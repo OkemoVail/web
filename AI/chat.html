@@ -14,8 +14,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -121,7 +120,7 @@
                 extend: {
                     fontFamily: {
                         sans: ['Satoshi', 'Inter', 'sans-serif'],
-                        serif: ['Instrument Serif', 'serif'],
+                        serif: ['GFS Didot', 'serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
@@ -251,14 +250,11 @@
 
         .__menu-item:hover {
             background-color: rgba(0, 0, 0, 0.03);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 1);
             border: 1px solid rgba(0, 0, 0, 0.05);
-            transform: translateY(-1px);
         }
 
         .dark .__menu-item:hover {
             background-color: rgba(255, 255, 255, 0.03);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.08);
         }
 
@@ -1522,13 +1518,11 @@
         }
 
         .header-island:hover {
-            background: rgba(255, 255, 255, 0.6);
             border-color: rgba(0, 0, 0, 0.12);
         }
 
         .dark .header-island:hover {
-            background: rgba(39, 39, 42, 0.6);
-            border-color: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
         #top-right-actions {
@@ -1613,18 +1607,14 @@
         }
 
         .skuomorphic-btn:hover {
-            transform: translateY(-1px);
-            background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+            border-color: rgba(0, 0, 0, 0.15) !important;
         }
 
         .dark .skuomorphic-btn:hover {
-            background: #2a2a28;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
         }
 
         .skuomorphic-btn:active {
-            transform: translateY(0) !important;
             box-shadow: none !important;
         }
 
@@ -2391,15 +2381,8 @@
         <div id="top-right-actions" class="animate-fade-in hidden lg:flex items-center gap-2">
             <div
                 class="skuomorphic-btn rounded-lg header-island flex items-center overflow-hidden border border-zinc-200 dark:border-zinc-800">
-                <button id="chat-tokens-btn"
-                    class="px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1 active:scale-95">
-                    <i data-feather="cpu" class="w-3.5 h-3.5 text-zinc-400"></i>
-                    <span id="token-count-display"
-                        class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label">0</span>
-                </button>
-                <div class="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800/50"></div>
                 <button onclick="window.showChangelog()"
-                    class="px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1 active:scale-95">
+                    class="px-3 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1 active:scale-95">
                     <i data-feather="zap" class="w-3.5 h-3.5 text-zinc-400"></i>
                     <span
                         class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label">Updates</span>
@@ -2439,22 +2422,22 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mt-1 max-w-2xl px-4">
                     <button
                         onclick="window.sendMessage('Write a highly detailed and creative science fiction short story about a time traveler from the year 3025 who accidentally gets stranded in the middle of a bustling metropolis in the year 2024. Describe their initial confusion, the primitive technology they encounter, and their desperate attempt to blend in without altering the timeline.')"
-                        class="skuomorphic-btn px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all flex items-center gap-2">
+                        class="skuomorphic-btn px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-xs font-medium text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
                         <i data-feather="pen-tool" class="w-3 h-3"></i> <span data-t="ex_writing">Sci-Fi Story</span>
                     </button>
                     <button
                         onclick="window.sendMessage('How would you design a sustainable city for 100,000 people on Mars? Think through the logistics, hazards, and social structure required.')"
-                        class="skuomorphic-btn px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all flex items-center gap-2">
+                        class="skuomorphic-btn px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-xs font-medium text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
                         <i data-feather="cpu" class="w-3 h-3"></i> <span data-t="ex_summary">Mars Colony</span>
                     </button>
                     <button
                         onclick="window.sendMessage('Write a robust and well-documented Python script that uses the BeautifulSoup library to scrape all the article titles and their corresponding URLs from a news website\'s homepage. Include error handling for connection issues and ensure the code follows PEP 8 style guidelines.')"
-                        class="skuomorphic-btn px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all flex items-center gap-2">
+                        class="skuomorphic-btn px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-xs font-medium text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
                         <i data-feather="code" class="w-3 h-3"></i> <span data-t="ex_code">Python Scraper</span>
                     </button>
                     <button
                         onclick="window.sendMessage('Provide a collection of five powerful and thought-provoking quotes from Stoic philosophers like Marcus Aurelius, Seneca, and Epictetus. For each quote, explain how its wisdom can be applied to maintain motivation and resilience when facing modern-day challenges.')"
-                        class="skuomorphic-btn px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all flex items-center gap-2">
+                        class="skuomorphic-btn px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-xs font-medium text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
                         <i data-feather="zap" class="w-3 h-3"></i> <span data-t="ex_inspiration">Stoic Wisdom</span>
                     </button>
                 </div>
@@ -2559,8 +2542,8 @@
 
 
                         <button id="send-btn" onclick="window.handleAction()" disabled
-                            class="skuomorphic-btn w-10 h-10 flex items-center justify-center rounded-xl opacity-50 cursor-not-allowed transition-all ml-1 active:scale-95"
-                            style="background-color: var(--accent-color); color: var(--accent-contrast); transition: background 0.2s, opacity 0.2s;">
+                            class="skuomorphic-btn w-10 h-10 flex items-center justify-center rounded-xl opacity-50 cursor-not-allowed transition-all active:scale-95"
+                            style="background-color: var(--accent-color); color: var(--accent-contrast); transition: background 0.2s, opacity 0.2s; margin-left: 5px;">
                             <span id="send-icon-wrapper" class="flex items-center justify-center h-full w-full">
                                 <i class="fa-solid fa-paper-plane text-sm"></i>
                             </span>
@@ -2651,25 +2634,65 @@
 
             window.initChatUI = function () {
 
-                const greetingQuotes = [
-                    "How can I help you today, [User]?",
-                    "[User] returns!",
-                    "Let's keep dreaming, [User].",
-                    "Ready to create, [User]?",
-                    "What's on your mind, [User]?",
-                    "Good to see you, [User].",
-                    "Let's build something great, [User].",
-                    "The world awaits, [User].",
-                    "What shall we explore, [User]?",
-                    "Beep Boop",
-                    "Welcome back, [User].",
-                    "Let's make today count, [User]."
-                ];
-                const userName = (typeof settings !== 'undefined' && settings.userName && settings.userName !== 'Guest') ? settings.userName : null;
-                const displayName = userName || 'Guest';
-                const randomGreeting = userName
-                    ? greetingQuotes[Math.floor(Math.random() * greetingQuotes.length)].replace(/\[User\]/g, displayName)
-                    : ['Welcome back, Guest.', 'Good to see you, Guest.', 'What shall we explore, Guest?', 'Ready to create, Guest?'][Math.floor(Math.random() * 4)];
+                const welcomeName = (typeof settings !== 'undefined' && settings.userName && settings.userName !== 'Guest') ? settings.userName : null;
+                const isGuest = !welcomeName;
+                const name = welcomeName || 'Guest';
+                const now = new Date();
+                const hour = now.getHours();
+                const day = now.getDay();
+
+                let options;
+
+                if (isGuest) {
+                    options = ['Hi Guest.'];
+                    setTimeout(() => {
+                        if (window.showToast) {
+                            window.showToast("Create an account to unlock personalization and full features.");
+                        }
+                    }, 1000);
+                } else {
+                    options = [
+                        'Back at it!', 'Cookie and Oaky time', 'Greetings, whoever you are',
+                        'Hey there', 'Hi, how are you?', 'How was your day?', 'How’s it going?',
+                        `Let’s chat, ${name}`, 'Welcome', 'What’s new?', 'What’s on your mind?'
+                    ];
+
+                    options.push(`${name} returns!`, `Back at it, ${name}`, `Hey there, ${name}`,
+                        `Hi ${name}, how are you?`, `How was your day, ${name}?`, `How’s it going, ${name}?`,
+                        `Welcome, ${name}`, `What’s new, ${name}?`, `What’s on your mind, ${name}?`);
+
+                    if (hour >= 5 && hour < 12) {
+                        options.push('Good morning', `Good morning, ${name}`);
+                    } else if (hour >= 12 && hour < 17) {
+                        options.push('Good afternoon', `Good afternoon, ${name}`);
+                    } else if (hour >= 17 && hour < 22) {
+                        options.push('Evening', 'Good evening', `Evening, ${name}`, `Good evening, ${name}`);
+                    }
+                    if (hour >= 18 || hour < 4) {
+                        options.push('What’s on your mind tonight?', 'Watchu doing tonight?', 'Late night thoughts?');
+                    }
+                    if (hour >= 22 || hour < 5) {
+                        options.push('Hello, night owl', 'Go to sleep you stinky');
+                    }
+
+                    if (day === 1) {
+                        options.push('Happy Monday', `Happy Monday, ${name}`);
+                    } else if (day === 2) {
+                        options.push('Happy Tuesday', `Happy Tuesday, ${name}`);
+                    } else if (day === 3) {
+                        options.push('Happy Wednesday', `Happy Wednesday, ${name}`);
+                    } else if (day === 4) {
+                        options.push('Happy Thursday', `Happy Thursday, ${name}`);
+                    } else if (day === 5) {
+                        options.push('Happy Friday', 'That Friday feeling', 'Welcome to the weekend', `Happy Friday, ${name}`, `That Friday feeling, ${name}`, `Welcome to the weekend, ${name}`);
+                    } else if (day === 6) {
+                        options.push('Happy Saturday!', 'Welcome to the weekend', `Happy Saturday, ${name}`, `Welcome to the weekend, ${name}`);
+                    } else if (day === 0) {
+                        options.push('Happy Sunday', 'Sunday session?', 'Welcome to the weekend', `Happy Sunday, ${name}`, `Sunday session, ${name}?`, `Welcome to the weekend, ${name}`);
+                    }
+                }
+
+                const randomGreeting = options[Math.floor(Math.random() * options.length)];
                 window.__currentRandomGreeting = randomGreeting;
 
                 const greetingEl = document.getElementById("welcome-greeting");
@@ -2844,26 +2867,9 @@
                     }
                 };
 
-                if (window.updateTokenCount) window.updateTokenCount(0);
 
-                // Fetch initial token count from backend for current chat
-                const fetchInitialTokens = async () => {
-                    try {
-                        const baseUrl = await getOpenAIClient();
-                        const res = await fetch(baseUrl + '/api/tokens?chat_id=' + encodeURIComponent(currentChatId), {
-                            headers: settings.apiKey ? { "Authorization": `Bearer ${settings.apiKey.trim()}` } : {}
-                        });
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (typeof data.total_tokens === 'number') {
-                                const display = document.getElementById('token-count-display');
-                                if (display) display.innerText = window.formatTokenCount(data.total_tokens);
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Failed to fetch initial tokens:", e);
-                    }
-                };
+
+
                 // Migrate legacy backend URLs (remove accidental /gradio suffix)
                 (function () {
                     const legacy = localStorage.getItem('vail_custom_backend_url');
@@ -2874,7 +2880,7 @@
                     }
                 })();
 
-                fetchInitialTokens();
+
 
                 // Auto-detect tunnel URL from backend (keeps frontend in sync when tunnel changes)
                 const detectTunnelUrl = async () => {
@@ -3003,7 +3009,7 @@
                     input_placeholder: "Message {{model}}...",
                     reply_placeholder: "Reply to {{model}}...",
                     thinking: "Hmmmm...",
-                    terminated: "You stopped the reponse",
+                    terminated: "Terminated",
                     no_history: "No recent history.",
                     prompt_error: "⚠️ Service error, tell okemo: ",
                     welcome_back: "How can I help you today, ",
@@ -3172,16 +3178,6 @@
             };
 
             let client = null, chatHistory = [], isGenerating = false, currentJob = null, abortController = null;
-            let tokenUpdateInterval = null;
-            const startTokenPolling = () => {
-                if (tokenUpdateInterval) clearInterval(tokenUpdateInterval);
-                tokenUpdateInterval = setInterval(window.updateChatTokens, 1500);
-            };
-            const stopTokenPolling = () => {
-                if (tokenUpdateInterval) clearInterval(tokenUpdateInterval);
-                tokenUpdateInterval = null;
-                window.updateChatTokens();
-            };
             let currentModel = MODELS.OCTAN;
             let allChats = {};
             window.currentChatId = crypto.randomUUID();
@@ -3228,7 +3224,6 @@
                 pfpX: 0, pfpY: 0, pfpScale: 1.0, hasCompletedTutorial: false,
                 lang: 'en',
                 sidebarMode: 'manual',
-                totalTokensUsed: 0,
                 customAccents: [],
                 folders: [],
                 systemPrompt: 'You are Octan, a helper!. You MUST use $$ delimiters for ALL mathematical notation and equations. NO EXCEPTIONS. Do not use [ ] or ( ) for blocks or inline math; use $$ for everything.'
@@ -3386,14 +3381,7 @@
                 return `rgba(${r}, ${g}, ${b}, ${alpha})`;
             };
 
-            window.formatTokenCount = (num) => {
-                if (num >= 100) {
-                    let val = (num / 1000).toFixed(1);
-                    if (val.endsWith('.0')) val = val.substring(0, val.length - 2);
-                    return val + 'k';
-                }
-                return num.toString();
-            };
+
 
             window.updateStorageUsage = async () => {
                 try {
@@ -4485,7 +4473,6 @@
                 window.toggleSendIcon('send');
                 if (isGenerating && currentJob) currentJob.cancel();
                 window.currentChatId = crypto.randomUUID(); chatHistory = []; isGenerating = false;
-                window.updateChatTokens();
                 // Reset token display for new chat
                 const tokenDisplay = document.getElementById('token-count-display');
                 if (tokenDisplay) tokenDisplay.innerText = window.formatTokenCount(0);
@@ -4548,7 +4535,6 @@
 
 
                     isGenerating = false;
-                    stopTokenPolling();
                     window.toggleSendIcon('send');
 
                     if (abortController) { abortController.abort(); abortController = null; }
@@ -4569,8 +4555,8 @@
 
                     try { if (currentJob) currentJob.cancel(); } catch (e) { console.warn("Internal Gradio cancel failed (safe to ignore):", e); }
 
-                    if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1][1] === null) {
-                        chatHistory[chatHistory.length - 1][1] = (chatHistory[chatHistory.length - 1][1] || "") + `<p class='opacity-40 text-[11px] font-bold uppercase tracking-widest mt-4'>${translations[settings.lang || 'en'].terminated}</p>`;
+                    if (chatHistory.length > 0) {
+                        chatHistory[chatHistory.length - 1][1] = (chatHistory[chatHistory.length - 1][1] || "") + `\n\n<p class='font-serif opacity-40 text-xs uppercase tracking-widest mt-3'>${translations[settings.lang || 'en'].terminated}</p>`;
                     }
 
                     render(); updateUI(); save();
@@ -4618,7 +4604,6 @@
                 currentJobId = Math.random().toString(36).substring(7);
 
                 isGenerating = true;
-                startTokenPolling();
                 updateUI();
                 window.toggleSendIcon('stop');
                 try {
@@ -4689,6 +4674,7 @@
                                 const finishReason = data.choices[0].finish_reason;
                                 if (delta !== "__DONE__") {
                                     responseText += delta;
+                                    chatHistory[chatHistory.length - 1][1] = responseText;
                                 }
 
                                 // --- LIVE VOICE TTS STREAMING ---
@@ -4748,9 +4734,7 @@
                                     // Auto-scroll logic
                                     els.chatCont.scrollTop = els.chatCont.scrollHeight;
                                 }
-                                if (data.usage) {
-                                    window.updateTokenCount(data.usage.total_tokens || 0);
-                                }
+
                                 if (finishReason === "stop" || finishReason === "length") {
                                     break;
                                 }
@@ -4765,7 +4749,6 @@
                     chatHistory[chatHistory.length - 1][1] = responseText;
                     isGenerating = false;
                     stopTokenPolling();
-                    window.updateChatTokens();
                     updateUI();
                     window.toggleSendIcon('send');
 
@@ -5600,6 +5583,27 @@
                 }, 10);
             };
 
+            window.showToast = (message, duration = 4000) => {
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-zinc-900 border border-zinc-700/50 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-3 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-3 transform -translate-y-[150%] opacity-0 transition-all duration-500 z-[9999] text-[13px] font-medium max-w-[300px] pointer-events-none select-none';
+                toast.innerHTML = `<i data-feather="info" class="w-4 h-4 shrink-0" style="color: var(--accent-color, #3b82f6)"></i> <span>${message}</span>`;
+                document.body.appendChild(toast);
+                if (window.feather) feather.replace({ 'stroke-width': 2.5, 'width': 16, 'height': 16 }, toast);
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        toast.style.transform = 'translateY(0)';
+                        toast.style.opacity = '1';
+                    });
+                });
+
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(-150%)';
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 500);
+                }, duration);
+            };
+
             window.showCustomConfirm = (title, message, onConfirm, isDanger = false) => {
                 const overlay = document.createElement('div');
                 overlay.className = 'custom-modal-overlay';
@@ -5689,6 +5693,9 @@
 
 
             const render = () => {
+                if (typeof isGenerating !== 'undefined' && !isGenerating) {
+                    window.__currentThinkingPhrase = null;
+                }
                 const isWelcome = chatHistory.length === 0;
 
                 if (isWelcome) {
@@ -5707,12 +5714,60 @@
                     if (!window.__currentRandomGreeting) {
                         const welcomeName = settings.userName;
                         const isGuest = !welcomeName || welcomeName === 'Guest';
-                        els.greeting.innerText = isGuest
-                            ? 'Welcome back, Guest.'
-                            : `${dict.welcome_back}${welcomeName}?`;
-                    } else {
-                        els.greeting.innerText = window.__currentRandomGreeting;
+                        const name = isGuest ? '' : welcomeName;
+                        const now = new Date();
+                        const hour = now.getHours();
+                        const day = now.getDay();
+
+                        let options;
+
+                        if (isGuest) {
+                            options = ['Hi Guest.'];
+                        } else {
+                            options = [
+                                'Back at it!', 'Cookie and Oaky time', 'Greetings, whoever you are',
+                                'Hey there', 'Hi, how are you?', 'How was your day?', 'How’s it going?',
+                                `Let’s chat, ${name}`, 'Welcome', 'What’s new?', 'What’s on your mind?'
+                            ];
+
+                            options.push(`${name} returns!`, `Back at it, ${name}`, `Hey there, ${name}`,
+                                `Hi ${name}, how are you?`, `How was your day, ${name}?`, `How’s it going, ${name}?`,
+                                `Welcome, ${name}`, `What’s new, ${name}?`, `What’s on your mind, ${name}?`);
+
+                            if (hour >= 5 && hour < 12) {
+                                options.push('Good morning', `Good morning, ${name}`);
+                            } else if (hour >= 12 && hour < 17) {
+                                options.push('Good afternoon', `Good afternoon, ${name}`);
+                            } else if (hour >= 17 && hour < 22) {
+                                options.push('Evening', 'Good evening', `Evening, ${name}`, `Good evening, ${name}`);
+                            }
+                            if (hour >= 18 || hour < 4) {
+                                options.push('What’s on your mind tonight?', 'Watchu doing tonight?', 'Late night thoughts?');
+                            }
+                            if (hour >= 22 || hour < 5) {
+                                options.push('Hello, night owl', 'Go to sleep you stinky');
+                            }
+
+                            if (day === 1) {
+                                options.push('Happy Monday', `Happy Monday, ${name}`);
+                            } else if (day === 2) {
+                                options.push('Happy Tuesday', `Happy Tuesday, ${name}`);
+                            } else if (day === 3) {
+                                options.push('Happy Wednesday', `Happy Wednesday, ${name}`);
+                            } else if (day === 4) {
+                                options.push('Happy Thursday', `Happy Thursday, ${name}`);
+                            } else if (day === 5) {
+                                options.push('Happy Friday', 'That Friday feeling', 'Welcome to the weekend', `Happy Friday, ${name}`, `That Friday feeling, ${name}`, `Welcome to the weekend, ${name}`);
+                            } else if (day === 6) {
+                                options.push('Happy Saturday!', 'Welcome to the weekend', `Happy Saturday, ${name}`, `Welcome to the weekend, ${name}`);
+                            } else if (day === 0) {
+                                options.push('Happy Sunday', 'Sunday session?', 'Welcome to the weekend', `Happy Sunday, ${name}`, `Sunday session, ${name}?`, `Welcome to the weekend, ${name}`);
+                            }
+                        }
+
+                        window.__currentRandomGreeting = options[Math.floor(Math.random() * options.length)];
                     }
+                    els.greeting.innerText = window.__currentRandomGreeting;
                 } else {
                     els.chatMsgs.innerHTML = chatHistory.map(([u, a], i) => `
                     <div class="user-row flex flex-col items-end ${i === 0 ? 'mt-0' : 'mt-10'}">
@@ -5727,9 +5782,20 @@
                             <div class="prose dark:prose-invert prose-target w-full leading-relaxed break-words overflow-wrap-anywhere ${a ? 'mt-[7px]' : ''}">
                                 ${(() => {
                             if (!a) {
+                                if (!window.__currentThinkingPhrase) {
+                                    const phrases = [
+                                        'Cooking...', 'Scheming...', 'Simmering...', 'Conjuring...', 'Marinating...',
+                                        'Plotting...', 'Manifesting...', 'Vibing...', 'Orchestrating...', 'Meditating...',
+                                        'Ruminating...', 'Puzzling...', 'Churning...', 'Wiggling...', 'Polishing...',
+                                        'Dreaming...', 'Scanning...', 'Sifting...', 'Whisking...', 'Crystallizing...',
+                                        'Brewing...', 'Gossiping...', 'Tinkering...', 'Wrangling...', 'Shuffling...',
+                                        'Peeking...', 'Mulling...', 'Searching...', 'Formatting...', 'Thinking...'
+                                    ];
+                                    window.__currentThinkingPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                                }
                                 return `
                                         <div class="thinking-container">
-                                            <span class="thinking-text-gradient">${currentGenerationIsSearch ? "Surfing the web..." : dict.thinking}</span>
+                                            <span class="thinking-text-gradient">${currentGenerationIsSearch ? "Surfing the web..." : window.__currentThinkingPhrase}</span>
                                         </div>
                                         `;
                             }
@@ -6527,7 +6593,7 @@
                 </ul>
 
                 <button onclick="window.closeChangelog()"
-                    class="w-full py-4 rounded-xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-[0.2em] skuomorphic-btn hover:brightness-110 active:scale-[0.98] transition-all">
+                    class="w-full py-4 rounded-full bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-[0.2em] skuomorphic-btn hover:brightness-110 active:scale-[0.98] transition-all">
                     Dismiss
                 </button>
             </div>
