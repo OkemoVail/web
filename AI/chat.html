@@ -3185,9 +3185,13 @@
 
 
             let streamQueue = "";
-            let displayedContent = "";
+            let typedResponseText = "";
             let typeInterval = null;
-            const TYPE_SPEED_MS = 1;
+            let charAccu = 0;
+            const TYPE_SPEED_MAIN = 33.3; // Approx 1 character per 30ms (0.03s)
+            const TYPE_SPEED_THOUGHT = 100; // Even faster for thoughts
+
+
             let currentGenerationIsSearch = false;
             let currentJobId = null;
 
@@ -3468,6 +3472,93 @@
                     if (icon) icon.style.transform = 'rotate(180deg)';
                 }
             };
+
+            const isInsideThought = (text) => {
+                const thoughtTags = ['<thought>', '<think>', '<|begin_of_thought|>', '<|thought|>'];
+                const endTags = ['</thought>', '</think>', '<|end_of_thought|>', '<|thought|>'];
+                let lastStart = -1;
+                let lastEnd = -1;
+                thoughtTags.forEach(tag => {
+                    const idx = text.lastIndexOf(tag);
+                    if (idx > lastStart) lastStart = idx;
+                });
+                endTags.forEach(tag => {
+                    const idx = text.lastIndexOf(tag);
+                    if (idx > lastEnd) lastEnd = idx;
+                });
+                return lastStart > lastEnd;
+            };
+
+            const updateAssistantDisplay = (text, isFinal = false) => {
+                const lastProse = els.chatMsgs.querySelector('.ai-row:last-child .prose-target');
+                if (!lastProse) return;
+                const thinkingPlaceholder = lastProse.querySelector('.thinking-container');
+                if (thinkingPlaceholder) thinkingPlaceholder.remove();
+
+                const { thought, content } = parseThought(text);
+
+                let thoughtContainer = lastProse.querySelector('.thought-container');
+                if (thought) {
+                    if (!thoughtContainer) {
+                        const thoughtHtml = `
+                            <div class="thought-container">
+                                <div class="thought-header" onclick="window.toggleThought(this)">
+                                    <span>${currentGenerationIsSearch ? "Surfing the web..." : "Thinking Process"}</span>
+                                    <i data-feather="chevron-down" class="w-3 h-3 transition-transform duration-200 chevron-icon" style="transform: rotate(180deg)"></i>
+                                </div>
+                                <div class="thought-content expanded">
+                                    <div class="thought-body whitespace-pre-wrap"></div>
+                                </div>
+                            </div>`;
+                        lastProse.insertAdjacentHTML('afterbegin', thoughtHtml);
+                        feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, lastProse.querySelector('.thought-header'));
+                        thoughtContainer = lastProse.querySelector('.thought-container');
+                    }
+                    const body = thoughtContainer.querySelector('.thought-body');
+                    if (body) body.innerText = thought;
+                }
+
+                let mainContentDiv = lastProse.querySelector('.main-response-content');
+                if (!mainContentDiv) {
+                    mainContentDiv = document.createElement('div');
+                    mainContentDiv.className = 'main-response-content';
+                    lastProse.appendChild(mainContentDiv);
+                }
+                if (content.trim()) {
+                    const displayContent = !isFinal ? ensureClosedCodeBlocks(sanitizeText(content)) : sanitizeText(content);
+                    mainContentDiv.innerHTML = marked.parse(displayContent);
+                    applyContentFeatures(mainContentDiv);
+                }
+                els.chatCont.scrollTop = els.chatCont.scrollHeight;
+            };
+
+            const startTypewriter = () => {
+                if (typeInterval) return;
+                typeInterval = setInterval(() => {
+                    if (streamQueue.length === 0) {
+                        if (!isGenerating) {
+                            clearInterval(typeInterval);
+                            typeInterval = null;
+                            updateAssistantDisplay(typedResponseText, true);
+                        }
+                        return;
+                    }
+                    const speed = isInsideThought(typedResponseText) ? TYPE_SPEED_THOUGHT : TYPE_SPEED_MAIN;
+                    charAccu += speed / 20;
+                    let charsAdded = 0;
+                    while (charAccu >= 1 && streamQueue.length > 0) {
+                        typedResponseText += streamQueue[0];
+                        streamQueue = streamQueue.substring(1);
+                        charAccu -= 1;
+                        charsAdded++;
+                    }
+                    if (charsAdded > 0) {
+                        updateAssistantDisplay(typedResponseText);
+                    }
+                }, 50);
+            };
+
+
 
             window.initChatUI = function () {
                 originalInit();
@@ -4538,6 +4629,9 @@
                     window.toggleSendIcon('send');
 
                     if (abortController) { abortController.abort(); abortController = null; }
+                    if (typeInterval) { clearInterval(typeInterval); typeInterval = null; }
+                    streamQueue = "";
+
 
                     if (currentJobId) {
                         try {
@@ -4584,13 +4678,11 @@
 
 
 
-                if (typeInterval) {
-                    clearInterval(typeInterval);
-                    typeInterval = null;
-                }
                 streamQueue = "";
-                displayedContent = "";
+                typedResponseText = "";
+                charAccu = 0;
                 els.input.value = ""; els.input.style.height = "auto";
+
 
 
 
@@ -4675,6 +4767,13 @@
                                 if (delta !== "__DONE__") {
                                     responseText += delta;
                                     chatHistory[chatHistory.length - 1][1] = responseText;
+                                    
+                                    let cleanDelta = delta.replace(/<\|im_(?:start|end)(?:[|>\s]*)/g, '')
+                                        .replace(/<\|endoftext\|?>/g, '')
+                                        .replace(/\ufffd/g, '');
+                                    
+                                    streamQueue += cleanDelta;
+                                    startTypewriter();
                                 }
 
                                 // --- LIVE VOICE TTS STREAMING ---
@@ -4682,58 +4781,7 @@
                                     window.voiceManager.addDelta(delta);
                                 }
                                 // --------------------------------
-
-                                responseText = responseText.replace(/<\|im_(?:start|end)(?:[|>\s]*)/g, '')
-                                    .replace(/<\|endoftext\|?>/g, '')
-                                    .replace(/\ufffd/g, '')
-                                    .replace(/^hi\s+/i, '');
-
-
-                                const lastProse = els.chatMsgs.querySelector('.ai-row:last-child .prose-target');
-                                if (lastProse) {
-
-                                    const thinkingPlaceholder = lastProse.querySelector('.thinking-container');
-                                    if (thinkingPlaceholder) thinkingPlaceholder.remove();
-
-                                    const { thought, content } = parseThought(responseText);
-
-                                    let thoughtContainer = lastProse.querySelector('.thought-container');
-                                    if (thought) {
-                                        if (!thoughtContainer) {
-                                            const thoughtHtml = `
-                                                <div class="thought-container">
-                                                    <div class="thought-header" onclick="window.toggleThought(this)">
-                                                        <span>${currentGenerationIsSearch ? "Surfing the web..." : "Thinking Process"}</span>
-                                                        <i data-feather="chevron-down" class="w-3 h-3 transition-transform duration-200 chevron-icon" style="transform: rotate(180deg)"></i>
-                                                    </div>
-                                                    <div class="thought-content expanded">
-                                                        <div class="thought-body whitespace-pre-wrap"></div>
-                                                    </div>
-                                                </div>`;
-                                            lastProse.insertAdjacentHTML('afterbegin', thoughtHtml);
-                                            feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, lastProse.querySelector('.thought-header'));
-                                            thoughtContainer = lastProse.querySelector('.thought-container');
-                                        }
-                                        const body = thoughtContainer.querySelector('.thought-body');
-                                        if (body) body.innerText = thought;
-                                    }
-
-                                    let mainContentDiv = lastProse.querySelector('.main-response-content');
-                                    if (!mainContentDiv) {
-                                        mainContentDiv = document.createElement('div');
-                                        mainContentDiv.className = 'main-response-content';
-                                        lastProse.appendChild(mainContentDiv);
-                                    }
-
-                                    if (content.trim()) {
-                                        const displayContent = isGenerating ? ensureClosedCodeBlocks(sanitizeText(content)) : sanitizeText(content);
-                                        mainContentDiv.innerHTML = marked.parse(displayContent);
-                                        applyContentFeatures(mainContentDiv);
-                                    }
-
-                                    // Auto-scroll logic
-                                    els.chatCont.scrollTop = els.chatCont.scrollHeight;
-                                }
+                                      // Rendering logic moved to typewriter loop
 
                                 if (finishReason === "stop" || finishReason === "length") {
                                     break;
