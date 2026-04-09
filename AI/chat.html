@@ -4767,11 +4767,11 @@
                                 if (delta !== "__DONE__") {
                                     responseText += delta;
                                     chatHistory[chatHistory.length - 1][1] = responseText;
-                                    
+
                                     let cleanDelta = delta.replace(/<\|im_(?:start|end)(?:[|>\s]*)/g, '')
                                         .replace(/<\|endoftext\|?>/g, '')
                                         .replace(/\ufffd/g, '');
-                                    
+
                                     streamQueue += cleanDelta;
                                     startTypewriter();
                                 }
@@ -4781,7 +4781,7 @@
                                     window.voiceManager.addDelta(delta);
                                 }
                                 // --------------------------------
-                                      // Rendering logic moved to typewriter loop
+                                // Rendering logic moved to typewriter loop
 
                                 if (finishReason === "stop" || finishReason === "length") {
                                     break;
