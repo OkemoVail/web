@@ -28,7 +28,7 @@ window.handleAction = () => {
         try { if (window.currentJob) window.currentJob.cancel(); } catch (e) { console.warn("Internal Gradio cancel failed (safe to ignore):", e); }
 
         if (window.chatHistory.length > 0) {
-            window.chatHistory[window.chatHistory.length - 1][1] = (window.chatHistory[window.chatHistory.length - 1][1] || "") + `\n\n<p class='font-serif opacity-40 text-xs uppercase tracking-widest mt-3'>${window.translations[window.settings.lang || 'en'].terminated}</p>`;
+            window.chatHistory[window.chatHistory.length - 1][1] = (window.chatHistory[window.chatHistory.length - 1][1] || "") + `\n\n<p class='opacity-40 text-xs uppercase tracking-widest mt-2'>${window.translations[window.settings.lang || 'en'].terminated}</p>`;
         }
 
         window.render(); window.updateUI(); window.save();
@@ -60,12 +60,11 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
 
     let lastProse = null;
 
-    window.chatHistory.push([displayMsg, null, null]);
+    window.chatHistory.push([displayMsg, null, null, Date.now()]);
     window.currentGenerationIsSearch = window.isWebSearch || forceSearch;
-    window.render(); window.els.chatCont.scrollTo({ top: window.els.chatCont.scrollHeight, behavior: 'smooth' });
-    window.currentJobId = Math.random().toString(36).substring(7);
-
     window.isGenerating = true;
+    window.currentJobId = Math.random().toString(36).substring(7);
+    window.render(); window.els.chatCont.scrollTo({ top: window.els.chatCont.scrollHeight, behavior: 'smooth' });
     window.updateUI();
     window.toggleSendIcon('stop');
     try {
@@ -133,13 +132,8 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                     const finishReason = data.choices[0].finish_reason;
                     if (delta !== "__DONE__") {
                         responseText += delta;
-                        window.chatHistory[window.chatHistory.length - 1][1] = responseText;
-                        
-                        let cleanDelta = delta.replace(/<\|im_(?:start|end)(?:[|>\s]*)/g, '')
-                            .replace(/<\|endoftext\|?>/g, '')
-                            .replace(/\ufffd/g, '');
-                        
-                        window.updateAssistantDisplay(responseText);
+                        window.streamQueue += delta;
+                        window.startTypewriter();
                     }
 
                     // --- LIVE VOICE TTS STREAMING ---
@@ -207,6 +201,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                     <button onclick="window.regenMsg(${window.chatHistory.length - 1})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
                     <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'good', this)" class="ai-action-btn feedback-btn" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
                     <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'bad', this)" class="ai-action-btn feedback-btn" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
+                    <span class="msg-timestamp ai-timestamp">${window.formatDate(window.chatHistory[window.chatHistory.length - 1][3])}</span>
                 `;
                 lastProseEl.parentNode.appendChild(actionRow);
                 feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, actionRow);

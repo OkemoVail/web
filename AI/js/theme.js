@@ -2,7 +2,7 @@
 
 window.updateAccent = (color) => {
     let isAuto = color === 'auto', isDark = document.documentElement.classList.contains('dark');
-    let finalColor = isAuto ? (isDark ? '#5F634F' : '#BFD7B5') : color;
+    let finalColor = isAuto ? (isDark ? '#5F634F' : '#9EB393') : color;
     window.settings.accent = color;
 
     if (color.startsWith('#') && document.getElementById('custom-accent-picker')) {
@@ -170,7 +170,7 @@ window.renderThemes = () => {
     const currentAccent = window.settings.accent || 'auto';
 
     const PRESETS = [
-        { color: 'auto', name: 'Sage Whisper', desc: 'Earthy & calm', isAuto: true, iconBg: 'linear-gradient(135deg, #5F634F, #BFD7B5)', glowColor: '#BFD7B5' },
+        { color: 'auto', name: 'Sage Whisper', desc: 'Earthy & calm', isAuto: true, iconBg: 'linear-gradient(135deg, #5F634F, #9EB393)', glowColor: '#9EB393' },
         { color: '#3b82f6', name: 'Midnight in Paris', desc: 'Deep & electric', iconBg: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', glowColor: '#3b82f6' },
         { color: '#a855f7', name: 'Electric Lemonade', desc: 'Vivid & playful', iconBg: 'linear-gradient(135deg, #7c3aed, #c084fc)', glowColor: '#a855f7' },
         { color: '#f97316', name: 'Vitamin C', desc: 'Warm & energetic', iconBg: 'linear-gradient(135deg, #ea580c, #fdba74)', glowColor: '#f97316' },

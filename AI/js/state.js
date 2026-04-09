@@ -66,7 +66,7 @@ window.translations = {
         input_placeholder: "Message {{model}}...",
         reply_placeholder: "Reply to {{model}}...",
         thinking: "Hmmmm...",
-        terminated: "Terminated",
+        terminated: "Stopped",
         no_history: "No recent history.",
         prompt_error: "⚠️ Service error, tell okemo: ",
         welcome_back: "How can I help you today, ",

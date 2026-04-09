@@ -34,3 +34,8 @@ window.truncateTitle = (title) => {
     }
     return title;
 };
+
+window.formatDate = (ts) => {
+    if (!ts) return "";
+    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};

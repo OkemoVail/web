@@ -3,6 +3,24 @@
 window.updateUI = () => {
     // 1. Send / Stop button transition
     const iconWrapper = document.getElementById('send-icon-wrapper');
+    const sendBtn = document.getElementById('send-btn');
+    const input = document.getElementById('user-input');
+
+    if (sendBtn) {
+        const hasText = input && input.value.trim().length > 0;
+        const shouldEnable = window.isGenerating || hasText;
+
+        if (shouldEnable) {
+            sendBtn.disabled = false;
+            sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            sendBtn.classList.add('opacity-100', 'cursor-pointer', 'hover:opacity-90');
+        } else {
+            sendBtn.disabled = true;
+            sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            sendBtn.classList.remove('opacity-100', 'cursor-pointer', 'hover:opacity-90');
+        }
+    }
+
     if (iconWrapper) {
         if (window.isGenerating) {
             iconWrapper.innerHTML = '<i class="fa-solid fa-square text-sm"></i>';
@@ -63,7 +81,7 @@ window.updateUI = () => {
         favicon.rel = 'icon';
         document.head.appendChild(favicon);
     }
-    const color = window.settings.accent === 'auto' ? '#BFD7B5' : window.settings.accent;
+    const color = window.settings.accent === 'auto' ? '#9EB393' : window.settings.accent;
     favicon.href = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22${encodeURIComponent(color)}%22 /></svg>`;
 };
 

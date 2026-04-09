@@ -64,6 +64,9 @@ window.startTypewriter = () => {
             charsAdded++;
         }
         if (charsAdded > 0) {
+            if (window.chatHistory.length > 0) {
+                window.chatHistory[window.chatHistory.length - 1][1] = window.typedResponseText;
+            }
             window.updateAssistantDisplay(window.typedResponseText);
         }
     }, 50);

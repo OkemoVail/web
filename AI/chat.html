@@ -42,8 +42,8 @@
 
     <style id="dynamic-accent-styles">
         :root {
-            --accent-color: #6C8EBF;
-            --accent-glow: rgba(108, 142, 191, 0.4);
+            --accent-color: #7abf6c;
+            --accent-glow: rgba(87, 172, 111, 0.4);
             --accent-tint: rgba(0, 0, 0, 0);
             --sidebar-tint: rgba(0, 0, 0, 0);
             --accent-contrast: #f0f4fa;
@@ -66,7 +66,7 @@
         }
 
         .dark {
-            --accent-color: #4A7AB5;
+            --accent-color: #7abf6c;
             --bg-color: #0C0D0B;
             --sidebar-bg: #111210;
             --input-bg: #161715;
@@ -149,13 +149,13 @@
 
     <style>
         .shimmer-active {
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-color), white 40%), transparent);
             background-size: 200% 100%;
             animation: shimmer-btn 1.5s infinite;
         }
 
         .dark .shimmer-active {
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-color), transparent 80%), transparent);
             background-size: 200% 100%;
             animation: shimmer-btn 1.5s infinite;
         }
@@ -333,14 +333,14 @@
 
         .user-row {
             position: relative;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             display: flex;
             justify-content: flex-end;
         }
 
         .ai-row {
             position: relative;
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.5rem;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
@@ -405,6 +405,29 @@
 
         .user-row:hover .user-msg-actions {
             opacity: 1;
+        }
+
+        .msg-timestamp {
+            font-size: 0.65rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #a1a1aa;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            margin: 0 6px;
+            user-select: none;
+        }
+
+        .user-row:hover .msg-timestamp,
+        .group:hover .msg-timestamp {
+            opacity: 0.5;
+        }
+
+        .ai-timestamp {
+            opacity: 0.35;
+            margin-left: 8px;
         }
 
         .user-msg-action-btn {
@@ -825,12 +848,11 @@
             font-weight: 500;
             letter-spacing: 0.01em;
             background: linear-gradient(90deg,
-                var(--action-btn-color) 0%,
-                var(--accent-color) 40%,
-                color-mix(in srgb, var(--accent-color), white 40%) 50%,
-                var(--accent-color) 60%,
-                var(--action-btn-color) 100%
-            );
+                    var(--action-btn-color) 0%,
+                    var(--accent-color) 40%,
+                    color-mix(in srgb, var(--accent-color), white 40%) 50%,
+                    var(--accent-color) 60%,
+                    var(--action-btn-color) 100%);
             background-size: 250% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -839,8 +861,13 @@
         }
 
         @keyframes thinking-shimmer {
-            0%   { background-position: 120% 0; }
-            100% { background-position: -120% 0; }
+            0% {
+                background-position: 120% 0;
+            }
+
+            100% {
+                background-position: -120% 0;
+            }
         }
 
 
@@ -2172,7 +2199,7 @@
 
         .loader-arc {
             fill: none;
-            stroke: var(--accent-color, #BFD7B5);
+            stroke: var(--accent-color, #9EB393);
             stroke-width: 6;
             stroke-linecap: round;
             stroke-dasharray: 282;

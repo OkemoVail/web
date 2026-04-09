@@ -18,7 +18,7 @@ window.render = () => {
     window.els.chatMsgs.innerHTML = "";
 
     window.chatHistory.forEach((pair, pairIdx) => {
-        const [userMsg, responseText, feedback] = pair;
+        const [userMsg, responseText, feedback, timestamp] = pair;
 
         // 1. Render USER Row
         const userRow = document.createElement('div');
@@ -29,6 +29,7 @@ window.render = () => {
                     <div class="prose-target">${marked.parse(userMsg)}</div>
                 </div>
                 <div class="user-msg-actions">
+                    <span class="msg-timestamp">${window.formatDate(timestamp)}</span>
                     <button onclick="window.copyUserMsg(${pairIdx}, this)" title="Copy" class="user-msg-action-btn"><i data-feather="copy"></i></button>
                     <button onclick="window.editMsg(${pairIdx})" title="Edit" class="user-msg-action-btn"><i data-feather="edit-2"></i></button>
                 </div>
@@ -73,6 +74,7 @@ window.render = () => {
                         <button onclick="window.regenMsg(${pairIdx})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
                         <button onclick="window.sendFeedback(${pairIdx}, 'good', this)" class="ai-action-btn feedback-btn" style="${feedback === 'good' ? 'color:#22c55e' : ''}" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
                         <button onclick="window.sendFeedback(${pairIdx}, 'bad', this)" class="ai-action-btn feedback-btn" style="${feedback === 'bad' ? 'color:#ef4444' : ''}" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
+                        <span class="msg-timestamp ai-timestamp">${window.formatDate(timestamp)}</span>
                     </div>` : ''}
                 </div>
             `;
