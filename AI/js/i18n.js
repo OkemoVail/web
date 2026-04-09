@@ -1,15 +1,24 @@
 // ─── Translation / i18n ────────────────────────────────────────
 
+window.getT = (key, params = {}) => {
+    const lang = window.settings.lang || 'en';
+    let text = window.translations[lang]?.[key] || window.translations['en']?.[key] || key;
+    for (const [k, v] of Object.entries(params)) {
+        text = text.replace(`{{${k}}}`, v);
+    }
+    return text;
+};
+
 window.applyTranslations = () => {
     const langCode = window.settings.lang || 'en';
     const dict = window.translations[langCode];
     document.querySelectorAll('[data-t]').forEach(el => {
         const key = el.getAttribute('data-t');
-        if (dict[key]) el.innerText = dict[key];
+        if (dict && dict[key]) el.innerText = dict[key];
     });
     if (window.els.input) {
-        const rawPlaceholder = (window.chatHistory && window.chatHistory.length > 0) ? dict.reply_placeholder : dict.input_placeholder;
-        window.els.input.placeholder = rawPlaceholder.replace('{{model}}', window.currentModel.name);
+        const key = (window.chatHistory && window.chatHistory.length > 0) ? 'reply_placeholder' : 'input_placeholder';
+        window.els.input.placeholder = window.getT(key, { model: window.currentModel.name });
     }
     document.querySelectorAll('.lang-text').forEach(t => t.innerText = langCode === 'en' ? '中文' : 'EN');
 };

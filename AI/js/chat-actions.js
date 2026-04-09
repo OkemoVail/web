@@ -139,8 +139,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                             .replace(/<\|endoftext\|?>/g, '')
                             .replace(/\ufffd/g, '');
                         
-                        window.streamQueue += cleanDelta;
-                        window.startTypewriter();
+                        window.updateAssistantDisplay(responseText);
                     }
 
                     // --- LIVE VOICE TTS STREAMING ---
@@ -199,26 +198,19 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
             window.applyContentFeatures(mainContentDiv);
         }
 
-        if (!lastProseEl.parentNode.querySelector('.flex.items-center.justify-between')) {
-            const actionRow = document.createElement('div');
-            actionRow.className = 'flex items-center justify-between gap-4 mt-3 w-full animate-fade-in';
-            actionRow.innerHTML = `
-                <div class="flex items-center gap-4">
-                    <button onclick="window.copyMsg(${window.chatHistory.length - 1}, this)" class="opacity-70 hover:opacity-100 transition-all" style="color: var(--accent-color)"><i data-feather="copy" class="w-4 h-4"></i></button>
-                    <button onclick="window.regenMsg(${window.chatHistory.length - 1})" class="opacity-70 hover:opacity-100" style="color: var(--accent-color)" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
-                    <button onclick="window.regenMsgWithSearch(${window.chatHistory.length - 1})" class="opacity-70 hover:opacity-100" style="color: var(--accent-color)" title="Regenerate with Web Search"><i data-feather="globe" class="w-4 h-4"></i></button>
-                    <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'good', this)" class="opacity-70 hover:opacity-100 transition-all feedback-btn" style="color: var(--accent-color)" title="Nice message"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
-                    <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'bad', this)" class="opacity-70 hover:opacity-100 transition-all feedback-btn" style="color: var(--accent-color)" title="Bad message"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="hallucination-disclaimer">Ontologics are prone to hallucinations.</div>
-                    <div class="opacity-40 w-4 h-4 flex items-center justify-center pointer-events-none" style="color: var(--accent-color)" title="${window.currentModel.name}">
-                        ${window.currentModel.icon}
-                    </div>
-                </div>
-            `;
-            lastProseEl.parentNode.appendChild(actionRow);
-            feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, actionRow);
+        if (lastProseEl) {
+            if (!lastProseEl.parentNode.querySelector('.ai-msg-actions')) {
+                const actionRow = document.createElement('div');
+                actionRow.className = 'ai-msg-actions animate-fade-in';
+                actionRow.innerHTML = `
+                    <button onclick="window.copyMsg(${window.chatHistory.length - 1}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>
+                    <button onclick="window.regenMsg(${window.chatHistory.length - 1})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
+                    <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'good', this)" class="ai-action-btn feedback-btn" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
+                    <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'bad', this)" class="ai-action-btn feedback-btn" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
+                `;
+                lastProseEl.parentNode.appendChild(actionRow);
+                feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, actionRow);
+            }
         }
         window.currentJob = null;
         console.log("Streaming complete");

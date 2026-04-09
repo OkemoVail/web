@@ -14,10 +14,12 @@ window.updateUI = () => {
     // 2. Chat empty state
     if (window.chatHistory.length === 0) {
         document.body.classList.add("chat-empty");
-        const greeting = window.__currentRandomGreeting || "How can I help you today?";
-        if (window.els.greeting) window.els.greeting.innerText = greeting;
+        if (window.els.welcome) window.els.welcome.style.display = 'flex';
+        if (window.els.input) window.els.input.placeholder = window.getT('input_placeholder', { model: window.currentModel.name });
     } else {
         document.body.classList.remove("chat-empty");
+        if (window.els.welcome) window.els.welcome.style.display = 'none';
+        if (window.els.input) window.els.input.placeholder = window.getT('reply_placeholder', { model: window.currentModel.name });
     }
 
     // 3. Search button
@@ -52,7 +54,7 @@ window.updateUI = () => {
         const placeholder = (window.chatHistory && window.chatHistory.length > 0) ? dict.reply_placeholder : dict.input_placeholder;
         window.els.input.placeholder = placeholder.replace('{{model}}', window.currentModel.name);
     }
-    
+
     // 6. Favicon
     let favicon = document.getElementById('dynamic-favicon');
     if (!favicon) {

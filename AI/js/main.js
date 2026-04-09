@@ -181,17 +181,23 @@ window.initChatUI = () => {
     try {
         const baseUrl = await window.getOpenAIClient();
         const res = await fetch(baseUrl + '/tunnel_url', {
-             headers: window.settings.apiKey ? { "Authorization": `Bearer ${window.settings.apiKey.trim()}` } : {}
+            headers: window.settings.apiKey ? { "Authorization": `Bearer ${window.settings.apiKey.trim()}` } : {}
         });
         if (res.ok) {
             const data = await res.json();
             if (data.tunnel_url && data.tunnel_url !== baseUrl) {
-                 localStorage.setItem('vail_custom_backend_url', data.tunnel_url);
+                localStorage.setItem('vail_custom_backend_url', data.tunnel_url);
             }
         }
     } catch (e) {
         console.warn('Failed to detect tunnel URL:', e);
     }
 
-    window.initChatUI();
+    try {
+        window.initChatUI();
+    } catch (e) {
+        console.error('Initialization error:', e);
+    } finally {
+        if (window.hidePreloader) window.hidePreloader();
+    }
 })();
