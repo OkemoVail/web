@@ -94,14 +94,7 @@
       border-radius: 10px;
     }
 
-    #mobile-menu-overlay {
-      clip-path: circle(0% at top right);
-      transition: clip-path 0.5s ease-in-out;
-    }
 
-    #mobile-menu-overlay.active {
-      clip-path: circle(150% at top right);
-    }
 
     .no-scrollbar::-webkit-scrollbar {
       display: none;
@@ -123,31 +116,20 @@
       <a href="/" class="serif-text text-2xl font-medium text-moss dark:text-sage tracking-tight">okemovail.</a>
       <div class="hidden md:flex space-x-10 text-sm font-medium text-moss/80 dark:text-sage/80">
         <a href="#work" class="hover:text-moss dark:hover:text-sage transition-colors">Projects</a>
-        <a href="/ai.html" class="hover:text-moss dark:hover:text-sage transition-colors">Ontologic AI</a>
+        <a href="/ai.html" class="hover:text-moss dark:hover:text-sage transition-colors">OkemoAI</a>
         <a href="https://github.com/ar12c" target="_blank"
           class="hover:text-moss dark:hover:text-sage transition-colors">GitHub</a>
       </div>
 
-      <button id="mobile-menu-btn" class="md:hidden text-amber-600 dark:text-amber-400 p-2 focus:outline-none">
-        <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m4 6h16" />
-        </svg>
-        <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+      <a href="/ai.html"
+        class="md:hidden text-sm font-medium text-moss/80 dark:text-sage/80 hover:text-moss dark:hover:text-sage transition-all border border-moss/10 dark:border-sage/20 px-5 py-2 rounded-full backdrop-blur-sm">
+        OkemoAI
+      </a>
     </div>
   </nav>
 
 
-  <div id="mobile-menu-overlay"
-    class="fixed inset-0 z-40 bg-paper dark:bg-obsidian md:hidden flex flex-col items-center justify-center space-y-8 text-2xl serif-text text-moss dark:text-sage">
-    <a href="#work" class="mobile-link">Projects</a>
-    <a href="/ai.html" class="mobile-link">Ontologic AI</a>
-    <a href="https://github.com/ar12c" target="_blank" class="mobile-link">GitHub</a>
-  </div>
+
 
   <main class="max-w-5xl mx-auto px-6 pt-32">
 
@@ -193,11 +175,13 @@
           <div
             class="h-64 bg-moss/5 dark:bg-white/5 border border-moss/10 dark:border-white/10 rounded-2xl p-8 flex flex-col justify-between hover:bg-moss/10 dark:hover:bg-white/10 transition-all duration-500">
             <div>
-              <h3 class="serif-text text-3xl text-moss dark:text-paper mb-3">Seurat</h3>
-              <p class="text-stone-500 dark:text-stone-400 leading-relaxed">Advanced AI model for seamless chatting and deep research integration.</p>
+              <h3 class="serif-text text-3xl text-moss dark:text-paper mb-3">Octan</h3>
+              <p class="text-stone-500 dark:text-stone-400 leading-relaxed">Advanced AI model for seamless chatting and
+                deep research integration.</p>
             </div>
             <div class="flex justify-between items-end">
-              <span class="text-[10px] uppercase tracking-widest font-bold text-moss/40 dark:text-sage/40">v1.6 • 1B Parameters</span>
+              <span class="text-[10px] uppercase tracking-widest font-bold text-moss/40 dark:text-sage/40">v1.6 • 1B
+                Parameters</span>
               <a href="/ai.html"
                 class="inline-block border border-moss/20 dark:border-sage/30 text-moss dark:text-sage px-6 py-2 rounded-full text-xs font-medium hover:bg-sage/10 transition-all">
                 Explore
@@ -210,11 +194,13 @@
           <div
             class="h-64 bg-moss/5 dark:bg-white/5 border border-moss/10 dark:border-white/10 rounded-2xl p-8 flex flex-col justify-between hover:bg-moss/10 dark:hover:bg-white/10 transition-all duration-500">
             <div>
-              <h3 class="serif-text text-3xl text-moss dark:text-paper mb-3">Ontologic Labs</h3>
-              <p class="text-stone-500 dark:text-stone-400 leading-relaxed">Exploring the boundaries of agentic coding and autonomous systems.</p>
+              <h3 class="serif-text text-3xl text-moss dark:text-paper mb-3">OkemoAI Labs</h3>
+              <p class="text-stone-500 dark:text-stone-400 leading-relaxed">Exploring the boundaries of agentic coding
+                and autonomous systems.</p>
             </div>
             <div class="flex justify-between items-end">
-              <span class="text-[10px] uppercase tracking-widest font-bold text-moss/40 dark:text-sage/40">Coming Soon</span>
+              <span class="text-[10px] uppercase tracking-widest font-bold text-moss/40 dark:text-sage/40">Coming
+                Soon</span>
               <span class="text-xs text-stone-400">Under Construction</span>
             </div>
           </div>
@@ -230,7 +216,7 @@
         <div class="flex space-x-8">
           <a href="https://github.com/ar12c" target="_blank"
             class="hover:text-moss dark:hover:text-sage transition-colors">Github</a>
-          <a href="/ai.html" class="hover:text-moss dark:hover:text-sage transition-colors">Ontologic AI</a>
+          <a href="/ai.html" class="hover:text-moss dark:hover:text-sage transition-colors">OkemoAI</a>
         </div>
       </div>
     </footer>
@@ -254,21 +240,7 @@
     });
 
 
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-    const menuIcon = document.getElementById('menu-icon');
-    const closeIcon = document.getElementById('close-icon');
-    const mobileLinks = document.querySelectorAll('.mobile-link');
 
-    function toggleMenu() {
-      mobileMenuOverlay.classList.toggle('active');
-      menuIcon.classList.toggle('hidden');
-      closeIcon.classList.toggle('hidden');
-      document.body.classList.toggle('overflow-hidden');
-    }
-
-    mobileMenuBtn.addEventListener('click', toggleMenu);
-    mobileLinks.forEach(link => link.addEventListener('click', toggleMenu));
   </script>
 </body>
 
