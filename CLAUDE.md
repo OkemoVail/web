@@ -98,3 +98,5 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 - `index.html` / `whitename.html` — landing pages using Tailwind (`src/output.css`)
 - `Themes/Themes.html` — theme browser
 - `ai.html` — top-level AI entry point
+
+Starting now, if you learn something new, or I prompt you something new, note it down here.
