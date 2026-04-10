@@ -30,6 +30,8 @@ The load order matters. Later files depend on earlier ones:
 8. `streaming.js` — SSE streaming logic
 9. `chat-management.js`, `chat-actions.js` — `window.sendMessage()`, `window.handleAction()`
 10. `feedback.js`, `history.js`, `menus.js`, `send-icon.js`, `research.js`, `changelog.js`
+
+Note: `AI/updatenotes.js` (not inside `AI/js/`) is loaded separately. It defines `window.checkChangelog()` / `window.showChangelog()` and reads build numbers from `localStorage` and remote overrides.
 11. `render.js` — `window.render()` rebuilds the entire chat DOM from `window.chatHistory`
 12. `ui.js` — `window.updateUI()` syncs button states to global flags
 13. `mini-logo.js`, `loader.js` — cosmetic/preloader
@@ -67,6 +69,9 @@ Switch with `window.selectModel('OCTAN')` or `window.selectModel('STUART')`.
 | `vail_theme` | `'light'`, `'dark'`, or `'system'` |
 | `google_access_token` | Google OAuth token |
 | `google_drive_folder_id` | Google Drive sync folder |
+| `vail_last_seen_build` | Last build number the user dismissed in the changelog modal |
+| `vail_remote_build` | Build number fetched from server (overrides local `BUILD_NUMBER` in `updatenotes.js`) |
+| `vail_remote_changelog` | JSON array of changelog strings fetched from server (overrides local `CHANGELOG.changes`) |
 
 ### Data flow for a message
 
