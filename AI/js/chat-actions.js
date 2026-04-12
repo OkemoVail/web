@@ -72,9 +72,11 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         console.log("Connecting to OpenAI Stream at:", baseUrl + "/v1/chat/completions");
 
         const messages = [];
-        if (window.settings.systemPrompt) {
-            messages.push({ role: "system", content: window.settings.systemPrompt });
-        }
+
+        const sysPrompt = (window.settings && window.settings.systemPrompt)
+            ? window.settings.systemPrompt
+            : 'You are Octan, a helpful assistant.';
+        messages.push({ role: "system", content: sysPrompt });
 
         for (const [u, a] of window.chatHistory.slice(0, -1)) {
             messages.push({ role: "user", content: u });
