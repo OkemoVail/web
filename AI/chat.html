@@ -454,7 +454,7 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .prose {
+        .prose, .prose-target {
             max-width: 100%;
             color: inherit;
             font-size: 0.95rem;
@@ -464,19 +464,19 @@
             overflow-wrap: anywhere;
         }
 
-        .prose a {
+        .prose a, .prose-target a {
             color: var(--accent-color);
             text-decoration: none;
         }
 
         @media (min-width: 1024px) {
-            .prose {
+            .prose, .prose-target {
                 font-size: 0.9rem;
                 line-height: 1.5;
             }
         }
 
-        .prose pre {
+        .prose pre, .prose-target pre {
             background: transparent;
             color: #18181b;
             padding: 1.25rem;
@@ -486,33 +486,41 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
             line-height: 1.6;
+            white-space: pre;
+            word-wrap: normal;
+            overflow-wrap: normal;
         }
 
-        .prose pre::-webkit-scrollbar {
+        .prose pre code, .prose-target pre code {
+            white-space: inherit;
+            word-break: normal;
+        }
+
+        .prose pre::-webkit-scrollbar, .prose-target pre::-webkit-scrollbar {
             height: 8px;
             background: transparent;
         }
 
-        .prose pre::-webkit-scrollbar-thumb {
+        .prose pre::-webkit-scrollbar-thumb, .prose-target pre::-webkit-scrollbar-thumb {
             background: transparent;
             border-radius: 10px;
             border: 2px solid transparent;
             background-clip: content-box;
         }
 
-        .prose pre:hover::-webkit-scrollbar-thumb {
+        .prose pre:hover::-webkit-scrollbar-thumb, .prose-target pre:hover::-webkit-scrollbar-thumb {
             background-color: rgba(0, 0, 0, 0.1);
         }
 
-        .dark .prose pre:hover::-webkit-scrollbar-thumb {
+        .dark .prose pre:hover::-webkit-scrollbar-thumb, .dark .prose-target pre:hover::-webkit-scrollbar-thumb {
             background-color: rgba(255, 255, 255, 0.1);
         }
 
-        .dark .prose pre {
+        .dark .prose pre, .dark .prose-target pre {
             color: #f4f4f5;
         }
 
-        .dark .prose pre::-webkit-scrollbar-thumb {
+        .dark .prose pre::-webkit-scrollbar-thumb, .dark .prose-target pre::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.15);
         }
 
