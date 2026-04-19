@@ -119,8 +119,8 @@ window.streamQueue = "";
 window.typedResponseText = "";
 window.typeInterval = null;
 window.charAccu = 0;
-window.TYPE_SPEED_MAIN = 33.3;
-window.TYPE_SPEED_THOUGHT = 100;
+window.TYPE_SPEED_MAIN = 80;
+window.TYPE_SPEED_THOUGHT = 200;
 
 window.currentGenerationIsSearch = false;
 window.currentJobId = null;
