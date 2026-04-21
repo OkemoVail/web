@@ -1,8 +1,3 @@
-/* Warm off-white for dark mode — replaces pure #fff with earthy cream */
-.dark {
-  --color-white: #EDE8DC;
-}
-
 @keyframes gradientScrollFast {
   0% { background-position: 0% 0%; }
   50% { background-position: 0% 110%; }

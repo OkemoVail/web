@@ -41,10 +41,11 @@ window.updateUI = () => {
     }
 
     // 3. Search button
+    const isDark = document.documentElement.classList.contains('dark');
     if (window.els.searchBtn) {
         if (window.isWebSearch) {
             window.els.searchBtn.classList.add('active');
-            window.els.searchBtn.style.color = 'var(--accent-color)';
+            window.els.searchBtn.style.color = isDark ? '#ffffff' : 'var(--accent-color)';
             window.els.searchBtn.style.background = 'var(--accent-glow)';
         } else {
             window.els.searchBtn.classList.remove('active');
@@ -57,7 +58,7 @@ window.updateUI = () => {
     if (window.els.thoughtBtn) {
         if (window.isThinkingEnabled) {
             window.els.thoughtBtn.classList.add('active');
-            window.els.thoughtBtn.style.color = 'var(--accent-color)';
+            window.els.thoughtBtn.style.color = isDark ? '#ffffff' : 'var(--accent-color)';
             window.els.thoughtBtn.style.background = 'var(--accent-glow)';
         } else {
             window.els.thoughtBtn.classList.remove('active');
