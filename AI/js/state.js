@@ -89,8 +89,8 @@ window.isGoogleSignedIn = !!window.googleAccessToken;
 window.settings = JSON.parse(localStorage.getItem('vail_settings_v4') || JSON.stringify({
     temp: 0.5,
     top_p: 0.9,
-    rep_pen: 1.35,
-    max_tokens: 4096,
+    rep_pen: 1.3,
+    max_tokens: 512,
     apiKey: '',
     accent: 'auto', userName: '', userPic: '',
     pfpX: 0, pfpY: 0, pfpScale: 1.0, hasCompletedTutorial: false,
