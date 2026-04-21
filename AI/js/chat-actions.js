@@ -73,10 +73,8 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
 
         const messages = [];
 
-        const sysPrompt = (window.settings && window.settings.systemPrompt)
-            ? window.settings.systemPrompt
-            : 'You are Octan, a helpful assistant.';
-        messages.push({ role: "system", content: sysPrompt });
+        const sysPrompt = window.settings && window.settings.systemPrompt;
+        if (sysPrompt) messages.push({ role: "system", content: sysPrompt });
 
         for (const [u, a] of window.chatHistory.slice(0, -1)) {
             messages.push({ role: "user", content: u });
@@ -103,6 +101,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                 use_thought: window.isThinkingEnabled,
                 temperature: window.settings.temp,
                 top_p: window.settings.top_p || 0.9,
+                repetition_penalty: window.settings.rep_pen || 1.3,
                 chat_id: window.currentChatId,
                 job_id: window.currentJobId
             })

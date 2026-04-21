@@ -87,7 +87,7 @@ window.googleDriveFolderId = localStorage.getItem('google_drive_folder_id') || n
 window.isGoogleSignedIn = !!window.googleAccessToken;
 
 window.settings = JSON.parse(localStorage.getItem('vail_settings_v4') || JSON.stringify({
-    temp: 0.9,
+    temp: 0.5,
     top_p: 0.9,
     rep_pen: 1.35,
     max_tokens: 4096,
@@ -98,7 +98,7 @@ window.settings = JSON.parse(localStorage.getItem('vail_settings_v4') || JSON.st
     sidebarMode: 'manual',
     customAccents: [],
     folders: [],
-    systemPrompt: 'You are Octan, a helper!. You MUST use $$ delimiters for ALL mathematical notation and equations. NO EXCEPTIONS. Do not use [ ] or ( ) for blocks or inline math; use $$ for everything.'
+    systemPrompt: ''
 }));
 
 if (!Array.isArray(window.settings.folders)) window.settings.folders = [];
@@ -126,7 +126,7 @@ window.currentGenerationIsSearch = false;
 window.currentJobId = null;
 
 window.isWebSearch = false;
-window.isThinkingEnabled = false;
+window.isThinkingEnabled = true;
 
 window.tokenClient = null;
 
