@@ -25,17 +25,17 @@ The load order matters. Later files depend on earlier ones:
 3. `storage.js` — `window.StorageController` (IndexedDB-backed chat persistence)
 4. `modals.js`, `i18n.js`, `theme.js` — UI scaffolding
 5. `thought.js`, `content-features.js` — markdown/KaTeX rendering helpers
-6. `api.js` — `window.getOpenAIClient()`, model definitions, backend URL resolution
+6. `api.js` — `window.getOpenAIClient()`, `window.getGradioClient()`, backend URL resolution (model definitions live in `state.js`)
 7. `google-auth.js`, `profile.js`, `sidebar.js`, `folders.js`, `settings.js` — feature modules
 8. `streaming.js` — SSE streaming logic
 9. `chat-management.js`, `chat-actions.js` — `window.sendMessage()`, `window.handleAction()`
 10. `feedback.js`, `history.js`, `menus.js`, `send-icon.js`, `research.js`, `changelog.js`
-
-Note: `AI/updatenotes.js` (not inside `AI/js/`) is loaded separately. It defines `window.checkChangelog()` / `window.showChangelog()` and reads build numbers from `localStorage` and remote overrides.
 11. `render.js` — `window.render()` rebuilds the entire chat DOM from `window.chatHistory`
 12. `ui.js` — `window.updateUI()` syncs button states to global flags
 13. `mini-logo.js`, `loader.js` — cosmetic/preloader
 14. `main.js` — `boot()` async IIFE that initializes storage, detects tunnel URL, then calls `window.initChatUI()`
+
+Note: `AI/updatenotes.js` (not inside `AI/js/`) is loaded separately. It defines `window.checkChangelog()` / `window.showChangelog()` and reads build numbers from `localStorage` and remote overrides.
 
 ### Key globals
 
@@ -51,6 +51,9 @@ Note: `AI/updatenotes.js` (not inside `AI/js/`) is loaded separately. It defines
 | `window.typedResponseText` | Accumulated text rendered so far during streaming |
 | `window.allChats` | All persisted chats loaded from IndexedDB at boot |
 | `window.currentChatId` | UUID of the active chat session |
+| `window.isWebSearch` | Boolean — web search mode active |
+| `window.isThinkingEnabled` | Boolean — thought block generation enabled |
+| `window.currentGenerationIsSearch` | Boolean — changes thought header label to "Surfing the web..." |
 
 ### Models
 
@@ -64,7 +67,7 @@ Switch with `window.selectModel('OCTAN')` or `window.selectModel('STUART')`.
 
 | Key | Purpose |
 |---|---|
-| `vail_settings_v4` | Main settings JSON (temp, top_p, rep_pen, max_tokens, apiKey, accent, userName, etc.) |
+| `vail_settings_v4` | Main settings JSON (temp, top_p, rep_pen, max_tokens, apiKey, accent, userName, sidebarMode, customAccents, folders, systemPrompt, etc.) |
 | `vail_custom_backend_url` | Override backend URL |
 | `vail_theme` | `'light'`, `'dark'`, or `'system'` |
 | `google_access_token` | Google OAuth token |
@@ -77,7 +80,7 @@ Switch with `window.selectModel('OCTAN')` or `window.selectModel('STUART')`.
 
 1. User submits → `window.handleAction()` → `window.sendMessage()`
 2. `sendMessage` pushes `[msg, null, null]` to `chatHistory`, calls `render()`, then streams from the OpenAI-compatible endpoint via SSE (`streaming.js`)
-3. Tokens arrive → `window.streamQueue` → typewriter drainer (`setInterval` at 50ms) appends chars to `window.typedResponseText` at `TYPE_SPEED_MAIN` (33.3 chars/tick) or `TYPE_SPEED_THOUGHT` (100 chars/tick) inside `<think>` blocks
+3. Tokens arrive → `window.streamQueue` → typewriter drainer (`setInterval` at 50ms) appends chars using `charAccu += speed / 20` where `TYPE_SPEED_MAIN = 80` (4 chars/tick) or `TYPE_SPEED_THOUGHT = 200` (10 chars/tick) inside `<think>` blocks
 4. On completion → `render()` + `updateUI()` + `save()`
 
 ### Streaming & thought blocks
