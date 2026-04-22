@@ -126,7 +126,7 @@ window.currentGenerationIsSearch = false;
 window.currentJobId = null;
 
 window.isWebSearch = false;
-window.isThinkingEnabled = true;
+window.isThinkingEnabled = false;
 
 window.tokenClient = null;
 
