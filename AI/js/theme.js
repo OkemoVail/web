@@ -2,7 +2,7 @@
 
 window.updateAccent = (color) => {
     let isAuto = color === 'auto', isDark = document.documentElement.classList.contains('dark');
-    let finalColor = isAuto ? (isDark ? '#5F634F' : '#9EB393') : color;
+    let finalColor = isAuto ? (isDark ? '#EBE9DD' : '#524738') : color;
     window.settings.accent = color;
 
     if (color.startsWith('#') && document.getElementById('custom-accent-picker')) {
@@ -19,7 +19,9 @@ window.updateAccent = (color) => {
     root.style.setProperty('--accent-glow', window.hexToRgba(finalColor, 0.4));
     root.style.setProperty('--accent-tint', window.hexToRgba(finalColor, isAuto ? 0.02 : 0.10));
     root.style.setProperty('--sidebar-tint', window.hexToRgba(finalColor, isAuto ? 0.01 : 0.07));
-    root.style.setProperty('--accent-contrast', isAuto ? (isDark ? '#d4dcd0' : '#1a2e24') : (isDark ? '#d4dcd0' : '#1a2e24'));
+    // Compute contrast color based on accent luminance so buttons are always readable
+    const lum = (0.299 * accRgb[0] + 0.587 * accRgb[1] + 0.114 * accRgb[2]) / 255;
+    root.style.setProperty('--accent-contrast', lum > 0.55 ? '#1a1a1a' : '#f5f5f5');
     root.style.setProperty('--fade-color', isDark ? '#0C0D0B' : '#F9F9F7');
     root.style.setProperty('--fade-gradient-stop', isDark ? '#0C0D0B' : '#F9F9F7');
     root.style.setProperty('--bg-color', isDark ? '#0C0D0B' : '#F9F9F7');
@@ -170,7 +172,7 @@ window.renderThemes = () => {
     const currentAccent = window.settings.accent || 'auto';
 
     const PRESETS = [
-        { color: 'auto', name: 'Sage Whisper', desc: 'Earthy & calm', isAuto: true, iconBg: 'linear-gradient(135deg, #5F634F, #9EB393)', glowColor: '#9EB393' },
+        { color: 'auto', name: 'Sage Whisper', desc: 'Earthy & calm', isAuto: true, iconBg: 'linear-gradient(135deg, #EBE9DD, #524738)', glowColor: '#524738' },
         { color: '#3b82f6', name: 'Midnight in Paris', desc: 'Deep & electric', iconBg: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', glowColor: '#3b82f6' },
         { color: '#a855f7', name: 'Electric Lemonade', desc: 'Vivid & playful', iconBg: 'linear-gradient(135deg, #7c3aed, #c084fc)', glowColor: '#a855f7' },
         { color: '#f97316', name: 'Vitamin C', desc: 'Warm & energetic', iconBg: 'linear-gradient(135deg, #ea580c, #fdba74)', glowColor: '#f97316' },
