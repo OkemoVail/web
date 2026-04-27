@@ -6,6 +6,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Research | OLM North Star</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/design-tokens.css">
+    <script>
+        (function() {
+            const stored = localStorage.getItem('vail_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        parchment:      'var(--bg)',
+                        ivory:          'var(--bg-elevated)',
+                        'text-warm':    'var(--text-primary)',
+                        'olive-gray':   'var(--text-secondary)',
+                        'stone-gray':   'var(--text-tertiary)',
+                        rosewood:       'var(--accent)',
+                        'border-cream': 'var(--border)',
+                        'border-warm':  'var(--border-strong)',
+                        'surf-dark':    'var(--surface-dark)',
+                        'deep-dark':    'var(--deep-dark)',
+                    },
+                    fontFamily: {
+                        sans: ['Satoshi', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,9 +70,9 @@
         }
 
         .header-island {
-            background: rgba(255, 255, 255, 0.7);
+            background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
             border-radius: 999px;
             padding: 4px;
             display: flex;
@@ -46,13 +81,13 @@
         }
 
         .dark .header-island {
-            background: rgba(0, 0, 0, 0.5);
-            border-color: rgba(255, 255, 255, 0.1);
+            background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+            border-color: var(--border);
         }
 
         .manage-card {
-            background: white;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 24px;
             transition: all 0.3s ease;
@@ -74,13 +109,13 @@
     </style>
 </head>
 
-<body class="bg-[#fafafa] dark:bg-[#0a0a0a] transition-colors duration-500 overflow-x-hidden">
+<body class="bg-parchment transition-colors duration-500 overflow-x-hidden">
     
     <header class="fixed top-0 left-0 w-full z-[100] px-6 py-8 pointer-events-none">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="header-island">
                 <a href="research.html"
-                    class="flex items-center gap-2 px-4 py-2 text-xs lg:text-[13px] font-bold tracking-tight text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all">
+                    class="flex items-center gap-2 px-4 py-2 text-xs lg:text-[13px] font-bold tracking-tight text-text-warm hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all">
                     <i class="fa-solid fa-arrow-left text-[10px]"></i>
                     <span>Back to Research</span>
                 </a>
@@ -88,7 +123,7 @@
 
             <div class="header-island pr-2">
                 <button id="connect-btn" onclick="connectStorage()"
-                    class="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all">
+                    class="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-olive-gray rounded-full font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all">
                     <i class="fa-solid fa-link text-[10px]"></i>
                     <span>Connect Storage</span>
                 </button>
@@ -98,12 +133,12 @@
 
     <main class="max-w-4xl mx-auto px-6 pt-40 pb-24">
         <div id="status-msg"
-            class="fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold transition-opacity opacity-0 px-4 py-2 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl z-50">
+            class="fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold transition-opacity opacity-0 px-4 py-2 rounded-full bg-ivory border border-border-cream shadow-xl z-50">
         </div>
         <div class="mb-16">
-            <h1 class="text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-100 mb-4">Research Management
+            <h1 class="text-4xl font-black tracking-tight text-text-warm mb-4">Research Management
             </h1>
-            <p class="text-zinc-500 dark:text-zinc-400 font-medium">Manage, edit, or remove your published research
+            <p class="text-olive-gray font-medium">Manage, edit, or remove your published research
                 papers.</p>
         </div>
 
@@ -112,10 +147,10 @@
         </div>
 
         <div id="empty-state" class="hidden py-24 text-center">
-            <i class="fa-solid fa-folder-open text-4xl text-zinc-200 dark:text-zinc-800 mb-6"></i>
-            <p class="text-zinc-400 font-medium">No custom research papers found.</p>
+            <i class="fa-solid fa-folder-open text-4xl text-stone-gray mb-6"></i>
+            <p class="text-olive-gray font-medium">No custom research papers found.</p>
             <a href="editor.html"
-                class="inline-block mt-8 text-blue-500 font-black uppercase tracking-widest text-xs hover:opacity-70 transition-opacity">Create
+                class="inline-block mt-8 text-rosewood font-black uppercase tracking-widest text-xs hover:opacity-70 transition-opacity">Create
                 your first paper</a>
         </div>
     </main>
@@ -137,7 +172,7 @@
 
                 const btn = document.getElementById('connect-btn');
                 btn.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i><span>Connected</span>';
-                btn.className = "flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-full font-bold text-xs transition-all";
+                btn.className = "flex items-center gap-2 px-3 py-1.5 bg-rosewood/10 text-rosewood rounded-full font-bold text-xs transition-all";
             } catch (err) {
                 console.error("Storage connection failed:", err);
             }
@@ -188,9 +223,9 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-3 mb-2">
                                 ${tags}
-                                <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">${blog.date}</span>
+                                <span class="text-[9px] font-bold text-stone-gray uppercase tracking-widest">${blog.date}</span>
                             </div>
-                            <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-100 truncate">${blog.title}</h3>
+                            <h3 class="text-lg font-bold text-text-warm truncate">${blog.title}</h3>
                         </div>
                         <div class="flex items-center gap-2">
                             <button onclick="deletePost('${blog.id}')" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
@@ -217,7 +252,7 @@
                     const statusMsg = document.getElementById('status-msg');
                     if (statusMsg) {
                         statusMsg.innerText = "Syncing deletion to file...";
-                        statusMsg.className = "fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold text-blue-500 px-4 py-2 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl z-50 transition-opacity opacity-100";
+                        statusMsg.className = "fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold text-blue-500 px-4 py-2 rounded-full bg-ivory border border-border-cream shadow-xl z-50 transition-opacity opacity-100";
                     }
 
                     const options = { mode: 'readwrite' };
@@ -229,7 +264,7 @@
 
                     if (statusMsg) {
                         statusMsg.innerText = "File Synced";
-                        statusMsg.className = "fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold text-green-500 px-4 py-2 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl z-50 transition-opacity opacity-100";
+                        statusMsg.className = "fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold text-rosewood px-4 py-2 rounded-full bg-ivory border border-border-cream shadow-xl z-50 transition-opacity opacity-100";
                         setTimeout(() => statusMsg.style.opacity = "0", 2000);
                     }
                 } catch (error) {
