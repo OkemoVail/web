@@ -13,13 +13,37 @@
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/design-tokens.css">
+    <script>
+        (function() {
+            const stored = localStorage.getItem('vail_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    colors: {
+                        parchment:      'var(--bg)',
+                        ivory:          'var(--bg-elevated)',
+                        'text-warm':    'var(--text-primary)',
+                        'olive-gray':   'var(--text-secondary)',
+                        'stone-gray':   'var(--text-tertiary)',
+                        rosewood:       'var(--accent)',
+                        'border-cream': 'var(--border)',
+                        'border-warm':  'var(--border-strong)',
+                        'surf-dark':    'var(--surface-dark)',
+                        'deep-dark':    'var(--deep-dark)',
+                    },
                     fontFamily: {
-                        sans: ['Satoshi', 'Inter', 'sans-serif'],
+                        serif: ['Century', 'Georgia', 'serif'],
+                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
+                        mono:  ['"JetBrains Mono"', 'monospace'],
                     }
                 }
             }
