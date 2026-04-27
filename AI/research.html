@@ -171,9 +171,9 @@
         /* --- Global Flat Styles --- */
         .skuomorphic-button {
             position: relative;
-            background: #f4f4f2;
+            background: var(--bg-elevated);
             border-radius: 9999px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-strong);
             transition: all 0.2s ease;
             cursor: pointer;
             display: inline-flex;
@@ -182,8 +182,8 @@
         }
 
         .dark .skuomorphic-button {
-            background: #2a2a28;
-            border-color: rgba(255, 255, 255, 0.05);
+            background: var(--bg-elevated);
+            border-color: var(--border);
         }
 
         .skuomorphic-button:hover {
