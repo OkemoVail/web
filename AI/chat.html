@@ -330,9 +330,12 @@
         }
 
         .user-msg-bubble {
-            background-color: rgba(0, 0, 0, 0.07);
+            background-color: var(--bg-elevated);
+            border: 1px solid var(--border-strong);
+            border-radius: 12px;
+            box-shadow: 0 0 0 1px var(--shadow-ring);
+            color: var(--text-primary);
             padding: 0.75rem 1.25rem;
-            border-radius: 18px;
             max-width: 100%;
             animation: fadeIn 0.3s ease-out forwards;
             word-wrap: break-word;
@@ -341,7 +344,7 @@
         }
 
         .dark .user-msg-bubble {
-            background-color: #2a2b28;
+            background-color: var(--bg-elevated);
         }
 
         .user-row {
@@ -396,14 +399,16 @@
         }
 
         .main-response-content {
-            color: var(--zinc-900);
+            background-color: transparent;
+            color: var(--text-primary);
+            border: none;
             font-size: 0.95rem;
             line-height: 1.7;
             font-weight: 450;
         }
 
         .dark .main-response-content {
-            color: #ececec;
+            color: var(--text-primary);
         }
 
         .user-msg-actions {
@@ -495,8 +500,8 @@
 
         .prose pre,
         .prose-target pre {
-            background: transparent;
-            color: #18181b;
+            background-color: var(--surface-dark);
+            color: #faf9f5;
             padding: 1.25rem;
             overflow-x: auto;
             margin: 0;
@@ -541,7 +546,8 @@
 
         .dark .prose pre,
         .dark .prose-target pre {
-            color: #f4f4f5;
+            color: #faf9f5;
+            background-color: var(--surface-dark);
         }
 
         .dark .prose pre::-webkit-scrollbar-thumb,
@@ -553,16 +559,16 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border-radius: 14px;
+            border-radius: 8px;
             margin: 1.5rem 0;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            background: #f4f4f5;
+            border: 1px solid var(--border);
+            background: var(--surface-dark);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .dark .code-window {
-            background: #000000;
-            border-color: #27272a;
+            background: var(--surface-dark);
+            border-color: var(--border);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         }
 
@@ -571,8 +577,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 0.75rem 1.25rem;
-            background: #f1f1f2;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background: var(--deep-dark);
+            border-bottom: 1px solid var(--border);
             position: sticky;
             left: 0;
             right: 0;
@@ -582,8 +588,8 @@
         }
 
         .dark .code-header {
-            background: #1c1c1f;
-            border-bottom-color: #27272a;
+            background: var(--deep-dark);
+            border-bottom-color: var(--border);
         }
 
         .code-header-left {
@@ -706,10 +712,11 @@
         }
 
         .input-box-wrap {
-            background-color: var(--input-bg);
+            background-color: var(--bg-elevated);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-strong);
+            border-radius: 16px;
             box-shadow:
                 0 6px 16px -2px rgba(0, 0, 0, 0.08),
                 0 2px 4px -1px rgba(0, 0, 0, 0.04);
@@ -720,8 +727,8 @@
         }
 
         .dark .input-box-wrap {
-            background-color: var(--input-bg);
-            border-color: rgba(255, 255, 255, 0.08);
+            background-color: var(--bg-elevated);
+            border-color: var(--border-strong);
             box-shadow:
                 0 8px 18px -4px rgba(0, 0, 0, 0.5);
         }
@@ -907,14 +914,15 @@
         .thought-container {
             margin-bottom: 1rem;
             margin-top: 0.5rem;
-            padding-left: 1rem;
-            border-left: 2px solid rgba(0, 0, 0, 0.1);
+            padding-left: 12px;
+            border-left: 2px solid var(--border-strong);
+            background-color: transparent;
             padding-top: 0.5rem;
             padding-bottom: 0.5rem;
         }
 
         .dark .thought-container {
-            border-left-color: rgba(255, 255, 255, 0.2);
+            border-left-color: var(--border-strong);
         }
 
         .thought-header {
@@ -922,11 +930,11 @@
             background: transparent;
             border: none;
             padding: 0;
-            font-size: 0.7rem;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #71717a;
+            color: var(--text-tertiary);
             margin-bottom: 0.4rem;
             display: flex;
             align-items: center;
@@ -938,17 +946,17 @@
         }
 
         .thought-header:hover {
-            color: #71717a;
+            color: var(--text-tertiary);
 
         }
 
         html.dark .thought-header {
-            color: #71717a;
+            color: var(--text-tertiary);
 
         }
 
         html.dark .thought-header:hover {
-            color: #a1a1aa;
+            color: var(--text-secondary);
 
         }
 
@@ -958,7 +966,7 @@
             font-size: 0.9rem;
 
             line-height: 1.6;
-            color: #71717a;
+            color: var(--text-tertiary);
 
             display: none;
 
@@ -982,7 +990,7 @@
         }
 
         html.dark .thought-content {
-            color: #a1a1aa;
+            color: var(--text-tertiary);
 
         }
 
@@ -1765,6 +1773,16 @@
 
         .skuomorphic-btn:active {
             box-shadow: none !important;
+        }
+
+        /* Send button: active (has text / generating) vs inactive */
+        #send-btn {
+            border-radius: 8px;
+        }
+
+        #send-btn:disabled {
+            background-color: var(--border-strong) !important;
+            color: var(--text-secondary) !important;
         }
 
         .skuomorphic-card {
