@@ -66,34 +66,18 @@
     </style>
 
     <style>
-        :root {
-            --accent-color: #3b82f6;
-            --chatbg-light: #f3f4f6;
-            --chatbg-dark: #09090b;
-            --paper-light: #ffffff;
-            --paper-dark: #18181b;
-        }
-
         html {
-            background-color: var(--chatbg-light);
+            background-color: var(--bg);
             transition: background-color 0.3s ease;
-        }
-
-        html.dark {
-            background-color: var(--chatbg-dark);
         }
 
         body {
             background-color: transparent;
-            color: #1a1a1b;
+            color: var(--text-primary);
             font-family: 'Satoshi', 'Inter', sans-serif;
             margin: 0;
             padding: 0;
             transition: color 0.3s ease;
-        }
-
-        .dark body {
-            color: #f4f4f5;
         }
 
         .header-island {
@@ -124,7 +108,7 @@
         }
 
         .manage-paper {
-            background: var(--paper-light);
+            background: var(--bg-elevated);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             padding: 40px;
             border-radius: 24px;
@@ -132,7 +116,7 @@
         }
 
         .dark .manage-paper {
-            background: var(--paper-dark);
+            background: var(--surface-dark);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -158,18 +142,18 @@
 
         input:focus,
         textarea:focus {
-            border-color: var(--accent-color);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            border-color: var(--accent);
+            background: var(--bg-elevated);
+            box-shadow: 0 0 0 4px var(--accent-light);
         }
 
         .dark input:focus,
         .dark textarea:focus {
-            background: #27272a;
+            background: var(--surface-dark);
         }
 
         .btn-primary {
-            background: var(--accent-color);
+            background: var(--accent);
             color: white;
             padding: 12px 24px;
             border-radius: 12px;
