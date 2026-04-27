@@ -9,7 +9,7 @@
   --text-primary:    #141413;
   --text-secondary:  #5e5d59;
   --text-tertiary:   #87867f;
-  --text-dark-link:  #3d3d3a;
+  --text-link:       #3d3d3a;
   --accent:          #c96478;
   --accent-light:    #d97790;
   --border:          #f0eee6;
@@ -27,17 +27,17 @@
   --text-primary:    #faf9f5;
   --text-secondary:  #b0aea5;
   --text-tertiary:   #87867f;
-  --text-dark-link:  #d1cfc5;
+  --text-link:       #d1cfc5;
+  /* --accent and --accent-light intentionally swap in dark mode for lightness shift */
   --accent:          #d97790;
   --accent-light:    #c96478;
   --border:          #30302e;
   --border-strong:   #3d3d3a;
   --shadow-ring:     #3d3d3a;
-  --surface-dark:    #30302e;
-  --deep-dark:       #141413;
 }
 
 /* ── Global resets ──────────────────────────────────────────── */
+/* Intentional global reset — all pages use the parchment/near-black base */
 body {
   background-color: var(--bg);
   color: var(--text-primary);
