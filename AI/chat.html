@@ -1647,10 +1647,10 @@
 
 
         .header-island {
-            background: rgba(249, 249, 247, 0.85);
+            background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
             padding: 0 8px;
             display: flex;
             align-items: center;
@@ -1661,17 +1661,17 @@
         }
 
         .dark .header-island {
-            background: rgba(12, 13, 11, 0.85);
-            border-color: rgba(255, 255, 255, 0.08);
+            background: color-mix(in srgb, var(--bg) 85%, transparent);
+            border-color: var(--border);
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
         .header-island:hover {
-            border-color: rgba(0, 0, 0, 0.12);
+            border-color: var(--border-strong);
         }
 
         .dark .header-island:hover {
-            border-color: rgba(255, 255, 255, 0.15);
+            border-color: var(--border-strong);
         }
 
         #top-right-actions {
@@ -1776,8 +1776,8 @@
         }
 
         .dark .skuomorphic-card {
-            background: #111210;
-            border-color: rgba(255, 255, 255, 0.1);
+            background: var(--bg-elevated);
+            border-color: var(--border);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
 
@@ -1799,7 +1799,7 @@
 
         .dark .skuomorphic-menu-active {
             background: rgba(255, 255, 255, 0.03) !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
+            border-color: var(--border) !important;
         }
 
 
@@ -2196,7 +2196,7 @@
         #app-preloader {
             position: fixed;
             inset: 0;
-            background: var(--bg-color, #0C0D0B);
+            background: var(--bg);
             z-index: 99999;
             display: flex;
             align-items: center;
@@ -2265,7 +2265,7 @@
 </head>
 
 <body
-    class="bg-chatbg-light dark:bg-chatbg-dark text-zinc-900 dark:text-zinc-200 font-sans h-full flex overflow-hidden">
+    class="text-zinc-900 dark:text-zinc-200 font-sans h-full flex overflow-hidden"
 
     <!-- APP PRELOADER -->
     <div id="app-preloader">
@@ -2397,8 +2397,8 @@
     </div>
 
     <aside id="sidebar"
-        class="-translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 bg-sidebar-light dark:bg-sidebar-dark border-r border-zinc-200 dark:border-zinc-800/50 flex flex-col shadow-xl lg:shadow-none transition-all duration-300"
-        style="width: var(--sidebar-width);">
+        class="-translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 flex flex-col shadow-xl lg:shadow-none transition-all duration-300"
+        style="width: var(--sidebar-width); background: var(--bg-elevated); border-right: 1px solid var(--border);">
 
         <!-- Full Sidebar Content -->
         <div id="sidebar-full-content" class="flex flex-col h-full w-full overflow-hidden">
@@ -2572,7 +2572,7 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-chatbg-light dark:bg-chatbg-dark">
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden" style="background: var(--bg);">
 
 
 
