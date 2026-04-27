@@ -8,33 +8,40 @@
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/design-tokens.css">
+    <script>
+        (function() {
+            const stored = localStorage.getItem('vail_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#5F634F',
-                        secondary: '#9EB393',
-                        bglight: '#F9F8F6',
-                        bgdark: '#1C1C1A',
-                        textlight: '#1A1A18',
-                        textdark: '#E8E6E1'
+                        parchment:      'var(--bg)',
+                        ivory:          'var(--bg-elevated)',
+                        'text-warm':    'var(--text-rosewood)',
+                        'olive-gray':   'var(--text-secondary)',
+                        'stone-gray':   'var(--text-tertiary)',
+                        rosewood:       'var(--accent)',
+                        'border-cream': 'var(--border)',
+                        'border-warm':  'var(--border-strong)',
+                        'surf-dark':    'var(--surface-dark)',
+                        'deep-dark':    'var(--deep-dark)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
-                        sans: ['Satoshi', 'Inter', 'sans-serif'],
+                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
                     }
                 }
             }
         }
-    </script>
-    <script>
-            /* Theme Sync Script */
-            (function () {
-                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (isDark) document.documentElement.classList.add('dark');
-            })();
     </script>
     <style>
         @font-face {
@@ -56,10 +63,10 @@
 
     <style>
         :root {
-            --bg-light: #F9F8F6;
-            --bg-dark: #1C1C1A;
-            --accent-olive: #5F634F;
-            --accent-mint: #9EB393;
+            --bg-light: var(--bg);
+            --bg-dark: var(--deep-dark);
+            --accent-olive: var(--accent);
+            --accent-mint: var(--accent-light);
         }
 
         body {
@@ -128,12 +135,12 @@
 </head>
 
 <body
-    class="bg-bglight text-textlight dark:bg-bgdark dark:text-textdark min-h-screen flex flex-col font-sans selection:bg-secondary selection:text-textlight overflow-x-hidden mesh-gradient">
+    class="bg-parchment text-text-warm dark:bg-deep-dark dark:text-text-warm min-h-screen flex flex-col font-sans selection:bg-rosewood selection:text-text-warm overflow-x-hidden mesh-gradient">
     <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-bgdark/80 backdrop-blur-md relative z-30">
+        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-md relative z-30">
         <a href="../AI.html" class="flex items-center gap-3">
             <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
-                class="w-8 h-8 text-primary fill-current">
+                class="w-8 h-8 text-rosewood fill-current">
                 <path
                     d="M4.96,314.21l508.97,180.31v-94.71L28.54,6.09C19.12-5.79,0,.87,0,16.03v286.6c0,4.38,1.79,8.56,4.96,11.58Z" />
                 <polygon points="513.93 561.2 0 684.2 0 395.8 513.93 522.5 513.93 561.2" />
@@ -145,13 +152,13 @@
                 <path
                     d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
             </svg>
-            <div class='text-xl md:text-2xl font-black text-primary'>Oaky</div>
+            <div class='text-xl md:text-2xl font-black text-rosewood'>Oaky</div>
         </a>
         <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="goals.html" class="text-primary transition-colors">Goals</a>
-            <a href="research.html" class="hover:text-primary transition-colors">Research</a>
-            <a href="privacy.html" class="hover:text-primary transition-colors">Privacy</a>
-            <a href="tos.html" class="hover:text-primary transition-colors">TOS</a>
+            <a href="goals.html" class="text-rosewood transition-colors">Goals</a>
+            <a href="research.html" class="hover:text-rosewood transition-colors">Research</a>
+            <a href="privacy.html" class="hover:text-rosewood transition-colors">Privacy</a>
+            <a href="tos.html" class="hover:text-rosewood transition-colors">TOS</a>
         </div>
     </nav>
 
@@ -159,7 +166,7 @@
 
         <div class="w-full animate-fade-in mb-20 mt-12">
             <h1
-                class="serif-text text-6xl md:text-8xl lg:text-9xl font-medium tracking-tighter mb-8 text-primary leading-[0.9]">
+                class="serif-text text-6xl md:text-8xl lg:text-9xl font-medium tracking-tighter mb-8 text-rosewood leading-[0.9]">
                 Our Goals
             </h1>
             <p class="text-2xl md:text-3xl text-gray-500 dark:text-gray-400 max-w-2xl font-normal leading-relaxed">
@@ -171,15 +178,15 @@
         <div class="space-y-16 w-full mt-12 pb-24">
             <!-- Goal 1: Free for Everyone -->
             <div
-                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-[#9EB393]/10 animate-fade-in">
+                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
                 <div
-                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-primary/10 dark:bg-primary/5 text-primary dark:text-secondary group-hover:scale-110 transition-transform">
+                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/10 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-earth-americas text-2xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h2 class="serif-text text-4xl font-medium mb-4 text-primary dark:text-textdark leading-tight">Free
+                    <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">Free
                         for Everyone</h2>
-                    <p class="text-xl text-gray-500 dark:text-textdark/60 leading-relaxed max-w-4xl">
+                    <p class="text-xl text-gray-500 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         Advanced AGI should not be a luxury reserved for the few. We are building infrastructure to
                         provide
                         state-of-the-art intelligence at zero cost to the end user. Intelligence should be a utility,
@@ -190,15 +197,15 @@
 
             <!-- Goal 2: Raw & Unfiltered -->
             <div
-                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-[#9EB393]/10 animate-fade-in">
+                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
                 <div
-                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-secondary/20 dark:bg-secondary/5 text-primary dark:text-secondary">
+                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/20 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray">
                     <i class="fa-solid fa-bolt text-2xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h2 class="serif-text text-4xl font-medium mb-4 text-primary dark:text-textdark leading-tight">Raw &
+                    <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">Raw &
                         Unfiltered</h2>
-                    <p class="text-xl text-gray-500 dark:text-textdark/60 leading-relaxed max-w-4xl">
+                    <p class="text-xl text-gray-500 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         We believe in raw intelligence. Without limits, without artificial filters, and without the
                         biases
                         imposed by corporate safety committees. True reasoning requires the absolute freedom to explore
@@ -209,15 +216,15 @@
 
             <!-- Goal 3: No Limits -->
             <div
-                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-[#9EB393]/10 animate-fade-in">
+                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
                 <div
-                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-primary/10 dark:bg-primary/5 text-primary dark:text-secondary">
+                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/10 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray">
                     <i class="fa-solid fa-infinity text-2xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h2 class="serif-text text-4xl font-medium mb-4 text-primary dark:text-textdark leading-tight">No
+                    <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">No
                         Limits</h2>
-                    <p class="text-xl text-gray-500 dark:text-textdark/60 leading-relaxed max-w-4xl">
+                    <p class="text-xl text-gray-500 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         Boundaries restrict discovery. Our models are architectural foundations for unbounded
                         exploration,
                         enabling breakthrough research, creative synthesis, and technological leaps that are
@@ -229,13 +236,13 @@
             <!-- Goal 4: Universal Access -->
             <div class="flex flex-col md:flex-row gap-10 items-start animate-fade-in">
                 <div
-                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-secondary/20 dark:bg-secondary/5 text-primary dark:text-secondary">
+                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/20 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray">
                     <i class="fa-solid fa-microchip text-2xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h2 class="serif-text text-4xl font-medium mb-4 text-primary dark:text-textdark leading-tight">
+                    <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">
                         Universal Access</h2>
-                    <p class="text-xl text-gray-500 dark:text-textdark/60 leading-relaxed max-w-4xl">
+                    <p class="text-xl text-gray-500 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         Whether you're a student, a researcher, or a dreamer, Oaky provides the tools to amplify
                         your
                         innate potential. We are democratizing the future of humanity by putting world-class
