@@ -16,6 +16,10 @@ Tailwind scans `./*.html`, `./AI/*.html`, and `./src/**/*.{html,js,jsx,ts,tsx}` 
 
 This is a vanilla JS, no-framework AI chat frontend called **Oaky** (`AI/chat.html`). All JS is loaded as plain `<script>` tags at the bottom of `chat.html` in dependency order. There is no module system — every file attaches functions to `window.*`.
 
+### CDN dependencies (loaded by `chat.html` at runtime)
+
+`marked`, `KaTeX`, `feather-icons`, `anime.js`, Tailwind CDN, Google GSI client, and Font Awesome are all loaded from CDN — there is no local npm bundle for these. Do not try to install them via npm.
+
 ### JS load order (`AI/js/`)
 
 The load order matters. Later files depend on earlier ones:
@@ -98,8 +102,8 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 - `AI/research.html` — research mode
 - `AI/tos.html`, `AI/privacy.html`, `AI/goals.html`, `AI/version.html` — static info pages
 - `AI/data/blogs.json` — static blog data
-- `index.html` / `whitename.html` — landing pages using Tailwind (`src/output.css`)
+- `index.html` / `whitename.html` — root landing pages using Tailwind (`src/output.css`)
+- `AI/index.html` — Oaky entry/landing page for the AI section (uses Tailwind CDN, not `src/output.css`)
 - `Themes/Themes.html` — theme browser
-- `ai.html` — top-level AI entry point
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.

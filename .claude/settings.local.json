@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(awk NR>=150 && NR<=160 *)",
-      "Bash(awk *)"
+      "Bash(awk *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file",
+      "mcp__plugin_context-mode_context-mode__ctx_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_search"
     ]
   }
 }

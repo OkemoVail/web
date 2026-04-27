@@ -50,9 +50,9 @@
             --sidebar-tint:   rgba(0, 0, 0, 0);
             --accent-contrast: #faf9f5;
 
-            /* Background system — chat bg matches accent (rosewood) */
+            /* Background system — chat bg + sidebar locked to rosewood accent (no light/dark variation) */
             --bg-color:               #c96478;
-            --sidebar-bg:             var(--bg-elevated);
+            --sidebar-bg:             #c96478;
             --input-bg:               var(--bg-elevated);
             --bg-elevated-secondary:  var(--bg-elevated);
             --fade-color:             #c96478;
@@ -76,10 +76,11 @@
             --accent-glow:     rgba(217, 119, 144, 0.4);
             --accent-contrast: #141413;
 
-            /* dark-mode chat bg matches dark accent */
-            --bg-color:           #d97790;
-            --fade-color:         #d97790;
-            --fade-gradient-stop: #d97790;
+            /* dark mode keeps chat bg + sidebar pinned to the same rosewood — no shift */
+            --bg-color:           #c96478;
+            --sidebar-bg:         #c96478;
+            --fade-color:         #c96478;
+            --fade-gradient-stop: #c96478;
             --thinking-accent:    color-mix(in srgb, var(--accent-color), white 35%);
             --thinking-side:      var(--border-strong);
         }
