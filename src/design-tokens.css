@@ -1,0 +1,57 @@
+/* ── JetBrains Mono ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Light tokens ───────────────────────────────────────────── */
+:root {
+  --bg:              #f5f4ed;
+  --bg-elevated:     #faf9f5;
+  --bg-white:        #ffffff;
+  --text-primary:    #141413;
+  --text-secondary:  #5e5d59;
+  --text-tertiary:   #87867f;
+  --text-dark-link:  #3d3d3a;
+  --accent:          #c96478;
+  --accent-light:    #d97790;
+  --border:          #f0eee6;
+  --border-strong:   #e8e6dc;
+  --shadow-ring:     #d1cfc5;
+  --surface-dark:    #30302e;
+  --deep-dark:       #141413;
+}
+
+/* ── Dark tokens ────────────────────────────────────────────── */
+.dark {
+  --bg:              #141413;
+  --bg-elevated:     #30302e;
+  --bg-white:        #30302e;
+  --text-primary:    #faf9f5;
+  --text-secondary:  #b0aea5;
+  --text-tertiary:   #87867f;
+  --text-dark-link:  #d1cfc5;
+  --accent:          #d97790;
+  --accent-light:    #c96478;
+  --border:          #30302e;
+  --border-strong:   #3d3d3a;
+  --shadow-ring:     #3d3d3a;
+  --surface-dark:    #30302e;
+  --deep-dark:       #141413;
+}
+
+/* ── Global resets ──────────────────────────────────────────── */
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+code, pre, .font-mono, [class*="code"] {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 10px;
+}
