@@ -5,25 +5,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OkemoVail</title>
+  <link rel="stylesheet" href="src/design-tokens.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
   <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
   <script>
+    (function() {
+      const stored = localStorage.getItem('vail_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'dark' || (!stored && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+  <script>
     tailwind.config = {
-      darkMode: 'media',
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            moss: '#5F634F',
-            sage: '#BFD7B5',
-            paper: '#F9F9F7',
-            obsidian: '#0C0D0B',
+            parchment:      'var(--bg)',
+            ivory:          'var(--bg-elevated)',
+            'text-warm':    'var(--text-primary)',
+            'olive-gray':   'var(--text-secondary)',
+            'stone-gray':   'var(--text-tertiary)',
+            rosewood:       'var(--accent)',
+            'rose-light':   'var(--accent-light)',
+            'border-cream': 'var(--border)',
+            'border-warm':  'var(--border-strong)',
+            'ring-warm':    'var(--shadow-ring)',
+            'surf-dark':    'var(--surface-dark)',
+            'deep-dark':    'var(--deep-dark)',
           },
           fontFamily: {
-            serif: ['Century', '"Century Schoolbook"', 'serif'],
-            sans: ['Satoshi', 'Inter', 'sans-serif'],
+            serif: ['Century', '"Century Schoolbook"', 'Georgia', 'serif'],
+            sans:  ['Satoshi', 'Inter', 'sans-serif'],
+            mono:  ['"JetBrains Mono"', 'monospace'],
           },
         }
       }
@@ -37,7 +54,6 @@
       font-display: swap;
       font-style: normal;
     }
-
     @font-face {
       font-family: 'Satoshi';
       src: url('Fonts/Satoshi-VariableItalic.ttf') format('truetype');
@@ -45,84 +61,30 @@
       font-display: swap;
       font-style: italic;
     }
-  </style>
-
-  <style>
-    body {
-      background-color: #F9F9F7;
-      color: #1a1a1a;
-      scroll-behavior: smooth;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #0C0D0B;
-        color: #F9F9F7;
-      }
-    }
-
-    .serif-text {
-      font-family: 'Century', 'Century Schoolbook', serif;
-    }
-
-    .fade-in {
-      animation: fadeIn 1s ease-out forwards;
-    }
-
+    .serif-text { font-family: 'Century', 'Century Schoolbook', Georgia, serif; }
+    .fade-in { animation: fadeIn 1s ease-out forwards; }
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #BFD7B5;
-      border-radius: 10px;
-    }
-
-
-
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 
 <body class="font-sans antialiased transition-colors duration-500">
 
 
-  <nav
-    class="fixed top-0 w-full z-50 bg-paper/80 dark:bg-obsidian/80 backdrop-blur-md border-b border-moss/10 dark:border-sage/10">
+  <nav class="fixed top-0 w-full z-50 bg-parchment/80 dark:bg-deep-dark/80 backdrop-blur-md border-b border-border-cream dark:border-surf-dark">
     <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="serif-text text-2xl font-medium text-moss dark:text-sage tracking-tight">okemovail.</a>
-      <div class="hidden md:flex space-x-10 text-sm font-medium text-moss/80 dark:text-sage/80">
-        <a href="#work" class="hover:text-moss dark:hover:text-sage transition-colors">Projects</a>
-        <a href="/AI/index.html" class="hover:text-moss dark:hover:text-sage transition-colors">OkemoAI</a>
-        <a href="https://github.com/ar12c" target="_blank"
-          class="hover:text-moss dark:hover:text-sage transition-colors">GitHub</a>
+      <a href="/" class="serif-text text-2xl font-medium text-rosewood tracking-tight">okemovail.</a>
+      <div class="hidden md:flex space-x-10 text-sm font-medium text-olive-gray dark:text-olive-gray">
+        <a href="#work" class="hover:text-text-warm dark:hover:text-text-warm transition-colors">Projects</a>
+        <a href="/AI/index.html" class="hover:text-text-warm dark:hover:text-text-warm transition-colors">OkemoAI</a>
+        <a href="https://github.com/ar12c" target="_blank" class="hover:text-text-warm dark:hover:text-text-warm transition-colors">GitHub</a>
       </div>
-
       <a href="/AI/index.html"
-        class="md:hidden text-sm font-medium text-moss/80 dark:text-sage/80 hover:text-moss dark:hover:text-sage transition-all border border-moss/10 dark:border-sage/20 px-5 py-2 rounded-full backdrop-blur-sm">
+        class="md:hidden text-sm font-medium text-olive-gray dark:text-olive-gray hover:text-text-warm transition-all border border-border-warm dark:border-surf-dark px-5 py-2 rounded-full backdrop-blur-sm">
         OkemoAI
       </a>
     </div>
@@ -135,92 +97,91 @@
 
 
     <section class="py-20 md:py-32 fade-in">
-
       <div class="mb-10">
         <img
           src="https://avatars.githubusercontent.com/u/179893130?s=400&u=d8a0d805e4137f21f0dd19fcf5163a1c746f02fd&v=4"
           alt="OkemoVail Profile"
-          class="w-24 h-24 rounded-2xl border border-moss/10 dark:border-sage/20 grayscale hover:grayscale-0 transition-all duration-700 bg-sage/20 object-cover">
+          class="w-24 h-24 rounded-2xl border border-border-cream dark:border-surf-dark grayscale hover:grayscale-0 transition-all duration-700 bg-ivory object-cover">
       </div>
-
-      <h1 class="serif-text text-5xl md:text-7xl text-moss dark:text-sage mb-4">
-        Hey, I'm OkemoVail</h1>
-      </p>
+      <h1 class="serif-text text-5xl md:text-7xl text-text-warm dark:text-text-warm mb-4">
+        Hey, I'm OkemoVail
+      </h1>
       <div class="mt-12 flex flex-wrap gap-4">
         <a href="#work"
-          class="bg-moss dark:bg-sage text-paper dark:text-obsidian px-8 py-3 rounded-full font-medium hover:opacity-90 transition-all">Explore
-          Projects</a>
+          class="bg-rosewood text-ivory px-8 py-3 rounded-lg font-medium hover:opacity-90 transition-all"
+          style="box-shadow: 0 0 0 1px var(--accent)">
+          Explore Projects
+        </a>
         <a href="https://github.com/ar12c" target="_blank"
-          class="border border-moss/20 dark:border-sage/30 text-moss dark:text-sage px-8 py-3 rounded-full font-medium hover:bg-sage/10 transition-all">GitHub
-          Profile</a>
+          class="border border-border-warm dark:border-surf-dark text-text-warm dark:text-text-warm px-8 py-3 rounded-lg font-medium hover:bg-ivory dark:hover:bg-surf-dark transition-all">
+          GitHub Profile
+        </a>
       </div>
     </section>
 
 
-    <section class="py-16 md:py-24 border-t border-moss/10 dark:border-sage/10 italic text-center">
-      <blockquote class="serif-text text-3xl md:text-4xl text-moss/60 dark:text-sage/60 max-w-2xl mx-auto leading-snug">
+    <section class="py-16 md:py-24 border-t border-border-cream dark:border-surf-dark italic text-center">
+      <blockquote class="serif-text text-3xl md:text-4xl text-olive-gray dark:text-olive-gray max-w-2xl mx-auto leading-snug">
         "Stay Hungry, Stay Foolish"
       </blockquote>
-      <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-400">— Steve Jobs</cite>
+      <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray">— Steve Jobs</cite>
     </section>
 
 
-    <section id="work" class="py-20 border-t border-moss/10 dark:border-sage/10">
+    <section id="work" class="py-20 border-t border-border-cream dark:border-surf-dark">
       <div class="flex items-baseline justify-between mb-12">
-        <h2 class="serif-text text-4xl text-moss dark:text-paper">Projects</h2>
+        <h2 class="serif-text text-4xl text-text-warm dark:text-text-warm">Projects</h2>
       </div>
-
-      <div class="">
+      <div>
         <table class="w-full text-left border-collapse">
           <thead class="hidden md:table-header-group">
-            <tr class="border-b border-moss/10 dark:border-white/10">
-              <th class="py-4 serif-text text-sm uppercase tracking-widest text-stone-500 font-medium w-1/4">Project</th>
-              <th class="py-4 serif-text text-sm uppercase tracking-widest text-stone-500 font-medium">Description</th>
-              <th class="py-4 serif-text text-sm uppercase tracking-widest text-stone-500 font-medium text-right">Details</th>
-              <th class="py-4 serif-text text-sm uppercase tracking-widest text-stone-500 font-medium text-right">Action</th>
+            <tr class="border-b border-border-cream dark:border-surf-dark">
+              <th class="py-4 serif-text text-sm uppercase tracking-widest text-stone-gray font-medium w-1/4">Project</th>
+              <th class="py-4 serif-text text-sm uppercase tracking-widest text-stone-gray font-medium">Description</th>
+              <th class="py-4 serif-text text-sm uppercase tracking-widest text-stone-gray font-medium text-right">Details</th>
+              <th class="py-4 serif-text text-sm uppercase tracking-widest text-stone-gray font-medium text-right">Action</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-moss/5 dark:divide-white/5">
-            <!-- Project 1 -->
-            <tr class="group hover:bg-moss/[0.02] dark:hover:bg-white/[0.02] transition-colors flex flex-col md:table-row py-8 md:py-0">
+          <tbody class="divide-y divide-border-cream dark:divide-surf-dark">
+            <tr class="group hover:bg-ivory dark:hover:bg-surf-dark/50 transition-colors flex flex-col md:table-row py-8 md:py-0">
               <td class="md:py-8 pr-4">
                 <div class="flex items-center justify-between md:block">
-                  <h3 class="serif-text text-2xl text-moss dark:text-paper group-hover:translate-x-1 transition-transform inline-block">Octan</h3>
-                  <span class="md:hidden text-[10px] uppercase tracking-widest font-bold text-moss/40 dark:text-sage/40">v1.6 • 1B</span>
+                  <h3 class="serif-text text-2xl text-text-warm dark:text-text-warm group-hover:translate-x-1 transition-transform inline-block">Octan</h3>
+                  <span class="md:hidden text-[10px] uppercase tracking-widest font-bold text-stone-gray">v1.6 • 1B</span>
                 </div>
               </td>
               <td class="py-4 md:py-8">
-                <p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed max-w-md">
+                <p class="text-olive-gray dark:text-olive-gray text-sm leading-relaxed max-w-md">
                   Advanced AI model for seamless chatting and deep research integration.
                 </p>
               </td>
               <td class="hidden md:table-cell py-8 text-right">
-                <span class="text-[10px] uppercase tracking-widest font-bold text-moss/40 dark:text-sage/40">v1.6 • 1B Parameters</span>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-stone-gray">v1.6 • 1B Parameters</span>
               </td>
               <td class="py-4 md:py-8 text-right">
-                <a href="/AI/index.html" class="inline-block w-full md:w-auto text-center border border-moss/20 dark:border-sage/30 text-moss dark:text-sage px-6 py-2 rounded-full text-xs font-medium hover:bg-sage/10 transition-all">
+                <a href="/AI/index.html"
+                  class="inline-block w-full md:w-auto text-center border border-border-warm dark:border-surf-dark text-text-warm dark:text-text-warm px-6 py-2 rounded-lg text-xs font-medium hover:bg-ivory dark:hover:bg-surf-dark transition-all">
                   Explore
                 </a>
               </td>
             </tr>
-            <!-- Project 2 -->
-            <tr class="group opacity-60 hover:bg-moss/[0.02] dark:hover:bg-white/[0.02] transition-colors flex flex-col md:table-row py-8 md:py-0">
+            <tr class="group opacity-60 hover:bg-ivory dark:hover:bg-surf-dark/50 transition-colors flex flex-col md:table-row py-8 md:py-0">
               <td class="md:py-8 pr-4">
                 <div class="flex items-center justify-between md:block">
-                  <h3 class="serif-text text-2xl text-moss dark:text-paper group-hover:translate-x-1 transition-transform inline-block">OkemoAI Labs</h3>
-                  <span class="md:hidden text-[10px] uppercase tracking-widest font-bold text-moss/40 dark:text-sage/40">Coming Soon</span>
+                  <h3 class="serif-text text-2xl text-text-warm dark:text-text-warm group-hover:translate-x-1 transition-transform inline-block">OkemoAI Labs</h3>
+                  <span class="md:hidden text-[10px] uppercase tracking-widest font-bold text-stone-gray">Coming Soon</span>
                 </div>
               </td>
               <td class="py-4 md:py-8">
-                <p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed max-w-md">
+                <p class="text-olive-gray dark:text-olive-gray text-sm leading-relaxed max-w-md">
                   Exploring the boundaries of agentic coding and autonomous systems.
                 </p>
               </td>
               <td class="hidden md:table-cell py-8 text-right">
-                <span class="text-[10px] uppercase tracking-widest font-bold text-moss/40 dark:text-sage/40">Coming Soon</span>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-stone-gray">Coming Soon</span>
               </td>
               <td class="py-4 md:py-8 text-right">
-                <span class="block md:inline-block w-full md:w-auto text-center text-xs text-stone-400 italic">
+                <span class="block md:inline-block w-full md:w-auto text-center text-xs text-stone-gray italic">
                   Under Construction
                 </span>
               </td>
@@ -231,14 +192,12 @@
     </section>
 
 
-    <footer class="py-12 border-t border-moss/10 dark:border-sage/10">
-      <div
-        class="flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400 gap-6">
+    <footer class="py-12 border-t border-border-cream dark:border-surf-dark">
+      <div class="flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-[0.2em] font-bold text-stone-gray gap-6">
         <p>2026 OKEMOVAIL.COM</p>
         <div class="flex space-x-8">
-          <a href="https://github.com/ar12c" target="_blank"
-            class="hover:text-moss dark:hover:text-sage transition-colors">Github</a>
-          <a href="/ai.html" class="hover:text-moss dark:hover:text-sage transition-colors">OkemoAI</a>
+          <a href="https://github.com/ar12c" target="_blank" class="hover:text-rosewood transition-colors">Github</a>
+          <a href="/AI/index.html" class="hover:text-rosewood transition-colors">OkemoAI</a>
         </div>
       </div>
     </footer>
