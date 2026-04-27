@@ -50,13 +50,13 @@
             --sidebar-tint:   rgba(0, 0, 0, 0);
             --accent-contrast: #faf9f5;
 
-            /* Background system — all reference design-tokens.css variables */
-            --bg-color:               var(--bg);
+            /* Background system — chat bg matches accent (rosewood) */
+            --bg-color:               #c96478;
             --sidebar-bg:             var(--bg-elevated);
             --input-bg:               var(--bg-elevated);
             --bg-elevated-secondary:  var(--bg-elevated);
-            --fade-color:             var(--bg);
-            --fade-gradient-stop:     var(--bg);
+            --fade-color:             #c96478;
+            --fade-gradient-stop:     #c96478;
 
             /* Text & actions */
             --action-btn-color:  var(--text-secondary);
@@ -76,9 +76,12 @@
             --accent-glow:     rgba(217, 119, 144, 0.4);
             --accent-contrast: #141413;
 
-            /* bg-color, sidebar-bg, etc. inherit from design-tokens.css .dark block */
-            --thinking-accent: color-mix(in srgb, var(--accent-color), white 35%);
-            --thinking-side:   var(--border-strong);
+            /* dark-mode chat bg matches dark accent */
+            --bg-color:           #d97790;
+            --fade-color:         #d97790;
+            --fade-gradient-stop: #d97790;
+            --thinking-accent:    color-mix(in srgb, var(--accent-color), white 35%);
+            --thinking-side:      var(--border-strong);
         }
 
 
@@ -2589,7 +2592,7 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-full relative overflow-hidden" style="background: var(--bg);">
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden" style="background: var(--bg-color);">
 
 
 
