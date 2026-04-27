@@ -11,33 +11,41 @@
     <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/design-tokens.css">
+    <script>
+        (function() {
+            const stored = localStorage.getItem('vail_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#5F634F',      // moss
-                        secondary: '#9EB393',    // sage
-                        bglight: '#F9F8F6',      // paper
-                        bgdark: '#1C1C1A',       // obsidian
-                        textlight: '#1A1A18',
-                        textdark: '#E8E6E1'
+                        parchment:      'var(--bg)',
+                        ivory:          'var(--bg-elevated)',
+                        'text-warm':    'var(--text-primary)',
+                        'olive-gray':   'var(--text-secondary)',
+                        'stone-gray':   'var(--text-tertiary)',
+                        rosewood:       'var(--accent)',
+                        'border-cream': 'var(--border)',
+                        'border-warm':  'var(--border-strong)',
+                        'surf-dark':    'var(--surface-dark)',
+                        'deep-dark':    'var(--deep-dark)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
-                        sans: ['Satoshi', 'Inter', 'sans-serif'],
-                    },
+                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
+                        mono:  ['"JetBrains Mono"', 'monospace'],
+                    }
                 }
             }
         }
-    </script>
-    <script>
-            /* Theme Sync Script */
-            (function () {
-                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (isDark) document.documentElement.classList.add('dark');
-            })();
     </script>
     <style>
         @font-face {
@@ -59,23 +67,23 @@
 
     <style>
         :root {
-            --bg-light: #F9F8F6;
-            --bg-dark: #1C1C1A;
-            --accent-olive: #5F634F;
-            --accent-mint: #9EB393;
+            --bg-light: var(--bg);
+            --bg-dark: var(--deep-dark);
+            --accent-olive: var(--accent);
+            --accent-mint: var(--accent-light);
         }
 
         body {
-            background-color: var(--bg-light);
+            background-color: var(--bg);
             font-family: 'Satoshi', 'Inter', sans-serif;
             margin: 0;
             padding: 0;
-            color: var(--accent-olive);
+            color: var(--accent);
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .dark body {
-            background-color: var(--bg-dark);
+            background-color: var(--deep-dark);
         }
 
         .serif-text {
@@ -134,12 +142,12 @@
             opacity: 0;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
-            background-color: var(--bg-light);
+            background-color: var(--bg);
             z-index: 1000;
         }
 
         .dark #reader-modal {
-            background-color: var(--bg-dark);
+            background-color: var(--deep-dark);
         }
 
         #reader-modal.active {
@@ -194,40 +202,41 @@
         }
 
         .skuomorphic-card {
-            background: #ffffff;
-            border-radius: 24px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            background-color: var(--bg-elevated);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
             transition: all 0.3s ease;
         }
 
         .dark .skuomorphic-card {
-            background: #1c1c1a;
-            border-color: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            background-color: var(--bg-elevated);
+            border-color: var(--border);
+            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
         }
 
         .skuomorphic-input {
-            background: #f4f4f2;
-            border-radius: 16px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            background-color: var(--bg-elevated);
+            border-radius: 12px;
+            border: 1px solid var(--border-strong);
+            color: var(--text-primary);
             transition: all 0.2s ease;
         }
 
         .dark .skuomorphic-input {
-            background: #0f0f0e;
-            border-color: rgba(255, 255, 255, 0.03);
+            background-color: var(--bg-elevated);
+            border-color: var(--border-strong);
         }
     </style>
 
 <body
-    class="bg-bglight text-textlight dark:bg-bgdark dark:text-textdark min-h-screen flex flex-col font-sans selection:bg-secondary selection:text-textlight overflow-x-hidden">
+    class="bg-parchment text-text-warm dark:bg-deep-dark dark:text-text-warm min-h-screen flex flex-col font-sans selection:bg-rosewood selection:text-text-warm overflow-x-hidden">
 
     <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-bgdark/80 backdrop-blur-md relative z-30">
+        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-md relative z-30">
         <a href="../AI.html" class="flex items-center gap-3">
             <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
-                class="w-8 h-8 text-primary fill-current">
+                class="w-8 h-8 text-rosewood fill-current">
                 <path
                     d="M4.96,314.21l508.97,180.31v-94.71L28.54,6.09C19.12-5.79,0,.87,0,16.03v286.6c0,4.38,1.79,8.56,4.96,11.58Z" />
                 <polygon points="513.93 561.2 0 684.2 0 395.8 513.93 522.5 513.93 561.2" />
@@ -239,13 +248,13 @@
                 <path
                     d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
             </svg>
-            <div class='text-xl md:text-2xl font-black text-primary'>Ontologic</div>
+            <div class='text-xl md:text-2xl font-black text-rosewood'>Ontologic</div>
         </a>
         <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="goals.html" class="hover:text-primary transition-colors">Goals</a>
-            <a href="research.html" class="hover:text-primary transition-colors">Research</a>
-            <a href="privacy.html" class="hover:text-primary transition-colors">Privacy</a>
-            <a href="tos.html" class="hover:text-primary transition-colors">TOS</a>
+            <a href="goals.html" class="hover:text-rosewood transition-colors">Goals</a>
+            <a href="research.html" class="hover:text-rosewood transition-colors">Research</a>
+            <a href="privacy.html" class="hover:text-rosewood transition-colors">Privacy</a>
+            <a href="tos.html" class="hover:text-rosewood transition-colors">TOS</a>
         </div>
     </nav>
 
@@ -262,11 +271,11 @@
             <div class="mb-12 animate-fade-in" style="animation-delay: 0.1s">
                 <div class="relative group">
                     <div
-                        class="absolute inset-y-0 left-6 flex items-center pointer-events-none text-primary/30 group-focus-within:text-primary transition-colors">
+                        class="absolute inset-y-0 left-6 flex items-center pointer-events-none text-rosewood/30 group-focus-within:text-rosewood transition-colors">
                         <i class="fa-solid fa-magnifying-glass text-lg"></i>
                     </div>
                     <input type="text" id="article-search" placeholder="Search papers, updates, and architecture..."
-                        class="skuomorphic-input w-full py-5 pl-16 pr-8 outline-none transition-all text-lg font-medium placeholder-gray-400 dark:placeholder-gray-600 focus:border-primary/30"
+                        class="skuomorphic-input w-full py-5 pl-16 pr-8 outline-none transition-all text-lg font-medium placeholder-gray-400 dark:placeholder-gray-600 focus:border-rosewood/30"
                         oninput="handleSearch()">
                 </div>
             </div>
@@ -285,13 +294,13 @@
 
 
     <div id="reader-modal" class="fixed inset-0 overflow-hidden">
-        <div class="modal-content relative flex flex-col h-full bg-bglight dark:bg-bgdark">
+        <div class="modal-content relative flex flex-col h-full bg-parchment dark:bg-deep-dark">
             <!-- Reader Header -->
             <div
-                class="sticky top-0 z-20 w-full flex items-center justify-between px-6 lg:px-16 py-6 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-bgdark/80 backdrop-blur-xl">
+                class="sticky top-0 z-20 w-full flex items-center justify-between px-6 lg:px-16 py-6 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-xl">
                 <div class="flex items-center gap-4">
                     <span
-                        class="text-xs font-black uppercase tracking-[0.2em] text-primary/40 dark:text-secondary/40">Ontologic
+                        class="text-xs font-black uppercase tracking-[0.2em] text-rosewood/40 dark:text-olive-gray/40">Ontologic
                         Research</span>
                 </div>
                 <button onclick="closeReader()"
@@ -309,7 +318,7 @@
 
             <!-- Reader Footer Bar (Optional progress or status) -->
             <div
-                class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 px-8 py-3 rounded-full bg-black/5 dark:bg-white/5 backdrop-blur-md border border-white/10 text-[10px] uppercase tracking-[0.3em] font-bold text-primary/40 dark:text-textdark/20">
+                class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 px-8 py-3 rounded-full bg-black/5 dark:bg-white/5 backdrop-blur-md border border-white/10 text-[10px] uppercase tracking-[0.3em] font-bold text-rosewood/40 dark:text-text-warm/20">
                 End of Document
             </div>
         </div>
@@ -421,13 +430,13 @@
                             </div>
                             <span class="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400">${blog.date || 'RECENT'}</span>
                         </div>
-                        <h2 class="serif-text text-3xl font-medium tracking-tight text-primary mb-6 group-hover:text-primary transition-colors leading-tight">${blog.title}</h2>
+                        <h2 class="serif-text text-3xl font-medium tracking-tight text-rosewood mb-6 group-hover:text-rosewood transition-colors leading-tight">${blog.title}</h2>
                         <div class="rich-content line-clamp-3 text-gray-500 dark:text-gray-400 text-lg font-normal mb-10">
                             ${stripHtml(blog.content)}
                         </div>
-                        <div class="flex items-center gap-3 text-primary font-bold text-[10px] uppercase tracking-widest">
+                        <div class="flex items-center gap-3 text-rosewood font-bold text-[10px] uppercase tracking-widest">
                             <span>Read Paper</span>
-                            <div class="w-8 h-8 rounded-full bg-primary text-bglight flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                            <div class="w-8 h-8 rounded-full bg-rosewood text-parchment flex items-center justify-center group-hover:translate-x-1 transition-transform">
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
                             </div>
                         </div>
@@ -459,10 +468,10 @@
             const contentHtml = `
                 <div class="text-center mb-16">
                     <div class="flex justify-center gap-4 mb-8">${tagsHtml}</div>
-                    <h1 class="serif-text text-5xl md:text-7xl font-medium tracking-tight text-primary dark:text-textdark mb-6 leading-[1.05]">${blog.title}</h1>
-                    <div class="text-sm font-bold text-primary/40 dark:text-textdark/40 uppercase tracking-[0.2em]">${blog.date || 'RECENT'}</div>
+                    <h1 class="serif-text text-5xl md:text-7xl font-medium tracking-tight text-rosewood dark:text-text-warm mb-6 leading-[1.05]">${blog.title}</h1>
+                    <div class="text-sm font-bold text-rosewood/40 dark:text-text-warm/40 uppercase tracking-[0.2em]">${blog.date || 'RECENT'}</div>
                 </div>
-                <div class="rich-content text-xl md:text-2xl leading-relaxed text-primary/80 dark:text-textdark/70 font-normal">
+                <div class="rich-content text-xl md:text-2xl leading-relaxed text-rosewood/80 dark:text-text-warm/70 font-normal">
                     ${blog.content}
                 </div>
             `;
