@@ -92,7 +92,7 @@ window.settings = JSON.parse(localStorage.getItem('vail_settings_v4') || JSON.st
     rep_pen: 1.3,
     max_tokens: 512,
     apiKey: '',
-    accent: 'auto', userName: '', userPic: '',
+    accent: '#c96478', userName: '', userPic: '',
     pfpX: 0, pfpY: 0, pfpScale: 1.0, hasCompletedTutorial: false,
     lang: 'en',
     sidebarMode: 'manual',
