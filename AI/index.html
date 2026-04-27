@@ -7,36 +7,46 @@
     <title>Oaky | Stay Curious</title>
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
+    <link rel="stylesheet" href="../src/design-tokens.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script>
+        (function() {
+            const stored = localStorage.getItem('vail_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#5F634F',
-                        secondary: '#9EB393',
-                        bglight: '#F9F8F6',
-                        bgdark: '#1C1C1A',
-                        textlight: '#1A1A18',
-                        textdark: '#E8E6E1'
+                        parchment:      'var(--bg)',
+                        ivory:          'var(--bg-elevated)',
+                        'text-warm':    'var(--text-primary)',
+                        'olive-gray':   'var(--text-secondary)',
+                        'stone-gray':   'var(--text-tertiary)',
+                        rosewood:       'var(--accent)',
+                        'rose-light':   'var(--accent-light)',
+                        'border-cream': 'var(--border)',
+                        'border-warm':  'var(--border-strong)',
+                        'ring-warm':    'var(--shadow-ring)',
+                        'surf-dark':    'var(--surface-dark)',
+                        'deep-dark':    'var(--deep-dark)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
-                        sans: ['Satoshi', 'Inter', 'sans-serif'],
+                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
+                        mono:  ['"JetBrains Mono"', 'monospace'],
                     }
                 }
             }
         }
-    </script>
-    <script>
-            /* Theme Sync Script */
-            (function () {
-                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (isDark) document.documentElement.classList.add('dark');
-            })();
     </script>
     <style>
         @font-face {
@@ -46,7 +56,6 @@
             font-display: swap;
             font-style: normal;
         }
-
         @font-face {
             font-family: 'Satoshi';
             src: url('../Fonts/Satoshi-VariableItalic.ttf') format('truetype');
@@ -58,10 +67,9 @@
 
     <style>
         :root {
-            --bg-dark: #1C1C1A;
-            --accent-olive: #5F634F;
-            --accent-mint: #9EB393;
-            --rim-light: rgba(139, 92, 246, 0.2);
+            --accent-olive: var(--accent);
+            --accent-mint:  var(--accent-light);
+            --rim-light:    rgba(201, 100, 120, 0.2);
         }
 
         body {
@@ -107,7 +115,7 @@
         .skuomorphic-button {
             position: relative;
             padding: 10px 24px;
-            background: #5F634F;
+            background: var(--accent);
             border-radius: 9999px;
             color: white;
             font-weight: 600;
@@ -123,7 +131,7 @@
         .skuomorphic-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            background: #6b705a;
+            background: var(--accent-light);
         }
 
         .skuomorphic-button:active {
@@ -213,7 +221,7 @@
 </head>
 
 <body
-    class="bg-bglight text-textlight dark:bg-bgdark dark:text-textdark min-h-screen flex flex-col font-sans selection:bg-secondary selection:text-textlight overflow-x-hidden">
+    class="bg-parchment text-text-warm dark:bg-deep-dark dark:text-text-warm min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
 
     <!-- Hand-Drawn Filters -->
     <svg style="position: absolute; width: 0; height: 0;">
@@ -238,10 +246,10 @@
     </svg>
 
     <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-bgdark/80 backdrop-blur-md relative z-30">
+        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-border-cream dark:border-gray-800/50 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-md relative z-30">
         <div class="flex items-center gap-3">
             <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
-                class="w-8 h-8 text-primary fill-current">
+                class="w-8 h-8 text-rosewood fill-current">
                 <path
                     d="M4.96,314.21l508.97,180.31v-94.71L28.54,6.09C19.12-5.79,0,.87,0,16.03v286.6c0,4.38,1.79,8.56,4.96,11.58Z" />
                 <polygon points="513.93 561.2 0 684.2 0 395.8 513.93 522.5 513.93 561.2" />
@@ -253,13 +261,13 @@
                 <path
                     d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
             </svg>
-            <div class='text-xl md:text-2xl font-black text-primary'>Oaky</div>
+            <div class='text-xl md:text-2xl font-black text-rosewood'>Oaky</div>
         </div>
         <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="AI/goals.html" class="hover:text-primary transition-colors">Goals</a>
-            <a href="AI/research.html" class="hover:text-primary transition-colors">Research</a>
-            <a href="AI/privacy.html" class="hover:text-primary transition-colors">Privacy</a>
-            <a href="AI/tos.html" class="hover:text-primary transition-colors">TOS</a>
+            <a href="AI/goals.html" class="hover:text-rosewood transition-colors">Goals</a>
+            <a href="AI/research.html" class="hover:text-rosewood transition-colors">Research</a>
+            <a href="AI/privacy.html" class="hover:text-rosewood transition-colors">Privacy</a>
+            <a href="AI/tos.html" class="hover:text-rosewood transition-colors">TOS</a>
         </div>
         <a href="https://discord.gg/BxjTsjvR8Z" target="_blank"
             class="skuomorphic-button discord !px-4 !py-1.5 text-xs md:text-sm">
@@ -307,10 +315,10 @@
     </main>
 
     <!-- Based AI: Core Pillars (Non-Bento) -->
-    <section class="py-24 px-6 max-w-7xl mx-auto border-t border-[#9EB393]/20">
+    <section class="py-24 px-6 max-w-7xl mx-auto border-t border-border-warm">
         <div class="mb-16">
-            <h2 class="text-4xl md:text-5xl font-bold mb-6 italic tracking-tight dark:text-textdark">Based AI</h2>
-            <p class="text-xl text-primary/80 dark:text-secondary/80 max-w-2xl leading-relaxed">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6 italic tracking-tight dark:text-text-warm">Based AI</h2>
+            <p class="text-xl text-rosewood/80 dark:text-rose-light/80 max-w-2xl leading-relaxed">
                 Oaky Software. I'm constantly updating the model in hopes of competing with giants along with zero
                 censorship.
             </p>
@@ -318,14 +326,14 @@
 
         <div class="space-y-12">
             <!-- Pillar 1: RTX 5080 Architecture -->
-            <div class="flex flex-col md:flex-row gap-8 items-start pb-12 border-b border-[#9EB393]/10">
+            <div class="flex flex-col md:flex-row gap-8 items-start pb-12 border-b border-border-cream">
                 <div
-                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-secondary/10 dark:bg-secondary/5 text-primary dark:text-secondary">
+                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
                     <i class="fa-solid fa-bolt-lightning text-xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h3 class="text-2xl font-semibold mb-3 dark:text-textdark">RTX 5080 High-Speed Architecture</h3>
-                    <p class="text-lg text-primary/70 dark:text-textdark/60 leading-relaxed max-w-4xl">
+                    <h3 class="text-2xl font-semibold mb-3 dark:text-text-warm">RTX 5080 High-Speed Architecture</h3>
+                    <p class="text-lg text-rosewood/70 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         By leveraging the RTX 5080's massive VRAM bandwidth and specialized Tensor Cores, we
                         achieve unprecedented throughput for large-scale models. This generational leap
                         enables high-parameter execution on consumer workstations with server-class performance.
@@ -334,14 +342,14 @@
             </div>
 
             <!-- Pillar 2: 3-Phase Evolution -->
-            <div class="flex flex-col md:flex-row gap-8 items-start pb-12 border-b border-[#9EB393]/10">
+            <div class="flex flex-col md:flex-row gap-8 items-start pb-12 border-b border-border-cream">
                 <div
-                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-secondary/10 dark:bg-secondary/5 text-primary dark:text-secondary">
+                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
                     <i class="fa-solid fa-diagram-project text-xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h3 class="text-2xl font-semibold mb-3 dark:text-textdark">3-Phase Strategic Evolution</h3>
-                    <p class="text-lg text-primary/70 dark:text-textdark/60 leading-relaxed max-w-4xl">
+                    <h3 class="text-2xl font-semibold mb-3 dark:text-text-warm">3-Phase Strategic Evolution</h3>
+                    <p class="text-lg text-rosewood/70 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         Intelligence isn't built in a day. Our structured methodology evolves models through distinct
                         phases—from basic reasoning and logic foundations to deep, specialized domain knowledge
                         and recursive self-improvement cycles.
@@ -351,12 +359,12 @@
             <!-- Pillar 3: Sustainable AI -->
             <div class="flex flex-col md:flex-row gap-8 items-start">
                 <div
-                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-secondary/10 dark:bg-secondary/5 text-primary dark:text-secondary">
+                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
                     <i class="fa-solid fa-leaf text-xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h3 class="text-2xl font-semibold mb-3 dark:text-textdark">Scaling Sustainably</h3>
-                    <p class="text-lg text-primary/70 dark:text-textdark/60 leading-relaxed max-w-4xl">
+                    <h3 class="text-2xl font-semibold mb-3 dark:text-text-warm">Scaling Sustainably</h3>
+                    <p class="text-lg text-rosewood/70 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         Democratizing AI training means making it affordable. We focus on high-efficiency scaling
                         that respects both your hardware budget and our planet's energy. Intelligence should
                         be accessible without environmental compromise.
