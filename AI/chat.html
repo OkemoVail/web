@@ -1034,7 +1034,7 @@
             position: fixed;
             inset: 0;
             z-index: 2000;
-            background: var(--bg-color, #f9fbf8);
+            background: var(--bg);
             display: flex;
             flex-direction: column;
             animation: fadeIn 0.4s ease-out;
@@ -1042,7 +1042,7 @@
         }
 
         .dark #onboarding-overlay {
-            background: #0d0d0d;
+            background: var(--bg);
         }
 
         #onboarding-overlay.hidden {
@@ -1160,8 +1160,8 @@
         }
 
         .dark #onboarding-pfp-preview {
-            background: #1e1e1e;
-            border-color: #27272a;
+            background: var(--bg-elevated);
+            border-color: var(--border);
         }
 
         #user-profile-section {
@@ -1218,7 +1218,7 @@
             position: fixed;
             inset: 0;
             z-index: 4000;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(20, 20, 19, 0.6);
             backdrop-filter: blur(8px);
             display: none;
             align-items: center;
@@ -1233,16 +1233,17 @@
         .changelog-card {
             width: 100%;
             max-width: 480px;
-            background: white;
-            border-radius: 24px;
+            background-color: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
             animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .dark .changelog-card {
-            background: #18181b;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-elevated);
+            border-color: var(--border);
         }
 
 
@@ -1250,7 +1251,7 @@
             position: fixed;
             inset: 0;
             z-index: 2990;
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(20, 20, 19, 0.6);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             display: none;
@@ -1273,12 +1274,14 @@
 
             inset: 0;
             border-radius: 0;
-            background: var(--bg-color, #f9fbf8);
+            background-color: var(--bg-elevated);
+            border: 1px solid var(--border);
+            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
             overflow: hidden;
         }
 
         .dark #settings-panel {
-            background: #0f0f0f;
+            background-color: var(--bg-elevated);
         }
 
         #settings-panel.active {
@@ -1295,13 +1298,13 @@
                 transform: translate(-50%, -50%) scale(0.96);
                 width: min(92vw, 560px);
                 max-height: 88vh;
-                border-radius: 24px;
-                box-shadow: 0 32px 80px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+                border-radius: 16px;
+                box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
                 overflow: hidden;
             }
 
             .dark #settings-panel {
-                box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.07);
+                box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
             }
 
             #settings-panel.active {
@@ -1340,7 +1343,7 @@
             border-radius: 10px;
             font-size: 12px;
             font-weight: 700;
-            color: #71717a;
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
             border: 1px solid transparent;
@@ -1348,7 +1351,7 @@
         }
 
         .dark .Cadance-tab-btn {
-            color: #a1a1aa;
+            color: var(--text-secondary);
         }
 
         .Cadance-tab-btn.active {
@@ -1380,11 +1383,11 @@
         }
 
         .Cadance-section-label {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #a1a1aa;
+            letter-spacing: 0.12px;
+            color: var(--text-tertiary);
             margin-bottom: 10px;
             padding-left: 4px;
         }
@@ -1423,12 +1426,12 @@
         .Cadance-row-label {
             font-size: 14px;
             font-weight: 500;
-            color: #18181b;
+            color: var(--text-primary);
             flex-shrink: 0;
         }
 
         .dark .Cadance-row-label {
-            color: #f4f4f5;
+            color: var(--text-primary);
         }
 
 
@@ -1937,7 +1940,7 @@
         }
 
         .dark .chat-action-menu {
-            background: #1a1a1a;
+            background: var(--bg-elevated);
             border-color: rgba(255, 255, 255, 0.1);
             box-shadow:
                 0 15px 45px rgba(0, 0, 0, 0.5),
@@ -1956,7 +1959,7 @@
             position: fixed;
             inset: 0;
             z-index: 5000;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(20, 20, 19, 0.6);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex;
@@ -1974,26 +1977,21 @@
         }
 
         .custom-modal-card {
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 28px;
+            background-color: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             width: 100%;
             max-width: 420px;
             padding: 2.25rem;
-            box-shadow:
-                0 30px 60px -12px rgba(0, 0, 0, 0.2),
-                inset 0 1px 2px rgba(255, 255, 255, 1);
+            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
             transform: scale(0.92) translateY(30px);
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .dark .custom-modal-card {
-            background: #18181b;
-            border-color: rgba(255, 255, 255, 0.1);
-            box-shadow:
-                0 40px 80px rgba(0, 0, 0, 0.6),
-                inset 0 1px 1px rgba(255, 255, 255, 0.1),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+            background-color: var(--bg-elevated);
+            border-color: var(--border);
+            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
         }
 
         .custom-modal-overlay.is-active .custom-modal-card {
@@ -2010,21 +2008,22 @@
 
         .custom-modal-message {
             font-size: 0.95rem;
-            color: #555;
+            color: var(--text-secondary);
             margin-bottom: 1.75rem;
             line-height: 1.6;
         }
 
         .dark .custom-modal-message {
-            color: #999;
+            color: var(--text-secondary);
         }
 
         .custom-modal-input {
             width: 100%;
             padding: 1.15rem 1.4rem;
-            border-radius: 14px;
-            background: #f8f8f8;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: var(--bg);
+            border: 1px solid var(--border-strong);
+            color: var(--text-primary);
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
             outline: none;
             font-size: 1rem;
@@ -2033,22 +2032,22 @@
         }
 
         .dark .custom-modal-input {
-            background: #27272a;
-            border-color: rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-            color: white;
+            background-color: var(--bg);
+            border-color: var(--border-strong);
+            color: var(--text-primary);
         }
 
         .custom-modal-input:focus {
-            background: white;
-            border-color: var(--accent-color);
-            box-shadow:
-                0 0 0 4px color-mix(in srgb, var(--accent-color) 15%, transparent),
-                inset 0 1px 2px rgba(0, 0, 0, 0.05);
+            outline: 2px solid #3898ec;
+            outline-offset: 1px;
+            border-color: #3898ec;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .dark .custom-modal-input:focus {
-            background: #1a1a20;
+            outline: 2px solid #3898ec;
+            outline-offset: 1px;
+            border-color: #3898ec;
         }
 
         .custom-modal-actions {
@@ -2169,11 +2168,11 @@
         }
 
         .section-header-text {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #a1a1aa;
+            letter-spacing: 0.12px;
+            color: var(--text-tertiary);
         }
     </style>
 
@@ -2250,14 +2249,14 @@
 
         .loader-arc {
             fill: none;
-            stroke: var(--accent-color, #9EB393);
+            stroke: var(--accent-color);
             stroke-width: 6;
             stroke-linecap: round;
             stroke-dasharray: 282;
             /* 2 * PI * 45 */
             stroke-dashoffset: 210;
             /* Show ~1/4 circle */
-            filter: drop-shadow(0 0 12px var(--accent-color, rgba(191, 215, 181, 0.4)));
+            filter: drop-shadow(0 0 12px var(--accent-color));
         }
 
 
