@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../src/design-tokens.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=JetBrains+Mono:wght@400;500&display=swap"
@@ -42,42 +43,42 @@
 
     <style id="dynamic-accent-styles">
         :root {
-            --accent-color: #7abf6c;
-            --accent-glow: rgba(87, 172, 111, 0.4);
-            --accent-tint: rgba(0, 0, 0, 0);
-            --sidebar-tint: rgba(0, 0, 0, 0);
-            --accent-contrast: #f0f4fa;
-            --fade-color: #F9F9F7;
-            --fade-gradient-stop: #F9F9F7;
+            /* Dynamic accent — JS in settings.js updates --accent-color for user customization */
+            --accent-color:   #c96478;
+            --accent-glow:    rgba(201, 100, 120, 0.4);
+            --accent-tint:    rgba(0, 0, 0, 0);
+            --sidebar-tint:   rgba(0, 0, 0, 0);
+            --accent-contrast: #faf9f5;
 
-            --bg-color: #F9F9F7;
-            --sidebar-bg: #F2F2F0;
-            --input-bg: rgba(249, 249, 247, 0.6);
-            --action-btn-color: #52525b;
-            --thinking-accent: color-mix(in srgb, var(--accent-color), black 20%);
-            --thinking-side: #94a3b8;
+            /* Background system — all reference design-tokens.css variables */
+            --bg-color:               var(--bg);
+            --sidebar-bg:             var(--bg-elevated);
+            --input-bg:               var(--bg-elevated);
+            --bg-elevated-secondary:  var(--bg-elevated);
+            --fade-color:             var(--bg);
+            --fade-gradient-stop:     var(--bg);
 
-            /* New Sidebar Variables */
-            --sidebar-width: 260px;
-            --sidebar-rail-width: 60px;
-            --header-height: 56px;
+            /* Text & actions */
+            --action-btn-color:  var(--text-secondary);
+            --thinking-accent:   color-mix(in srgb, var(--accent-color), black 20%);
+            --thinking-side:     var(--border-strong);
+
+            /* Layout — unchanged */
+            --sidebar-width:                    260px;
+            --sidebar-rail-width:               60px;
+            --header-height:                    56px;
             --sidebar-section-first-margin-top: 8px;
-            --bg-elevated-secondary: #F2F2F0;
         }
 
         .dark {
-            --accent-color: #7abf6c;
-            --bg-color: #0C0D0B;
-            --sidebar-bg: #111210;
-            --input-bg: #161715;
-            --fade-color: #0C0D0B;
-            --fade-gradient-stop: #0C0D0B;
-            --action-btn-color: #e4e4e7;
-            --thinking-accent: color-mix(in srgb, var(--accent-color), white 35%);
-            --thinking-side: #4b5563;
+            /* --accent and --accent-light intentionally swap for dark-mode lightness */
+            --accent-color:    #d97790;
+            --accent-glow:     rgba(217, 119, 144, 0.4);
+            --accent-contrast: #141413;
 
-            /* New Sidebar Variables - Dark */
-            --bg-elevated-secondary: #111210;
+            /* bg-color, sidebar-bg, etc. inherit from design-tokens.css .dark block */
+            --thinking-accent: color-mix(in srgb, var(--accent-color), white 35%);
+            --thinking-side:   var(--border-strong);
         }
 
 
@@ -119,14 +120,26 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Satoshi', 'Inter', 'sans-serif'],
-                        serif: ['GFS Didot', 'serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
                     colors: {
-                        chatbg: { light: '#F9F9F7', dark: '#0C0D0B' },
-                        sidebar: { light: '#F2F2F0', dark: '#111210' }
+                        parchment:      'var(--bg)',
+                        ivory:          'var(--bg-elevated)',
+                        'text-warm':    'var(--text-primary)',
+                        'olive-gray':   'var(--text-secondary)',
+                        'stone-gray':   'var(--text-tertiary)',
+                        rosewood:       'var(--accent)',
+                        'rose-light':   'var(--accent-light)',
+                        'border-cream': 'var(--border)',
+                        'border-warm':  'var(--border-strong)',
+                        'ring-warm':    'var(--shadow-ring)',
+                        'surf-dark':    'var(--surface-dark)',
+                        'deep-dark':    'var(--deep-dark)',
+                        accent:         'var(--accent-color)',
+                        'accent-glow':  'var(--accent-glow)',
+                    },
+                    fontFamily: {
+                        serif: ['Century', 'Georgia', 'serif'],
+                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
+                        mono:  ['"JetBrains Mono"', 'monospace'],
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.5s ease-out forwards',
