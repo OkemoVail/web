@@ -70,11 +70,15 @@ window.render = () => {
                     <div class="prose-target">${contentHtml}</div>
                     ${(responseText && (!isLast || !window.isGenerating)) ? `
                     <div class="ai-msg-actions">
-                        <button onclick="window.copyMsg(${pairIdx}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>
-                        <button onclick="window.regenMsg(${pairIdx})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
-                        <button onclick="window.sendFeedback(${pairIdx}, 'good', this)" class="ai-action-btn feedback-btn" style="${feedback === 'good' ? 'color:#22c55e' : ''}" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
-                        <button onclick="window.sendFeedback(${pairIdx}, 'bad', this)" class="ai-action-btn feedback-btn" style="${feedback === 'bad' ? 'color:#ef4444' : ''}" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
-                        <span class="msg-timestamp ai-timestamp">${window.formatDate(timestamp)}</span>
+                        <div class="ai-actions-left">
+                            <button onclick="window.copyMsg(${pairIdx}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>
+                            <button onclick="window.regenMsg(${pairIdx})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="ai-actions-right">
+                            <button onclick="window.sendFeedback(${pairIdx}, 'good', this)" class="ai-action-btn feedback-btn" style="${feedback === 'good' ? 'color:#22c55e' : ''}" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
+                            <button onclick="window.sendFeedback(${pairIdx}, 'bad', this)" class="ai-action-btn feedback-btn" style="${feedback === 'bad' ? 'color:#ef4444' : ''}" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
+                            <span class="msg-timestamp ai-timestamp">${window.formatDate(timestamp)}</span>
+                        </div>
                     </div>` : ''}
                 </div>
             `;

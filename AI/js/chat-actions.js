@@ -202,11 +202,15 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                 const actionRow = document.createElement('div');
                 actionRow.className = 'ai-msg-actions animate-fade-in';
                 actionRow.innerHTML = `
-                    <button onclick="window.copyMsg(${window.chatHistory.length - 1}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>
-                    <button onclick="window.regenMsg(${window.chatHistory.length - 1})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
-                    <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'good', this)" class="ai-action-btn feedback-btn" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
-                    <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'bad', this)" class="ai-action-btn feedback-btn" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
-                    <span class="msg-timestamp ai-timestamp">${window.formatDate(window.chatHistory[window.chatHistory.length - 1][3])}</span>
+                    <div class="ai-actions-left">
+                        <button onclick="window.copyMsg(${window.chatHistory.length - 1}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>
+                        <button onclick="window.regenMsg(${window.chatHistory.length - 1})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="ai-actions-right">
+                        <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'good', this)" class="ai-action-btn feedback-btn" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
+                        <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'bad', this)" class="ai-action-btn feedback-btn" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
+                        <span class="msg-timestamp ai-timestamp">${window.formatDate(window.chatHistory[window.chatHistory.length - 1][3])}</span>
+                    </div>
                 `;
                 lastProseEl.parentNode.appendChild(actionRow);
                 feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, actionRow);
