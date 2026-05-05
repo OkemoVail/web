@@ -174,8 +174,8 @@ window.renderThemes = () => {
     const PETAL_ICON = `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="6.5" r="3"/><circle cx="6.8" cy="10.3" r="3"/><circle cx="17.2" cy="10.3" r="3"/><circle cx="8.8" cy="16.2" r="3"/><circle cx="15.2" cy="16.2" r="3"/><circle cx="12" cy="12" r="1.8" fill="rgba(255,255,255,0.55)"/></svg>`;
 
     const PRESETS = [
-        { color: '#c96478', name: 'Velvet Petal', desc: 'Warm & rosy (default)', iconSvg: PETAL_ICON, iconBg: 'linear-gradient(135deg, #c96478, #d97790)', glowColor: '#c96478' },
-        { color: 'auto', name: 'Sage Whisper', desc: 'Earthy & calm', isAuto: true, iconBg: 'linear-gradient(135deg, #EBE9DD, #524738)', glowColor: '#524738' },
+        { color: '#c96478', name: 'Velvet Petal', desc: 'Warm & rosy', iconSvg: PETAL_ICON, iconBg: 'linear-gradient(135deg, #c96478, #d97790)', glowColor: '#c96478' },
+        { color: 'auto', name: 'Ghost', desc: 'Clean & minimal (default)', isAuto: true, iconBg: 'linear-gradient(135deg, #EBE9DD, #524738)', glowColor: '#524738' },
         { color: '#3b82f6', name: 'Midnight in Paris', desc: 'Deep & electric', iconBg: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', glowColor: '#3b82f6' },
         { color: '#a855f7', name: 'Electric Lemonade', desc: 'Vivid & playful', iconBg: 'linear-gradient(135deg, #7c3aed, #c084fc)', glowColor: '#a855f7' },
         { color: '#f97316', name: 'Vitamin C', desc: 'Warm & energetic', iconBg: 'linear-gradient(135deg, #ea580c, #fdba74)', glowColor: '#f97316' },

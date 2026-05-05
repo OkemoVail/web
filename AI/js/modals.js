@@ -2,7 +2,7 @@
 
 window.showToast = (message, duration = 4000) => {
     const toast = document.createElement('div');
-    toast.className = 'fixed top-4 right-4 bg-zinc-900 border border-zinc-700/50 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-3 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-3 transform -translate-y-[150%] opacity-0 transition-all duration-500 z-[9999] text-[13px] font-medium max-w-[300px] pointer-events-none select-none';
+    toast.className = 'fixed top-4 right-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700/50 text-zinc-900 dark:text-white px-4 py-3 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-3 transform -translate-y-[150%] opacity-0 transition-all duration-500 z-[9999] text-[13px] font-medium max-w-[300px] pointer-events-none select-none';
     toast.innerHTML = `<i data-feather="info" class="w-4 h-4 shrink-0" style="color: var(--accent-color, #3b82f6)"></i> <span>${message}</span>`;
     document.body.appendChild(toast);
     if (window.feather) feather.replace({ 'stroke-width': 2.5, 'width': 16, 'height': 16 }, toast);

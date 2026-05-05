@@ -75,6 +75,7 @@
             --accent-color:    #d97790;
             --accent-glow:     rgba(217, 119, 144, 0.4);
             --accent-contrast: #141413;
+            --bg-elevated:     #1e1e1c;
 
             /* dark mode keeps chat bg + sidebar pinned to the same rosewood — no shift */
             --bg-color:           #c96478;
@@ -733,8 +734,12 @@
         .dark .input-box-wrap {
             background-color: var(--bg-elevated);
             border-color: var(--border-strong);
-            box-shadow:
-                0 8px 18px -4px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 18px -4px rgba(0, 0, 0, 0.5);
+        }
+
+        .dark .input-box-wrap:focus-within {
+            box-shadow: 0 8px 18px -4px rgba(0, 0, 0, 0.5);
+            outline: none;
         }
 
         .input-box-wrap::before {
@@ -2677,7 +2682,7 @@
         <div class="px-5 md:px-0 w-full max-w-2xl mx-auto relative group">
 
             <div
-                class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 rounded-2xl relative flex flex-col shadow-lg !overflow-visible pointer-events-auto">
+                class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none rounded-2xl relative flex flex-col !overflow-visible pointer-events-auto">
 
                 <div class="relative flex-1">
                     <textarea id="user-input" placeholder="Type something..." rows="1"
@@ -2689,27 +2694,44 @@
 
 
                     <div class="flex items-center gap-1">
-                        <button id="thought-btn" onclick="window.toggleThinking()"
-                            class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-4 h-4">
-                                <path
-                                    d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z">
-                                </path>
-                                <path d="M9 21h6"></path>
-                                <path d="M12 21v1"></path>
-                            </svg>
-                            <span id="thought-btn-text" class="hidden sm:inline">Think</span>
-                        </button>
-
-                        <button id="web-search-btn" onclick="window.toggleSearch()"
-                            class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
-                            <i data-feather="globe" class="w-4 h-4"></i>
-                            <span class="hidden sm:inline">Search</span>
-                        </button>
-
-
+                        <div id="plus-menu-container" class="relative z-50">
+                            <button id="plus-menu-btn" onclick="window.toggleMenu(event, 'plus-menu')"
+                                class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
+                                <i data-feather="plus" class="w-4 h-4"></i>
+                                <span id="plus-active-icon" class="flex items-center gap-0.5" style="display:none">
+                                    <span id="plus-search-indicator" class="w-6 h-6 flex items-center justify-center rounded-sm" style="display:none; color: var(--accent-color); background: var(--accent-tint)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                    </span>
+                                    <span id="plus-research-indicator" class="w-6 h-6 flex items-center justify-center rounded-sm" style="display:none; color: var(--accent-color); background: var(--accent-tint)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.41"/><path d="m13.56 11.747 4.332-.924"/><path d="m16 21-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z"/><path d="m6.158 8.633 1.114 4.456"/><path d="m8 21 3.105-6.21"/><circle cx="12" cy="13" r="2"/></svg>
+                                    </span>
+                                    <span id="plus-think-indicator" class="w-6 h-6 flex items-center justify-center rounded-sm" style="display:none; color: var(--accent-color); background: var(--accent-tint)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                                    </span>
+                                </span>
+                            </button>
+                            <div id="plus-menu"
+                                class="absolute bottom-full left-0 mb-2 w-52 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl shadow-xl opacity-0 invisible transition-all duration-200 z-50 origin-bottom-left"
+                                style="transform: translateY(6px) scale(0.97)">
+                                <div class="p-2 grid grid-cols-3 gap-1.5">
+                                    <button id="web-search-btn" onclick="window.toggleSearch(); window.closeAllMenus()"
+                                        class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
+                                        <i data-feather="globe" class="w-5 h-5 shrink-0"></i>
+                                        <span class="text-[10px] font-semibold leading-none">Search</span>
+                                    </button>
+                                    <button id="deep-research-btn" onclick="window.toggleDeepResearch(); window.closeAllMenus()"
+                                        class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.41"/><path d="m13.56 11.747 4.332-.924"/><path d="m16 21-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z"/><path d="m6.158 8.633 1.114 4.456"/><path d="m8 21 3.105-6.21"/><circle cx="12" cy="13" r="2"/></svg>
+                                        <span class="text-[10px] font-semibold leading-none">Research</span>
+                                    </button>
+                                    <button id="think-btn" onclick="window.toggleThinking(); window.closeAllMenus()"
+                                        class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                                        <span class="text-[10px] font-semibold leading-none">Think</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
 

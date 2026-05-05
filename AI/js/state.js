@@ -127,6 +127,7 @@ window.currentJobId = null;
 
 window.isWebSearch = false;
 window.isThinkingEnabled = false;
+window.isDeepResearch = false;
 
 window.tokenClient = null;
 

@@ -42,32 +42,61 @@ window.updateUI = () => {
 
     // 3. Search button
     const isDark = document.documentElement.classList.contains('dark');
+    const plusActiveIcon = document.getElementById('plus-active-icon');
+    const plusSearchIndicator = document.getElementById('plus-search-indicator');
+    const plusResearchIndicator = document.getElementById('plus-research-indicator');
+    const plusThinkIndicator = document.getElementById('plus-think-indicator');
+    const deepResearchBtn = document.getElementById('deep-research-btn');
+    const thinkBtn = document.getElementById('think-btn');
+    const activeColor = isDark ? '#ffffff' : 'var(--accent-color)';
+
     if (window.els.searchBtn) {
         if (window.isWebSearch) {
             window.els.searchBtn.classList.add('active');
-            window.els.searchBtn.style.color = isDark ? '#ffffff' : 'var(--accent-color)';
+            window.els.searchBtn.style.color = activeColor;
             window.els.searchBtn.style.background = 'var(--accent-glow)';
+            if (plusSearchIndicator) plusSearchIndicator.style.display = 'flex';
         } else {
             window.els.searchBtn.classList.remove('active');
             window.els.searchBtn.style.color = '';
             window.els.searchBtn.style.background = '';
+            if (plusSearchIndicator) plusSearchIndicator.style.display = 'none';
         }
     }
 
-    // 4. Thinking button
-    if (window.els.thoughtBtn) {
-        if (window.isThinkingEnabled) {
-            window.els.thoughtBtn.classList.add('active');
-            window.els.thoughtBtn.style.color = isDark ? '#ffffff' : 'var(--accent-color)';
-            window.els.thoughtBtn.style.background = 'var(--accent-glow)';
+    if (deepResearchBtn) {
+        if (window.isDeepResearch) {
+            deepResearchBtn.classList.add('active');
+            deepResearchBtn.style.color = activeColor;
+            deepResearchBtn.style.background = 'var(--accent-glow)';
+            if (plusResearchIndicator) plusResearchIndicator.style.display = 'flex';
         } else {
-            window.els.thoughtBtn.classList.remove('active');
-            window.els.thoughtBtn.style.color = '';
-            window.els.thoughtBtn.style.background = '';
+            deepResearchBtn.classList.remove('active');
+            deepResearchBtn.style.color = '';
+            deepResearchBtn.style.background = '';
+            if (plusResearchIndicator) plusResearchIndicator.style.display = 'none';
         }
     }
 
-    // 5. Placeholder
+    if (thinkBtn) {
+        if (window.isThinkingEnabled) {
+            thinkBtn.classList.add('active');
+            thinkBtn.style.color = activeColor;
+            thinkBtn.style.background = 'var(--accent-glow)';
+            if (plusThinkIndicator) plusThinkIndicator.style.display = 'flex';
+        } else {
+            thinkBtn.classList.remove('active');
+            thinkBtn.style.color = '';
+            thinkBtn.style.background = '';
+            if (plusThinkIndicator) plusThinkIndicator.style.display = 'none';
+        }
+    }
+
+    if (plusActiveIcon) {
+        plusActiveIcon.style.display = (window.isWebSearch || window.isDeepResearch || window.isThinkingEnabled) ? 'flex' : 'none';
+    }
+
+    // 4. Placeholder
     if (window.els.input) {
         const dict = window.translations[window.settings.lang || 'en'];
         const placeholder = (window.chatHistory && window.chatHistory.length > 0) ? dict.reply_placeholder : dict.input_placeholder;
@@ -91,7 +120,13 @@ window.toggleSearch = () => {
     window.updateUI();
 };
 
+window.toggleDeepResearch = () => {
+    window.isDeepResearch = !window.isDeepResearch;
+    window.updateUI();
+};
+
 window.toggleThinking = () => {
     window.isThinkingEnabled = !window.isThinkingEnabled;
     window.updateUI();
 };
+

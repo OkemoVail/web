@@ -65,7 +65,6 @@ window.initChatUI = () => {
     window.els.modMenu = document.getElementById("model-menu-input");
     window.els.noteMenu = document.getElementById("notes-menu");
     window.els.searchBtn = document.getElementById("web-search-btn");
-    window.els.thoughtBtn = document.getElementById("thought-btn");
     window.els.modelSelector = document.getElementById("model-selector-input");
     window.els.sidebar = document.getElementById('sidebar');
     window.els.sidebarOverlay = document.getElementById('sidebar-overlay');
