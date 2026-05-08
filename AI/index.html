@@ -76,41 +76,6 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Hand-drawn squiggly boil effect - optional, apply .hand-drawn to elements */
-        @keyframes squiggly-anim {
-            0% {
-                filter: url('#squiggly-0');
-            }
-
-            25% {
-                filter: url('#squiggly-1');
-            }
-
-            50% {
-                filter: url('#squiggly-2');
-            }
-
-            75% {
-                filter: url('#squiggly-3');
-            }
-
-            100% {
-                filter: url('#squiggly-0');
-            }
-        }
-
-        .hand-drawn {
-            animation: squiggly-anim 3s infinite step-end;
-        }
-
-        /* Essential for the drawing animation */
-        .animate-path {
-            opacity: 0;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
         /* Flat Button Styles */
         .skuomorphic-button {
             position: relative;
@@ -170,80 +135,18 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
 
-        /* --- Glyph Grid (Nothing Phone Style) --- */
-        #glyph-container {
-            display: grid;
-            grid-template-columns: repeat(29, auto);
-            gap: 4px;
-            padding: 20px;
-        }
-
-        .glyph-dot {
-            width: 6px;
-            height: 6px;
-            background: #d1d1d1;
-            border-radius: 1px;
-            opacity: 0.15;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: transform, opacity;
-        }
-
-        .glyph-dot.hover-radius {
-            transition: transform 0.1s ease-out, opacity 0.1s ease-out, background-color 0.4s ease-in;
-        }
-
-        .dark .glyph-dot {
-            background: #ffffff;
-            opacity: 0.1;
-        }
-
-        .glyph-dot.active {
-            opacity: 1;
-            box-shadow: 0 0 8px currentColor;
-            background: currentColor;
-        }
-
-        .glyph-dot:hover,
-        .glyph-dot.hover-radius {
-            opacity: 1;
-            transform: scale(1.6);
-            background: #ff4d4d !important;
-            box-shadow: 0 0 15px #ff4d4d;
-            z-index: 10;
-        }
-
-        .glyph-dot.accent {
-            background: #ff4d4d;
-            box-shadow: 0 0 12px #ff4d4d;
-            opacity: 1;
+        #oaky-logo-svg .logo-path {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 18;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
     </style>
 </head>
 
 <body
     class="bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
-
-    <!-- Hand-Drawn Filters -->
-    <svg style="position: absolute; width: 0; height: 0;">
-        <defs>
-            <filter id="squiggly-0">
-                <feTurbulence baseFrequency="0.1" numOctaves="3" result="noise" seed="0" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
-            </filter>
-            <filter id="squiggly-1">
-                <feTurbulence baseFrequency="0.1" numOctaves="3" result="noise" seed="2" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
-            </filter>
-            <filter id="squiggly-2">
-                <feTurbulence baseFrequency="0.1" numOctaves="3" result="noise" seed="100" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
-            </filter>
-            <filter id="squiggly-3">
-                <feTurbulence baseFrequency="0.1" numOctaves="3" result="noise" seed="8" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
-            </filter>
-        </defs>
-    </svg>
 
     <nav
         class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-border-cream dark:border-gray-800/50 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-md relative z-30">
@@ -263,11 +166,11 @@
             </svg>
             <div class='text-xl md:text-2xl font-black text-rosewood'>Oaky</div>
         </div>
-        <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="AI/goals.html" class="hover:text-rosewood transition-colors">Goals</a>
-            <a href="AI/research.html" class="hover:text-rosewood transition-colors">Research</a>
-            <a href="AI/privacy.html" class="hover:text-rosewood transition-colors">Privacy</a>
-            <a href="AI/tos.html" class="hover:text-rosewood transition-colors">TOS</a>
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-olive-gray dark:text-stone-gray">
+            <a href="AI/goals.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Goals</a>
+            <a href="AI/research.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Research</a>
+            <a href="AI/privacy.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Privacy</a>
+            <a href="AI/tos.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">TOS</a>
         </div>
         <a href="https://discord.gg/BxjTsjvR8Z" target="_blank"
             class="skuomorphic-button discord !px-4 !py-1.5 text-xs md:text-sm">
@@ -294,22 +197,25 @@
             </button>
         </div>
 
-        <!-- RIGHT PANE: SVG CONTAINER -->
+        <!-- RIGHT PANE: ANIMATED LOGO -->
         <div class="relative w-full h-[350px] md:h-[450px] lg:h-full flex items-center justify-center order-2">
-            <div id="svg-wrapper"
-                class="w-full h-full max-w-[500px] flex items-center justify-center bg-white/5 dark:bg-black/5 rounded-3xl backdrop-blur-sm transition-all duration-700">
-
-                <!-- 
-                     YOUR SVG START 
-                     Instructions: 
-                     1. Replace the SVG below with your own.
-                     2. Add class="animate-path" to any <path> you want to animate.
-                     3. Use stroke="currentColor" to inherit theme colors.
-                -->
-                <div id="glyph-container" class="transition-all duration-700">
-                    <!-- Dots will be generated here -->
+            <div class="flex flex-col items-center justify-center gap-10">
+                <svg id="oaky-logo-svg" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg"
+                    class="w-44 h-44 md:w-64 md:h-64 lg:w-72 lg:h-72">
+                    <g id="logo-paths">
+                        <path class="logo-path" d="M4.96,314.21l508.97,180.31v-94.71L28.54,6.09C19.12-5.79,0,.87,0,16.03v286.6c0,4.38,1.79,8.56,4.96,11.58Z"/>
+                        <polygon class="logo-path" points="513.93 561.2 0 684.2 0 395.8 513.93 522.5 513.93 561.2"/>
+                        <path class="logo-path" d="M4.96,765.79l508.97-180.31v94.71L28.54,1073.91C19.12,1085.79,0,1079.13,0,1063.97v-286.6c0-4.38,1.79-8.56,4.96-11.58Z"/>
+                        <path class="logo-path" d="M1075.04,314.21l-508.97,180.31v-94.71S1051.46,6.09,1051.46,6.09c9.42-11.88,28.54-5.22,28.54,9.94v286.6c0,4.38-1.79,8.56-4.96,11.58Z"/>
+                        <polygon class="logo-path" points="566.07 561.2 1080 684.2 1080 395.8 566.07 522.5 566.07 561.2"/>
+                        <path class="logo-path" d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z"/>
+                    </g>
+                </svg>
+                <div id="thinking-dots" class="flex gap-3 opacity-0">
+                    <span class="w-2 h-2 rounded-full block" style="background: var(--accent)"></span>
+                    <span class="w-2 h-2 rounded-full block" style="background: var(--accent)"></span>
+                    <span class="w-2 h-2 rounded-full block" style="background: var(--accent)"></span>
                 </div>
-
             </div>
         </div>
     </main>
@@ -376,341 +282,50 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('glyph-container');
-            const ROW_COUNT = 30;
-            const COL_COUNT = 29;
-            const TOTAL_DOTS = ROW_COUNT * COL_COUNT;
-            const dots = [];
+            const paths = document.querySelectorAll('#logo-paths .logo-path');
 
-            // Generate dots
-            for (let i = 0; i < TOTAL_DOTS; i++) {
-                const dot = document.createElement('div');
-                dot.classList.add('glyph-dot');
-                container.appendChild(dot);
-                dots.push(dot);
-            }
+            // Draw each path sequentially using anime.js stroke-dashoffset technique
+            anime({
+                targets: paths,
+                strokeDashoffset: [anime.setDashoffset, 0],
+                easing: 'easeInOutCubic',
+                duration: 900,
+                delay: anime.stagger(180),
+                begin() {
+                    paths.forEach(p => { p.style.opacity = 1; });
+                },
+                complete() {
+                    // Gentle breathing loop on the logo
+                    anime({
+                        targets: '#oaky-logo-svg',
+                        scale: [1, 1.04, 1],
+                        easing: 'easeInOutSine',
+                        duration: 3200,
+                        loop: true
+                    });
 
-            // Function to light up a dot at (x, y)
-            function setDot(x, y, active = true, accent = false) {
-                if (x < 0 || x >= COL_COUNT || y < 0 || y >= ROW_COUNT) return;
-                const index = y * COL_COUNT + x;
-                if (active) {
-                    dots[index].classList.add('active');
-                    if (accent) dots[index].classList.add('accent');
-                } else {
-                    dots[index].classList.remove('active', 'accent');
-                }
-            }
-
-            // Clear all dots
-            function clearGrid() {
-                dots.forEach(dot => dot.classList.remove('active', 'accent'));
-            }
-
-            // Draw 4-pointed star (Astroid)
-            function drawStarGlyph() {
-                clearGrid();
-                const centerX = 14;
-                const centerY = 15;
-                const radius = 12;
-
-                for (let x = -COL_COUNT; x < COL_COUNT; x++) {
-                    for (let y = -ROW_COUNT; y < ROW_COUNT; y++) {
-                        const relX = x / radius;
-                        const relY = y / radius;
-                        if (Math.pow(Math.abs(relX), 2 / 3) + Math.pow(Math.abs(relY), 2 / 3) <= 1) {
-                            setDot(centerX + x, centerY + y);
+                    // Fade in thinking dots then stagger-pulse them
+                    anime({
+                        targets: '#thinking-dots',
+                        opacity: [0, 1],
+                        duration: 400,
+                        easing: 'easeOutQuad',
+                        complete() {
+                            anime({
+                                targets: '#thinking-dots span',
+                                scale: [0.5, 1.3, 0.5],
+                                opacity: [0.3, 1, 0.3],
+                                easing: 'easeInOutSine',
+                                duration: 1000,
+                                loop: true,
+                                delay: anime.stagger(160)
+                            });
                         }
-                    }
+                    });
                 }
-            }
-
-            // --- Interactive Radius ---
-            container.addEventListener('mousemove', (e) => {
-                const rect = container.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-
-                dots.forEach((dot, index) => {
-                    const dotRect = dot.getBoundingClientRect();
-                    const dotX = dotRect.left + dotRect.width / 2 - rect.left;
-                    const dotY = dotRect.top + dotRect.height / 2 - rect.top;
-
-                    const dist = Math.sqrt((mouseX - dotX) ** 2 + (mouseY - dotY) ** 2);
-                    if (dist < 32) { // 5x5 circle radius (approx 3.2 dots)
-                        dot.classList.add('hover-radius');
-                    } else {
-                        dot.classList.remove('hover-radius');
-                    }
-                });
             });
 
-            container.addEventListener('mouseleave', () => {
-                dots.forEach(dot => dot.classList.remove('hover-radius'));
-            });
-
-            // --- 3D Rotating Cube ---
-            let cubeRotation = 0;
-            const cubeVertices = [
-                [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-                [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
-            ];
-            const cubeEdges = [
-                [0, 1], [1, 2], [2, 3], [3, 0],
-                [4, 5], [5, 6], [6, 7], [7, 4],
-                [0, 4], [1, 5], [2, 6], [3, 7]
-            ];
-
-            function draw3DCube() {
-                clearGrid();
-                const centerX = 14;
-                const centerY = 15;
-                const scale = 3.5;
-                const dist = 5;
-
-                const cos = Math.cos(cubeRotation);
-                const sin = Math.sin(cubeRotation);
-
-                cubeEdges.forEach(edge => {
-                    const v1 = cubeVertices[edge[0]];
-                    const v2 = cubeVertices[edge[1]];
-
-                    const rotate = (v) => {
-                        let x = v[0], y = v[1], z = v[2];
-                        let tx = x * cos - z * sin;
-                        let tz = x * sin + z * cos;
-                        let ty = y * cos - tz * sin;
-                        tz = y * sin + tz * cos;
-                        return [tx, ty, tz];
-                    };
-
-                    const rv1 = rotate(v1);
-                    const rv2 = rotate(v2);
-
-                    const p1 = [rv1[0] * scale / (rv1[2] + dist), rv1[1] * scale / (rv1[2] + dist)];
-                    const p2 = [rv2[0] * scale / (rv2[2] + dist), rv2[1] * scale / (rv2[2] + dist)];
-
-                    const x0 = Math.round(centerX + p1[0] * 8);
-                    const y0 = Math.round(centerY + p1[1] * 8);
-                    const x1 = Math.round(centerX + p2[0] * 8);
-                    const y1 = Math.round(centerY + p2[1] * 8);
-
-                    drawLine(x0, y0, x1, y1);
-                });
-                cubeRotation += 0.03;
-            }
-
-            function drawLine(x0, y0, x1, y1) {
-                const dx = Math.abs(x1 - x0);
-                const dy = Math.abs(y1 - y0);
-                const sx = (x0 < x1) ? 1 : -1;
-                const sy = (y0 < y1) ? 1 : -1;
-                let err = dx - dy;
-                while (true) {
-                    setDot(x0, y0);
-                    if (x0 === x1 && y0 === y1) break;
-                    const e2 = 2 * err;
-                    if (e2 > -dy) { err -= dy; x0 += sx; }
-                    if (e2 < dx) { err += dx; y0 += sy; }
-                }
-            }
-
-            // --- Oaky SVG Mapping ---
-            function drawSVGLOgo() {
-                clearGrid();
-                const quads = [
-                    [[0, 0], [514, 396], [514, 495], [0, 314]],
-                    [[0, 396], [514, 523], [514, 561], [0, 684]],
-                    [[0, 766], [514, 585], [514, 680], [0, 1080]]
-                ];
-
-                function pointInPoly(pt, poly) {
-                    let inside = false;
-                    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-                        let xi = poly[i][0], yi = poly[i][1];
-                        let xj = poly[j][0], yj = poly[j][1];
-                        let intersect = ((yi > pt[1]) !== (yj > pt[1])) &&
-                            (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi);
-                        if (intersect) inside = !inside;
-                    }
-                    return inside;
-                }
-
-                for (let x = 0; x < COL_COUNT; x++) {
-                    for (let y = 0; y < ROW_COUNT; y++) {
-                        let ptX = (x / (COL_COUNT - 1)) * 1080;
-                        let ptY = (y / (ROW_COUNT - 1)) * 1080;
-
-                        let isInside = quads.some(q => pointInPoly([ptX, ptY], q));
-
-                        if (!isInside) {
-                            let mirroredPtX = 1080 - ptX;
-                            isInside = quads.some(q => pointInPoly([mirroredPtX, ptY], q));
-                        }
-
-                        if (isInside) {
-                            setDot(x, y);
-                        }
-                    }
-                }
-            }
-
-            // --- Star Glyph ---
-            function drawStar() {
-                clearGrid();
-                const centerX = 14;
-                const centerY = 15;
-                const spikes = 5;
-                const outerRadius = 13;
-                const innerRadius = 5;
-
-                let rot = Math.PI / 2 * 3;
-                let step = Math.PI / spikes;
-                let points = [];
-
-                for (let i = 0; i < spikes; i++) {
-                    points.push([Math.round(centerX + Math.cos(rot) * outerRadius), Math.round(centerY + Math.sin(rot) * outerRadius)]);
-                    rot += step;
-                    points.push([Math.round(centerX + Math.cos(rot) * innerRadius), Math.round(centerY + Math.sin(rot) * innerRadius)]);
-                    rot += step;
-                }
-
-                for (let i = 0; i < points.length; i++) {
-                    let next = (i + 1) % points.length;
-                    drawLine(points[i][0], points[i][1], points[next][0], points[next][1]);
-                }
-            }
-
-            let starInterval = null;
-            function startStarMode() {
-                if (starInterval) clearInterval(starInterval);
-                starInterval = setInterval(() => {
-                    dots.forEach(dot => {
-                        if (dot.classList.contains('active')) {
-                            if (Math.random() < 0.15) {
-                                dot.classList.toggle('accent');
-                            }
-                        }
-                    });
-                }, 150);
-            }
-
-            function stopStarMode() {
-                if (starInterval) {
-                    clearInterval(starInterval);
-                    starInterval = null;
-                }
-                dots.forEach(dot => dot.classList.remove('accent'));
-            }
-
-
-            // (Removed duplicate blocks)
-
-            // --- Matrix Rain Transition (Full Screen Wipe) ---
-            function matrixRainTransition(nextStateEvaluator, finalizeCallback) {
-                // Generate drops for every column, staggered Y starts
-                let drops = [];
-                for (let c = 0; c < COL_COUNT; c++) {
-                    drops.push({
-                        x: c,
-                        y: -Math.floor(1 + Math.random() * 25),
-                        speed: 1
-                    });
-                }
-
-                // Capture current state
-                let currentState = dots.map(d => d.classList.contains('active'));
-
-                // Evaluate next shape without interfering with DOM immediately
-                clearGrid();
-                nextStateEvaluator();
-                let nextState = dots.map(d => d.classList.contains('active'));
-
-                // Restore current state
-                clearGrid();
-                currentState.forEach((isActive, i) => {
-                    if (isActive) dots[i].classList.add('active');
-                });
-
-                const rainInterval = setInterval(() => {
-                    let allDone = true;
-
-                    drops.forEach(drop => {
-                        drop.y += drop.speed;
-                        if (drop.y < ROW_COUNT + 5) {
-                            allDone = false;
-                        }
-
-                        // Render full screen wipe column
-                        for (let y = 0; y < ROW_COUNT; y++) {
-                            let index = y * COL_COUNT + drop.x;
-                            if (y > drop.y) {
-                                // Keep old state (below wipe)
-                            } else if (y >= drop.y - 2 && y <= drop.y) {
-                                // Bright front of wipe
-                                dots[index].classList.add('active');
-                            } else {
-                                // Transition to next state (above wipe)
-                                dots[index].classList.remove('active');
-                                if (nextState[index]) {
-                                    dots[index].classList.add('active');
-                                }
-                            }
-                        }
-                    });
-
-                    if (allDone) {
-                        clearInterval(rainInterval);
-                        if (finalizeCallback) finalizeCallback();
-                    }
-                }, 40);
-            }
-
-            // Animation Cycle
-            let currentStep = 0;
-            let cubeInterval = null;
-
-            function startCubeMode() {
-                if (cubeInterval) clearInterval(cubeInterval);
-                cubeInterval = setInterval(draw3DCube, 50);
-            }
-
-            function stopCubeMode() {
-                if (cubeInterval) {
-                    clearInterval(cubeInterval);
-                    cubeInterval = null;
-                }
-            }
-
-            function cycleAnimation() {
-                stopCubeMode();
-                stopStarMode();
-                if (currentStep === 0) {
-                    matrixRainTransition(drawStar, startStarMode);
-                } else if (currentStep === 1) {
-                    matrixRainTransition(draw3DCube, startCubeMode);
-                } else if (currentStep === 2) {
-                    matrixRainTransition(drawSVGLOgo, null);
-                }
-                currentStep = (currentStep + 1) % 3;
-            }
-
-            // Initial Flow
-            drawSVGLOgo();
-            setInterval(cycleAnimation, 6000);
-
-            // Subtle animation
-            setInterval(() => {
-                const randomDot = Math.floor(Math.random() * TOTAL_DOTS);
-                dots[randomDot].style.transform = 'scale(1.5)';
-                setTimeout(() => {
-                    dots[randomDot].style.transform = 'scale(1)';
-                }, 500);
-            }, 2000);
-
-            // Button Logic
-            const startButton = document.getElementById('start-button');
-            startButton.addEventListener('click', () => {
+            document.getElementById('start-button').addEventListener('click', () => {
                 window.location.href = 'chat.html';
             });
         });
