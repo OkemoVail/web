@@ -5,7 +5,7 @@
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 const UNIQUE_SVG_NORTH = `<svg class="w-full h-full stroke-[2px] stroke-current fill-none" viewBox="0 0 24 24"><path d="M12 2V22M2 12H22M19.07 4.93L4.93 19.07M19.07 19.07L4.93 4.93" /><circle cx="12" cy="12" r="3" class="fill-current stroke-none" /></svg>`;
-const UNIQUE_SVG_OCTAN = `<svg class="w-full h-full stroke-[2.5px] stroke-current fill-none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /></svg>`;
+const UNIQUE_SVG_OCTAN = `<svg class="w-full h-full stroke-[1.8px] stroke-current fill-none" viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 12 C9.5 9.5,8 4,12 3 C16 4,14.5 9.5,12 12 Z"/><path d="M12 12 C14.5 9.5,20 8,21 12 C20 16,14.5 14.5,12 12 Z"/><path d="M12 12 C14.5 14.5,16 20,12 21 C8 20,9.5 14.5,12 12 Z"/><path d="M12 12 C9.5 14.5,4 16,3 12 C4 8,9.5 9.5,12 12 Z"/><circle cx="12" cy="12" r="2" class="fill-current stroke-none"/></svg>`;
 
 window.CF_BACKEND_URL = 'https://api.okemovail.com';
 window.DEFAULT_BACKEND_URL = window.CF_BACKEND_URL;
