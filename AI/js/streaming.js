@@ -6,6 +6,14 @@ window.updateAssistantDisplay = (text, isFinal = false) => {
     const thinkingPlaceholder = lastProse.querySelector('.thinking-container');
     if (thinkingPlaceholder) thinkingPlaceholder.remove();
 
+    if (isFinal) {
+        const genHeader = lastProse.querySelector('.model-generating-header');
+        if (genHeader) {
+            genHeader.classList.add('done');
+            setTimeout(() => genHeader.remove(), 300);
+        }
+    }
+
     const { thought, content } = window.parseThought(text);
 
     let thoughtContainer = lastProse.querySelector('.thought-container');
