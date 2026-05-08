@@ -13,7 +13,8 @@
       "mcp__plugin_context-mode_context-mode__ctx_stats",
       "Bash(python *)",
       "PowerShell(python -c \"import ast; ast.parse\\(open\\('C:\\\\Users\\\\okemo\\\\Desktop\\\\web\\\\train.py', encoding='utf-8'\\).read\\(\\)\\); print\\('OK'\\)\")",
-      "Bash(bash *)"
+      "Bash(bash *)",
+      "Bash(scripts/start-server.sh *)"
     ]
   }
 }

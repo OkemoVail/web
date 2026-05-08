@@ -10,7 +10,7 @@ window.updateAssistantDisplay = (text, isFinal = false) => {
         const genHeader = lastProse.querySelector('.model-generating-header');
         if (genHeader) {
             genHeader.classList.add('done');
-            setTimeout(() => genHeader.remove(), 300);
+            setTimeout(() => genHeader.remove(), 420);
         }
     }
 

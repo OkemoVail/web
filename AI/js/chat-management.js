@@ -15,8 +15,8 @@ window.generateChatTitle = async (chatId, userMsg, aiMsg, force = false) => {
             body: JSON.stringify({
                 model: window.currentModel.id,
                 messages: [
-                    { "role": "system", "content": "You are a title generator. Generate a title for this conversation based on the first interaction. Do not use quotes, punctuation, or thought tags. Just return the short title." },
-                    { "role": "user", "content": `Give me a title based on the user request of "${userMsg}"` }
+                    { "role": "system", "content": "You are a chat title generator. Your sole output is a short, specific title (3–6 words) that captures the core topic of the conversation.\n\nRules:\n- Output ONLY the title — nothing else\n- 3 to 6 words, title case (capitalize major words)\n- Be specific, not vague — avoid generic titles like \"User Question\" or \"Helpful Chat\"\n- No quotes, no punctuation at the end, no explanations, no thought tags\n- Focus on the subject matter, not the interaction\n\nExamples:\nUser: \"how do I reverse a linked list in Python\" → Python Linked List Reversal\nUser: \"what are symptoms of iron deficiency\" → Iron Deficiency Symptoms\nUser: \"write a poem about autumn leaves\" → Autumn Leaves Poem\nUser: \"explain how black holes form\" → How Black Holes Form" },
+                    { "role": "user", "content": `Conversation:\nUser: "${userMsg}"\nAssistant: "${(aiMsg || '').substring(0, 300).replace(/[\r\n]+/g, ' ')}"\n\nGenerate a title for this conversation.` }
                 ],
                 temperature: 0.3,
                 max_tokens: 25,
