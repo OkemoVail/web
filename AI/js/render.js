@@ -44,6 +44,20 @@ window.render = () => {
             aiRow.className = 'ai-row animate-fade-in';
             
             let contentHtml = "";
+
+            // Inject generating header at top of active response
+            if (isLast && window.isGenerating) {
+                const _modelIcon = window.currentModel ? window.currentModel.icon : '';
+                const _modelName = window.currentModel ? window.currentModel.name : '';
+                contentHtml += `<div class="model-generating-header">
+                    <div class="model-spinner-wrap">
+                        <div class="model-spinner-ring"></div>
+                        <div class="model-spinner-icon">${_modelIcon}</div>
+                    </div>
+                    <span class="model-generating-label"><strong>${_modelName}</strong> is thinking…</span>
+                </div>`;
+            }
+
             if (responseText === null && isLast && window.isGenerating) {
                 const _thinkingPhrases = ['Pondering...','Scheming...','Hallucinating...','Vibing...','Cooking...','Brewing...','Buffering...','Noodling...','Marinating...','Ruminating...','Conspiring...','Daydreaming...','Manifesting...','Simmering...','Deliberating...','Cogitating...','Calculating...','Contemplating...','Overcooking...','Zoning out...'];
                 const _phrase = _thinkingPhrases[Math.floor(Math.random() * _thinkingPhrases.length)];
