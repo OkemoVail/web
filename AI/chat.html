@@ -350,6 +350,15 @@
             background: transparent !important;
         }
 
+        .sb-profile-btn .sb-nav-icon {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.12s ease;
+            transform: translateX(10px);
+        }
+
+        body.sidebar-collapsed .sb-profile-btn .sb-nav-icon {
+            transform: translateX(0);
+        }
+
         body.sidebar-collapsed .sb-profile-btn:hover .sb-nav-icon {
             background: rgba(0, 0, 0, 0.07);
         }
@@ -2841,7 +2850,7 @@
                 ondragleave="window.onFolderDragLeave(event)" ondragover="window.onFolderDragOver(event)"
                 ondrop="window.onFolderDrop(event, null)">
                 <div id="user-profile-section">
-                    <div onclick="window.toggleSettingsPanel()" class="sb-profile-btn group" style="gap: 26px;">
+                    <div onclick="window.toggleSettingsPanel()" class="sb-profile-btn group" style="gap: 16px;">
                         <!-- 44px avatar slot — always visible, same centering as nav icons -->
                         <div class="sb-nav-icon">
                             <div id="user-avatar-container"
