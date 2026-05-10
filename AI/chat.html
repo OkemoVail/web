@@ -593,17 +593,6 @@
             background-clip: text;
         }
 
-        .mini-logo-icon {
-            display: none;
-        }
-
-        .mini-logo-btn:hover .vail-logo-ai {
-            display: none;
-        }
-
-        .mini-logo-btn:hover .mini-logo-icon {
-            display: block;
-        }
 
         .ai-icon-bubble {
             background-color: var(--accent-color);
@@ -2776,11 +2765,9 @@
         <div id="sidebar-full-content" class="flex flex-col h-full">
 
             <!-- Header: wordmark + actions -->
-            <div class="h-[var(--header-height)] flex items-center shrink-0">
-                <!-- 44px logo slot — always visible, click to toggle -->
-                <div class="flex items-center justify-center shrink-0" style="width: var(--sidebar-rail-width)">
-                    <button id="mini-logo-btn" type="button" aria-label="Toggle sidebar"
-                        class="mini-logo-btn flex items-center justify-center w-5 h-5 cursor-pointer">
+            <div class="h-[var(--header-height)] flex items-center shrink-0 px-2">
+                <button onclick="window.toggleSidebar()" class="sb-nav-item text-left bg-transparent border-none pr-3" style="gap: 8px;">
+                    <span class="sb-nav-icon">
                         <svg class="mini-logo-svg w-5 h-5 fill-current vail-logo-ai" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 1080 1080">
                             <path
@@ -2789,22 +2776,17 @@
                             <path
                                 d="M4.96,765.79l508.97-180.31v94.71L28.54,1073.91C19.12,1085.79,0,1079.13,0,1063.97v-286.6c0-4.38,1.79-8.56,4.96-11.58Z" />
                             <path
-                                d="M1075.04,314.21l-508.97,180.31v-94.71S1051.46,6.09,1051.46,6.09c9.42-11.88,28.54-5.22,28.54,9.94v286.6c0,4.38-1.79,8.56-4.96,11.58Z" />
+                                d="M1075.04,314.21l-508.97,180.31v-94.71S1051.46,6.09,1051.46,6.09c9.42-11.88,28.54-5.22,28.54,9.94v286.6c0,4.38-1.79-8.56-4.96-11.58Z" />
                             <polygon points="566.07 561.2 1080 684.2 1080 395.8 566.07 522.5 566.07 561.2" />
                             <path
                                 d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
                         </svg>
-                        <i data-feather="chevron-right" class="mini-logo-icon w-4 h-4" style="display:none"></i>
-                    </button>
-                </div>
-                <!-- Wordmark + collapse btn (fades when collapsed) -->
-                <div class="sb-row-text flex items-center flex-1 pr-2 gap-0.5">
-                    <span
-                        class="text-[17px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex-1 leading-none">Oaky</span>
-                    <button onclick="window.toggleSidebar()" title="Collapse sidebar" class="sb-icon-btn">
-                        <i data-feather="sidebar" class="w-[15px] h-[15px]"></i>
-                    </button>
-                </div>
+                    </span>
+                    <span class="sb-row-text text-[17px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight py-1">Oaky</span>
+                </button>
+                <button onclick="window.toggleSidebar()" title="Collapse sidebar" class="sb-icon-btn sb-row-text shrink-0 ml-auto">
+                    <i data-feather="sidebar" class="w-[15px] h-[15px]"></i>
+                </button>
             </div>
 
             <!-- New chat -->
@@ -2827,12 +2809,12 @@
                 </a>
             </div>
 
-            <!-- hidden search input kept for JS filterChats compatibility -->
-            <input type="text" id="chat-search-input" style="display:none" oninput="window.filterChats(this.value)">
-
-            <!-- Recents label + history -->
+            <!-- Recents search bar + history -->
             <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 mt-3">
-                <div class="sb-section-label sb-row-text">Recents</div>
+                <div class="sb-search-wrap sb-row-text">
+                    <i data-feather="search" class="sb-search-icon"></i>
+                    <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..." oninput="window.filterChats(this.value)">
+                </div>
                 <div id="folders-section" class="shrink-0 max-h-[40%] overflow-y-auto no-scrollbar">
                     <div id="folders-list" class="pb-1"></div>
                 </div>
