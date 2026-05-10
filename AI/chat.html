@@ -44,46 +44,46 @@
     <style id="dynamic-accent-styles">
         :root {
             /* Dynamic accent — JS in settings.js updates --accent-color for user customization */
-            --accent-color:   #c96478;
-            --accent-glow:    rgba(201, 100, 120, 0.4);
-            --accent-tint:    rgba(0, 0, 0, 0);
-            --sidebar-tint:   rgba(0, 0, 0, 0);
+            --accent-color: #c96478;
+            --accent-glow: rgba(201, 100, 120, 0.4);
+            --accent-tint: rgba(0, 0, 0, 0);
+            --sidebar-tint: rgba(0, 0, 0, 0);
             --accent-contrast: #faf9f5;
 
             /* Background system — chat bg + sidebar locked to rosewood accent (no light/dark variation) */
-            --bg-color:               #c96478;
-            --sidebar-bg:             #c96478;
-            --input-bg:               var(--bg-elevated);
-            --bg-elevated-secondary:  var(--bg-elevated);
-            --fade-color:             #c96478;
-            --fade-gradient-stop:     #c96478;
+            --bg-color: #c96478;
+            --sidebar-bg: #c96478;
+            --input-bg: var(--bg-elevated);
+            --bg-elevated-secondary: var(--bg-elevated);
+            --fade-color: #c96478;
+            --fade-gradient-stop: #c96478;
 
             /* Text & actions */
-            --action-btn-color:  var(--text-secondary);
-            --thinking-accent:   color-mix(in srgb, var(--accent-color), black 20%);
-            --thinking-side:     var(--border-strong);
+            --action-btn-color: var(--text-secondary);
+            --thinking-accent: color-mix(in srgb, var(--accent-color), black 20%);
+            --thinking-side: var(--border-strong);
 
             /* Layout — unchanged */
-            --sidebar-width:                    260px;
-            --sidebar-rail-width:               60px;
-            --header-height:                    56px;
+            --sidebar-width: 260px;
+            --sidebar-rail-width: 44px;
+            --header-height: 56px;
             --sidebar-section-first-margin-top: 8px;
         }
 
         .dark {
             /* --accent and --accent-light intentionally swap for dark-mode lightness */
-            --accent-color:    #d97790;
-            --accent-glow:     rgba(217, 119, 144, 0.4);
+            --accent-color: #d97790;
+            --accent-glow: rgba(217, 119, 144, 0.4);
             --accent-contrast: #141413;
-            --bg-elevated:     #1e1e1c;
+            --bg-elevated: #1e1e1c;
 
             /* dark mode keeps chat bg + sidebar pinned to the same rosewood — no shift */
-            --bg-color:           #c96478;
-            --sidebar-bg:         #c96478;
-            --fade-color:         #c96478;
+            --bg-color: #c96478;
+            --sidebar-bg: #c96478;
+            --fade-color: #c96478;
             --fade-gradient-stop: #c96478;
-            --thinking-accent:    color-mix(in srgb, var(--accent-color), white 35%);
-            --thinking-side:      var(--border-strong);
+            --thinking-accent: color-mix(in srgb, var(--accent-color), white 35%);
+            --thinking-side: var(--border-strong);
         }
 
 
@@ -126,25 +126,25 @@
             theme: {
                 extend: {
                     colors: {
-                        parchment:      'var(--bg)',
-                        ivory:          'var(--bg-elevated)',
-                        'text-warm':    'var(--text-primary)',
-                        'olive-gray':   'var(--text-secondary)',
-                        'stone-gray':   'var(--text-tertiary)',
-                        rosewood:       'var(--accent)',
-                        'rose-light':   'var(--accent-light)',
+                        parchment: 'var(--bg)',
+                        ivory: 'var(--bg-elevated)',
+                        'text-warm': 'var(--text-primary)',
+                        'olive-gray': 'var(--text-secondary)',
+                        'stone-gray': 'var(--text-tertiary)',
+                        rosewood: 'var(--accent)',
+                        'rose-light': 'var(--accent-light)',
                         'border-cream': 'var(--border)',
-                        'border-warm':  'var(--border-strong)',
-                        'ring-warm':    'var(--shadow-ring)',
-                        'surf-dark':    'var(--surface-dark)',
-                        'deep-dark':    'var(--deep-dark)',
-                        accent:         'var(--accent-color)',
-                        'accent-glow':  'var(--accent-glow)',
+                        'border-warm': 'var(--border-strong)',
+                        'ring-warm': 'var(--shadow-ring)',
+                        'surf-dark': 'var(--surface-dark)',
+                        'deep-dark': 'var(--deep-dark)',
+                        accent: 'var(--accent-color)',
+                        'accent-glow': 'var(--accent-glow)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
-                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
-                        mono:  ['"JetBrains Mono"', 'monospace'],
+                        sans: ['Satoshi', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.5s ease-out forwards',
@@ -178,8 +178,16 @@
             animation: shimmer-btn 1.5s infinite;
         }
 
-        * {
-            transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+        button,
+        a,
+        input,
+        select,
+        textarea,
+        [class*="transition"],
+        [class*="hover:"],
+        .__menu-item,
+        .skuomorphic-btn {
+            transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
         }
 
         .no-scrollbar::-webkit-scrollbar {
@@ -202,8 +210,19 @@
             left: 0;
             z-index: 2500;
             width: 100%;
+            overflow: hidden;
+            /* Elements inside keep fixed positions; aside clips them as width changes */
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
 
-            transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        #sidebar-full-content {
+            contain: layout style;
+        }
+
+        #sidebar-history-area {
+            contain: layout style;
         }
 
         aside::before {
@@ -223,6 +242,9 @@
 
         #sidebar-full-content {
             display: flex;
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            flex-shrink: 0;
         }
 
         @media (min-width: 1024px) {
@@ -233,26 +255,281 @@
             }
 
             body.sidebar-collapsed aside {
-                width: var(--sidebar-rail-width);
-                min-width: var(--sidebar-rail-width);
-                transform: translateX(0);
-                overflow: hidden;
-                /* Keep the same background and border as the non-collapsed sidebar
-                   so the mini rail does not visually change color when collapsed. */
-                background-color: var(--sidebar-bg) !important;
-                border-color: inherit !important;
-            }
-
-            body.sidebar-collapsed #sidebar-full-content {
-                display: none !important;
-            }
-
-            body.sidebar-collapsed #sidebar-mini-content {
-                display: flex !important;
+                width: var(--sidebar-rail-width) !important;
             }
         }
 
-        /* ChatGPT Style Sidebar Specifics */
+        /* ── Sidebar row text — fades via CSS, icons always visible ─ */
+        .sb-row-text {
+            white-space: nowrap;
+            overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.18s ease-out 0.08s;
+        }
+
+        body.sidebar-collapsed .sb-row-text {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.08s ease-in;
+        }
+
+        /* Hide chat history + folders in collapsed rail */
+        #sidebar-history-area {
+            opacity: 1;
+            transition: opacity 0.18s ease-out 0.08s;
+        }
+
+        body.sidebar-collapsed #sidebar-history-area {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.08s ease-in;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            #sidebar-history-area,
+            .sb-row-text,
+            aside {
+                transition: none !important;
+            }
+        }
+
+        /* ── Sidebar redesign ─────────────────────────────────────── */
+        .sb-icon-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .sb-icon-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+            color: var(--text-primary);
+        }
+
+        .dark .sb-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .sb-nav-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 8px;
+            transition: background 0.12s ease;
+        }
+
+        /* Collapsed: suppress full-width rect, highlight only icon slot */
+        body.sidebar-collapsed .sb-nav-item {
+            background: transparent !important;
+        }
+
+        body.sidebar-collapsed .sb-new-chat-btn {
+            background: transparent !important;
+        }
+
+        body.sidebar-collapsed .sb-nav-item:hover .sb-nav-icon,
+        body.sidebar-collapsed .sb-new-chat-btn:hover .sb-nav-icon {
+            background: rgba(0, 0, 0, 0.07);
+        }
+
+        .dark body.sidebar-collapsed .sb-nav-item:hover .sb-nav-icon,
+        .dark body.sidebar-collapsed .sb-new-chat-btn:hover .sb-nav-icon {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        body.sidebar-collapsed .sb-profile-btn {
+            background: transparent !important;
+        }
+
+        body.sidebar-collapsed .sb-profile-btn:hover .sb-nav-icon {
+            background: rgba(0, 0, 0, 0.07);
+        }
+
+        .dark body.sidebar-collapsed .sb-profile-btn:hover .sb-nav-icon {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Hide folder icon (keep chevron) */
+        #folders-list .opacity-60 {
+            display: none;
+        }
+
+        .sb-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 6px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-primary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.12s ease;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sb-nav-item:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .dark .sb-nav-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .sb-nav-item--muted {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .sb-nav-item--muted:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .dark .sb-nav-item--muted:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* New chat button */
+        .sb-new-chat-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 6px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background 0.12s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sb-new-chat-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .dark .sb-new-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        /* Recents section label */
+        .sb-section-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            padding: 8px 12px 4px;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sb-search-wrap {
+            position: relative;
+            margin: 0 8px 8px;
+        }
+
+        .sb-search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 13px;
+            height: 13px;
+            color: var(--text-tertiary);
+            pointer-events: none;
+            transition: color 0.15s ease;
+        }
+
+        .sb-search-input {
+            width: 100%;
+            padding: 7px 10px 7px 32px;
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            outline: none;
+            color: var(--text-primary);
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .sb-search-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .sb-search-input:focus {
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .dark .sb-search-input {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .dark .sb-search-input:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sb-search-wrap:focus-within .sb-search-icon {
+            color: var(--accent-color);
+        }
+
+        .sb-profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 6px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }
+
+        .sb-profile-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .sb-profile-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .sb-mini-btn {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .sb-mini-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+            color: var(--text-primary);
+        }
+
+        .dark .sb-mini-btn:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        /* keep .__menu-item for any legacy callers */
         .__menu-item {
             display: flex;
             align-items: center;
@@ -262,19 +539,17 @@
             border-radius: 0.5rem;
             border: 1px solid transparent;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: background-color 0.15s ease, color 0.15s ease;
             color: var(--action-btn-color);
             text-decoration: none;
         }
 
         .__menu-item:hover {
-            background-color: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: rgba(0, 0, 0, 0.04);
         }
 
         .dark .__menu-item:hover {
-            background-color: rgba(255, 255, 255, 0.03);
-            border-color: rgba(255, 255, 255, 0.08);
+            background-color: rgba(255, 255, 255, 0.04);
         }
 
         .__menu-item .icon {
@@ -379,7 +654,9 @@
             margin-top: 10px;
             margin-left: -6px;
         }
-        .ai-actions-left, .ai-actions-right {
+
+        .ai-actions-left,
+        .ai-actions-right {
             display: flex;
             align-items: center;
             gap: 2px;
@@ -824,12 +1101,14 @@
             opacity: 1;
             transition: max-height 0.4s ease, opacity 0.3s ease, margin-bottom 0.4s ease;
         }
+
         .model-generating-header.done {
             max-height: 0;
             opacity: 0;
             margin-bottom: 0;
             pointer-events: none;
         }
+
         .model-generating-label {
             font-size: 12px;
             font-style: italic;
@@ -840,13 +1119,20 @@
             -webkit-text-fill-color: transparent;
             animation: gen-text-shimmer 2s linear infinite;
         }
+
         .model-generating-label strong {
             font-style: normal;
             font-weight: 600;
         }
+
         @keyframes gen-text-shimmer {
-            0%   { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
         }
 
         @keyframes border-spin-move {
@@ -932,19 +1218,31 @@
             user-select: none;
             box-sizing: border-box;
         }
+
         .ai-model-logo {
             width: 26px;
             height: 26px;
             color: var(--accent-color);
             margin-top: 12px;
         }
-        .ai-model-logo svg { width: 100%; height: 100%; }
+
+        .ai-model-logo svg {
+            width: 100%;
+            height: 100%;
+        }
+
         .ai-model-logo.spinning svg {
             animation: logoSpin 1.4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
         }
+
         @keyframes logoSpin {
-            0%   { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .thinking-shimmer {
@@ -1229,7 +1527,7 @@
         }
 
         #user-profile-section {
-            padding: 0.875rem 0.75rem;
+            padding: 0.875rem 0.5rem;
             border-top: 1px solid rgba(0, 0, 0, 0.05);
             margin-top: 0.4rem;
         }
@@ -1301,7 +1599,7 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
             animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
@@ -1340,7 +1638,7 @@
             border-radius: 0;
             background-color: var(--bg-elevated);
             border: 1px solid var(--border);
-            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
             overflow: hidden;
         }
 
@@ -1363,12 +1661,12 @@
                 width: min(92vw, 560px);
                 max-height: 88vh;
                 border-radius: 16px;
-                box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
+                box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
                 overflow: hidden;
             }
 
             .dark #settings-panel {
-                box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
+                box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
             }
 
             #settings-panel.active {
@@ -1676,6 +1974,12 @@
             backdrop-filter: blur(4px);
             z-index: 450;
             display: none;
+            opacity: 0;
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #sidebar-overlay.sidebar-overlay-visible {
+            opacity: 1;
         }
 
         .dark #sidebar-overlay {
@@ -2047,7 +2351,7 @@
             width: 100%;
             max-width: 420px;
             padding: 2.25rem;
-            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
             transform: scale(0.92) translateY(30px);
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -2055,7 +2359,7 @@
         .dark .custom-modal-card {
             background-color: var(--bg-elevated);
             border-color: var(--border);
-            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
         }
 
         .custom-modal-overlay.is-active .custom-modal-card {
@@ -2248,30 +2552,6 @@
              override the inline `width: var(--sidebar-width)` on the
              aside element.
         */
-        @media (min-width: 1024px) {
-            body.sidebar-collapsed #sidebar {
-                width: 3rem !important;
-                /* ~48px, matches a compact rail */
-                /* Remove visible border/shadow so the mini rail blends with the page */
-                border-right: none !important;
-                box-shadow: none !important;
-                background-color: var(--sidebar-bg) !important;
-            }
-
-            /* Hide the full sidebar content and show the mini rail */
-            body.sidebar-collapsed #sidebar-full-content {
-                display: none !important;
-            }
-
-            body.sidebar-collapsed #sidebar-mini-content {
-                display: flex !important;
-            }
-
-            /* Ensure transform doesn't keep the sidebar offset when collapsed */
-            body.sidebar-collapsed #sidebar {
-                transform: none !important;
-            }
-        }
 
         /* APP PRELOADER STYLES */
         #app-preloader {
@@ -2345,10 +2625,7 @@
     </style>
 </head>
 
-<body
-    class="text-zinc-900 dark:text-zinc-200 font-sans h-full flex overflow-hidden"
-
-    <!-- APP PRELOADER -->
+<body class="text-zinc-900 dark:text-zinc-200 font-sans h-full flex overflow-hidden" <!-- APP PRELOADER -->
     <div id="app-preloader">
         <div class="loader-hub" id="loader-interactive-hub">
             <svg class="loader-svg" viewBox="0 0 100 100">
@@ -2477,180 +2754,121 @@
         <img id="onboarding-side-img" src="../src/Ontologic.png" alt="Ontologic" />
     </div>
 
-    <aside id="sidebar"
-        class="-translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 flex flex-col shadow-xl lg:shadow-none transition-all duration-300"
+    <aside id="sidebar" class="-translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 flex flex-col"
         style="width: var(--sidebar-width); background: var(--bg-elevated); border-right: 1px solid var(--border);">
 
-        <!-- Full Sidebar Content -->
-        <div id="sidebar-full-content" class="flex flex-col h-full w-full overflow-hidden">
-            <!-- Header with Logo and Close Button -->
-            <div class="h-[var(--header-height)] flex items-center justify-between px-4 shrink-0">
-                <a href="/AI/index.html" class="flex items-center gap-3 no-underline">
-                    <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
-                        class="w-6 h-6 fill-current vail-logo-ai">
-                        <path
-                            d="M4.96,314.21l508.97,180.31v-94.71L28.54,6.09C19.12-5.79,0,.87,0,16.03v286.6c0,4.38,1.79,8.56,4.96,11.58Z" />
-                        <polygon points="513.93 561.2 0 684.2 0 395.8 513.93 522.5 513.93 561.2" />
-                        <path
-                            d="M4.96,765.79l508.97-180.31v94.71L28.54,1073.91C19.12,1085.79,0,1079.13,0,1063.97v-286.6c0-4.38,1.79-8.56,4.96-11.58Z" />
-                        <path
-                            d="M1075.04,314.21l-508.97,180.31v-94.71S1051.46,6.09,1051.46,6.09c9.42-11.88,28.54-5.22,28.54,9.94v286.6c0,4.38-1.79,8.56-4.96,11.58Z" />
-                        <polygon points="566.07 561.2 1080 684.2 1080 395.8 566.07 522.5 566.07 561.2" />
-                        <path
-                            d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
-                    </svg>
-                </a>
-                <button
-                    class="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                    onclick="window.toggleSidebar()">
-                    <i data-feather="chevron-left" class="w-4 h-4"></i>
+        <!--
+            Single content div — fixed width, never shrinks.
+            The aside clips it via overflow:hidden as its width transitions.
+            Icon slots are width: var(--sidebar-rail-width) = 44px, centered.
+            Icons center at 22px = 44/2 — stationary throughout collapse/expand.
+            .sb-row-text fades via CSS; no JS needed.
+        -->
+        <div id="sidebar-full-content" class="flex flex-col h-full">
+
+            <!-- Header: wordmark + actions -->
+            <div class="h-[var(--header-height)] flex items-center shrink-0">
+                <!-- 44px logo slot — always visible, click to toggle -->
+                <div class="flex items-center justify-center shrink-0" style="width: var(--sidebar-rail-width)">
+                    <button id="mini-logo-btn" type="button" aria-label="Toggle sidebar"
+                        class="mini-logo-btn flex items-center justify-center w-5 h-5 cursor-pointer">
+                        <svg class="mini-logo-svg w-5 h-5 fill-current vail-logo-ai" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 1080 1080">
+                            <path
+                                d="M4.96,314.21l508.97,180.31v-94.71L28.54,6.09C19.12-5.79,0,.87,0,16.03v286.6c0,4.38,1.79,8.56,4.96,11.58Z" />
+                            <polygon points="513.93 561.2 0 684.2 0 395.8 513.93 522.5 513.93 561.2" />
+                            <path
+                                d="M4.96,765.79l508.97-180.31v94.71L28.54,1073.91C19.12,1085.79,0,1079.13,0,1063.97v-286.6c0-4.38,1.79-8.56,4.96-11.58Z" />
+                            <path
+                                d="M1075.04,314.21l-508.97,180.31v-94.71S1051.46,6.09,1051.46,6.09c9.42-11.88,28.54-5.22,28.54,9.94v286.6c0,4.38-1.79,8.56-4.96,11.58Z" />
+                            <polygon points="566.07 561.2 1080 684.2 1080 395.8 566.07 522.5 566.07 561.2" />
+                            <path
+                                d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
+                        </svg>
+                        <i data-feather="chevron-right" class="mini-logo-icon w-4 h-4" style="display:none"></i>
+                    </button>
+                </div>
+                <!-- Wordmark + collapse btn (fades when collapsed) -->
+                <div class="sb-row-text flex items-center flex-1 pr-2 gap-0.5">
+                    <span
+                        class="text-[17px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex-1 leading-none">Oaky</span>
+                    <button onclick="window.toggleSidebar()" title="Collapse sidebar" class="sb-icon-btn">
+                        <i data-feather="sidebar" class="w-[15px] h-[15px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- New chat -->
+            <div class="shrink-0 pt-1 pb-0.5 px-2">
+                <button onclick="window.resetChat()" class="sb-new-chat-btn">
+                    <span class="sb-nav-icon"><i data-feather="edit-2" class="w-[17px] h-[17px]"></i></span>
+                    <span class="sb-row-text">New chat</span>
                 </button>
             </div>
 
-            <!-- Main Navigation -->
-            <div class="flex-1 overflow-y-auto no-scrollbar pt-2">
-                <!-- New Chat Button -->
-                <div class="px-2 mb-2">
-                    <button onclick="window.resetChat()" title="New Chat"
-                        class="skuomorphic-btn w-full p-3 flex items-center justify-start gap-3 rounded-xl bg-white dark:bg-zinc-900/40 text-zinc-900 dark:text-zinc-100 font-semibold group transition-all">
-                        <i data-feather="plus" class="w-4 h-4"></i>
-                        <span class="text-sm">New chat</span>
-                    </button>
-                </div>
-
-                <!-- Sponsored/Research -->
-                <a href="https://voidai.app" target="_blank" class="__menu-item">
-                    <div class="flex items-center gap-3">
-                        <div class="icon"><i data-feather="external-link" class="w-4 h-4"></i></div>
-                        <span class="text-sm font-medium truncate">Sponsored by foidai</span>
-                    </div>
+            <!-- Nav items -->
+            <div class="shrink-0 flex flex-col px-2">
+                <a href="research.html" class="sb-nav-item">
+                    <span class="sb-nav-icon"><i data-feather="compass" class="w-[17px] h-[17px]"></i></span>
+                    <span class="sb-row-text">Research</span>
                 </a>
-
-                <a href="research.html" class="__menu-item">
-                    <div class="flex items-center gap-3">
-                        <div class="icon"><i data-feather="compass" class="w-4 h-4"></i></div>
-                        <span class="text-sm font-medium">Research</span>
-                    </div>
+                <a href="https://voidai.app" target="_blank" class="sb-nav-item sb-nav-item--muted">
+                    <span class="sb-nav-icon"><i data-feather="zap" class="w-[17px] h-[17px]"></i></span>
+                    <span class="sb-row-text">Try VoidAI</span>
                 </a>
+            </div>
 
-                <!-- Search Input -->
-                <div class="px-2 mt-1 shrink-0">
-                    <div class="relative group">
-                        <i data-feather="search"
-                            class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 w-3.5 h-3.5 pointer-events-none group-focus-within:text-[var(--accent-color)] transition-colors"></i>
-                        <input type="text" id="chat-search-input" placeholder="Search"
-                            class="skuomorphic-btn w-full pl-9 pr-3 py-2 text-sm font-medium rounded-lg bg-zinc-500/5 dark:bg-zinc-900/40 border border-transparent focus:bg-white dark:focus:bg-zinc-900 focus:border-[var(--accent-color)]/30 outline-none transition-all placeholder-zinc-400"
-                            oninput="window.filterChats(this.value)">
-                    </div>
+            <!-- hidden search input kept for JS filterChats compatibility -->
+            <input type="text" id="chat-search-input" style="display:none" oninput="window.filterChats(this.value)">
+
+            <!-- Recents label + history -->
+            <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 mt-3">
+                <div class="sb-section-label sb-row-text">Recents</div>
+                <div id="folders-section" class="shrink-0 max-h-[40%] overflow-y-auto no-scrollbar">
+                    <div id="folders-list" class="pb-1"></div>
                 </div>
-
-                <!-- Independent Scrollable History Area -->
-                <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 translate-z-0">
-                    <!-- Folders Section (Fixed top, limited height) -->
-                    <div id="folders-section" class="shrink-0 max-h-[40%] overflow-y-auto no-scrollbar scroll-smooth">
-                        <div id="folders-list" class="px-2 pt-1 pb-1"></div>
-                    </div>
-
-                    <!-- Recents Section (Fills remaining space, direct drop target) -->
-                    <div id="recents-section" class="flex-1 flex flex-col min-h-0 relative overflow-hidden">
-                        <div id="recents-scroll-area"
-                            class="flex-1 overflow-y-auto no-scrollbar scroll-smooth transition-colors duration-200"
-                            ondragenter="window.onFolderDragEnter(event)" ondragleave="window.onFolderDragLeave(event)"
-                            ondragover="window.onFolderDragOver(event)" ondrop="window.onFolderDrop(event, null)">
-                            <div id="history-list" class="flex flex-col space-y-0.5 px-2 pt-0 pb-20"></div>
-                        </div>
+                <div id="recents-section" class="flex-1 flex flex-col min-h-0 overflow-hidden">
+                    <div id="recents-scroll-area" class="flex-1 overflow-y-auto no-scrollbar"
+                        ondragenter="window.onFolderDragEnter(event)" ondragleave="window.onFolderDragLeave(event)"
+                        ondragover="window.onFolderDragOver(event)" ondrop="window.onFolderDrop(event, null)">
+                        <div id="history-list" class="flex flex-col pb-20"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Fixed Bottom Section: Clear and Profile -->
-            <div id="sidebar-bottom-actions"
-                class="shrink-0 px-2 pb-2 mt-auto bg-inherit transition-colors duration-200"
-                ondragenter="window.onFolderDragEnter(event)" ondragleave="window.onFolderDragLeave(event)"
-                ondragover="window.onFolderDragOver(event)" ondrop="window.onFolderDrop(event, null)">
-                <div class="__menu-item text-red-500/80 hover:bg-red-500/5 mt-1" onclick="window.clearAll()">
-                    <div class="flex items-center gap-3">
-                        <div class="icon"><i data-feather="trash-2" class="w-4 h-4"></i></div>
-                        <span class="text-sm font-medium">Clear all chats</span>
-                    </div>
-                </div>
-
-                <div id="user-profile-section" class="mt-1">
-                    <div onclick="window.toggleSettingsPanel()"
-                        class="flex items-center justify-between group cursor-pointer hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-all rounded-lg px-3 py-2.5">
-                        <div class="flex items-center gap-3">
+            <!-- Bottom: Profile -->
+            <div id="sidebar-bottom-actions" class="shrink-0 mt-auto" ondragenter="window.onFolderDragEnter(event)"
+                ondragleave="window.onFolderDragLeave(event)" ondragover="window.onFolderDragOver(event)"
+                ondrop="window.onFolderDrop(event, null)">
+                <div id="user-profile-section">
+                    <div onclick="window.toggleSettingsPanel()" class="sb-profile-btn group" style="gap: 26px;">
+                        <!-- 44px avatar slot — always visible, same centering as nav icons -->
+                        <div class="sb-nav-icon">
                             <div id="user-avatar-container"
-                                class="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-bold overflow-hidden shrink-0">
+                                class="w-7 h-7 rounded-full bg-zinc-300 dark:bg-zinc-600 flex items-center justify-center text-[10px] font-bold overflow-hidden">
                                 <div id="user-avatar-display">O</div>
                             </div>
-                            <div class="flex flex-col min-w-0">
-                                <span id="sidebar-user-name"
-                                    class="text-sm font-semibold text-zinc-900 dark:text-white leading-tight break-words">Profile</span>
-                                <span class="text-[10px] text-zinc-400 mt-1 uppercase tracking-tighter"
-                                    id="storage-display-sidebar">Storage: —</span>
-                            </div>
                         </div>
+                        <!-- Name + plan (fades when collapsed) -->
+                        <div class="sb-row-text flex flex-col min-w-0 flex-1">
+                            <span id="sidebar-user-name"
+                                class="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 leading-tight truncate">Profile</span>
+                            <span id="storage-display-sidebar"
+                                class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">Storage: —</span>
+                        </div>
+                        <!-- Actions (fades when collapsed) -->
+                        <button onclick="event.stopPropagation(); window.clearAll()" title="Clear all chats"
+                            class="sb-row-text sb-icon-btn opacity-0 group-hover:opacity-100 !text-zinc-400 hover:!text-red-500 mr-2">
+                            <i data-feather="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Mini Sidebar Content (Rail) -->
-        <div id="sidebar-mini-content" class="hidden lg:flex flex-col items-center h-full w-full shrink-0">
-            <!-- Logo at top -->
-            <div class="h-[var(--header-height)] flex items-center justify-center shrink-0">
-                <button id="mini-logo-btn"
-                    class="mini-logo-btn w-9 h-9 flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all rounded-lg hover:bg-zinc-500/10"
-                    type="button" aria-label="Toggle sidebar">
-                    <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
-                        class="w-6 h-6 fill-current vail-logo-ai transition-all">
-                        <path
-                            d="M4.96,314.21l508.97,180.31v-94.71L28.54,6.09C19.12-5.79,0,.87,0,16.03v286.6c0,4.38,1.79,8.56,4.96,11.58Z" />
-                        <polygon points="513.93 561.2 0 684.2 0 395.8 513.93 522.5 513.93 561.2" />
-                        <path
-                            d="M4.96,765.79l508.97-180.31v94.71L28.54,1073.91C19.12,1085.79,0,1079.13,0,1063.97v-286.6c0-4.38,1.79-8.56,4.96-11.58Z" />
-                        <path
-                            d="M1075.04,314.21l-508.97,180.31v-94.71S1051.46,6.09,1051.46,6.09c9.42-11.88,28.54-5.22,28.54,9.94v286.6c0,4.38-1.79,8.56-4.96,11.58Z" />
-                        <polygon points="566.07 561.2 1080 684.2 1080 395.8 566.07 522.5 566.07 561.2" />
-                        <path
-                            d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
-                    </svg>
-                    <i data-feather="chevron-right" class="mini-logo-icon w-4 h-4 transition-all"></i>
-                </button>
-            </div>
-
-            <div class="flex-1 flex flex-col items-center mt-1">
-                <div class="skuomorphic-btn flex flex-col items-center rounded-xl p-0.5 bg-white dark:bg-zinc-900/40">
-                    <button onclick="window.resetChat()"
-                        class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-zinc-500/10 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all"
-                        title="New Chat">
-                        <i data-feather="plus" class="w-4 h-4"></i>
-                    </button>
-                    <div class="w-6 h-px bg-zinc-200 dark:bg-zinc-800 my-0.5"></div>
-                    <button onclick="window.location.href='research.html'"
-                        class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-zinc-500/10 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all"
-                        title="Research">
-                        <i data-feather="compass" class="w-4 h-4"></i>
-                    </button>
-                </div>
-
-
-            </div>
-
-            <!-- Bottom: Trash + PFP -->
-            <div class="pb-4 flex flex-col items-center gap-2">
-                <button onclick="window.clearAll()"
-                    class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-zinc-400 hover:text-red-500 transition-all"
-                    title="Clear all chats">
-                    <i data-feather="trash-2" class="w-4 h-4"></i>
-                </button>
-                <div id="mini-avatar-display"
-                    class="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-[9px] font-bold overflow-hidden cursor-pointer hover:ring-2 hover:ring-[var(--accent-color)]/40 transition-all"
-                    onclick="window.toggleSettingsPanel()" title="Profile">
-                    U
-                </div>
-            </div>
-        </div>
+        <!-- Stub for JS compatibility -->
+        <div id="sidebar-mini-content" style="display:none"></div>
+        <div id="mini-avatar-display" style="display:none">U</div>
     </aside>
 
     <main class="flex-1 flex flex-col h-full relative overflow-hidden" style="background: var(--bg-elevated);">
@@ -2754,14 +2972,46 @@
                                 class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
                                 <i data-feather="plus" class="w-4 h-4"></i>
                                 <span id="plus-active-icon" class="flex items-center gap-0.5" style="display:none">
-                                    <span id="plus-search-indicator" class="w-6 h-6 flex items-center justify-center rounded-sm" style="display:none; color: var(--accent-color); background: var(--accent-tint)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                    <span id="plus-search-indicator"
+                                        class="w-6 h-6 flex items-center justify-center rounded-sm"
+                                        style="display:none; color: var(--accent-color); background: var(--accent-tint)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <line x1="2" y1="12" x2="22" y2="12" />
+                                            <path
+                                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                        </svg>
                                     </span>
-                                    <span id="plus-research-indicator" class="w-6 h-6 flex items-center justify-center rounded-sm" style="display:none; color: var(--accent-color); background: var(--accent-tint)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.41"/><path d="m13.56 11.747 4.332-.924"/><path d="m16 21-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z"/><path d="m6.158 8.633 1.114 4.456"/><path d="m8 21 3.105-6.21"/><circle cx="12" cy="13" r="2"/></svg>
+                                    <span id="plus-research-indicator"
+                                        class="w-6 h-6 flex items-center justify-center rounded-sm"
+                                        style="display:none; color: var(--accent-color); background: var(--accent-tint)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.41" />
+                                            <path d="m13.56 11.747 4.332-.924" />
+                                            <path d="m16 21-3.105-6.21" />
+                                            <path
+                                                d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z" />
+                                            <path d="m6.158 8.633 1.114 4.456" />
+                                            <path d="m8 21 3.105-6.21" />
+                                            <circle cx="12" cy="13" r="2" />
+                                        </svg>
                                     </span>
-                                    <span id="plus-think-indicator" class="w-6 h-6 flex items-center justify-center rounded-sm" style="display:none; color: var(--accent-color); background: var(--accent-tint)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                                    <span id="plus-think-indicator"
+                                        class="w-6 h-6 flex items-center justify-center rounded-sm"
+                                        style="display:none; color: var(--accent-color); background: var(--accent-tint)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                                            <path d="M9 18h6" />
+                                            <path d="M10 22h4" />
+                                        </svg>
                                     </span>
                                 </span>
                             </button>
@@ -2774,14 +3024,34 @@
                                         <i data-feather="globe" class="w-5 h-5 shrink-0"></i>
                                         <span class="text-[10px] font-semibold leading-none">Search</span>
                                     </button>
-                                    <button id="deep-research-btn" onclick="window.toggleDeepResearch(); window.closeAllMenus()"
+                                    <button id="deep-research-btn"
+                                        onclick="window.toggleDeepResearch(); window.closeAllMenus()"
                                         class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.41"/><path d="m13.56 11.747 4.332-.924"/><path d="m16 21-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z"/><path d="m6.158 8.633 1.114 4.456"/><path d="m8 21 3.105-6.21"/><circle cx="12" cy="13" r="2"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.41" />
+                                            <path d="m13.56 11.747 4.332-.924" />
+                                            <path d="m16 21-3.105-6.21" />
+                                            <path
+                                                d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z" />
+                                            <path d="m6.158 8.633 1.114 4.456" />
+                                            <path d="m8 21 3.105-6.21" />
+                                            <circle cx="12" cy="13" r="2" />
+                                        </svg>
                                         <span class="text-[10px] font-semibold leading-none">Research</span>
                                     </button>
                                     <button id="think-btn" onclick="window.toggleThinking(); window.closeAllMenus()"
                                         class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                                            <path d="M9 18h6" />
+                                            <path d="M10 22h4" />
+                                        </svg>
                                         <span class="text-[10px] font-semibold leading-none">Think</span>
                                     </button>
                                 </div>
@@ -2833,11 +3103,11 @@
                                         <div class="w-4 h-4 flex items-center justify-center">
                                             <svg class="w-full h-full stroke-[1.8px] stroke-current fill-none"
                                                 viewBox="0 0 24 24" stroke-linecap="round">
-                                                <path d="M12 12 C9.5 9.5,8 4,12 3 C16 4,14.5 9.5,12 12 Z"/>
-                                                <path d="M12 12 C14.5 9.5,20 8,21 12 C20 16,14.5 14.5,12 12 Z"/>
-                                                <path d="M12 12 C14.5 14.5,16 20,12 21 C8 20,9.5 14.5,12 12 Z"/>
-                                                <path d="M12 12 C9.5 14.5,4 16,3 12 C4 8,9.5 9.5,12 12 Z"/>
-                                                <circle cx="12" cy="12" r="2" class="fill-current stroke-none"/>
+                                                <path d="M12 12 C9.5 9.5,8 4,12 3 C16 4,14.5 9.5,12 12 Z" />
+                                                <path d="M12 12 C14.5 9.5,20 8,21 12 C20 16,14.5 14.5,12 12 Z" />
+                                                <path d="M12 12 C14.5 14.5,16 20,12 21 C8 20,9.5 14.5,12 12 Z" />
+                                                <path d="M12 12 C9.5 14.5,4 16,3 12 C4 8,9.5 9.5,12 12 Z" />
+                                                <circle cx="12" cy="12" r="2" class="fill-current stroke-none" />
                                             </svg>
                                         </div>
                                         <div class="flex flex-col">

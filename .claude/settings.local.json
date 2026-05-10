@@ -14,7 +14,8 @@
       "Bash(python *)",
       "PowerShell(python -c \"import ast; ast.parse\\(open\\('C:\\\\Users\\\\okemo\\\\Desktop\\\\web\\\\train.py', encoding='utf-8'\\).read\\(\\)\\); print\\('OK'\\)\")",
       "Bash(bash *)",
-      "Bash(scripts/start-server.sh *)"
+      "Bash(scripts/start-server.sh *)",
+      "Bash(python3 \"C:\\\\Users\\\\okemo\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"sidebar navigation collapsed expanded animation\" --domain ux -n 5)"
     ]
   }
 }

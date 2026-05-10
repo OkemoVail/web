@@ -2,50 +2,33 @@
 
 window.toggleSidebar = () => {
     if (!window.els.sidebar) return;
-    const body = document.body;
-    const fullContent = document.getElementById('sidebar-full-content');
-    const miniContent = document.getElementById('sidebar-mini-content');
 
     if (window.innerWidth < 1024) {
+        // Mobile: slide drawer in/out
         const overlay = document.getElementById('sidebar-overlay');
-        if (window.els.sidebar.classList.contains('-translate-x-full')) {
+        const isHidden = window.els.sidebar.classList.contains('-translate-x-full');
+        if (isHidden) {
             window.els.sidebar.classList.remove('-translate-x-full');
-            if (overlay) overlay.style.display = 'block';
+            if (overlay) {
+                overlay.style.display = 'block';
+                requestAnimationFrame(() => overlay.classList.add('sidebar-overlay-visible'));
+            }
         } else {
+            if (overlay) {
+                overlay.classList.remove('sidebar-overlay-visible');
+                const hide = () => {
+                    overlay.style.display = 'none';
+                    overlay.removeEventListener('transitionend', hide);
+                };
+                overlay.addEventListener('transitionend', hide);
+            }
             window.els.sidebar.classList.add('-translate-x-full');
-            if (overlay) overlay.style.display = 'none';
         }
         return;
     }
 
-    const isCollapsed = body.classList.contains('sidebar-collapsed');
-
-    if (isCollapsed) {
-        body.classList.remove('sidebar-collapsed');
-        fullContent.style.display = 'flex';
-        miniContent.style.display = 'none';
-
-        anime({
-            targets: fullContent,
-            opacity: [0, 1],
-            translateX: [-20, 0],
-            duration: 300,
-            easing: 'easeOutQuint'
-        });
-    } else {
-        anime({
-            targets: fullContent,
-            opacity: [1, 0],
-            translateX: [0, -20],
-            duration: 200,
-            easing: 'easeInQuint',
-            complete: () => {
-                body.classList.add('sidebar-collapsed');
-                fullContent.style.display = 'none';
-                miniContent.style.display = 'flex';
-                miniContent.style.opacity = 1;
-            }
-        });
-    }
+    // Desktop: CSS handles everything — width transition clips content,
+    // .sb-row-text fades via CSS selectors, icons stay pinned at px-3.
+    document.body.classList.toggle('sidebar-collapsed');
     if (typeof window.updateUI === 'function') window.updateUI();
 };
