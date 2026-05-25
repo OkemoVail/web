@@ -1,6 +1,19 @@
 // ─── Main Entrance & App Boot ──────────────────────────────
 
 window.initChatUI = () => {
+    // First-boot seed: if no systemPrompt has ever been saved, copy the
+    // Default personality preset in. Without this a fresh browser sends no
+    // system block and the model reverts to its base "I'm Qwen" identity.
+    if (window.settings &&
+        (!window.settings.systemPrompt || !String(window.settings.systemPrompt).trim())) {
+        const presets = window.PERSONALITY_PRESETS || [];
+        const def = presets.find(p => p.id === 'default') || presets[0];
+        if (def && def.prompt) {
+            window.settings.systemPrompt = def.prompt;
+            if (typeof window.saveSettings === 'function') window.saveSettings();
+        }
+    }
+
     // Ensure all chatting toggles are off on first load
     window.isWebSearch = false;
     window.isDeepResearch = false;

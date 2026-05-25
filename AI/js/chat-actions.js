@@ -79,7 +79,15 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         const messages = [];
 
         const sysPrompt = window.settings && window.settings.systemPrompt;
-        const globalRules = [
+        // Identity override — beats baked-in Qwen identity from the downloaded weights.
+        // Placed FIRST so it dominates anything else in the system message.
+        const octanIdentity = [
+            "Your name is Octan, made by OkemoVail."
+        ].join("\n");
+        // Prefer the backend-served global rules (single source of truth in
+        // system_prompts.json on the server). Fall back to the hardcoded copy
+        // when the API isn't reachable so the UI keeps working offline.
+        const globalRules = (window.__systemPrompts && window.__systemPrompts.global_rules) || [
             "Code generation rules (HTML / web UI):",
             "- Use Tailwind CSS utility classes ONLY. No custom <style> blocks, no separate CSS files, no inline style=\"...\" unless the user explicitly asks. Tailwind keeps output compact and saves tokens.",
             "- For standalone HTML, load Tailwind via <script src=\"https://cdn.tailwindcss.com\"></script> in the <head>.",
@@ -94,7 +102,20 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
             "Clarification rule:",
             "- If the user's task is ambiguous, underspecified, or complex enough that you cannot confidently produce a correct answer, ask 1–3 short, specific follow-up questions BEFORE writing code or a long answer. Do not guess silently. Simple, clear tasks: just answer."
         ].join("\n");
-        const mergedSys = sysPrompt ? (sysPrompt + "\n\n" + globalRules) : globalRules;
+        // Gender directive — controlled by the toggle inside the personality
+        // modal. Empty = no gender preference (the model picks/stays neutral).
+        const g = (window.settings && window.settings.gender) || '';
+        let genderLine = '';
+        if (g === 'female') {
+            genderLine = "You identify as female. Use she/her pronouns when referring to yourself.";
+        } else if (g === 'male') {
+            genderLine = "You identify as male. Use he/him pronouns when referring to yourself.";
+        }
+        const sysParts = [octanIdentity];
+        if (sysPrompt) sysParts.push(sysPrompt);
+        if (genderLine) sysParts.push(genderLine);
+        sysParts.push(globalRules);
+        const mergedSys = sysParts.join("\n\n");
         messages.push({ role: "system", content: mergedSys });
 
         for (const [u, a] of window.chatHistory.slice(0, -1)) {
@@ -495,3 +516,39 @@ window.openAttachmentFull = (idx) => {
         w.document.body.appendChild(img);
     }
 };
+
+// ─── Sync personalities + global rules from backend (single source of truth) ──
+// Fetches system_prompts.json via /api/system_prompts. Falls back to the
+// hardcoded PERSONALITY_PRESETS in chat.html if the call fails.
+(async function _bootstrapSystemPrompts() {
+    try {
+        const baseUrl = (typeof window.getOpenAIClient === 'function')
+            ? await window.getOpenAIClient()
+            : (localStorage.getItem('vail_custom_backend_url') || '');
+        if (!baseUrl) return;
+        const r = await fetch(baseUrl.replace(/\/$/, '') + '/api/system_prompts', {
+            headers: { 'ngrok-skip-browser-warning': 'true', 'bypass-tunnel-reminder': 'true' }
+        });
+        if (!r.ok) return;
+        const data = await r.json();
+        if (!data || !Array.isArray(data.personalities)) return;
+        window.__systemPrompts = data;
+        // Replace UI's personality list with the server's, preserving the
+        // same shape chat.html expects: { id, label, icon, prompt }.
+        const iconMap = { default:'circle', concise:'minimize-2', creative:'feather', coder:'code', tutor:'book-open', sarcastic:'smile', analyst:'bar-chart-2', friend:'heart', 'discord-friend':'message-circle' };
+        window.PERSONALITY_PRESETS = data.personalities.map(p => ({
+            id: p.id,
+            label: p.label || p.id,
+            icon: iconMap[p.id] || 'circle',
+            prompt: p.prompt || ''
+        }));
+        // If the personality modal is open, rerender its preset chips.
+        if (typeof window._renderPersonalityPresets === 'function'
+            && document.getElementById('personality-modal')
+            && document.getElementById('personality-modal').style.display === 'flex') {
+            window._renderPersonalityPresets();
+        }
+    } catch (e) {
+        console.warn('[system_prompts] fetch failed, using hardcoded fallback:', e);
+    }
+})();

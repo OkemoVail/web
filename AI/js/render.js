@@ -76,13 +76,11 @@ window.render = () => {
             const _modelIcon = window.currentModel ? window.currentModel.icon : '';
             const _modelName = window.currentModel ? window.currentModel.name : '';
 
-            // Inject generating header at top of active response
-            if (isLast && window.isGenerating) {
-                contentHtml += `<div class="model-generating-header"><span class="model-generating-label"><strong>${_modelName}</strong> is thinking…</span></div>`;
-            }
-
+            // New unified thinking indicator — shimmer-gradient text reading
+            // "Octan is thinking". Shown before any tokens arrive (replaces
+            // the old "Thinking…" placeholder + duplicate generating header).
             if (responseText === null && isLast && window.isGenerating) {
-                contentHtml = `<div class="thinking-container"><span class="thinking-shimmer">Thinking…</span></div>`;
+                contentHtml = `<div class="thinking-container"><span class="thinking-text-gradient">Octan is thinking</span></div>`;
             } else if (responseText) {
                 const { thought, content } = window.parseThought(responseText);
                 if (thought) {
