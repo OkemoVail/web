@@ -99,6 +99,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                 stream: true,
                 web_search: window.currentGenerationIsSearch,
                 use_thought: window.isThinkingEnabled,
+                use_canvas: window.canvasEnabled,
                 deep_research: window.isDeepResearch,
                 temperature: window.settings.temp,
                 top_p: window.settings.top_p || 0.9,

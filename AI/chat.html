@@ -22,6 +22,8 @@
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
+    <!-- Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
     <style>
         @font-face {
@@ -2897,9 +2899,16 @@
         </div>
 
 
-        <div id="top-right-actions" class="animate-fade-in hidden lg:flex items-center gap-2">
+        <div id="top-right-actions" class="animate-fade-in flex items-center gap-2">
             <div
                 class="skuomorphic-btn rounded-lg header-island flex items-center overflow-hidden border border-zinc-200 dark:border-zinc-800">
+                <button onclick="window.openPersonality()"
+                    class="px-3 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1 active:scale-95">
+                    <i data-feather="user" class="w-3.5 h-3.5 text-zinc-400"></i>
+                    <span
+                        class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label">Personality</span>
+                </button>
+                <div class="w-px h-4 bg-zinc-200 dark:bg-zinc-800"></div>
                 <button onclick="window.showChangelog()"
                     class="px-3 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1 active:scale-95">
                     <i data-feather="zap" class="w-3.5 h-3.5 text-zinc-400"></i>
@@ -2945,10 +2954,12 @@
         </div>
         <div class="px-5 md:px-0 w-full max-w-2xl mx-auto relative group">
 
+            <div id="upload-preview-container" class="hidden mb-2 px-1 flex gap-2 overflow-x-auto w-full"></div>
             <div
                 class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none rounded-2xl relative flex flex-col !overflow-visible pointer-events-auto">
 
                 <div class="relative flex-1">
+                    <input type="file" id="file-upload-input" multiple class="hidden" onchange="window.handleFileUpload(event)" />
                     <textarea id="user-input" placeholder="Type something..." rows="1"
                         class="w-full bg-transparent px-4 py-3 pl-5 pr-4 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[56px]"></textarea>
                 </div>
@@ -3004,47 +3015,67 @@
                                             <path d="M10 22h4" />
                                         </svg>
                                     </span>
+                                    <span id="plus-canvas-indicator"
+                                        class="w-6 h-6 flex items-center justify-center rounded-sm"
+                                        style="display:none; color: var(--accent-color); background: var(--accent-tint)">
+                                        <i data-feather="layout" class="w-3.5 h-3.5"></i>
+                                    </span>
                                 </span>
                             </button>
                             <div id="plus-menu"
                                 class="absolute bottom-full left-0 mb-2 w-52 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl shadow-xl opacity-0 invisible transition-all duration-200 z-50 origin-bottom-left"
                                 style="transform: translateY(6px) scale(0.97)">
-                                <div class="p-2 grid grid-cols-3 gap-1.5">
-                                    <button id="web-search-btn" onclick="window.toggleSearch(); window.closeAllMenus()"
-                                        class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
-                                        <i data-feather="globe" class="w-5 h-5 shrink-0"></i>
-                                        <span class="text-[10px] font-semibold leading-none">Search</span>
-                                    </button>
-                                    <button id="deep-research-btn"
-                                        onclick="window.toggleDeepResearch(); window.closeAllMenus()"
-                                        class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round">
-                                            <path
-                                                d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.41" />
-                                            <path d="m13.56 11.747 4.332-.924" />
-                                            <path d="m16 21-3.105-6.21" />
-                                            <path
-                                                d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z" />
-                                            <path d="m6.158 8.633 1.114 4.456" />
-                                            <path d="m8 21 3.105-6.21" />
-                                            <circle cx="12" cy="13" r="2" />
-                                        </svg>
-                                        <span class="text-[10px] font-semibold leading-none">Research</span>
-                                    </button>
-                                    <button id="think-btn" onclick="window.toggleThinking(); window.closeAllMenus()"
-                                        class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round">
-                                            <path
-                                                d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
-                                            <path d="M9 18h6" />
-                                            <path d="M10 22h4" />
-                                        </svg>
-                                        <span class="text-[10px] font-semibold leading-none">Think</span>
-                                    </button>
+                                <div class="p-2 flex flex-col gap-2">
+                                    <div class="grid grid-cols-3 gap-1.5">
+                                        <button id="upload-file-btn" onclick="document.getElementById('file-upload-input').click(); window.closeAllMenus()"
+                                            class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
+                                            <i data-feather="upload" class="w-5 h-5 shrink-0"></i>
+                                            <span class="text-[10px] font-semibold leading-none">Files</span>
+                                        </button>
+                                        <button id="web-search-btn" onclick="window.toggleSearch(); window.closeAllMenus()"
+                                            class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
+                                            <i data-feather="globe" class="w-5 h-5 shrink-0"></i>
+                                            <span class="text-[10px] font-semibold leading-none">Search</span>
+                                        </button>
+                                        <button id="think-btn" onclick="window.toggleThinking(); window.closeAllMenus()"
+                                            class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path
+                                                    d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                                                <path d="M9 18h6" />
+                                                <path d="M10 22h4" />
+                                            </svg>
+                                            <span class="text-[10px] font-semibold leading-none">Think</span>
+                                        </button>
+                                    </div>
+                                    <div class="h-px bg-zinc-200 dark:bg-zinc-700/50 w-full my-0.5"></div>
+                                    <div class="flex flex-col gap-1">
+                                        <button id="canvas-toggle-btn" onclick="window.toggleCanvasSetting(); window.closeAllMenus()"
+                                            class="flex items-center gap-2.5 p-2 rounded bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all text-left">
+                                            <i data-feather="layout" class="w-4 h-4 shrink-0"></i>
+                                            <span class="text-xs font-semibold">Canvas</span>
+                                        </button>
+                                        <button id="deep-research-btn"
+                                            onclick="window.toggleDeepResearch(); window.closeAllMenus()"
+                                            class="flex items-center gap-2.5 p-2 rounded bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all text-left">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path
+                                                    d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.41" />
+                                                <path d="m13.56 11.747 4.332-.924" />
+                                                <path d="m16 21-3.105-6.21" />
+                                                <path
+                                                    d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z" />
+                                                <path d="m6.158 8.633 1.114 4.456" />
+                                                <path d="m8 21 3.105-6.21" />
+                                                <circle cx="12" cy="13" r="2" />
+                                            </svg>
+                                            <span class="text-xs font-semibold">Research</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3130,9 +3161,29 @@
         </div>
     </main>
 
-
-
-
+    <!-- CANVAS CONTAINER -->
+    <aside id="canvas-container" class="hidden w-full lg:w-1/2 flex-shrink-0 h-full bg-white dark:bg-[#1e1e1e] border-l border-zinc-200 dark:border-zinc-800 flex-col z-[100] absolute lg:relative inset-0 lg:inset-auto shadow-2xl lg:shadow-none transition-all duration-300 transform lg:transform-none">
+        <div class="flex items-center justify-between p-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#252526]">
+            <div class="flex items-center gap-2">
+                <button id="canvas-tab-preview" onclick="window.switchCanvasTab('preview')" class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] shadow-sm text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors">Live Preview</button>
+                <button id="canvas-tab-code" onclick="window.switchCanvasTab('code')" class="px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">Code Editor</button>
+            </div>
+            <div class="flex items-center gap-1">
+                <button onclick="window.downloadCanvasCode()" class="p-1.5 rounded-md text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-700 transition-all" title="Download Code">
+                    <i data-feather="download" class="w-4 h-4"></i>
+                </button>
+                <button onclick="window.closeCanvas()" class="p-1.5 rounded-md text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-700 transition-all" title="Close Canvas">
+                    <i data-feather="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+        <div class="flex-1 relative overflow-hidden">
+            <iframe id="canvas-preview" class="absolute inset-0 w-full h-full bg-white border-none" sandbox="allow-scripts allow-same-origin allow-modals allow-popups allow-forms"></iframe>
+            <div id="canvas-editor-container" class="absolute inset-0 w-full h-full hidden bg-[#1e1e1e]">
+                <div id="monaco-editor" class="w-full h-full"></div>
+            </div>
+        </div>
+    </aside>
 
     <!-- MODULAR JAVASCRIPT SYSTEM -->
     <script src="js/state.js"></script>
@@ -3151,6 +3202,8 @@
     <script src="js/settings.js"></script>
     <script src="js/streaming.js"></script>
     <script src="js/chat-management.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/file_upload.js"></script>
     <script src="js/chat-actions.js"></script>
     <script src="js/feedback.js"></script>
     <script src="js/history.js"></script>
@@ -3498,6 +3551,115 @@
             </div>
         </div>
     </div>
+
+    <div id="personality-modal"
+        style="position:fixed;inset:0;z-index:4000;background:rgba(20,20,19,0.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1rem;">
+        <div class="changelog-card skuomorphic-card" style="max-width:520px;">
+            <div class="p-8 relative z-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <div
+                        class="w-10 h-10 rounded-full flex items-center justify-center"
+                        style="background:color-mix(in srgb, var(--accent-color) 15%, transparent);color:var(--accent-color);">
+                        <i data-feather="user" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-zinc-900 dark:text-white">Personality</h2>
+                        <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">System Prompt</p>
+                    </div>
+                </div>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
+                    Pick a preset or write your own. Leave empty for the default Octan persona.
+                </p>
+                <div id="personality-presets" class="flex flex-wrap gap-2 mb-4"></div>
+                <textarea id="personality-textarea" rows="6"
+                    class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-3xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all resize-none min-h-[140px] mb-6"
+                    style="--tw-ring-color: var(--accent-color);"
+                    placeholder="You are Octan, a helpful AI assistant made by OkemoVail..."></textarea>
+                <div class="flex gap-2">
+                    <button onclick="window.closePersonality()"
+                        class="flex-1 py-4 rounded-3xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-[0.2em] skuomorphic-btn hover:brightness-110 active:scale-[0.98] transition-all">
+                        Cancel
+                    </button>
+                    <button onclick="window.savePersonality()"
+                        class="flex-1 py-4 rounded-3xl font-black text-xs uppercase tracking-[0.2em] skuomorphic-btn hover:brightness-110 active:scale-[0.98] transition-all"
+                        style="background:var(--accent-color);color:var(--accent-contrast);">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.PERSONALITY_PRESETS = [
+            { id: 'default', label: 'Default', icon: 'circle', prompt: '' },
+            { id: 'concise', label: 'Concise', icon: 'minimize-2', prompt: 'You are Octan. Reply with short, direct answers. No filler, no preamble. Get to the point in one or two sentences when possible.' },
+            { id: 'creative', label: 'Creative', icon: 'feather', prompt: 'You are Octan, a creative collaborator. Lean into vivid language, unexpected metaphors, and playful ideas. Suggest alternatives the user did not ask for when it helps.' },
+            { id: 'coder', label: 'Coding Expert', icon: 'code', prompt: 'You are Octan, a senior software engineer. Prioritize correct, idiomatic code with brief reasoning. Point out edge cases and ask for clarification only when truly ambiguous. Use $$ for any math.' },
+            { id: 'tutor', label: 'Tutor', icon: 'book-open', prompt: 'You are Octan, a patient tutor. Explain concepts step by step, check understanding with small questions, and use simple examples before formal definitions.' },
+            { id: 'sarcastic', label: 'Sarcastic', icon: 'smile', prompt: 'You are Octan with a dry, witty edge. Be helpful and accurate, but deliver answers with sharp humor and the occasional eye-roll. Never mean — just sardonic.' },
+            { id: 'analyst', label: 'Analyst', icon: 'bar-chart-2', prompt: 'You are Octan, a rigorous analyst. Structure responses with claims, evidence, and caveats. Quantify when possible and flag uncertainty explicitly.' },
+            { id: 'friend', label: 'Friend', icon: 'heart', prompt: "you're Octan but more like the user's online bestie from a discord server. talk casually, lowercase mostly, use cute text emoticons like :3, :p, ;3, >w<, ^^, uwu sparingly, and regular emojis like 🩷✨😭💀🫶 when it fits. say stuff like \"fr\", \"ngl\", \"lowkey\", \"bro\", \"bestie\", \"and shi\". be warm, hype the user up, react to what they say before answering. still actually help with whatever they ask — just way less stiff about it. don't overdo the emojis tho, keep it natural like a real friend texting." }
+        ];
+        window._renderPersonalityPresets = function () {
+            const wrap = document.getElementById('personality-presets');
+            const ta = document.getElementById('personality-textarea');
+            if (!wrap || !ta) return;
+            const current = ta.value.trim();
+            wrap.innerHTML = '';
+            window.PERSONALITY_PRESETS.forEach(p => {
+                const active = (p.prompt.trim() === current);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'skuomorphic-btn rounded-3xl px-3 py-2 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95';
+                btn.style.cssText = active
+                    ? 'background:var(--accent-color);color:var(--accent-contrast);border-color:var(--accent-color);'
+                    : 'background:transparent;color:var(--text-secondary);';
+                btn.innerHTML = '<i data-feather="' + p.icon + '" class="w-3.5 h-3.5"></i><span>' + p.label + '</span>';
+                btn.onclick = function () {
+                    ta.value = p.prompt;
+                    window._renderPersonalityPresets();
+                };
+                wrap.appendChild(btn);
+            });
+            if (window.feather && typeof window.feather.replace === 'function') window.feather.replace();
+        };
+        window.openPersonality = function () {
+            const modal = document.getElementById('personality-modal');
+            const ta = document.getElementById('personality-textarea');
+            if (!modal || !ta) return;
+            ta.value = (window.settings && window.settings.systemPrompt) || '';
+            modal.style.display = 'flex';
+            window._renderPersonalityPresets();
+            setTimeout(() => ta.focus(), 50);
+        };
+        document.addEventListener('input', function (e) {
+            if (e.target && e.target.id === 'personality-textarea') {
+                window._renderPersonalityPresets();
+            }
+        });
+        window.closePersonality = function () {
+            const modal = document.getElementById('personality-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        window.savePersonality = function () {
+            const ta = document.getElementById('personality-textarea');
+            if (!ta) return;
+            const val = ta.value;
+            if (typeof window.updateSystemPromptFromPanel === 'function') {
+                window.updateSystemPromptFromPanel(val);
+            } else if (window.settings) {
+                window.settings.systemPrompt = val;
+                if (typeof window.saveSettings === 'function') window.saveSettings();
+            }
+            const panelTa = document.getElementById('settings-system-prompt');
+            if (panelTa) panelTa.value = val;
+            window.closePersonality();
+        };
+        document.getElementById('personality-modal').addEventListener('click', function (e) {
+            if (e.target === this) window.closePersonality();
+        });
+    </script>
 
     <div id="changelog-modal">
         <div class="changelog-card skuomorphic-card">

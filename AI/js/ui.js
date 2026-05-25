@@ -46,8 +46,10 @@ window.updateUI = () => {
     const plusSearchIndicator = document.getElementById('plus-search-indicator');
     const plusResearchIndicator = document.getElementById('plus-research-indicator');
     const plusThinkIndicator = document.getElementById('plus-think-indicator');
+    const plusCanvasIndicator = document.getElementById('plus-canvas-indicator');
     const deepResearchBtn = document.getElementById('deep-research-btn');
     const thinkBtn = document.getElementById('think-btn');
+    const canvasToggleBtn = document.getElementById('canvas-toggle-btn');
     const activeColor = isDark ? '#ffffff' : 'var(--accent-color)';
 
     if (window.els.searchBtn) {
@@ -92,8 +94,22 @@ window.updateUI = () => {
         }
     }
 
+    if (canvasToggleBtn) {
+        if (window.canvasEnabled) {
+            canvasToggleBtn.classList.add('active');
+            canvasToggleBtn.style.color = activeColor;
+            canvasToggleBtn.style.background = 'var(--accent-glow)';
+            if (plusCanvasIndicator) plusCanvasIndicator.style.display = 'flex';
+        } else {
+            canvasToggleBtn.classList.remove('active');
+            canvasToggleBtn.style.color = '';
+            canvasToggleBtn.style.background = '';
+            if (plusCanvasIndicator) plusCanvasIndicator.style.display = 'none';
+        }
+    }
+
     if (plusActiveIcon) {
-        plusActiveIcon.style.display = (window.isWebSearch || window.isDeepResearch || window.isThinkingEnabled) ? 'flex' : 'none';
+        plusActiveIcon.style.display = (window.isWebSearch || window.isDeepResearch || window.isThinkingEnabled || window.canvasEnabled) ? 'flex' : 'none';
     }
 
     // 4. Placeholder
