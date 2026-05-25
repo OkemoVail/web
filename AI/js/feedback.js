@@ -18,7 +18,8 @@ window.sendFeedback = async (idx, type, btnEl) => {
                 chat_id: window.currentChatId,
                 message_index: idx,
                 content: content,
-                feedback_type: type
+                feedback_type: type,
+                user_name: (window.settings && window.settings.userName) || ""
             })
         });
 

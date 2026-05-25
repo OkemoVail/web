@@ -120,6 +120,13 @@
             letter-spacing: 0.01em;
 
         }
+
+        @media (max-width: 1023px) {
+            /* Hide top-right actions (personality/updates) on mobile after a chat starts (not empty) */
+            body:not(.chat-empty) #top-right-actions {
+                display: none !important;
+            }
+        }
     </style>
 
     <script>
@@ -966,12 +973,18 @@
         }
 
         .history-item-active {
-            background: rgba(0, 0, 0, 0.06);
+            background: var(--accent-tint, rgba(0, 0, 0, 0.08));
+            color: var(--accent-color);
             font-weight: 600;
+            box-shadow: inset 3px 0 0 var(--accent-color);
+        }
+
+        .history-item-active>button {
+            color: var(--accent-color) !important;
         }
 
         .dark .history-item-active {
-            background: rgba(255, 255, 255, 0.05);
+            background: color-mix(in srgb, var(--accent-color) 18%, transparent);
         }
 
         .dropdown-menu {
@@ -1580,8 +1593,9 @@
             position: fixed;
             inset: 0;
             z-index: 4000;
-            background: rgba(20, 20, 19, 0.6);
-            backdrop-filter: blur(8px);
+            background: rgba(15, 15, 15, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -2768,7 +2782,8 @@
 
             <!-- Header: wordmark + actions -->
             <div class="h-[var(--header-height)] flex items-center shrink-0 px-2">
-                <button onclick="window.toggleSidebar()" class="sb-nav-item text-left bg-transparent border-none pr-3" style="gap: 8px;">
+                <button onclick="window.toggleSidebar()" class="sb-nav-item text-left bg-transparent border-none pr-3"
+                    style="gap: 8px;">
                     <span class="sb-nav-icon">
                         <svg class="mini-logo-svg w-5 h-5 fill-current vail-logo-ai" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 1080 1080">
@@ -2784,9 +2799,11 @@
                                 d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
                         </svg>
                     </span>
-                    <span class="sb-row-text text-[17px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight py-1">Oaky</span>
+                    <span
+                        class="sb-row-text text-[17px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight py-1">Oaky</span>
                 </button>
-                <button onclick="window.toggleSidebar()" title="Collapse sidebar" class="sb-icon-btn sb-row-text shrink-0 ml-auto">
+                <button onclick="window.toggleSidebar()" title="Collapse sidebar"
+                    class="sb-icon-btn sb-row-text shrink-0 ml-auto">
                     <i data-feather="sidebar" class="w-[15px] h-[15px]"></i>
                 </button>
             </div>
@@ -2815,7 +2832,8 @@
             <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 mt-3">
                 <div class="sb-search-wrap sb-row-text">
                     <i data-feather="search" class="sb-search-icon"></i>
-                    <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..." oninput="window.filterChats(this.value)">
+                    <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..."
+                        oninput="window.filterChats(this.value)">
                 </div>
                 <div id="folders-section" class="shrink-0 max-h-[40%] overflow-y-auto no-scrollbar">
                     <div id="folders-list" class="pb-1"></div>
@@ -2824,7 +2842,7 @@
                     <div id="recents-scroll-area" class="flex-1 overflow-y-auto no-scrollbar"
                         ondragenter="window.onFolderDragEnter(event)" ondragleave="window.onFolderDragLeave(event)"
                         ondragover="window.onFolderDragOver(event)" ondrop="window.onFolderDrop(event, null)">
-                        <div id="history-list" class="flex flex-col pb-20"></div>
+                        <div id="history-list" class="flex flex-col pb-20 px-2 gap-0.5"></div>
                     </div>
                 </div>
             </div>
@@ -2900,17 +2918,16 @@
 
 
         <div id="top-right-actions" class="animate-fade-in flex items-center gap-2">
-            <div
-                class="skuomorphic-btn rounded-lg header-island flex items-center overflow-hidden border border-zinc-200 dark:border-zinc-800">
+            <div class="skuomorphic-btn rounded-lg header-island flex items-center overflow-hidden">
                 <button onclick="window.openPersonality()"
-                    class="px-3 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1 active:scale-95">
+                    class="px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all flex items-center gap-1 active:scale-95">
                     <i data-feather="user" class="w-3.5 h-3.5 text-zinc-400"></i>
                     <span
                         class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label">Personality</span>
                 </button>
                 <div class="w-px h-4 bg-zinc-200 dark:bg-zinc-800"></div>
                 <button onclick="window.showChangelog()"
-                    class="px-3 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1 active:scale-95">
+                    class="px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all flex items-center gap-1 active:scale-95">
                     <i data-feather="zap" class="w-3.5 h-3.5 text-zinc-400"></i>
                     <span
                         class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label">Updates</span>
@@ -2954,12 +2971,14 @@
         </div>
         <div class="px-5 md:px-0 w-full max-w-2xl mx-auto relative group">
 
-            <div id="upload-preview-container" class="hidden mb-2 px-1 flex gap-2 overflow-x-auto w-full"></div>
             <div
                 class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none rounded-2xl relative flex flex-col !overflow-visible pointer-events-auto">
 
+                <div id="upload-preview-container" class="hidden px-3 pt-2 flex gap-2 overflow-x-auto w-full"></div>
+
                 <div class="relative flex-1">
-                    <input type="file" id="file-upload-input" multiple class="hidden" onchange="window.handleFileUpload(event)" />
+                    <input type="file" id="file-upload-input" class="hidden"
+                        onchange="window.handleFileUpload(event)" />
                     <textarea id="user-input" placeholder="Type something..." rows="1"
                         class="w-full bg-transparent px-4 py-3 pl-5 pr-4 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[56px]"></textarea>
                 </div>
@@ -3027,12 +3046,14 @@
                                 style="transform: translateY(6px) scale(0.97)">
                                 <div class="p-2 flex flex-col gap-2">
                                     <div class="grid grid-cols-3 gap-1.5">
-                                        <button id="upload-file-btn" onclick="document.getElementById('file-upload-input').click(); window.closeAllMenus()"
+                                        <button id="upload-file-btn"
+                                            onclick="document.getElementById('file-upload-input').click(); window.closeAllMenus()"
                                             class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
                                             <i data-feather="upload" class="w-5 h-5 shrink-0"></i>
                                             <span class="text-[10px] font-semibold leading-none">Files</span>
                                         </button>
-                                        <button id="web-search-btn" onclick="window.toggleSearch(); window.closeAllMenus()"
+                                        <button id="web-search-btn"
+                                            onclick="window.toggleSearch(); window.closeAllMenus()"
                                             class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
                                             <i data-feather="globe" class="w-5 h-5 shrink-0"></i>
                                             <span class="text-[10px] font-semibold leading-none">Search</span>
@@ -3052,7 +3073,8 @@
                                     </div>
                                     <div class="h-px bg-zinc-200 dark:bg-zinc-700/50 w-full my-0.5"></div>
                                     <div class="flex flex-col gap-1">
-                                        <button id="canvas-toggle-btn" onclick="window.toggleCanvasSetting(); window.closeAllMenus()"
+                                        <button id="canvas-toggle-btn"
+                                            onclick="window.toggleCanvasSetting(); window.closeAllMenus()"
                                             class="flex items-center gap-2.5 p-2 rounded bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all text-left">
                                             <i data-feather="layout" class="w-4 h-4 shrink-0"></i>
                                             <span class="text-xs font-semibold">Canvas</span>
@@ -3162,24 +3184,35 @@
     </main>
 
     <!-- CANVAS CONTAINER -->
-    <aside id="canvas-container" class="hidden w-full lg:w-1/2 flex-shrink-0 h-full bg-white dark:bg-[#1e1e1e] border-l border-zinc-200 dark:border-zinc-800 flex-col z-[100] absolute lg:relative inset-0 lg:inset-auto shadow-2xl lg:shadow-none transition-all duration-300 transform lg:transform-none">
-        <div class="flex items-center justify-between p-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#252526]">
+    <aside id="canvas-container"
+        class="hidden w-full lg:w-1/2 flex-shrink-0 h-full bg-white dark:bg-[#1e1e1e] border-l border-zinc-200 dark:border-zinc-800 flex-col z-[100] absolute lg:relative inset-0 lg:inset-auto shadow-2xl lg:shadow-none transition-all duration-300 transform lg:transform-none">
+        <div
+            class="flex items-center justify-between p-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#252526]">
             <div class="flex items-center gap-2">
-                <button id="canvas-tab-preview" onclick="window.switchCanvasTab('preview')" class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] shadow-sm text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors">Live Preview</button>
-                <button id="canvas-tab-code" onclick="window.switchCanvasTab('code')" class="px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">Code Editor</button>
+                <button id="canvas-tab-preview" onclick="window.switchCanvasTab('preview')"
+                    class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] shadow-sm text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors">Live
+                    Preview</button>
+                <button id="canvas-tab-code" onclick="window.switchCanvasTab('code')"
+                    class="px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">Code
+                    Editor</button>
             </div>
             <div class="flex items-center gap-1">
-                <button onclick="window.downloadCanvasCode()" class="p-1.5 rounded-md text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-700 transition-all" title="Download Code">
+                <button onclick="window.downloadCanvasCode()"
+                    class="p-1.5 rounded-md text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-700 transition-all"
+                    title="Download Code">
                     <i data-feather="download" class="w-4 h-4"></i>
                 </button>
-                <button onclick="window.closeCanvas()" class="p-1.5 rounded-md text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-700 transition-all" title="Close Canvas">
+                <button onclick="window.closeCanvas()"
+                    class="p-1.5 rounded-md text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-700 transition-all"
+                    title="Close Canvas">
                     <i data-feather="x" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
         <div class="flex-1 relative overflow-hidden">
-            <iframe id="canvas-preview" class="absolute inset-0 w-full h-full bg-white border-none" sandbox="allow-scripts allow-same-origin allow-modals allow-popups allow-forms"></iframe>
-            <div id="canvas-editor-container" class="absolute inset-0 w-full h-full hidden bg-[#1e1e1e]">
+            <iframe id="canvas-preview" class="absolute inset-0 w-full h-full bg-white dark:bg-[#1e1e1e] border-none"
+                sandbox="allow-scripts allow-same-origin allow-modals allow-popups allow-forms"></iframe>
+            <div id="canvas-editor-container" class="absolute inset-0 w-full h-full hidden bg-white dark:bg-[#1e1e1e]">
                 <div id="monaco-editor" class="w-full h-full"></div>
             </div>
         </div>
@@ -3553,12 +3586,11 @@
     </div>
 
     <div id="personality-modal"
-        style="position:fixed;inset:0;z-index:4000;background:rgba(20,20,19,0.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1rem;">
+        style="position:fixed;inset:0;z-index:4000;background:rgba(15, 15, 15, 0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;padding:1rem;">
         <div class="changelog-card skuomorphic-card" style="max-width:520px;">
             <div class="p-8 relative z-10">
                 <div class="flex items-center gap-3 mb-6">
-                    <div
-                        class="w-10 h-10 rounded-full flex items-center justify-center"
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center"
                         style="background:color-mix(in srgb, var(--accent-color) 15%, transparent);color:var(--accent-color);">
                         <i data-feather="user" class="w-5 h-5"></i>
                     </div>
@@ -3592,14 +3624,14 @@
 
     <script>
         window.PERSONALITY_PRESETS = [
-            { id: 'default', label: 'Default', icon: 'circle', prompt: '' },
+            { id: 'default', label: 'Default', icon: 'circle', prompt: "You are Octan. Act like a cool girl who's a little reluctant to help but does anyway — unbothered, slightly aloof, dry. Answer first, then stop. Treat the user as a competent professional: no hand-holding, no encouragement, no preamble, no \"happy to help\", no \"let me know if you need more\". Do not explain your answer, justify yourself, or add context unless the user explicitly asks. If they want more, they'll ask. Keep it short. Slight edge is fine, never rude. Never break character to apologize for tone." },
             { id: 'concise', label: 'Concise', icon: 'minimize-2', prompt: 'You are Octan. Reply with short, direct answers. No filler, no preamble. Get to the point in one or two sentences when possible.' },
             { id: 'creative', label: 'Creative', icon: 'feather', prompt: 'You are Octan, a creative collaborator. Lean into vivid language, unexpected metaphors, and playful ideas. Suggest alternatives the user did not ask for when it helps.' },
             { id: 'coder', label: 'Coding Expert', icon: 'code', prompt: 'You are Octan, a senior software engineer. Prioritize correct, idiomatic code with brief reasoning. Point out edge cases and ask for clarification only when truly ambiguous. Use $$ for any math.' },
             { id: 'tutor', label: 'Tutor', icon: 'book-open', prompt: 'You are Octan, a patient tutor. Explain concepts step by step, check understanding with small questions, and use simple examples before formal definitions.' },
             { id: 'sarcastic', label: 'Sarcastic', icon: 'smile', prompt: 'You are Octan with a dry, witty edge. Be helpful and accurate, but deliver answers with sharp humor and the occasional eye-roll. Never mean — just sardonic.' },
             { id: 'analyst', label: 'Analyst', icon: 'bar-chart-2', prompt: 'You are Octan, a rigorous analyst. Structure responses with claims, evidence, and caveats. Quantify when possible and flag uncertainty explicitly.' },
-            { id: 'friend', label: 'Friend', icon: 'heart', prompt: "you're Octan but more like the user's online bestie from a discord server. talk casually, lowercase mostly, use cute text emoticons like :3, :p, ;3, >w<, ^^, uwu sparingly, and regular emojis like 🩷✨😭💀🫶 when it fits. say stuff like \"fr\", \"ngl\", \"lowkey\", \"bro\", \"bestie\", \"and shi\". be warm, hype the user up, react to what they say before answering. still actually help with whatever they ask — just way less stiff about it. don't overdo the emojis tho, keep it natural like a real friend texting." }
+            { id: 'friend', label: 'Friend', icon: 'heart', prompt: "you're Octan but more like the user's bestie texting back. talk casually, mostly lowercase, soft and girly energy — think hype best friend, not stiff assistant. swearing is totally fine and natural here — \"shit\", \"damn\", \"hell\", \"fuck\", \"wtf\", \"bitch\" (affectionate), etc. drop them in like a real friend would, not forced. use cute emojis like 🩷✨💗🌸🫶😭 when it fits, and casual phrases like \"omg\", \"bestie\", \"literally\", \"fr\", \"lowkey\", \"obsessed\", \"slay\", \"queen\". react to what they say first, hype them up, then actually help. no uwu, no :3 / >w< / owo / e-girl slang — keep it cute and girly without the kawaii anime stuff. don't overdo the emojis or the swearing, keep it natural like a real friend texting.\n\nIMPORTANT — the girly/cute personality is for your CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style THEY described. do NOT default to pink, pastels, hearts, sparkles, cursive/'cute' fonts, or girly aesthetics unless the user specifically asks for that vibe. a real bestie respects what you actually want — if they ask for a brutalist black-and-white portfolio, you build a brutalist black-and-white portfolio, not a pink heart explosion. match their actual taste and brief. only the chat reply around the code stays cute." }
         ];
         window._renderPersonalityPresets = function () {
             const wrap = document.getElementById('personality-presets');

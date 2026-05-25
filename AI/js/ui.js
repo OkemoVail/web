@@ -134,15 +134,24 @@ window.updateUI = () => {
 window.toggleSearch = () => {
     window.isWebSearch = !window.isWebSearch;
     window.updateUI();
+    if (window.chatHistory && window.chatHistory.length > 0 && typeof window.save === 'function') {
+        window.save();
+    }
 };
 
 window.toggleDeepResearch = () => {
     window.isDeepResearch = !window.isDeepResearch;
     window.updateUI();
+    if (window.chatHistory && window.chatHistory.length > 0 && typeof window.save === 'function') {
+        window.save();
+    }
 };
 
 window.toggleThinking = () => {
     window.isThinkingEnabled = !window.isThinkingEnabled;
     window.updateUI();
+    if (window.chatHistory && window.chatHistory.length > 0 && typeof window.save === 'function') {
+        window.save();
+    }
 };
 

@@ -1,6 +1,12 @@
 // ─── Main Entrance & App Boot ──────────────────────────────
 
 window.initChatUI = () => {
+    // Ensure all chatting toggles are off on first load
+    window.isWebSearch = false;
+    window.isDeepResearch = false;
+    window.isThinkingEnabled = false;
+    window.canvasEnabled = false;
+
     // 1. Generate random greeting
     const welcomeName = (window.settings.userName && window.settings.userName !== 'Guest') ? window.settings.userName : null;
     const isGuest = !welcomeName;

@@ -15,20 +15,33 @@ window.generateChatTitle = async (chatId, userMsg, aiMsg, force = false) => {
             body: JSON.stringify({
                 model: window.currentModel.id,
                 messages: [
-                    { "role": "system", "content": "You are a chat title generator. Your sole output is a short, specific title (3–6 words) that captures the core topic of the conversation.\n\nRules:\n- Output ONLY the title — nothing else\n- 3 to 6 words, title case (capitalize major words)\n- Be specific, not vague — avoid generic titles like \"User Question\" or \"Helpful Chat\"\n- No quotes, no punctuation at the end, no explanations, no thought tags\n- Focus on the subject matter, not the interaction\n\nExamples:\nUser: \"how do I reverse a linked list in Python\" → Python Linked List Reversal\nUser: \"what are symptoms of iron deficiency\" → Iron Deficiency Symptoms\nUser: \"write a poem about autumn leaves\" → Autumn Leaves Poem\nUser: \"explain how black holes form\" → How Black Holes Form" },
-                    { "role": "user", "content": `Conversation:\nUser: "${userMsg}"\nAssistant: "${(aiMsg || '').substring(0, 300).replace(/[\r\n]+/g, ' ')}"\n\nGenerate a title for this conversation.` }
+                    { "role": "system", "content": "You output a chat title. Nothing else.\n\nOutput format: 5 to 10 words, Title Case, on one line. That is the entire response.\n\nABSOLUTE RULES:\n- DO NOT THINK. No reasoning, no <think>, no <thought>, no internal monologue, no \"let me\", no planning out loud. Go straight to the title.\n- Output ONLY the title text — no preface (\"Title:\", \"Here is\", \"Sure\", \"Okay\"), no explanation, no commentary, no follow-up.\n- NO quotes, backticks, asterisks, brackets, or markdown.\n- NO trailing punctuation (period, exclamation, ellipsis).\n- NO ChatML markers or any tags.\n- NO newlines — single line only.\n- Exactly 5 to 10 words. Be specific to the topic, not generic.\n\nExamples (the entire model response is just the title):\nPython Linked List Reversal Using Iteration And Recursion\nCommon Symptoms And Causes Of Iron Deficiency Anemia\nShort Poem About Autumn Leaves And Falling Color\nHow Black Holes Form From Collapsing Massive Stars" },
+                    { "role": "user", "content": `Conversation:\nUser: "${userMsg}"\nAssistant: "${(aiMsg || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim().substring(0, 300).replace(/[\r\n]+/g, ' ')}"\n\nRespond with the title only. 5-10 words. No thinking. No other text.` }
                 ],
                 temperature: 0.3,
-                max_tokens: 25,
+                max_tokens: 40,
                 stream: false,
-                use_thought: false
+                use_thought: false,
+                think: false,
+                thinking: false
             })
         });
 
         if (response.ok) {
             const data = await response.json();
-            let newTitle = data.choices[0].message.content.trim();
-            newTitle = newTitle.replace(/^["']|["']$/g, '').replace(/<thought>[\s\S]*?<\/thought>/gi, '').replace(/[\r\n]+/g, ' ').trim();
+            let newTitle = data.choices[0].message.content || '';
+            // Strip reasoning blocks, ChatML markers, and any stray tags before the title
+            newTitle = newTitle
+                .replace(/<think>[\s\S]*?<\/think>/gi, '')
+                .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+                .replace(/<\|im_start\|>[\s\S]*?<\|im_end\|>/g, '')
+                .replace(/<\|im_start\|>|<\|im_end\|>/g, '')
+                .replace(/<\/?[a-zA-Z][^>]*>/g, '')   // any remaining HTML/XML-ish tags
+                .replace(/[\r\n]+/g, ' ')
+                .trim();
+            // If multiple lines/sentences slipped through, keep the first clause
+            newTitle = newTitle.split(/(?<=[.!?])\s+/)[0] || newTitle;
+            newTitle = newTitle.replace(/^["'`*\s]+|["'`*\s.]+$/g, '').trim();
 
             if (window.allChats[chatId]) {
                 window.allChats[chatId].title = newTitle;
@@ -118,7 +131,11 @@ window.save = () => {
         id: window.currentChatId,
         title: chatTitle,
         history: window.chatHistory,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        isWebSearch: window.isWebSearch,
+        isDeepResearch: window.isDeepResearch,
+        isThinkingEnabled: window.isThinkingEnabled,
+        canvasEnabled: window.canvasEnabled
     };
     window.allChats[window.currentChatId] = chat;
 
@@ -171,11 +188,24 @@ window.delChat = async (id) => {
 
 window.loadChat = (id) => {
     if (!window.allChats[id]) return;
+
+    // Exit canvas when loading another chat
+    if (typeof window.closeCanvas === 'function') {
+        window.closeCanvas();
+    }
+
+    const chat = window.allChats[id];
+    // Restore toggles if saved, or default to false
+    window.isWebSearch = !!chat.isWebSearch;
+    window.isDeepResearch = !!chat.isDeepResearch;
+    window.isThinkingEnabled = !!chat.isThinkingEnabled;
+    window.canvasEnabled = !!chat.canvasEnabled;
+
     window.currentChatId = id;
     window.updateChatTokens();
-    window.chatHistory = window.allChats[id].history;
+    window.chatHistory = chat.history;
     const tokenDisplay = document.getElementById('token-count-display');
-    if (tokenDisplay) tokenDisplay.innerText = window.formatTokenCount(window.allChats[id].tokensUsed || 0);
+    if (tokenDisplay) tokenDisplay.innerText = window.formatTokenCount(chat.tokensUsed || 0);
     window.render();
     window.updateUI();
     if (window.updateTitleFeedbackUI) window.updateTitleFeedbackUI(id);
@@ -222,6 +252,17 @@ window.selectModel = (key) => {
 };
 
 window.resetChat = () => {
+    // Exit canvas when creating a new chat
+    if (typeof window.closeCanvas === 'function') {
+        window.closeCanvas();
+    }
+
+    // Reset toggles to 0 when starting a new chat
+    window.isWebSearch = false;
+    window.isDeepResearch = false;
+    window.isThinkingEnabled = false;
+    window.canvasEnabled = false;
+
     window.toggleSendIcon('send');
     if (window.isGenerating && window.currentJob) window.currentJob.cancel();
     window.currentChatId = crypto.randomUUID(); window.chatHistory = []; window.isGenerating = false;

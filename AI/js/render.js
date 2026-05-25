@@ -18,14 +18,43 @@ window.render = () => {
     window.els.chatMsgs.innerHTML = "";
 
     window.chatHistory.forEach((pair, pairIdx) => {
-        const [userMsg, responseText, feedback, timestamp] = pair;
+        const [userMsg, responseText, feedback, timestamp, attachment, sources] = pair;
 
         // 1. Render USER Row
         const userRow = document.createElement('div');
         userRow.className = 'user-row animate-fade-in group';
+
+        let attachmentHtml = '';
+        if (attachment && attachment.dataUrl) {
+            if (attachment.isImage) {
+                attachmentHtml = `
+                    <div class="msg-attachment image-attachment mb-1 inline-block relative group/att">
+                        <img src="${attachment.dataUrl}" alt="${attachment.name}"
+                             onclick="window.openAttachmentFull(${pairIdx})"
+                             class="max-w-[220px] max-h-[220px] rounded-lg object-cover cursor-zoom-in border border-zinc-200 dark:border-zinc-700">
+                        <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover/att:opacity-100 transition-opacity">
+                            <button onclick="window.copyAttachment(${pairIdx})" title="Copy image" class="bg-black/60 hover:bg-black/80 text-white rounded-md p-1 cursor-pointer"><i data-feather="copy" class="w-3 h-3"></i></button>
+                            <button onclick="window.downloadAttachment(${pairIdx})" title="Download" class="bg-black/60 hover:bg-black/80 text-white rounded-md p-1 cursor-pointer"><i data-feather="download" class="w-3 h-3"></i></button>
+                        </div>
+                    </div>`;
+            } else {
+                attachmentHtml = `
+                    <div class="msg-attachment file-attachment mb-1 inline-flex items-center gap-2 px-2 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs">
+                        <span class="w-8 h-8 rounded bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center"><i data-feather="file-text" class="w-4 h-4"></i></span>
+                        <span class="flex flex-col leading-tight">
+                            <span class="max-w-[180px] truncate font-medium">${attachment.name}</span>
+                            <span class="text-[10px] text-zinc-500 dark:text-zinc-400">${((attachment.size||0)/1024).toFixed(1)} KB</span>
+                        </span>
+                        <button onclick="window.copyAttachment(${pairIdx})" title="Copy text" class="ml-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-white cursor-pointer"><i data-feather="copy" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="window.downloadAttachment(${pairIdx})" title="Download" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white cursor-pointer"><i data-feather="download" class="w-3.5 h-3.5"></i></button>
+                    </div>`;
+            }
+        }
+
         userRow.innerHTML = `
             <div class="user-bubble-container">
                 <div class="user-msg-bubble">
+                    ${attachmentHtml}
                     <div class="prose-target">${marked.parse(userMsg)}</div>
                 </div>
                 <div class="user-msg-actions">
@@ -79,6 +108,7 @@ window.render = () => {
                         <div class="ai-actions-left">
                             <button onclick="window.copyMsg(${pairIdx}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>
                             <button onclick="window.regenMsg(${pairIdx})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
+                            ${(sources && sources.length) ? `<button onclick="window.showSources(${pairIdx})" class="ai-action-btn sources-btn" title="View ${sources.length} sources"><i data-feather="link" class="w-4 h-4"></i><span class="sources-count">${sources.length}</span></button>` : ''}
                         </div>
                         <div class="ai-actions-right">
                             <button onclick="window.sendFeedback(${pairIdx}, 'good', this)" class="ai-action-btn feedback-btn" style="${feedback === 'good' ? 'color:#22c55e' : ''}" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
