@@ -111,11 +111,12 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         } else if (g === 'male') {
             genderLine = "You identify as male. Use he/him pronouns when referring to yourself.";
         }
-        const sysParts = [octanIdentity];
-        if (sysPrompt) sysParts.push(sysPrompt);
-        if (genderLine) sysParts.push(genderLine);
-        sysParts.push(globalRules);
-        const mergedSys = sysParts.join("\n\n");
+        const mergedSys = [
+            `<identity>\n${octanIdentity}\n</identity>`,
+            sysPrompt ? `<personality>\n${sysPrompt}\n</personality>` : '',
+            genderLine ? `<gender>\n${genderLine}\n</gender>` : '',
+            `<rules>\n${globalRules}\n</rules>`,
+        ].filter(Boolean).join('\n\n');
         messages.push({ role: "system", content: mergedSys });
 
         for (const [u, a] of window.chatHistory.slice(0, -1)) {
