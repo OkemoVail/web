@@ -79,11 +79,11 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         const messages = [];
 
         const sysPrompt = window.settings && window.settings.systemPrompt;
-        // Identity override — beats baked-in Qwen identity from the downloaded weights.
-        // Placed FIRST so it dominates anything else in the system message.
-        const octanIdentity = [
-            "Your name is Octan, made by OkemoVail."
-        ].join("\n");
+        // Use the full identity_lock from system_prompts.json (fetched from /api/system_prompts).
+        // This ensures the system message at inference exactly matches what the model trained on.
+        // Falls back to a short string when the server isn't reachable (offline mode).
+        const octanIdentity = (window.__systemPrompts && window.__systemPrompts.identity_lock) ||
+            "Your name is Octan, made by OkemoVail.";
         // Prefer the backend-served global rules (single source of truth in
         // system_prompts.json on the server). Fall back to the hardcoded copy
         // when the API isn't reachable so the UI keeps working offline.
@@ -536,12 +536,29 @@ window.openAttachmentFull = (idx) => {
         // Replace UI's personality list with the server's, preserving the
         // same shape chat.html expects: { id, label, icon, prompt }.
         const iconMap = { default:'circle', concise:'minimize-2', creative:'feather', coder:'code', tutor:'book-open', sarcastic:'smile', analyst:'bar-chart-2', friend:'heart', 'discord-friend':'message-circle' };
+        // Snapshot old presets before replacing — needed to detect stale saved prompts.
+        const oldPresets = (window.PERSONALITY_PRESETS || []).slice();
         window.PERSONALITY_PRESETS = data.personalities.map(p => ({
             id: p.id,
             label: p.label || p.id,
             icon: iconMap[p.id] || 'circle',
             prompt: p.prompt || ''
         }));
+
+        // If the user's saved systemPrompt matches a stale hardcoded preset,
+        // migrate it to the server's version of that same preset so their chosen
+        // personality actually takes effect (fixes double-identity override bug).
+        const currentSys = (window.settings && window.settings.systemPrompt) || '';
+        const matchedOld = oldPresets.find(p => p.prompt && p.prompt.trim() === currentSys.trim());
+        if (matchedOld) {
+            const serverVersion = window.PERSONALITY_PRESETS.find(p => p.id === matchedOld.id);
+            if (serverVersion && serverVersion.prompt && serverVersion.prompt.trim() !== currentSys.trim()) {
+                window.settings.systemPrompt = serverVersion.prompt;
+                if (typeof window.saveSettings === 'function') window.saveSettings();
+                console.log('[system_prompts] migrated systemPrompt to server preset:', matchedOld.id);
+            }
+        }
+
         // If the personality modal is open, rerender its preset chips.
         if (typeof window._renderPersonalityPresets === 'function'
             && document.getElementById('personality-modal')
