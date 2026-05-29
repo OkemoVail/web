@@ -78,7 +78,9 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
 
         const messages = [];
 
-        const sysPrompt = window.settings && window.settings.systemPrompt;
+        const sysPrompt = (window.settings && window.settings.systemPrompt)
+            || (window.PERSONALITY_PRESETS && window.PERSONALITY_PRESETS.length > 0
+                ? window.PERSONALITY_PRESETS[0].prompt : '');
         // Use the full identity_lock from system_prompts.json (fetched from /api/system_prompts).
         // This ensures the system message at inference exactly matches what the model trained on.
         // Falls back to a short string when the server isn't reachable (offline mode).
