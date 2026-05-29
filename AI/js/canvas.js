@@ -44,16 +44,28 @@ function initMonacoEditor() {
     }
 }
 
-function openCanvas(code) {
+function openCanvas(code, passedLang) {
     if (!window.canvasEnabled) return;
 
     window.currentCanvasCode = code;
+    const lang = passedLang || window.currentCanvasLang || 'html';
 
     const container = document.getElementById('canvas-container');
     container.classList.remove('hidden');
     container.classList.add('flex');
     document.body.classList.add('canvas-open');  // triggers 70/30 split
     document.body.classList.add('sidebar-collapsed'); // collapse sidebar to mini mode
+
+    const isDoc = lang === 'document' || lang === 'markdown' || lang === 'text' || lang === 'word';
+
+    const wordBtn = document.getElementById('canvas-tab-word');
+    if (wordBtn) {
+        if (isDoc) wordBtn.classList.remove('hidden');
+        else wordBtn.classList.add('hidden');
+    }
+
+    const codeTab = document.getElementById('canvas-tab-code');
+    if (codeTab) codeTab.style.display = '';
 
     initMonacoEditor();
     if (window.monacoEditorInstance) {
@@ -261,9 +273,10 @@ function closeCanvas() {
 function extractCanvasCode(text) {
     if (!text) return null;
     const html = text.match(/```html\s*([\s\S]*?)```/i);
-    if (html) return html[1].trim();
-    const any = text.match(/```[a-zA-Z]*\s*([\s\S]*?)```/);
-    return any ? any[1].trim() : null;
+    if (html) { window.currentCanvasLang = 'html'; return html[1].trim(); }
+    const any = text.match(/```([a-zA-Z]*)\s*([\s\S]*?)```/);
+    if (any) { window.currentCanvasLang = any[1].toLowerCase(); return any[2].trim(); }
+    return null;
 }
 window.extractCanvasCode = extractCanvasCode;
 
@@ -273,9 +286,10 @@ function streamingCanvasCode(text) {
     if (!text) return null;
     const closed = extractCanvasCode(text);
     if (closed) return closed;
-    const open = text.match(/```(?:html|[a-zA-Z]*)\s*\n?([\s\S]*)$/i);
+    const open = text.match(/```(?:html|([a-zA-Z]*))\s*\n?([\s\S]*)$/i);
     if (!open) return null;
-    const body = open[1];
+    window.currentCanvasLang = (open[1] || 'html').toLowerCase();
+    const body = open[2];
     if (body.length < 16) return null; // wait for a little content before opening
     return body;
 }
@@ -317,8 +331,56 @@ function _withCanvasThemeSync(html) {
 
 function updateCanvasPreview() {
     const iframe = document.getElementById('canvas-preview');
-    iframe.srcdoc = _withCanvasThemeSync(window.currentCanvasCode);
+    const lang = window.currentCanvasLang || 'html';
+    const isDoc = lang === 'document' || lang === 'markdown' || lang === 'text' || lang === 'word';
+
+    if (isDoc) {
+        const htmlContent = window.marked ? window.marked.parse(window.currentCanvasCode) : `<pre style="white-space:pre-wrap;font-family:sans-serif;">${window.currentCanvasCode}</pre>`;
+        const styledDoc = `<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 800px; margin: 0 auto; color: #18181b; }
+        h1 { font-size: 2.25rem; font-weight: 800; margin-bottom: 1rem; }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        p { margin-bottom: 1rem; line-height: 1.6; }
+        ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+        ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+        pre { background: #1e1e1e; color: #fff; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
+        code { font-family: monospace; }
+        .dark body { background: #1e1e1e; color: #e4e4e7; }
+        .dark pre { background: #000; }
+    </style>
+</head>
+<body class="${document.documentElement.classList.contains('dark') ? 'dark' : ''}">
+    ${htmlContent}
+</body>
+</html>`;
+        iframe.removeAttribute('src'); // clear any lingering word iframe
+        iframe.srcdoc = _withCanvasThemeSync(styledDoc);
+    } else {
+        iframe.removeAttribute('src'); // Ensure we clear the word iframe
+        iframe.srcdoc = _withCanvasThemeSync(window.currentCanvasCode);
+    }
 }
+
+window.exportToWord = function() {
+    const code = window.currentCanvasCode || '';
+    const htmlContent = window.marked ? window.marked.parse(code) : code;
+    
+    // Save to temp local datastorage for transfer
+    sessionStorage.setItem('okemo_word_temp_transfer', htmlContent);
+    
+    // Also save to permanent storage as fallback
+    const documentTitle = 'AI Generated Document';
+    const store = JSON.parse(localStorage.getItem('okemo_word_docs_v1') || '{}');
+    store[documentTitle] = { title: documentTitle, content: htmlContent, savedAt: Date.now() };
+    localStorage.setItem('okemo_word_docs_v1', JSON.stringify(store));
+    localStorage.setItem('okemo_word_last', documentTitle);
+    
+    window.open('../word/index.html', '_blank');
+};
 
 // Push theme changes into a live iframe without reloading it.
 function _pushCanvasTheme() {

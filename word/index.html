@@ -584,7 +584,6 @@
             <div class="ai-input-area">
                 <div class="ai-input-wrap">
                     <textarea id="ai-input" rows="1"
-                              placeholder="Ask Oaky about your document..."
                               onkeydown="handleAIKey(event)"
                               oninput="autoResizeTA(this)"></textarea>
                     <button id="ai-send-btn" onclick="handleSendAI()">
@@ -633,7 +632,17 @@ let msgCounter     = 0;
 
 // ─── Boot ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    loadDoc();
+    // Check for temp local datastorage transfer
+    const tempTransfer = sessionStorage.getItem('okemo_word_temp_transfer');
+    if (tempTransfer) {
+        document.getElementById('doc-title').value = 'AI Generated Document';
+        document.getElementById('editor').innerHTML = tempTransfer;
+        sessionStorage.removeItem('okemo_word_temp_transfer');
+        saveDoc(true);
+    } else {
+        loadDoc();
+    }
+    
     updateStats();
     updateThemeBtn();
     loadProfile();
@@ -659,6 +668,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const menu = document.getElementById('export-menu');
         if (menu.style.display !== 'none' && !menu.contains(e.target)) {
             menu.style.display = 'none';
+        }
+    });
+
+    // Listen for live updates from parent (e.g., Canvas mode in AI chat)
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'live_update') {
+            document.getElementById('editor').innerHTML = event.data.content;
+            if (event.data.title) document.getElementById('doc-title').value = event.data.title;
+            updateStats();
+            saveDoc(true);
         }
     });
 });

@@ -116,11 +116,17 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         } else if (g === 'male') {
             genderLine = "You identify as male. Use he/him pronouns when referring to yourself.";
         }
+        let runtimeRules = '';
+        if (window.canvasEnabled) {
+            runtimeRules = "Canvas Mode is ENABLED. You can generate websites (using ```html) AND text documents (using ```document or ```markdown). Text documents will be automatically exported and opened in Okemo Word (word/index.html).";
+        }
+
         const mergedSys = [
             `<identity>\n${octanIdentity}\n</identity>`,
             sysPrompt ? `<personality>\n${sysPrompt}\n</personality>` : '',
             genderLine ? `<gender>\n${genderLine}\n</gender>` : '',
             `<rules>\n${globalRules}\n</rules>`,
+            runtimeRules ? `<canvas_mode>\n${runtimeRules}\n</canvas_mode>` : ''
         ].filter(Boolean).join('\n\n');
         const chatId = window.currentChatId;
         const isFirstTurn = window.chatHistory.length === 1;
@@ -220,8 +226,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                                 } else {
                                     window.currentCanvasCode = partial;
                                     if (window.monacoEditorInstance) window.monacoEditorInstance.setValue(partial);
-                                    const iframe = document.getElementById('canvas-preview');
-                                    if (iframe) iframe.srcdoc = partial;
+                                    if (window.updateCanvasPreview) window.updateCanvasPreview();
                                 }
                             }
                         }

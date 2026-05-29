@@ -41,11 +41,15 @@ window.applyContentFeatures = (el) => {
             if (firstCodeForCanvas === null) firstCodeForCanvas = trimmed;
 
             const isGenerating = !!window.isGenerating;
+            const isDoc = lang === 'document' || lang === 'markdown' || lang === 'text' || lang === 'word';
             const title = lang === 'html' ? 'Simple Website'
+                : isDoc ? 'Text Document'
                 : lang === 'code' ? 'Code Artifact'
                 : (lang.charAt(0).toUpperCase() + lang.slice(1)) + ' Snippet';
 
-            const iconSvg = (feather.icons.code)
+            const iconSvg = isDoc && feather.icons['file-text']
+                ? feather.icons['file-text'].toSvg({ class: 'w-5 h-5' })
+                : (feather.icons.code)
                 ? feather.icons.code.toSvg({ class: 'w-5 h-5' })
                 : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
 
@@ -68,7 +72,7 @@ window.applyContentFeatures = (el) => {
             `;
             const captured = trimmed;
             pill.addEventListener('click', () => {
-                if (window.openCanvas) window.openCanvas(captured);
+                if (window.openCanvas) window.openCanvas(captured, lang);
             });
             pre.replaceWith(pill);
             return;
