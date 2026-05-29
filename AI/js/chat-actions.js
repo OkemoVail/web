@@ -1,5 +1,8 @@
 // ─── Chat Actions (send, regen, copy, feedback, etc.) ──────────
 
+// Per-chat tracking of last sent system prompt — only re-send on first turn or change.
+const _sentSysPromptPerChat = {};
+
 window.handleAction = () => {
     console.log("handleAction: isGenerating?", window.isGenerating);
     if (window.isGenerating) {
@@ -119,7 +122,13 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
             genderLine ? `<gender>\n${genderLine}\n</gender>` : '',
             `<rules>\n${globalRules}\n</rules>`,
         ].filter(Boolean).join('\n\n');
-        messages.push({ role: "system", content: mergedSys });
+        const chatId = window.currentChatId;
+        const isFirstTurn = window.chatHistory.length === 1;
+        const sysChanged = _sentSysPromptPerChat[chatId] !== mergedSys;
+        if (isFirstTurn || sysChanged) {
+            messages.push({ role: "system", content: mergedSys });
+            _sentSysPromptPerChat[chatId] = mergedSys;
+        }
 
         for (const [u, a] of window.chatHistory.slice(0, -1)) {
             messages.push({ role: "user", content: u });
