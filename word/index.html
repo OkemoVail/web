@@ -479,7 +479,7 @@
         <div class="vr"></div>
         <button class="hdr-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"><i class="fa-solid fa-moon"></i></button>
         <button class="hdr-btn" id="ai-toggle-btn" onclick="toggleAIPanel()" title="Oaky AI  —  writing assistant">
-            <i class="fa-solid fa-sparkles"></i>
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
         </button>
         <div id="hdr-profile" class="hdr-profile"></div>
     </header>
@@ -545,7 +545,7 @@
             <!-- Header -->
             <div class="ai-header">
                 <div class="ai-header-left">
-                    <div class="ai-icon-ring"><i class="fa-solid fa-sparkles"></i></div>
+                    <div class="ai-icon-ring"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                     <span class="ai-title">Oaky AI</span>
                 </div>
                 <div class="ai-header-right">
@@ -561,7 +561,7 @@
             <!-- Messages -->
             <div id="ai-messages">
                 <div class="ai-welcome" id="ai-welcome">
-                    <div class="ai-welcome-icon"><i class="fa-solid fa-sparkles"></i></div>
+                    <div class="ai-welcome-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                     <h4>Hi, I'm Oaky</h4>
                     <p>Your AI writing assistant. Select text for context-aware help, or ask me anything about your document.</p>
                 </div>
@@ -612,7 +612,7 @@
 
     <!-- Mobile AI FAB -->
     <button id="ai-fab" class="hidden" onclick="toggleAIPanel()" title="Open Oaky AI">
-        <i class="fa-solid fa-sparkles"></i>
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
     </button>
 
 </div><!-- #app -->
@@ -969,6 +969,10 @@ function handleSendAI() {
 function autoResizeTA(el) {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+    const qa = document.querySelector('.ai-quick-actions');
+    if (qa) {
+        qa.style.display = el.value.trim().length > 0 ? 'none' : 'flex';
+    }
 }
 
 // ─── AI — streaming ────────────────────────────────────────────
@@ -1050,7 +1054,7 @@ async function sendAIMessage(userMessage) {
                     if (tok) {
                         accumulated += tok;
                         if (txtEl) {
-                            txtEl.textContent = accumulated;
+                            txtEl.textContent = accumulated.replace(/<(?:think|thought)>[\s\S]*?(?:<\/(?:think|thought)>|$)/gi, '').trimStart();
                             msgsEl.scrollTop  = msgsEl.scrollHeight;
                         }
                     }
@@ -1062,11 +1066,12 @@ async function sendAIMessage(userMessage) {
     }
 
     // Finalise
+    const cleanOutput = accumulated.replace(/<(?:think|thought)>[\s\S]*?(?:<\/(?:think|thought)>|$)/gi, '').trim();
     if (txtEl) {
-        if (!accumulated) accumulated = '(No response)';
-        txtEl.textContent = accumulated;
+        if (!cleanOutput) txtEl.textContent = '(No response)';
+        else txtEl.textContent = cleanOutput;
     }
-    responseMap[id] = accumulated;
+    responseMap[id] = cleanOutput || '(No response)';
 
     // Insert / Replace buttons — always show both
     const actionsDiv = document.createElement('div');
@@ -1136,7 +1141,7 @@ function insertIntoDoc(id, replace = false) {
 function clearAIChat() {
     document.getElementById('ai-messages').innerHTML = `
         <div class="ai-welcome" id="ai-welcome">
-            <div class="ai-welcome-icon"><i class="fa-solid fa-sparkles"></i></div>
+            <div class="ai-welcome-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
             <h4>Hi, I'm Oaky</h4>
             <p>Your AI writing assistant. Select text for context-aware help, or ask me anything about your document.</p>
         </div>`;
