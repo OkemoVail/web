@@ -10,12 +10,25 @@
   <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
   <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
   <script>
-    (function() {
-      const stored = localStorage.getItem('vail_theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (stored === 'dark' || (!stored && prefersDark)) {
-        document.documentElement.classList.add('dark');
+    (function () {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      function applyTheme(isDark) {
+        document.documentElement.classList.toggle('dark', isDark);
       }
+      function resolveTheme() {
+        const stored = localStorage.getItem('vail_theme');
+        if (stored === 'dark') applyTheme(true);
+        else if (stored === 'light') applyTheme(false);
+        else applyTheme(mediaQuery.matches);
+      }
+      resolveTheme();
+      mediaQuery.addEventListener('change', () => {
+        const stored = localStorage.getItem('vail_theme');
+        if (!stored || stored === 'system') applyTheme(mediaQuery.matches);
+      });
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'vail_theme') resolveTheme();
+      });
     })();
   </script>
   <script>
@@ -121,10 +134,21 @@
 
 
     <section class="py-16 md:py-24 border-t border-border-cream dark:border-surf-dark italic text-center">
-      <blockquote class="serif-text text-3xl md:text-4xl text-olive-gray max-w-2xl mx-auto leading-snug">
-        "Stay Hungry, Stay Foolish"
-      </blockquote>
-      <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray">— Steve Jobs</cite>
+      <div class="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
+        <div>
+          <blockquote class="serif-text text-3xl md:text-4xl text-olive-gray leading-snug">
+            "Stay Hungry, Stay Foolish"
+          </blockquote>
+          <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray">— Steve Jobs</cite>
+        </div>
+        <div class="hidden md:block w-px h-16 bg-border-cream dark:bg-surf-dark self-center"></div>
+        <div>
+          <blockquote class="serif-text text-3xl md:text-4xl text-olive-gray leading-snug">
+            "Don't be evil"
+          </blockquote>
+          <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray">— Google</cite>
+        </div>
+      </div>
     </section>
 
 
@@ -146,7 +170,7 @@
             <tr class="flex flex-col md:table-row py-8 md:py-0">
               <td class="md:py-8 pr-4">
                 <div class="flex items-center justify-between md:block">
-                  <h3 class="serif-text text-2xl text-text-warm inline-block">Octan</h3>
+                  <h3 class="serif-text text-2xl text-text-warm inline-block">Pisces</h3>
                 </div>
               </td>
               <td class="py-4 md:py-8">
@@ -160,6 +184,26 @@
                 <a href="/AI/index.html"
                   class="inline-block w-full md:w-auto text-center border border-border-warm dark:border-surf-dark text-text-warm px-6 py-2 rounded-lg text-xs font-medium hover:bg-ivory dark:hover:bg-surf-dark transition-all">
                   Explore
+                </a>
+              </td>
+            </tr>
+            <tr class="flex flex-col md:table-row py-8 md:py-0">
+              <td class="md:py-8 pr-4">
+                <div class="flex items-center justify-between md:block">
+                  <h3 class="serif-text text-2xl text-text-warm inline-block">Okemo Word</h3>
+                </div>
+              </td>
+              <td class="py-4 md:py-8">
+                <p class="text-olive-gray text-sm leading-relaxed max-w-md">
+                  A minimal, distraction-free writing experience built for focused thinking.
+                </p>
+              </td>
+              <td class="hidden md:table-cell py-8 text-right">
+              </td>
+              <td class="py-4 md:py-8 text-right">
+                <a href="/word/index.html"
+                  class="inline-block w-full md:w-auto text-center border border-border-warm dark:border-surf-dark text-text-warm px-6 py-2 rounded-lg text-xs font-medium hover:bg-ivory dark:hover:bg-surf-dark transition-all">
+                  Open
                 </a>
               </td>
             </tr>

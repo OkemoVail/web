@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@tailwindcss/cli": "^4.1.16",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.60.0",
     "tailwindcss": "^4.1.16"
   }
 }

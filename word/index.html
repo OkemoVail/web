@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -7,16 +8,31 @@
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
 
     <script src="https://unpkg.com/feather-icons"></script>
-    <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../src/design-tokens.css">
 
     <script>
         (function () {
-            const stored = localStorage.getItem('vail_theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (stored === 'dark' || (!stored && prefersDark)) document.documentElement.classList.add('dark');
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            function applyTheme(isDark) {
+                document.documentElement.classList.toggle('dark', isDark);
+            }
+            function resolveTheme() {
+                const stored = localStorage.getItem('vail_theme');
+                if (stored === 'dark') applyTheme(true);
+                else if (stored === 'light') applyTheme(false);
+                else applyTheme(mediaQuery.matches);
+            }
+            resolveTheme();
+            mediaQuery.addEventListener('change', () => {
+                const stored = localStorage.getItem('vail_theme');
+                if (!stored || stored === 'system') applyTheme(mediaQuery.matches);
+            });
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'vail_theme') resolveTheme();
+            });
         })();
     </script>
 
@@ -27,6 +43,7 @@
             font-weight: 300 900;
             font-display: swap;
         }
+
         @font-face {
             font-family: 'Satoshi';
             src: url('../Fonts/Satoshi-VariableItalic.ttf') format('truetype');
@@ -35,12 +52,32 @@
             font-style: italic;
         }
 
-        *, *::before, *::after { box-sizing: border-box; }
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
-        body { font-family: 'Satoshi', 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Satoshi', 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
 
         /* ── Layout shell ─────────────────────────────────────────── */
-        #app { display: flex; flex-direction: column; height: 100vh; }
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
 
         /* ── Header ──────────────────────────────────────────────── */
         .ow-header {
@@ -54,126 +91,264 @@
             flex-shrink: 0;
             z-index: 100;
         }
+
         .ow-logo {
-            width: 28px; height: 28px;
+            width: 28px;
+            height: 28px;
             border-radius: 8px;
             background: var(--accent);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 800; font-size: 13px; letter-spacing: -0.5px;
-            flex-shrink: 0; user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+            user-select: none;
         }
+
         .ow-app-name {
-            font-size: 13px; font-weight: 600; color: var(--text-primary);
-            flex-shrink: 0; margin-right: 2px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex-shrink: 0;
+            margin-right: 2px;
         }
-        .vr { width: 1px; height: 18px; background: var(--border-strong); margin: 0 6px; flex-shrink: 0; }
+
+        .vr {
+            width: 1px;
+            height: 18px;
+            background: var(--border-strong);
+            margin: 0 6px;
+            flex-shrink: 0;
+        }
+
         #doc-title {
-            font-size: 13px; font-weight: 500;
-            background: transparent; border: none; outline: none;
-            color: var(--text-secondary); font-family: inherit;
-            min-width: 100px; max-width: 240px;
-            padding: 3px 6px; border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-secondary);
+            font-family: inherit;
+            min-width: 100px;
+            max-width: 240px;
+            padding: 3px 6px;
+            border-radius: 6px;
             transition: background 0.15s, color 0.15s;
         }
-        #doc-title:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
-        .dark #doc-title:hover { background: rgba(255,255,255,0.05); }
-        #doc-title:focus { background: rgba(0,0,0,0.04); color: var(--text-primary); }
-        .dark #doc-title:focus { background: rgba(255,255,255,0.05); }
+
+        #doc-title:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text-primary);
+        }
+
+        .dark #doc-title:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        #doc-title:focus {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text-primary);
+        }
+
+        .dark #doc-title:focus {
+            background: rgba(255, 255, 255, 0.05);
+        }
 
         .hdr-word-pill {
-            font-size: 11px; color: var(--text-tertiary);
-            padding: 3px 9px; background: var(--border); border-radius: 12px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            padding: 3px 9px;
+            background: var(--border);
+            border-radius: 12px;
             white-space: nowrap;
         }
 
         /* header action buttons */
         .hdr-btn {
-            width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; border: none; background: transparent;
-            color: var(--text-secondary); cursor: pointer; font-size: 14px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
             transition: background 0.15s, color 0.15s;
             flex-shrink: 0;
         }
-        .hdr-btn:hover { background: rgba(0,0,0,0.06); color: var(--text-primary); }
-        .dark .hdr-btn:hover { background: rgba(255,255,255,0.06); }
-        .hdr-btn.active { background: var(--accent); color: white; }
+
+        .hdr-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+            color: var(--text-primary);
+        }
+
+        .dark .hdr-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .hdr-btn.active {
+            background: var(--accent);
+            color: white;
+        }
 
         .hdr-profile {
-            width: 28px; height: 28px; border-radius: 50%;
-            background: var(--accent); color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 600; flex-shrink: 0;
-            overflow: hidden; user-select: none; margin-left: 4px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
+            overflow: hidden;
+            user-select: none;
+            margin-left: 4px;
         }
-        .hdr-profile img { width: 100%; height: 100%; object-fit: cover; }
+
+        .hdr-profile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         /* ── Toolbar ─────────────────────────────────────────────── */
         .ow-toolbar {
-            display: flex; align-items: center;
-            padding: 5px 14px; gap: 1px;
+            display: flex;
+            align-items: center;
+            padding: 5px 14px;
+            gap: 1px;
             background: var(--bg-elevated);
             border-bottom: 1px solid var(--border);
-            overflow-x: auto; scrollbar-width: none;
+            overflow-x: auto;
+            scrollbar-width: none;
             flex-shrink: 0;
         }
-        .ow-toolbar::-webkit-scrollbar { display: none; }
+
+        .ow-toolbar::-webkit-scrollbar {
+            display: none;
+        }
 
         .tb-btn {
-            width: 30px; height: 30px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 6px; border: none; background: transparent;
-            color: var(--text-secondary); cursor: pointer;
-            font-size: 13px; font-weight: 600;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
             font-family: 'Satoshi', 'Inter', sans-serif;
             transition: background 0.12s, color 0.12s;
             flex-shrink: 0;
         }
-        .tb-btn:hover { background: rgba(0,0,0,0.055); color: var(--text-primary); }
-        .dark .tb-btn:hover { background: rgba(255,255,255,0.06); }
-        .tb-btn.active { background: rgba(201,100,120,0.12); color: var(--accent); }
-        .dark .tb-btn.active { background: rgba(217,119,144,0.14); color: var(--accent); }
 
-        .tb-sep { width: 1px; height: 20px; background: var(--border-strong); margin: 0 5px; flex-shrink: 0; }
+        .tb-btn:hover {
+            background: rgba(0, 0, 0, 0.055);
+            color: var(--text-primary);
+        }
+
+        .dark .tb-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .tb-btn.active {
+            background: rgba(201, 100, 120, 0.12);
+            color: var(--accent);
+        }
+
+        .dark .tb-btn.active {
+            background: rgba(217, 119, 144, 0.14);
+            color: var(--accent);
+        }
+
+        .tb-sep {
+            width: 1px;
+            height: 20px;
+            background: var(--border-strong);
+            margin: 0 5px;
+            flex-shrink: 0;
+        }
 
         .tb-select {
-            height: 28px; padding: 0 8px; border-radius: 6px;
+            height: 28px;
+            padding: 0 8px;
+            border-radius: 6px;
             border: 1px solid var(--border-strong);
-            background: var(--bg); color: var(--text-secondary);
-            font-size: 12px; font-family: 'Satoshi', 'Inter', sans-serif;
-            cursor: pointer; outline: none; flex-shrink: 0;
+            background: var(--bg);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-family: 'Satoshi', 'Inter', sans-serif;
+            cursor: pointer;
+            outline: none;
+            flex-shrink: 0;
             transition: border-color 0.15s;
         }
-        .tb-select:hover { border-color: var(--accent); color: var(--text-primary); }
+
+        .tb-select:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
 
         /* ── Main area ───────────────────────────────────────────── */
-        .ow-main { display: flex; flex: 1; overflow: hidden; }
+        .ow-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
 
         /* ── Document scroll ─────────────────────────────────────── */
         .doc-scroll {
-            flex: 1; overflow-y: auto; overflow-x: hidden;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
             padding: 40px 28px 60px;
             background: var(--bg);
-            scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-strong) transparent;
         }
 
         /* ── Editor paper ────────────────────────────────────────── */
         .editor-paper {
-            max-width: 816px; margin: 0 auto;
+            max-width: 816px;
+            margin: 0 auto;
             background: var(--bg-elevated);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.06), 0 0 0 1px var(--border);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--border);
             border-radius: 3px;
             min-height: 1056px;
             padding: 72px 88px;
             position: relative;
             transition: background 0.3s, box-shadow 0.3s;
         }
+
         .dark .editor-paper {
             background: var(--surface-dark);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px var(--border);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
         }
-        @media (max-width: 900px) { .editor-paper { padding: 48px 40px; } }
-        @media (max-width: 600px) { .editor-paper { padding: 32px 24px; } }
+
+        @media (max-width: 900px) {
+            .editor-paper {
+                padding: 48px 40px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .editor-paper {
+                padding: 32px 24px;
+            }
+        }
 
         /* ── Editor content ──────────────────────────────────────── */
         #editor {
@@ -186,710 +361,1122 @@
             caret-color: var(--accent);
             word-break: break-word;
         }
+
         #editor:empty::before {
             content: attr(data-placeholder);
             color: var(--text-tertiary);
             pointer-events: none;
         }
-        #editor h1 { font-size: 2em; font-weight: 700; line-height: 1.25; margin: 0.8em 0 0.3em; color: var(--text-primary); }
-        #editor h2 { font-size: 1.5em; font-weight: 650; line-height: 1.35; margin: 0.7em 0 0.25em; }
-        #editor h3 { font-size: 1.2em; font-weight: 600; line-height: 1.4; margin: 0.6em 0 0.2em; }
-        #editor p { margin: 0.4em 0; }
-        #editor ul, #editor ol { padding-left: 1.6em; margin: 0.5em 0; }
-        #editor li { margin: 0.2em 0; line-height: 1.75; }
+
+        #editor h1 {
+            font-size: 2em;
+            font-weight: 700;
+            line-height: 1.25;
+            margin: 0.8em 0 0.3em;
+            color: var(--text-primary);
+        }
+
+        #editor h2 {
+            font-size: 1.5em;
+            font-weight: 650;
+            line-height: 1.35;
+            margin: 0.7em 0 0.25em;
+        }
+
+        #editor h3 {
+            font-size: 1.2em;
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0.6em 0 0.2em;
+        }
+
+        #editor p {
+            margin: 0.4em 0;
+        }
+
+        #editor ul,
+        #editor ol {
+            padding-left: 1.6em;
+            margin: 0.5em 0;
+        }
+
+        #editor li {
+            margin: 0.2em 0;
+            line-height: 1.75;
+        }
+
         #editor blockquote {
             border-left: 3px solid var(--accent);
-            padding-left: 1.1em; margin: 0.9em 0;
-            color: var(--text-secondary); font-style: italic;
+            padding-left: 1.1em;
+            margin: 0.9em 0;
+            color: var(--text-secondary);
+            font-style: italic;
         }
-        #editor a { color: var(--accent); text-decoration: underline; }
-        #editor hr { border: none; border-top: 1px solid var(--border-strong); margin: 1.2em 0; }
+
+        #editor a {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        #editor hr {
+            border: none;
+            border-top: 1px solid var(--border-strong);
+            margin: 1.2em 0;
+        }
+
         #editor code {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.85em;
-            background: var(--border); padding: 0.1em 0.4em; border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            background: var(--border);
+            padding: 0.1em 0.4em;
+            border-radius: 4px;
         }
+
         #editor pre {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.84em;
-            background: var(--surface-dark); color: #e2e0d8;
-            padding: 1em 1.2em; border-radius: 8px; overflow-x: auto; margin: 0.9em 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.84em;
+            background: var(--surface-dark);
+            color: #e2e0d8;
+            padding: 1em 1.2em;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 0.9em 0;
         }
 
         /* ── AI Panel ────────────────────────────────────────────── */
         #ai-panel {
-            width: 356px; min-width: 356px;
+            width: 356px;
+            min-width: 356px;
             border-left: 1px solid var(--border);
-            display: flex; flex-direction: column;
+            display: flex;
+            flex-direction: column;
             background: var(--bg-elevated);
             overflow: hidden;
-            transition: width 0.3s cubic-bezier(0.16,1,0.3,1),
-                        min-width 0.3s cubic-bezier(0.16,1,0.3,1),
-                        opacity 0.25s ease,
-                        transform 0.3s cubic-bezier(0.16,1,0.3,1);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                min-width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.25s ease,
+                transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 200;
         }
-        #ai-panel.collapsed { width: 0; min-width: 0; opacity: 0; }
+
+        #ai-panel.collapsed {
+            width: 0;
+            min-width: 0;
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
 
         @media (max-width: 768px) {
             #ai-panel {
                 position: fixed;
                 top: 52px;
-                left: 0; right: 0; bottom: 0;
-                width: 100% !important; min-width: 100% !important;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100% !important;
+                min-width: 100% !important;
                 border-left: none;
                 border-top: 1px solid var(--border);
                 transform: translateY(0);
                 opacity: 1;
             }
+
             #ai-panel.collapsed {
                 transform: translateY(100%);
                 opacity: 0;
                 pointer-events: none;
-                width: 100% !important; min-width: 100% !important;
+                width: 100% !important;
+                min-width: 100% !important;
             }
         }
 
         .ai-header {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 11px 14px;
             background: var(--accent);
-            color: white; flex-shrink: 0;
+            color: white;
+            flex-shrink: 0;
         }
-        .ai-header-left { display: flex; align-items: center; gap: 8px; }
+
+        .ai-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .ai-icon-ring {
-            width: 24px; height: 24px; border-radius: 50%;
-            background: rgba(255,255,255,0.18);
-            display: flex; align-items: center; justify-content: center; font-size: 11px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
         }
-        .ai-title { font-size: 13px; font-weight: 600; }
-        .ai-header-right { display: flex; align-items: center; gap: 6px; }
+
+        .ai-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .ai-header-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .ai-clear-btn {
-            width: 26px; height: 26px; background: rgba(255,255,255,0.15);
-            border: none; border-radius: 7px; color: white; cursor: pointer;
-            font-size: 11px; display: flex; align-items: center; justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 7px;
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background 0.15s;
         }
-        .ai-clear-btn:hover { background: rgba(255,255,255,0.25); }
+
+        .ai-clear-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
 
         /* messages */
         #ai-messages {
-            flex: 1; overflow-y: auto; padding: 14px;
-            display: flex; flex-direction: column; gap: 10px;
-            scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent;
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-strong) transparent;
         }
 
-        .ai-welcome { text-align: center; padding: 32px 16px 16px; }
+        .ai-welcome {
+            text-align: center;
+            padding: 32px 16px 16px;
+        }
+
         .ai-welcome-icon {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(201,100,120,0.1);
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 12px; color: var(--accent); font-size: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(201, 100, 120, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: var(--accent);
+            font-size: 16px;
         }
-        .ai-welcome h4 { font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 0 0 6px; }
-        .ai-welcome p { font-size: 12px; color: var(--text-secondary); margin: 0; line-height: 1.55; }
 
-        .msg-user { display: flex; justify-content: flex-end; }
+        .ai-welcome h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 6px;
+        }
+
+        .ai-welcome p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.55;
+        }
+
+        .msg-user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
         .msg-user-bubble {
-            max-width: 88%; background: var(--accent); color: white;
+            max-width: 88%;
+            background: var(--accent);
+            color: white;
             border-radius: 16px 16px 4px 16px;
-            padding: 8px 12px; font-size: 13px; line-height: 1.5;
+            padding: 8px 12px;
+            font-size: 13px;
+            line-height: 1.5;
             word-break: break-word;
         }
-        .msg-ai { display: flex; flex-direction: column; gap: 5px; }
+
+        .msg-ai {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
         .msg-ai-bubble {
-            background: var(--bg); border: 1px solid var(--border-strong);
+            background: var(--bg);
+            border: 1px solid var(--border-strong);
             border-radius: 4px 16px 16px 16px;
-            padding: 9px 12px; font-size: 13px; line-height: 1.65;
-            color: var(--text-primary); word-break: break-word;
+            padding: 9px 12px;
+            font-size: 13px;
+            line-height: 1.65;
+            color: var(--text-primary);
+            word-break: break-word;
             white-space: pre-wrap;
         }
-        .dark .msg-ai-bubble { background: rgba(255,255,255,0.03); }
+
+        .dark .msg-ai-bubble {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
         .msg-insert-btn {
             align-self: flex-start;
-            display: flex; align-items: center; gap: 4px;
-            font-size: 11px; color: var(--accent); background: none;
-            border: none; cursor: pointer; padding: 3px 6px; border-radius: 5px;
-            font-family: inherit; transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--accent);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-family: inherit;
+            transition: background 0.15s;
         }
-        .msg-insert-btn:hover { background: rgba(201,100,120,0.08); }
+
+        .msg-insert-btn:hover {
+            background: rgba(201, 100, 120, 0.08);
+        }
 
         /* quick actions */
         .ai-quick-actions {
-            padding: 9px 12px; border-top: 1px solid var(--border);
-            display: flex; flex-wrap: wrap; gap: 5px; flex-shrink: 0;
+            padding: 9px 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            flex-shrink: 0;
         }
+
         .qa-chip {
-            padding: 4px 10px; border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 20px;
             border: 1px solid var(--border-strong);
-            background: var(--bg); color: var(--text-secondary);
-            font-size: 11.5px; font-family: 'Satoshi', 'Inter', sans-serif;
-            cursor: pointer; white-space: nowrap;
+            background: var(--bg);
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-family: 'Satoshi', 'Inter', sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
             transition: border-color 0.15s, color 0.15s, background 0.15s;
         }
-        .qa-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(201,100,120,0.06); }
+
+        .qa-chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(201, 100, 120, 0.06);
+        }
 
         /* input area */
-        .ai-input-area { padding: 11px 12px; border-top: 1px solid var(--border); flex-shrink: 0; }
+        .ai-input-area {
+            padding: 11px 12px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
         .ai-input-wrap {
-            display: flex; align-items: flex-end; gap: 7px;
-            background: var(--bg); border: 1px solid var(--border-strong);
-            border-radius: 14px; padding: 7px 7px 7px 12px;
+            display: flex;
+            align-items: flex-end;
+            gap: 7px;
+            background: var(--bg);
+            border: 1px solid var(--border-strong);
+            border-radius: 14px;
+            padding: 7px 7px 7px 12px;
             transition: border-color 0.2s;
         }
-        .ai-input-wrap:focus-within { border-color: var(--accent); }
+
+        .ai-input-wrap:focus-within {
+            border-color: var(--accent);
+        }
+
         #ai-input {
-            flex: 1; background: transparent; border: none; outline: none;
-            resize: none; font-size: 13px; font-family: 'Satoshi', 'Inter', sans-serif;
-            color: var(--text-primary); line-height: 1.5;
-            max-height: 100px; overflow-y: auto;
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 13px;
+            font-family: 'Satoshi', 'Inter', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.5;
+            max-height: 100px;
+            overflow-y: auto;
         }
-        #ai-input::placeholder { color: var(--text-tertiary); }
+
+        #ai-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
         #ai-send-btn {
-            width: 29px; height: 29px; border-radius: 8px;
-            background: var(--accent); color: white; border: none;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; font-size: 12px; transition: opacity 0.15s;
+            width: 29px;
+            height: 29px;
+            border-radius: 8px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 12px;
+            transition: opacity 0.15s;
         }
-        #ai-send-btn:hover { opacity: 0.85; }
-        #ai-send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        #ai-send-btn:hover {
+            opacity: 0.85;
+        }
+
+        #ai-send-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
         .ai-disclaimer {
-            font-size: 10px; color: var(--text-tertiary);
-            text-align: center; margin: 6px 0 0; line-height: 1.4;
+            font-size: 10px;
+            color: var(--text-tertiary);
+            text-align: center;
+            margin: 6px 0 0;
+            line-height: 1.4;
         }
 
         /* ── Status bar ──────────────────────────────────────────── */
         .ow-status {
-            height: 28px; display: flex; align-items: center; gap: 10px;
-            padding: 0 14px; border-top: 1px solid var(--border);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 14px;
+            border-top: 1px solid var(--border);
             background: var(--bg-elevated);
-            font-size: 11px; color: var(--text-tertiary);
-            flex-shrink: 0; z-index: 90;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+            z-index: 90;
         }
-        .ow-status .dot { color: var(--border-strong); }
+
+        .ow-status .dot {
+            color: var(--border-strong);
+        }
 
         /* ── Thinking animation ──────────────────────────────────── */
         @keyframes pulse-dot {
-            0%, 80%, 100% { opacity: 0.25; transform: scale(0.75); }
-            40%            { opacity: 1;    transform: scale(1); }
+
+            0%,
+            80%,
+            100% {
+                opacity: 0.25;
+                transform: scale(0.75);
+            }
+
+            40% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
-        .thinking-dots { display: inline-flex; align-items: center; gap: 3px; }
+
+        .thinking-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
         .thinking-dots span {
-            display: inline-block; width: 5px; height: 5px;
-            background: var(--text-tertiary); border-radius: 50%;
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            background: var(--text-tertiary);
+            border-radius: 50%;
             animation: pulse-dot 1.4s infinite ease-in-out;
         }
-        .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        .thinking-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .thinking-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
 
         /* ── Export menu ─────────────────────────────────────────── */
         #export-menu {
-            display: none; position: fixed;
-            background: var(--bg-elevated); border: 1px solid var(--border-strong);
-            border-radius: 10px; padding: 5px; z-index: 500;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.14); min-width: 170px;
+            display: none;
+            position: fixed;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            padding: 5px;
+            z-index: 500;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+            min-width: 170px;
         }
+
         .export-item {
-            display: flex; align-items: center; gap: 9px;
-            width: 100%; padding: 7px 10px;
-            background: none; border: none; cursor: pointer;
-            color: var(--text-primary); font-family: inherit; font-size: 13px;
-            border-radius: 6px; text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            padding: 7px 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            border-radius: 6px;
+            text-align: left;
             transition: background 0.12s;
         }
-        .export-item:hover { background: rgba(0,0,0,0.05); }
-        .dark .export-item:hover { background: rgba(255,255,255,0.06); }
-        .export-item i { color: var(--accent); width: 14px; text-align: center; }
+
+        .export-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .export-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .export-item i {
+            color: var(--accent);
+            width: 14px;
+            text-align: center;
+        }
 
         /* ── Toast ───────────────────────────────────────────────── */
         #ow-toast {
-            position: fixed; bottom: 46px; left: 50%; transform: translateX(-50%);
-            background: var(--surface-dark); color: var(--bg-elevated);
-            padding: 7px 16px; border-radius: 20px; font-size: 12px;
-            z-index: 1000; opacity: 0; pointer-events: none;
-            transition: opacity 0.2s; white-space: nowrap;
+            position: fixed;
+            bottom: 46px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface-dark);
+            color: var(--bg-elevated);
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            white-space: nowrap;
         }
 
         /* ── Mobile FAB & close ─────────────────────────────────── */
         .ai-mobile-close {
             display: none;
-            width: 26px; height: 26px;
-            background: rgba(255,255,255,0.15);
-            border: none; border-radius: 7px;
-            color: white; cursor: pointer;
+            width: 26px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 7px;
+            color: white;
+            cursor: pointer;
             font-size: 13px;
-            align-items: center; justify-content: center;
+            align-items: center;
+            justify-content: center;
             transition: background 0.15s;
         }
-        .ai-mobile-close:hover { background: rgba(255,255,255,0.25); }
+
+        .ai-mobile-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
 
         #ai-fab {
             display: none;
             position: fixed;
-            bottom: 40px; right: 16px;
-            width: 50px; height: 50px;
+            bottom: 40px;
+            right: 16px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: var(--accent);
-            color: white; border: none; cursor: pointer;
+            color: white;
+            border: none;
+            cursor: pointer;
             font-size: 19px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
             z-index: 300;
-            align-items: center; justify-content: center;
+            align-items: center;
+            justify-content: center;
             transition: opacity 0.2s, transform 0.2s;
         }
-        #ai-fab.hidden { opacity: 0; transform: scale(0.75); pointer-events: none; }
+
+        #ai-fab.hidden {
+            opacity: 0;
+            transform: scale(0.75);
+            pointer-events: none;
+        }
 
         @media (max-width: 768px) {
-            .ai-mobile-close { display: flex; }
-            #ai-fab { display: flex; }
+            .ai-mobile-close {
+                display: flex;
+            }
+
+            #ai-fab {
+                display: flex;
+            }
         }
 
         /* ── Print ───────────────────────────────────────────────── */
         @media print {
-            .ow-header, .ow-toolbar, .ow-status, #ai-panel, #ow-toast, #export-menu { display: none !important; }
-            html, body { overflow: visible !important; height: auto !important; }
-            #app { height: auto !important; }
-            .ow-main { overflow: visible !important; height: auto !important; }
-            .doc-scroll { overflow: visible !important; padding: 0 !important; }
-            .editor-paper { box-shadow: none !important; min-height: auto !important; border: none !important; }
+
+            .ow-header,
+            .ow-toolbar,
+            .ow-status,
+            #ai-panel,
+            #ow-toast,
+            #export-menu {
+                display: none !important;
+            }
+
+            html,
+            body {
+                overflow: visible !important;
+                height: auto !important;
+            }
+
+            #app {
+                height: auto !important;
+            }
+
+            .ow-main {
+                overflow: visible !important;
+                height: auto !important;
+            }
+
+            .doc-scroll {
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+
+            .editor-paper {
+                box-shadow: none !important;
+                min-height: auto !important;
+                border: none !important;
+            }
         }
 
         /* ── Scrollbars ──────────────────────────────────────────── */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 10px;
+        }
     </style>
 </head>
+
 <body>
-<div id="app">
+    <div id="app">
 
-    <!-- ── Header ──────────────────────────────────────────────── -->
-    <header class="ow-header">
-        <div class="ow-logo">W</div>
-        <span class="ow-app-name">Okemo Word</span>
-        <div class="vr"></div>
-        <input id="doc-title" type="text" value="Untitled Document"
-               spellcheck="false"
-               onblur="saveDoc(true)" oninput="markUnsaved()">
-        <div style="flex:1;"></div>
-        <span id="hdr-word-count" class="hdr-word-pill">0 words</span>
-        <div class="vr"></div>
-        <button class="hdr-btn" onclick="newDoc()" title="New document"><i class="fa-regular fa-file"></i></button>
-        <button class="hdr-btn" id="save-btn" onclick="saveDoc()" title="Save  Ctrl+S"><i class="fa-regular fa-floppy-disk"></i></button>
-        <button class="hdr-btn" onclick="showExportMenu(event)" title="Export"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
-        <button class="hdr-btn" onclick="printDoc()" title="Print"><i class="fa-solid fa-print"></i></button>
-        <div class="vr"></div>
-        <button class="hdr-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"><i class="fa-solid fa-moon"></i></button>
-        <button class="hdr-btn" id="ai-toggle-btn" onclick="toggleAIPanel()" title="Oaky AI  —  writing assistant">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </button>
-        <div id="hdr-profile" class="hdr-profile"></div>
-    </header>
-
-    <!-- ── Formatting toolbar ──────────────────────────────────── -->
-    <div class="ow-toolbar" role="toolbar" aria-label="Formatting">
-        <select class="tb-select" id="fmt-select" title="Paragraph style" onchange="formatBlock(this.value); this.blur();" style="width:110px;">
-            <option value="p">Normal</option>
-            <option value="h1">Heading 1</option>
-            <option value="h2">Heading 2</option>
-            <option value="h3">Heading 3</option>
-            <option value="blockquote">Blockquote</option>
-            <option value="pre">Code Block</option>
-        </select>
-        <div class="tb-sep"></div>
-        <button class="tb-btn" id="tb-bold"      onclick="fmt('bold')"           title="Bold  Ctrl+B"><b>B</b></button>
-        <button class="tb-btn" id="tb-italic"    onclick="fmt('italic')"         title="Italic  Ctrl+I"><em style="font-style:italic;">I</em></button>
-        <button class="tb-btn" id="tb-underline" onclick="fmt('underline')"      title="Underline  Ctrl+U" style="text-decoration:underline;">U</button>
-        <button class="tb-btn" id="tb-strike"    onclick="fmt('strikeThrough')"  title="Strikethrough" style="text-decoration:line-through;">S</button>
-        <div class="tb-sep"></div>
-        <button class="tb-btn" id="tb-al" onclick="fmt('justifyLeft')"   title="Align left"><i class="fa-solid fa-align-left" style="font-size:12px;"></i></button>
-        <button class="tb-btn" id="tb-ac" onclick="fmt('justifyCenter')" title="Align center"><i class="fa-solid fa-align-center" style="font-size:12px;"></i></button>
-        <button class="tb-btn" id="tb-ar" onclick="fmt('justifyRight')"  title="Align right"><i class="fa-solid fa-align-right" style="font-size:12px;"></i></button>
-        <button class="tb-btn" id="tb-aj" onclick="fmt('justifyFull')"   title="Justify"><i class="fa-solid fa-align-justify" style="font-size:12px;"></i></button>
-        <div class="tb-sep"></div>
-        <button class="tb-btn" id="tb-ul" onclick="fmt('insertUnorderedList')" title="Bullet list"><i class="fa-solid fa-list-ul" style="font-size:12px;"></i></button>
-        <button class="tb-btn" id="tb-ol" onclick="fmt('insertOrderedList')"   title="Numbered list"><i class="fa-solid fa-list-ol" style="font-size:12px;"></i></button>
-        <button class="tb-btn" onclick="fmt('outdent')" title="Decrease indent"><i class="fa-solid fa-outdent" style="font-size:12px;"></i></button>
-        <button class="tb-btn" onclick="fmt('indent')"  title="Increase indent"><i class="fa-solid fa-indent" style="font-size:12px;"></i></button>
-        <div class="tb-sep"></div>
-        <button class="tb-btn" onclick="insertLink()"    title="Insert link"><i class="fa-solid fa-link" style="font-size:12px;"></i></button>
-        <button class="tb-btn" onclick="insertTable()"   title="Insert table"><i class="fa-solid fa-table" style="font-size:12px;"></i></button>
-        <button class="tb-btn" onclick="insertHR()"      title="Insert divider"><i class="fa-solid fa-minus" style="font-size:12px;"></i></button>
-        <div class="tb-sep"></div>
-        <button class="tb-btn" onclick="fmt('removeFormat')" title="Clear formatting"><i class="fa-solid fa-text-slash" style="font-size:12px;"></i></button>
-    </div>
-
-    <!-- ── Export menu ─────────────────────────────────────────── -->
-    <div id="export-menu">
-        <button class="export-item" onclick="exportHTML()"><i class="fa-brands fa-html5"></i> Export as HTML</button>
-        <button class="export-item" onclick="exportText()"><i class="fa-regular fa-file-lines"></i> Export as Text</button>
-        <button class="export-item" onclick="copyAsHTML()"><i class="fa-regular fa-copy"></i> Copy HTML</button>
-        <button class="export-item" onclick="copyAsText()"><i class="fa-solid fa-clipboard"></i> Copy Text</button>
-    </div>
-
-    <!-- ── Main ────────────────────────────────────────────────── -->
-    <div class="ow-main">
-
-        <!-- Document area -->
-        <div class="doc-scroll" id="doc-scroll">
-            <div class="editor-paper" id="editor-paper">
-                <div id="editor"
-                     contenteditable="true"
-                     spellcheck="true"
-                     data-placeholder="Start writing, or ask Oaky AI to help you begin...">
-                </div>
+        <!-- ── Header ──────────────────────────────────────────────── -->
+        <header class="ow-header">
+            <div class="ow-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                </svg>
             </div>
+            <span class="ow-app-name">Okemo Word</span>
+            <div class="vr"></div>
+            <input id="doc-title" type="text" value="Untitled Document" spellcheck="false" onblur="saveDoc(true)"
+                oninput="markUnsaved()">
+            <div style="flex:1;"></div>
+            <span id="hdr-word-count" class="hdr-word-pill">0 words</span>
+            <div class="vr"></div>
+            <button class="hdr-btn" onclick="newDoc()" title="New document"><i class="fa-regular fa-file"></i></button>
+            <button class="hdr-btn" id="save-btn" onclick="saveDoc()" title="Save  Ctrl+S"><i
+                    class="fa-regular fa-floppy-disk"></i></button>
+            <button class="hdr-btn" onclick="showExportMenu(event)" title="Export"><i
+                    class="fa-solid fa-arrow-up-from-bracket"></i></button>
+            <button class="hdr-btn" onclick="printDoc()" title="Print"><i class="fa-solid fa-print"></i></button>
+            <div class="vr"></div>
+            <button class="hdr-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"><i
+                    class="fa-solid fa-moon"></i></button>
+            <button class="hdr-btn" id="ai-toggle-btn" onclick="toggleAIPanel()" title="Oaky AI  —  writing assistant">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+            <div id="hdr-profile" class="hdr-profile"></div>
+        </header>
+
+        <!-- ── Formatting toolbar ──────────────────────────────────── -->
+        <div class="ow-toolbar" role="toolbar" aria-label="Formatting">
+            <select class="tb-select" id="fmt-select" title="Paragraph style"
+                onchange="formatBlock(this.value); this.blur();" style="width:110px;">
+                <option value="p">Normal</option>
+                <option value="h1">Heading 1</option>
+                <option value="h2">Heading 2</option>
+                <option value="h3">Heading 3</option>
+                <option value="blockquote">Blockquote</option>
+                <option value="pre">Code Block</option>
+            </select>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" id="tb-bold" onclick="fmt('bold')" title="Bold  Ctrl+B"><b>B</b></button>
+            <button class="tb-btn" id="tb-italic" onclick="fmt('italic')" title="Italic  Ctrl+I"><em
+                    style="font-style:italic;">I</em></button>
+            <button class="tb-btn" id="tb-underline" onclick="fmt('underline')" title="Underline  Ctrl+U"
+                style="text-decoration:underline;">U</button>
+            <button class="tb-btn" id="tb-strike" onclick="fmt('strikeThrough')" title="Strikethrough"
+                style="text-decoration:line-through;">S</button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" id="tb-al" onclick="fmt('justifyLeft')" title="Align left"><i
+                    class="fa-solid fa-align-left" style="font-size:12px;"></i></button>
+            <button class="tb-btn" id="tb-ac" onclick="fmt('justifyCenter')" title="Align center"><i
+                    class="fa-solid fa-align-center" style="font-size:12px;"></i></button>
+            <button class="tb-btn" id="tb-ar" onclick="fmt('justifyRight')" title="Align right"><i
+                    class="fa-solid fa-align-right" style="font-size:12px;"></i></button>
+            <button class="tb-btn" id="tb-aj" onclick="fmt('justifyFull')" title="Justify"><i
+                    class="fa-solid fa-align-justify" style="font-size:12px;"></i></button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" id="tb-ul" onclick="fmt('insertUnorderedList')" title="Bullet list"><i
+                    class="fa-solid fa-list-ul" style="font-size:12px;"></i></button>
+            <button class="tb-btn" id="tb-ol" onclick="fmt('insertOrderedList')" title="Numbered list"><i
+                    class="fa-solid fa-list-ol" style="font-size:12px;"></i></button>
+            <button class="tb-btn" onclick="fmt('outdent')" title="Decrease indent"><i class="fa-solid fa-outdent"
+                    style="font-size:12px;"></i></button>
+            <button class="tb-btn" onclick="fmt('indent')" title="Increase indent"><i class="fa-solid fa-indent"
+                    style="font-size:12px;"></i></button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" onclick="insertLink()" title="Insert link"><i class="fa-solid fa-link"
+                    style="font-size:12px;"></i></button>
+            <button class="tb-btn" onclick="insertTable()" title="Insert table"><i class="fa-solid fa-table"
+                    style="font-size:12px;"></i></button>
+            <button class="tb-btn" onclick="insertHR()" title="Insert divider"><i class="fa-solid fa-minus"
+                    style="font-size:12px;"></i></button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" onclick="fmt('removeFormat')" title="Clear formatting"><i
+                    class="fa-solid fa-text-slash" style="font-size:12px;"></i></button>
         </div>
 
-        <!-- AI Panel -->
-        <aside id="ai-panel">
+        <!-- ── Export menu ─────────────────────────────────────────── -->
+        <div id="export-menu">
+            <button class="export-item" onclick="exportHTML()"><i class="fa-brands fa-html5"></i> Export as
+                HTML</button>
+            <button class="export-item" onclick="exportText()"><i class="fa-regular fa-file-lines"></i> Export as
+                Text</button>
+            <button class="export-item" onclick="copyAsHTML()"><i class="fa-regular fa-copy"></i> Copy HTML</button>
+            <button class="export-item" onclick="copyAsText()"><i class="fa-solid fa-clipboard"></i> Copy Text</button>
+        </div>
 
-            <!-- Header -->
-            <div class="ai-header">
-                <div class="ai-header-left">
-                    <div class="ai-icon-ring"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <span class="ai-title">Oaky AI</span>
-                </div>
-                <div class="ai-header-right">
-                    <button class="ai-clear-btn" onclick="clearAIChat()" title="Clear conversation">
-                        <i class="fa-solid fa-rotate-right"></i>
-                    </button>
-                    <button class="ai-mobile-close" onclick="toggleAIPanel()" title="Close AI panel">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
+        <!-- ── Main ────────────────────────────────────────────────── -->
+        <div class="ow-main">
 
-            <!-- Messages -->
-            <div id="ai-messages">
-                <div class="ai-welcome" id="ai-welcome">
-                    <div class="ai-welcome-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <h4>Hi, I'm Oaky</h4>
-                    <p>Your AI writing assistant. Select text for context-aware help, or ask me anything about your document.</p>
+            <!-- Document area -->
+            <div class="doc-scroll" id="doc-scroll">
+                <div class="editor-paper" id="editor-paper">
+                    <div id="editor" contenteditable="true" spellcheck="true"
+                        data-placeholder="Start writing, or ask Oaky AI to help you begin...">
+                    </div>
                 </div>
             </div>
 
-            <!-- Quick actions -->
-            <div class="ai-quick-actions">
-                <button class="qa-chip" onclick="quickPrompt('improve')">✨ Improve</button>
-                <button class="qa-chip" onclick="quickPrompt('continue')">➡️ Continue</button>
-                <button class="qa-chip" onclick="quickPrompt('summarize')">📝 Summarize</button>
-                <button class="qa-chip" onclick="quickPrompt('grammar')">✔️ Fix Grammar</button>
-                <button class="qa-chip" onclick="quickPrompt('shorter')">📏 Shorter</button>
-                <button class="qa-chip" onclick="quickPrompt('expand')">📖 Expand</button>
-                <button class="qa-chip" onclick="quickPrompt('suggest')">💡 Suggest Edits</button>
-                <button class="qa-chip" onclick="quickPrompt('professional')">👔 Professional</button>
-                <button class="qa-chip" onclick="quickPrompt('casual')">😊 Casual</button>
-            </div>
+            <!-- AI Panel -->
+            <aside id="ai-panel">
 
-            <!-- Input -->
-            <div class="ai-input-area">
-                <div class="ai-input-wrap">
-                    <textarea id="ai-input" rows="1"
-                              onkeydown="handleAIKey(event)"
-                              oninput="autoResizeTA(this)"></textarea>
-                    <button id="ai-send-btn" onclick="handleSendAI()">
-                        <i class="fa-solid fa-arrow-up"></i>
-                    </button>
+                <!-- Header -->
+                <div class="ai-header">
+                    <div class="ai-header-left">
+                        <div class="ai-icon-ring"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <span class="ai-title">Oaky AI</span>
+                    </div>
+                    <div class="ai-header-right">
+                        <button class="ai-clear-btn" onclick="clearAIChat()" title="Clear conversation">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                        <button class="ai-mobile-close" onclick="toggleAIPanel()" title="Close AI panel">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
                 </div>
-                <p class="ai-disclaimer">Oaky may make mistakes. Review before inserting.</p>
-            </div>
-        </aside>
-    </div>
 
-    <!-- ── Status bar ──────────────────────────────────────────── -->
-    <div class="ow-status">
-        <span id="st-words">0 words</span>
-        <span class="dot">·</span>
-        <span id="st-chars">0 characters</span>
-        <span class="dot">·</span>
-        <span id="st-read">&lt; 1 min read</span>
-        <div style="flex:1;"></div>
-        <span id="st-save">Not saved</span>
-    </div>
+                <!-- Messages -->
+                <div id="ai-messages">
+                    <div class="ai-welcome" id="ai-welcome">
+                        <div class="ai-welcome-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <h4>Hi, I'm Oaky</h4>
+                        <p>Your AI writing assistant. Select text for context-aware help, or ask me anything about your
+                            document.</p>
+                    </div>
+                </div>
 
-    <!-- Toast -->
-    <div id="ow-toast"></div>
+                <!-- Quick actions -->
+                <div class="ai-quick-actions">
+                    <button class="qa-chip" onclick="quickPrompt('improve')">✨ Improve</button>
+                    <button class="qa-chip" onclick="quickPrompt('continue')">➡️ Continue</button>
+                    <button class="qa-chip" onclick="quickPrompt('summarize')">📝 Summarize</button>
+                    <button class="qa-chip" onclick="quickPrompt('grammar')">✔️ Fix Grammar</button>
+                    <button class="qa-chip" onclick="quickPrompt('shorter')">📏 Shorter</button>
+                    <button class="qa-chip" onclick="quickPrompt('expand')">📖 Expand</button>
+                    <button class="qa-chip" onclick="quickPrompt('suggest')">💡 Suggest Edits</button>
+                    <button class="qa-chip" onclick="quickPrompt('professional')">👔 Professional</button>
+                    <button class="qa-chip" onclick="quickPrompt('casual')">😊 Casual</button>
+                </div>
 
-    <!-- Mobile AI FAB -->
-    <button id="ai-fab" class="hidden" onclick="toggleAIPanel()" title="Open Oaky AI">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-    </button>
+                <!-- Input -->
+                <div class="ai-input-area">
+                    <div class="ai-input-wrap">
+                        <textarea id="ai-input" rows="1" onkeydown="handleAIKey(event)"
+                            oninput="autoResizeTA(this)"></textarea>
+                        <button id="ai-send-btn" onclick="handleSendAI()">
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </button>
+                    </div>
+                    <p class="ai-disclaimer">Oaky may make mistakes. Review before inserting.</p>
+                </div>
+            </aside>
+        </div>
 
-</div><!-- #app -->
+        <!-- ── Status bar ──────────────────────────────────────────── -->
+        <div class="ow-status">
+            <span id="st-words">0 words</span>
+            <span class="dot">·</span>
+            <span id="st-chars">0 characters</span>
+            <span class="dot">·</span>
+            <span id="st-read">&lt; 1 min read</span>
+            <div style="flex:1;"></div>
+            <span id="st-save">Not saved</span>
+        </div>
 
-<script>
-// ─── Constants & state ─────────────────────────────────────────
-const BACKEND_URL  = 'https://api.okemovail.com';
-const DOC_KEY      = 'okemo_word_docs_v1';
-const LAST_KEY     = 'okemo_word_last';
+        <!-- Toast -->
+        <div id="ow-toast"></div>
 
-let currentModel   = 'Octan-1.2B';
-let isGenerating   = false;
-let aiPanelOpen    = true;
-let savedRange     = null;
-let autoSaveTimer  = null;
-let responseMap    = {};   // msgId → full text
-let msgCounter     = 0;
+        <!-- Mobile AI FAB -->
+        <button id="ai-fab" class="hidden" onclick="toggleAIPanel()" title="Open Oaky AI">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </button>
 
-// ─── Boot ──────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    // Check for temp local datastorage transfer
-    const tempTransfer = sessionStorage.getItem('okemo_word_temp_transfer');
-    if (tempTransfer) {
-        document.getElementById('doc-title').value = 'AI Generated Document';
-        document.getElementById('editor').innerHTML = tempTransfer;
-        sessionStorage.removeItem('okemo_word_temp_transfer');
-        saveDoc(true);
-    } else {
-        loadDoc();
-    }
-    
-    updateStats();
-    updateThemeBtn();
-    loadProfile();
+    </div><!-- #app -->
 
-    // Start AI panel collapsed on mobile
-    if (window.innerWidth <= 768) {
-        aiPanelOpen = false;
-        document.getElementById('ai-panel').classList.add('collapsed');
-        document.getElementById('ai-fab').classList.remove('hidden');
-    } else {
-        document.getElementById('ai-toggle-btn').classList.add('active');
-    }
+    <script>
+        // ─── Constants & state ─────────────────────────────────────────
+        const BACKEND_URL = 'https://api.okemovail.com';
+        const DOC_KEY = 'okemo_word_docs_v1';
+        const LAST_KEY = 'okemo_word_last';
 
-    // Global keyboard shortcuts
-    document.addEventListener('keydown', e => {
-        const mod = e.ctrlKey || e.metaKey;
-        if (mod && e.key === 's') { e.preventDefault(); saveDoc(); }
-        if (mod && e.key === 'p') { e.preventDefault(); printDoc(); }
-    });
+        let currentModel = 'Octan-1.2B';
+        let isGenerating = false;
+        let aiPanelOpen = true;
+        let savedRange = null;
+        let autoSaveTimer = null;
+        let responseMap = {};   // msgId → full text
+        let msgCounter = 0;
 
-    // Close export menu on outside click
-    document.addEventListener('click', e => {
-        const menu = document.getElementById('export-menu');
-        if (menu.style.display !== 'none' && !menu.contains(e.target)) {
-            menu.style.display = 'none';
-        }
-    });
+        // ─── Boot ──────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for temp local datastorage transfer
+            const tempTransfer = sessionStorage.getItem('okemo_word_temp_transfer');
+            if (tempTransfer) {
+                document.getElementById('doc-title').value = 'AI Generated Document';
+                document.getElementById('editor').innerHTML = tempTransfer;
+                sessionStorage.removeItem('okemo_word_temp_transfer');
+                saveDoc(true);
+            } else {
+                loadDoc();
+            }
 
-    // Listen for live updates from parent (e.g., Canvas mode in AI chat)
-    window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'live_update') {
-            document.getElementById('editor').innerHTML = event.data.content;
-            if (event.data.title) document.getElementById('doc-title').value = event.data.title;
             updateStats();
-            saveDoc(true);
+            updateThemeBtn();
+            loadProfile();
+
+            // Start AI panel collapsed on mobile
+            if (window.innerWidth <= 768) {
+                aiPanelOpen = false;
+                document.getElementById('ai-panel').classList.add('collapsed');
+                document.getElementById('ai-fab').classList.remove('hidden');
+            } else {
+                document.getElementById('ai-toggle-btn').classList.add('active');
+            }
+
+            // Global keyboard shortcuts
+            document.addEventListener('keydown', e => {
+                const mod = e.ctrlKey || e.metaKey;
+                if (mod && e.key === 's') { e.preventDefault(); saveDoc(); }
+                if (mod && e.key === 'p') { e.preventDefault(); printDoc(); }
+            });
+
+            // Init editor reference now that DOM is ready
+            editor = document.getElementById('editor');
+
+            // Editor events
+            editor.addEventListener('keyup', () => { updateStats(); syncToolbar(); });
+            editor.addEventListener('mouseup', () => { syncToolbar(); captureRange(); });
+            editor.addEventListener('input', onEdit);
+            editor.addEventListener('click', () => { syncToolbar(); captureRange(); });
+            editor.addEventListener('focus', captureRange);
+
+            // Always keep savedRange current
+            document.addEventListener('selectionchange', () => {
+                const sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    const range = sel.getRangeAt(0);
+                    if (editor && editor.contains(range.commonAncestorContainer)) {
+                        savedRange = range.cloneRange();
+                        syncToolbar();
+                    }
+                }
+            });
+
+            // Prevent toolbar buttons from stealing focus/selection from editor
+            document.querySelector('.ow-toolbar').addEventListener('mousedown', e => {
+                if (e.target.closest('.tb-btn')) e.preventDefault();
+            });
+
+            // Close export menu on outside click
+            document.addEventListener('click', e => {
+                const menu = document.getElementById('export-menu');
+                if (menu.style.display !== 'none' && !menu.contains(e.target)) {
+                    menu.style.display = 'none';
+                }
+            });
+
+            // Listen for live updates from parent (e.g., Canvas mode in AI chat)
+            window.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'live_update') {
+                    document.getElementById('editor').innerHTML = event.data.content;
+                    if (event.data.title) document.getElementById('doc-title').value = event.data.title;
+                    updateStats();
+                    saveDoc(true);
+                }
+            });
+        });
+
+        // ─── Theme ─────────────────────────────────────────────────────
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('vail_theme', isDark ? 'dark' : 'light');
+            updateThemeBtn();
         }
-    });
-});
-
-// ─── Theme ─────────────────────────────────────────────────────
-function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('vail_theme', isDark ? 'dark' : 'light');
-    updateThemeBtn();
-}
-function updateThemeBtn() {
-    const isDark = document.documentElement.classList.contains('dark');
-    document.getElementById('theme-btn').innerHTML =
-        isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-}
-
-function loadProfile() {
-    try {
-        const settings = JSON.parse(localStorage.getItem('vail_settings_v4') || '{}');
-        const pfp = document.getElementById('hdr-profile');
-        if (settings.userPic) {
-            pfp.innerHTML = `<img src="${settings.userPic}" alt="Profile">`;
-        } else if (settings.userName) {
-            pfp.textContent = settings.userName.substring(0, 2).toUpperCase();
-        } else {
-            pfp.innerHTML = '<i class="fa-solid fa-user"></i>';
+        function updateThemeBtn() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('theme-btn').innerHTML =
+                isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
         }
-    } catch(e) {}
-}
 
-// ─── AI panel toggle ───────────────────────────────────────────
-function toggleAIPanel() {
-    aiPanelOpen = !aiPanelOpen;
-    document.getElementById('ai-panel').classList.toggle('collapsed', !aiPanelOpen);
-    document.getElementById('ai-toggle-btn').classList.toggle('active', aiPanelOpen);
-    const fab = document.getElementById('ai-fab');
-    if (fab) fab.classList.toggle('hidden', aiPanelOpen);
-}
-
-// ─── Formatting ────────────────────────────────────────────────
-const editor = document.getElementById('editor');
-
-function fmt(cmd, val) {
-    editor.focus();
-    document.execCommand(cmd, false, val || null);
-    syncToolbar();
-}
-
-function formatBlock(tag) {
-    editor.focus();
-    document.execCommand('formatBlock', false, tag);
-    syncToolbar();
-}
-
-function insertLink() {
-    const url = prompt('Enter URL (include https://):', 'https://');
-    if (url) { editor.focus(); document.execCommand('createLink', false, url); }
-}
-
-function insertHR() {
-    editor.focus();
-    document.execCommand('insertHTML', false,
-        '<hr style="border:none;border-top:1px solid var(--border-strong);margin:1.2em 0;"><p><br></p>');
-}
-
-function insertTable() {
-    editor.focus();
-    const rows = parseInt(prompt('Rows:', '3') || '3');
-    const cols = parseInt(prompt('Columns:', '3') || '3');
-    if (!rows || !cols) return;
-    let html = '<table style="border-collapse:collapse;width:100%;margin:1em 0;">';
-    for (let r = 0; r < rows; r++) {
-        html += '<tr>';
-        for (let c = 0; c < cols; c++) {
-            const tag = r === 0 ? 'th' : 'td';
-            html += `<${tag} style="border:1px solid var(--border-strong);padding:6px 10px;text-align:left;${r===0?'font-weight:600;background:var(--border);':''}">${r===0?'Header':'Cell'}</${tag}>`;
+        function loadProfile() {
+            try {
+                const settings = JSON.parse(localStorage.getItem('vail_settings_v4') || '{}');
+                const pfp = document.getElementById('hdr-profile');
+                if (settings.userPic) {
+                    pfp.innerHTML = `<img src="${settings.userPic}" alt="Profile">`;
+                } else if (settings.userName) {
+                    pfp.textContent = settings.userName.substring(0, 2).toUpperCase();
+                } else {
+                    pfp.innerHTML = '<i class="fa-solid fa-user"></i>';
+                }
+            } catch (e) { }
         }
-        html += '</tr>';
-    }
-    html += '</table><p><br></p>';
-    document.execCommand('insertHTML', false, html);
-}
 
-// ─── Toolbar sync ──────────────────────────────────────────────
-const TB_CMDS = {
-    'tb-bold':      'bold',
-    'tb-italic':    'italic',
-    'tb-underline': 'underline',
-    'tb-strike':    'strikeThrough',
-    'tb-al':        'justifyLeft',
-    'tb-ac':        'justifyCenter',
-    'tb-ar':        'justifyRight',
-    'tb-aj':        'justifyFull',
-    'tb-ul':        'insertUnorderedList',
-    'tb-ol':        'insertOrderedList',
-};
+        // ─── AI panel toggle ───────────────────────────────────────────
+        function toggleAIPanel() {
+            aiPanelOpen = !aiPanelOpen;
+            document.getElementById('ai-panel').classList.toggle('collapsed', !aiPanelOpen);
+            document.getElementById('ai-toggle-btn').classList.toggle('active', aiPanelOpen);
+            const fab = document.getElementById('ai-fab');
+            if (fab) fab.classList.toggle('hidden', aiPanelOpen);
+        }
 
-function syncToolbar() {
-    for (const [id, cmd] of Object.entries(TB_CMDS)) {
-        const el = document.getElementById(id);
-        if (el) el.classList.toggle('active', document.queryCommandState(cmd));
-    }
-    const blk = document.queryCommandValue('formatBlock').toLowerCase().replace(/[<>]/g, '');
-    const sel = document.getElementById('fmt-select');
-    const valid = ['p','h1','h2','h3','blockquote','pre'];
-    if (sel && valid.includes(blk)) sel.value = blk;
-}
+        // ─── Formatting ────────────────────────────────────────────────
+        let editor;
 
-// Editor events
-editor.addEventListener('keyup',   () => { updateStats(); syncToolbar(); });
-editor.addEventListener('mouseup', () => { syncToolbar(); captureRange(); });
-editor.addEventListener('input',   onEdit);
-editor.addEventListener('click',   () => { syncToolbar(); captureRange(); });
-editor.addEventListener('focus',   captureRange);
+        function restoreSelection() {
+            editor.focus();
+            if (!savedRange) return;
+            try {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedRange);
+            } catch (_) { }
+        }
 
-function captureRange() {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
-}
+        function fmt(cmd, val) {
+            restoreSelection();
+            document.execCommand(cmd, false, val ?? null);
+            captureRange();
+            syncToolbar();
+        }
 
-function getSelectedText() {
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed) return '';
-    const range = sel.getRangeAt(0);
-    if (!editor.contains(range.commonAncestorContainer)) return '';
-    return sel.toString().trim();
-}
+        function formatBlock(tag) {
+            restoreSelection();
+            document.execCommand('formatBlock', false, tag);
+            captureRange();
+            syncToolbar();
+        }
 
-// ─── Stats ─────────────────────────────────────────────────────
-function updateStats() {
-    const text  = editor.textContent || '';
-    const words = text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0;
-    const chars = text.length;
-    const mins  = Math.ceil(words / 200);
-    const read  = mins < 1 ? '< 1 min read' : `${mins} min read`;
+        function insertLink() {
+            const url = prompt('Enter URL (include https://):', 'https://');
+            if (url) { editor.focus(); document.execCommand('createLink', false, url); }
+        }
 
-    document.getElementById('st-words').textContent = `${words.toLocaleString()} word${words !== 1 ? 's' : ''}`;
-    document.getElementById('st-chars').textContent = `${chars.toLocaleString()} char${chars !== 1 ? 's' : ''}`;
-    document.getElementById('st-read').textContent  = read;
-    document.getElementById('hdr-word-count').textContent = `${words.toLocaleString()} words`;
-}
+        function insertHR() {
+            editor.focus();
+            document.execCommand('insertHTML', false,
+                '<hr style="border:none;border-top:1px solid var(--border-strong);margin:1.2em 0;"><p><br></p>');
+        }
 
-// ─── Document persistence ──────────────────────────────────────
-function onEdit() {
-    updateStats();
-    markUnsaved();
-    clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => saveDoc(true), 2500);
-}
+        function insertTable() {
+            editor.focus();
+            const rows = parseInt(prompt('Rows:', '3') || '3');
+            const cols = parseInt(prompt('Columns:', '3') || '3');
+            if (!rows || !cols) return;
+            let html = '<table style="border-collapse:collapse;width:100%;margin:1em 0;">';
+            for (let r = 0; r < rows; r++) {
+                html += '<tr>';
+                for (let c = 0; c < cols; c++) {
+                    const tag = r === 0 ? 'th' : 'td';
+                    html += `<${tag} style="border:1px solid var(--border-strong);padding:6px 10px;text-align:left;${r === 0 ? 'font-weight:600;background:var(--border);' : ''}">${r === 0 ? 'Header' : 'Cell'}</${tag}>`;
+                }
+                html += '</tr>';
+            }
+            html += '</table><p><br></p>';
+            document.execCommand('insertHTML', false, html);
+        }
 
-function markUnsaved() {
-    const el = document.getElementById('st-save');
-    el.textContent = 'Unsaved changes';
-    el.style.color = 'var(--accent)';
-}
+        // ─── Toolbar sync ──────────────────────────────────────────────
+        const TB_CMDS = {
+            'tb-bold': 'bold',
+            'tb-italic': 'italic',
+            'tb-underline': 'underline',
+            'tb-strike': 'strikeThrough',
+            'tb-al': 'justifyLeft',
+            'tb-ac': 'justifyCenter',
+            'tb-ar': 'justifyRight',
+            'tb-aj': 'justifyFull',
+            'tb-ul': 'insertUnorderedList',
+            'tb-ol': 'insertOrderedList',
+        };
 
-function markSaved() {
-    const el  = document.getElementById('st-save');
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    el.textContent = `Saved ${now}`;
-    el.style.color = 'var(--text-tertiary)';
-}
+        function syncToolbar() {
+            for (const [id, cmd] of Object.entries(TB_CMDS)) {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('active', document.queryCommandState(cmd));
+            }
+            const blk = document.queryCommandValue('formatBlock').toLowerCase().replace(/[<>]/g, '');
+            const sel = document.getElementById('fmt-select');
+            const valid = ['p', 'h1', 'h2', 'h3', 'blockquote', 'pre'];
+            if (sel && valid.includes(blk)) sel.value = blk;
+        }
 
-function saveDoc(silent = false) {
-    const title   = document.getElementById('doc-title').value.trim() || 'Untitled Document';
-    const content = editor.innerHTML;
-    const store   = JSON.parse(localStorage.getItem(DOC_KEY) || '{}');
-    store[title]  = { title, content, savedAt: Date.now() };
-    localStorage.setItem(DOC_KEY, JSON.stringify(store));
-    localStorage.setItem(LAST_KEY, title);
-    markSaved();
-    if (!silent) showToast('Document saved');
-}
+        // Editor events — wired up in DOMContentLoaded after editor is assigned
 
-function loadDoc() {
-    const last  = localStorage.getItem(LAST_KEY);
-    if (!last) return;
-    const store = JSON.parse(localStorage.getItem(DOC_KEY) || '{}');
-    const doc   = store[last];
-    if (doc) {
-        document.getElementById('doc-title').value = doc.title;
-        editor.innerHTML = doc.content;
-        updateStats();
-        markSaved();
-    }
-}
+        function captureRange() {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
+        }
 
-function newDoc() {
-    if (editor.innerHTML.trim() && !confirm('Start a new document? Unsaved changes will be lost.')) return;
-    editor.innerHTML = '';
-    document.getElementById('doc-title').value = 'Untitled Document';
-    localStorage.removeItem(LAST_KEY);
-    updateStats();
-    const el = document.getElementById('st-save');
-    el.textContent = 'Not saved';
-    el.style.color = 'var(--text-tertiary)';
-}
+        function getSelectedText() {
+            const sel = window.getSelection();
+            if (!sel || sel.isCollapsed) return '';
+            const range = sel.getRangeAt(0);
+            if (!editor.contains(range.commonAncestorContainer)) return '';
+            return sel.toString().trim();
+        }
 
-// ─── Export ────────────────────────────────────────────────────
-function showExportMenu(e) {
-    const menu = document.getElementById('export-menu');
-    const rect = e.currentTarget.getBoundingClientRect();
-    menu.style.top   = (rect.bottom + 6) + 'px';
-    menu.style.right = (window.innerWidth - rect.right) + 'px';
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-}
+        // ─── Stats ─────────────────────────────────────────────────────
+        function updateStats() {
+            const text = editor.textContent || '';
+            const words = text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+            const chars = text.length;
+            const mins = Math.ceil(words / 200);
+            const read = mins < 1 ? '< 1 min read' : `${mins} min read`;
 
-function exportHTML() {
-    closeExportMenu();
-    const title   = document.getElementById('doc-title').value || 'document';
-    const content = editor.innerHTML;
-    const html = `<!DOCTYPE html>
+            document.getElementById('st-words').textContent = `${words.toLocaleString()} word${words !== 1 ? 's' : ''}`;
+            document.getElementById('st-chars').textContent = `${chars.toLocaleString()} char${chars !== 1 ? 's' : ''}`;
+            document.getElementById('st-read').textContent = read;
+            document.getElementById('hdr-word-count').textContent = `${words.toLocaleString()} words`;
+        }
+
+        // ─── Document persistence ──────────────────────────────────────
+        function onEdit() {
+            updateStats();
+            markUnsaved();
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => saveDoc(true), 2500);
+        }
+
+        function markUnsaved() {
+            const el = document.getElementById('st-save');
+            el.textContent = 'Unsaved changes';
+            el.style.color = 'var(--accent)';
+        }
+
+        function markSaved() {
+            const el = document.getElementById('st-save');
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            el.textContent = `Saved ${now}`;
+            el.style.color = 'var(--text-tertiary)';
+        }
+
+        function saveDoc(silent = false) {
+            const title = document.getElementById('doc-title').value.trim() || 'Untitled Document';
+            const content = editor.innerHTML;
+            const store = JSON.parse(localStorage.getItem(DOC_KEY) || '{}');
+            store[title] = { title, content, savedAt: Date.now() };
+            localStorage.setItem(DOC_KEY, JSON.stringify(store));
+            localStorage.setItem(LAST_KEY, title);
+            markSaved();
+            if (!silent) showToast('Document saved');
+        }
+
+        function loadDoc() {
+            const last = localStorage.getItem(LAST_KEY);
+            if (!last) return;
+            const store = JSON.parse(localStorage.getItem(DOC_KEY) || '{}');
+            const doc = store[last];
+            if (doc) {
+                document.getElementById('doc-title').value = doc.title;
+                editor.innerHTML = doc.content;
+                updateStats();
+                markSaved();
+            }
+        }
+
+        function newDoc() {
+            if (editor.innerHTML.trim() && !confirm('Start a new document? Unsaved changes will be lost.')) return;
+            editor.innerHTML = '';
+            document.getElementById('doc-title').value = 'Untitled Document';
+            localStorage.removeItem(LAST_KEY);
+            updateStats();
+            const el = document.getElementById('st-save');
+            el.textContent = 'Not saved';
+            el.style.color = 'var(--text-tertiary)';
+        }
+
+        // ─── Export ────────────────────────────────────────────────────
+        function showExportMenu(e) {
+            const menu = document.getElementById('export-menu');
+            const rect = e.currentTarget.getBoundingClientRect();
+            menu.style.top = (rect.bottom + 6) + 'px';
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function exportHTML() {
+            closeExportMenu();
+            const title = document.getElementById('doc-title').value || 'document';
+            const content = editor.innerHTML;
+            const html = `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><title>${title}</title>
 <style>
   body{font-family:'Segoe UI',sans-serif;max-width:800px;margin:60px auto;padding:0 28px;line-height:1.8;color:#141413;font-size:16px}
@@ -899,280 +1486,281 @@ function exportHTML() {
   table{border-collapse:collapse;width:100%}td,th{border:1px solid #e8e6dc;padding:6px 10px}th{background:#f5f4ed}
   code{font-family:monospace;background:#f0eee6;padding:.1em .3em;border-radius:3px}
 </style></head><body>${content}</body></html>`;
-    dlFile(title + '.html', html, 'text/html');
-}
+            dlFile(title + '.html', html, 'text/html');
+        }
 
-function exportText() {
-    closeExportMenu();
-    const title = document.getElementById('doc-title').value || 'document';
-    dlFile(title + '.txt', editor.innerText, 'text/plain');
-}
+        function exportText() {
+            closeExportMenu();
+            const title = document.getElementById('doc-title').value || 'document';
+            dlFile(title + '.txt', editor.innerText, 'text/plain');
+        }
 
-function copyAsHTML() {
-    closeExportMenu();
-    navigator.clipboard.writeText(editor.innerHTML)
-        .then(() => showToast('HTML copied to clipboard'))
-        .catch(() => showToast('Could not access clipboard'));
-}
+        function copyAsHTML() {
+            closeExportMenu();
+            navigator.clipboard.writeText(editor.innerHTML)
+                .then(() => showToast('HTML copied to clipboard'))
+                .catch(() => showToast('Could not access clipboard'));
+        }
 
-function copyAsText() {
-    closeExportMenu();
-    navigator.clipboard.writeText(editor.innerText)
-        .then(() => showToast('Text copied to clipboard'))
-        .catch(() => showToast('Could not access clipboard'));
-}
+        function copyAsText() {
+            closeExportMenu();
+            navigator.clipboard.writeText(editor.innerText)
+                .then(() => showToast('Text copied to clipboard'))
+                .catch(() => showToast('Could not access clipboard'));
+        }
 
-function closeExportMenu() { document.getElementById('export-menu').style.display = 'none'; }
+        function closeExportMenu() { document.getElementById('export-menu').style.display = 'none'; }
 
-function dlFile(name, content, type) {
-    const a = Object.assign(document.createElement('a'), {
-        href: URL.createObjectURL(new Blob([content], { type })),
-        download: name,
-    });
-    a.click(); URL.revokeObjectURL(a.href);
-}
+        function dlFile(name, content, type) {
+            const a = Object.assign(document.createElement('a'), {
+                href: URL.createObjectURL(new Blob([content], { type })),
+                download: name,
+            });
+            a.click(); URL.revokeObjectURL(a.href);
+        }
 
-function printDoc() { window.print(); }
+        function printDoc() { window.print(); }
 
-// ─── Toast ─────────────────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg) {
-    const t = document.getElementById('ow-toast');
-    t.textContent = msg;
-    t.style.opacity = '1';
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
-}
+        // ─── Toast ─────────────────────────────────────────────────────
+        let toastTimer = null;
+        function showToast(msg) {
+            const t = document.getElementById('ow-toast');
+            t.textContent = msg;
+            t.style.opacity = '1';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+        }
 
-// ─── AI — model ────────────────────────────────────────────────
-// Model hardcoded to Octan
+        // ─── AI — model ────────────────────────────────────────────────
+        // Model hardcoded to Octan
 
-// ─── AI — quick prompts ────────────────────────────────────────
-const QUICK = {
-    improve:      (s, d) => s ? `Improve this text (preserve meaning):\n\n${s}` : `Improve the writing quality of my document:\n\n${d}`,
-    continue:     (s, d) => `Continue writing naturally from where this ends:\n\n${d.slice(-1000)}`,
-    summarize:    (s, d) => `Write a concise summary of this ${s ? 'selected text' : 'document'}:\n\n${s || d}`,
-    grammar:      (s, d) => `Fix all grammar, spelling, and punctuation errors:\n\n${s || d}`,
-    shorter:      (s, d) => `Make this shorter while keeping key information:\n\n${s || d}`,
-    expand:       (s, d) => `Expand this with more detail, examples, and depth:\n\n${s || d}`,
-    suggest:      (s, d) => `Suggest edits or improvements for the following text:\n\n${s || d}`,
-    professional: (s, d) => `Rewrite this in a clear, professional, formal tone:\n\n${s || d}`,
-    casual:       (s, d) => `Rewrite this in a warm, friendly, conversational tone:\n\n${s || d}`,
-};
+        // ─── AI — quick prompts ────────────────────────────────────────
+        const QUICK = {
+            improve: (s, d) => s ? `Improve this text (preserve meaning):\n\n${s}` : `Improve the writing quality of my document:\n\n${d}`,
+            continue: (s, d) => `Continue writing naturally from where this ends:\n\n${d.slice(-1000)}`,
+            summarize: (s, d) => `Write a concise summary of this ${s ? 'selected text' : 'document'}:\n\n${s || d}`,
+            grammar: (s, d) => `Fix all grammar, spelling, and punctuation errors:\n\n${s || d}`,
+            shorter: (s, d) => `Make this shorter while keeping key information:\n\n${s || d}`,
+            expand: (s, d) => `Expand this with more detail, examples, and depth:\n\n${s || d}`,
+            suggest: (s, d) => `Suggest edits or improvements for the following text:\n\n${s || d}`,
+            professional: (s, d) => `Rewrite this in a clear, professional, formal tone:\n\n${s || d}`,
+            casual: (s, d) => `Rewrite this in a warm, friendly, conversational tone:\n\n${s || d}`,
+        };
 
-function quickPrompt(type) {
-    captureRange();
-    const sel = getSelectedText();
-    const doc = (editor.innerText || '').substring(0, 4000);
-    if (!sel && !doc.trim()) { showToast('Write something first, or select text'); return; }
-    const fn = QUICK[type];
-    if (!fn) return;
-    sendAIMessage(fn(sel, doc));
-}
+        function quickPrompt(type) {
+            captureRange();
+            const sel = getSelectedText();
+            const doc = (editor.innerText || '').substring(0, 4000);
+            if (!sel && !doc.trim()) { showToast('Write something first, or select text'); return; }
+            const fn = QUICK[type];
+            if (!fn) return;
+            sendAIMessage(fn(sel, doc));
+        }
 
-// ─── AI — input helpers ────────────────────────────────────────
-function handleAIKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendAI(); }
-}
+        // ─── AI — input helpers ────────────────────────────────────────
+        function handleAIKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendAI(); }
+        }
 
-function handleSendAI() {
-    const input = document.getElementById('ai-input');
-    const msg   = input.value.trim();
-    if (!msg || isGenerating) return;
-    input.value = '';
-    autoResizeTA(input);
-    captureRange();
-    sendAIMessage(msg);
-}
+        function handleSendAI() {
+            const input = document.getElementById('ai-input');
+            const msg = input.value.trim();
+            if (!msg || isGenerating) return;
+            input.value = '';
+            autoResizeTA(input);
+            captureRange();
+            sendAIMessage(msg);
+        }
 
-function autoResizeTA(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
-    const qa = document.querySelector('.ai-quick-actions');
-    if (qa) {
-        qa.style.display = el.value.trim().length > 0 ? 'none' : 'flex';
-    }
-}
-
-// ─── AI — streaming ────────────────────────────────────────────
-async function sendAIMessage(userMessage) {
-    if (isGenerating) return;
-    isGenerating = true;
-
-    const msgsEl  = document.getElementById('ai-messages');
-    const welcome = document.getElementById('ai-welcome');
-    if (welcome) welcome.remove();
-
-    // User bubble
-    const userDiv = document.createElement('div');
-    userDiv.className = 'msg-user';
-    userDiv.innerHTML = `<div class="msg-user-bubble">${escHtml(userMessage)}</div>`;
-    msgsEl.appendChild(userDiv);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-
-    // AI bubble (thinking)
-    const id      = 'ai-' + (++msgCounter);
-    const aiDiv   = document.createElement('div');
-    aiDiv.className = 'msg-ai';
-    aiDiv.id = id;
-    aiDiv.innerHTML = `<div class="msg-ai-bubble" id="${id}-txt">
-        <div class="thinking-dots"><span></span><span></span><span></span></div>
-    </div>`;
-    msgsEl.appendChild(aiDiv);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-
-    document.getElementById('ai-send-btn').disabled = true;
-
-    // Build context
-    const sel = getSelectedText();
-    let prompt = userMessage;
-    if (sel && !userMessage.includes(sel)) prompt += `\n\n[Selected: "${sel.substring(0, 500)}"]`;
-
-    const messages = [
-        { role: 'system', content: 'You are Oaky, an AI writing assistant inside Okemo Word. Help the user write, edit, and improve document content. When providing rewritten or corrected text, output only the improved text without preamble or meta-commentary unless the user explicitly asks for explanation.' },
-        { role: 'user',   content: prompt },
-    ];
-
-    let accumulated = '';
-    const txtEl = document.getElementById(`${id}-txt`);
-
-    try {
-        const res = await fetch(`${BACKEND_URL}/v1/chat/completions`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model:       currentModel,
-                messages,
-                stream:      true,
-                max_tokens:  1024,
-                temperature: 0.7,
-                use_thought: false,
-            }),
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const reader  = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buf = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buf += decoder.decode(value, { stream: true });
-
-            const lines = buf.split('\n');
-            buf = lines.pop() || '';
-
-            for (const line of lines) {
-                const t = line.trim();
-                if (!t.startsWith('data: ')) continue;
-                const d = t.slice(6);
-                if (d === '[DONE]') break;
-                try {
-                    const tok = JSON.parse(d)?.choices?.[0]?.delta?.content || '';
-                    if (tok) {
-                        accumulated += tok;
-                        if (txtEl) {
-                            txtEl.textContent = accumulated.replace(/<(?:think|thought)>[\s\S]*?(?:<\/(?:think|thought)>|$)/gi, '').trimStart();
-                            msgsEl.scrollTop  = msgsEl.scrollHeight;
-                        }
-                    }
-                } catch (_) {}
+        function autoResizeTA(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+            const qa = document.querySelector('.ai-quick-actions');
+            if (qa) {
+                qa.style.display = el.value.trim().length > 0 ? 'none' : 'flex';
             }
         }
-    } catch (err) {
-        accumulated = 'Could not reach Oaky — check your connection and try again.';
-    }
 
-    // Finalise
-    const cleanOutput = accumulated.replace(/<(?:think|thought)>[\s\S]*?(?:<\/(?:think|thought)>|$)/gi, '').trim();
-    if (txtEl) {
-        if (!cleanOutput) txtEl.textContent = '(No response)';
-        else txtEl.textContent = cleanOutput;
-    }
-    responseMap[id] = cleanOutput || '(No response)';
+        // ─── AI — streaming ────────────────────────────────────────────
+        async function sendAIMessage(userMessage) {
+            if (isGenerating) return;
+            isGenerating = true;
 
-    // Insert / Replace buttons — always show both
-    const actionsDiv = document.createElement('div');
-    actionsDiv.style.cssText = 'display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;';
+            const msgsEl = document.getElementById('ai-messages');
+            const welcome = document.getElementById('ai-welcome');
+            if (welcome) welcome.remove();
 
-    const insertBtn = document.createElement('button');
-    insertBtn.className = 'msg-insert-btn';
-    insertBtn.innerHTML = '<i class="fa-solid fa-arrow-turn-down" style="font-size:9px;"></i> Insert Below';
-    insertBtn.onclick = () => insertIntoDoc(id, false);
+            // User bubble
+            const userDiv = document.createElement('div');
+            userDiv.className = 'msg-user';
+            userDiv.innerHTML = `<div class="msg-user-bubble">${escHtml(userMessage)}</div>`;
+            msgsEl.appendChild(userDiv);
+            msgsEl.scrollTop = msgsEl.scrollHeight;
 
-    const replaceBtn = document.createElement('button');
-    replaceBtn.className = 'msg-insert-btn';
-    const hadSel = savedRange && !savedRange.collapsed;
-    replaceBtn.innerHTML = hadSel
-        ? '<i class="fa-solid fa-rotate" style="font-size:9px;"></i> Replace Selection'
-        : '<i class="fa-solid fa-file-pen" style="font-size:9px;"></i> Replace Document';
-    replaceBtn.onclick = () => insertIntoDoc(id, true);
+            // AI bubble (thinking)
+            const id = 'ai-' + (++msgCounter);
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'msg-ai';
+            aiDiv.id = id;
+            aiDiv.innerHTML = `<div class="msg-ai-bubble" id="${id}-txt">
+        <div class="thinking-dots"><span></span><span></span><span></span></div>
+    </div>`;
+            msgsEl.appendChild(aiDiv);
+            msgsEl.scrollTop = msgsEl.scrollHeight;
 
-    actionsDiv.appendChild(insertBtn);
-    actionsDiv.appendChild(replaceBtn);
-    aiDiv.appendChild(actionsDiv);
+            document.getElementById('ai-send-btn').disabled = true;
 
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-    isGenerating = false;
-    document.getElementById('ai-send-btn').disabled = false;
-}
+            // Build context
+            const sel = getSelectedText();
+            let prompt = userMessage;
+            if (sel && !userMessage.includes(sel)) prompt += `\n\n[Selected: "${sel.substring(0, 500)}"]`;
 
-// ─── AI — insert into doc ──────────────────────────────────────
-function insertIntoDoc(id, replace = false) {
-    const text = responseMap[id];
-    if (!text) return;
+            const messages = [
+                { role: 'system', content: 'You are Oaky, an AI writing assistant inside Okemo Word. Help the user write, edit, and improve document content. When providing rewritten or corrected text, output only the improved text without preamble or meta-commentary unless the user explicitly asks for explanation.' },
+                { role: 'user', content: prompt },
+            ];
 
-    editor.focus();
+            let accumulated = '';
+            const txtEl = document.getElementById(`${id}-txt`);
 
-    if (replace && savedRange && !savedRange.collapsed) {
-        // Replace the selected text
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(savedRange);
-        document.execCommand('delete');
-        document.execCommand('insertText', false, text);
-        showToast('Selection replaced');
-    } else if (replace) {
-        // Replace entire document
-        if (!confirm('Replace the entire document with Oaky\'s response?')) return;
-        editor.innerText = text;
-        showToast('Document replaced');
-    } else {
-        // Insert below cursor/end of selection
-        const sel = window.getSelection();
-        const r = savedRange ? (function() {
-            const rr = savedRange.cloneRange(); rr.collapse(false); return rr;
-        })() : (function() {
-            const rr = document.createRange(); rr.selectNodeContents(editor); rr.collapse(false); return rr;
-        })();
-        sel.removeAllRanges();
-        sel.addRange(r);
-        document.execCommand('insertText', false, '\n\n' + text);
-        showToast('Inserted into document');
-    }
+            try {
+                const res = await fetch(`${BACKEND_URL}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: currentModel,
+                        messages,
+                        stream: true,
+                        max_tokens: 1024,
+                        temperature: 0.7,
+                        use_thought: false,
+                    }),
+                });
 
-    updateStats();
-    onEdit();
-}
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-// ─── AI — clear chat ──────────────────────────────────────────
-function clearAIChat() {
-    document.getElementById('ai-messages').innerHTML = `
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buf = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buf += decoder.decode(value, { stream: true });
+
+                    const lines = buf.split('\n');
+                    buf = lines.pop() || '';
+
+                    for (const line of lines) {
+                        const t = line.trim();
+                        if (!t.startsWith('data: ')) continue;
+                        const d = t.slice(6);
+                        if (d === '[DONE]') break;
+                        try {
+                            const tok = JSON.parse(d)?.choices?.[0]?.delta?.content || '';
+                            if (tok) {
+                                accumulated += tok;
+                                if (txtEl) {
+                                    txtEl.textContent = accumulated.replace(/<(?:think|thought)>[\s\S]*?(?:<\/(?:think|thought)>|$)/gi, '').trimStart();
+                                    msgsEl.scrollTop = msgsEl.scrollHeight;
+                                }
+                            }
+                        } catch (_) { }
+                    }
+                }
+            } catch (err) {
+                accumulated = 'Could not reach Oaky — check your connection and try again.';
+            }
+
+            // Finalise
+            const cleanOutput = accumulated.replace(/<(?:think|thought)>[\s\S]*?(?:<\/(?:think|thought)>|$)/gi, '').trim();
+            if (txtEl) {
+                if (!cleanOutput) txtEl.textContent = '(No response)';
+                else txtEl.textContent = cleanOutput;
+            }
+            responseMap[id] = cleanOutput || '(No response)';
+
+            // Insert / Replace buttons — always show both
+            const actionsDiv = document.createElement('div');
+            actionsDiv.style.cssText = 'display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;';
+
+            const insertBtn = document.createElement('button');
+            insertBtn.className = 'msg-insert-btn';
+            insertBtn.innerHTML = '<i class="fa-solid fa-arrow-turn-down" style="font-size:9px;"></i> Insert Below';
+            insertBtn.onclick = () => insertIntoDoc(id, false);
+
+            const replaceBtn = document.createElement('button');
+            replaceBtn.className = 'msg-insert-btn';
+            const hadSel = savedRange && !savedRange.collapsed;
+            replaceBtn.innerHTML = hadSel
+                ? '<i class="fa-solid fa-rotate" style="font-size:9px;"></i> Replace Selection'
+                : '<i class="fa-solid fa-file-pen" style="font-size:9px;"></i> Replace Document';
+            replaceBtn.onclick = () => insertIntoDoc(id, true);
+
+            actionsDiv.appendChild(insertBtn);
+            actionsDiv.appendChild(replaceBtn);
+            aiDiv.appendChild(actionsDiv);
+
+            msgsEl.scrollTop = msgsEl.scrollHeight;
+            isGenerating = false;
+            document.getElementById('ai-send-btn').disabled = false;
+        }
+
+        // ─── AI — insert into doc ──────────────────────────────────────
+        function insertIntoDoc(id, replace = false) {
+            const text = responseMap[id];
+            if (!text) return;
+
+            editor.focus();
+
+            if (replace && savedRange && !savedRange.collapsed) {
+                // Replace the selected text
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedRange);
+                document.execCommand('delete');
+                document.execCommand('insertText', false, text);
+                showToast('Selection replaced');
+            } else if (replace) {
+                // Replace entire document
+                if (!confirm('Replace the entire document with Oaky\'s response?')) return;
+                editor.innerText = text;
+                showToast('Document replaced');
+            } else {
+                // Insert below cursor/end of selection
+                const sel = window.getSelection();
+                const r = savedRange ? (function () {
+                    const rr = savedRange.cloneRange(); rr.collapse(false); return rr;
+                })() : (function () {
+                    const rr = document.createRange(); rr.selectNodeContents(editor); rr.collapse(false); return rr;
+                })();
+                sel.removeAllRanges();
+                sel.addRange(r);
+                document.execCommand('insertText', false, '\n\n' + text);
+                showToast('Inserted into document');
+            }
+
+            updateStats();
+            onEdit();
+        }
+
+        // ─── AI — clear chat ──────────────────────────────────────────
+        function clearAIChat() {
+            document.getElementById('ai-messages').innerHTML = `
         <div class="ai-welcome" id="ai-welcome">
             <div class="ai-welcome-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
             <h4>Hi, I'm Oaky</h4>
             <p>Your AI writing assistant. Select text for context-aware help, or ask me anything about your document.</p>
         </div>`;
-    responseMap  = {};
-    msgCounter   = 0;
-}
+            responseMap = {};
+            msgCounter = 0;
+        }
 
-// ─── Utility ──────────────────────────────────────────────────
-function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-</script>
+        // ─── Utility ──────────────────────────────────────────────────
+        function escHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
 </body>
+
 </html>

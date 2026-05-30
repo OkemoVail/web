@@ -23,30 +23,31 @@
                 }
             }
 
-            // Initial load check
-            const stored = localStorage.getItem('vail_theme');
-            if (stored) {
-                applyTheme(stored === 'dark');
-            } else {
-                applyTheme(mediaQuery.matches);
+            function resolveTheme() {
+                const stored = localStorage.getItem('vail_theme');
+                if (stored === 'dark') {
+                    applyTheme(true);
+                } else if (stored === 'light') {
+                    applyTheme(false);
+                } else {
+                    // 'system' or not set — follow OS preference
+                    applyTheme(mediaQuery.matches);
+                }
             }
 
-            // Listen for live system theme changes
-            mediaQuery.addEventListener('change', (e) => {
-                if (!localStorage.getItem('vail_theme')) {
-                    applyTheme(e.matches);
+            resolveTheme();
+
+            // Live system preference changes (when theme is 'system' or unset)
+            mediaQuery.addEventListener('change', () => {
+                const stored = localStorage.getItem('vail_theme');
+                if (!stored || stored === 'system') {
+                    applyTheme(mediaQuery.matches);
                 }
             });
 
             // Sync when theme is changed in another tab (e.g. chat.html settings)
             window.addEventListener('storage', (e) => {
-                if (e.key === 'vail_theme') {
-                    if (e.newValue) {
-                        applyTheme(e.newValue === 'dark');
-                    } else {
-                        applyTheme(mediaQuery.matches);
-                    }
-                }
+                if (e.key === 'vail_theme') resolveTheme();
             });
         })();
     </script>
