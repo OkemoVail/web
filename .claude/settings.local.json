@@ -16,7 +16,8 @@
       "Bash(bash *)",
       "Bash(scripts/start-server.sh *)",
       "Bash(python3 \"C:\\\\Users\\\\okemo\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"sidebar navigation collapsed expanded animation\" --domain ux -n 5)",
-      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\okemo\\\\Desktop\\\\Projects\\\\web\\\\word\\\\index.html\"\\).Count)"
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\okemo\\\\Desktop\\\\Projects\\\\web\\\\word\\\\index.html\"\\).Count)",
+      "Bash(node -e ' *)"
     ]
   }
 }

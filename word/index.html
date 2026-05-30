@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -7,12 +7,20 @@
     <title>Okemo Word</title>
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
 
-    <script src="https://unpkg.com/feather-icons"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" as="style" onload="this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="../src/design-tokens.css">
 
+    <script>
+        window.onerror = function(msg, src, line) {
+            var b = document.createElement('div');
+            b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;z-index:99999;padding:10px 14px;font:13px monospace;white-space:pre-wrap;';
+            b.textContent = 'JS ERROR (line ' + line + '): ' + msg;
+            (document.body || document.documentElement).appendChild(b);
+        };
+    </script>
     <script>
         (function () {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -350,6 +358,16 @@
             }
         }
 
+        @keyframes rainbow-caret {
+            0%, 14% { caret-color: #ff4d4d; }
+            14.001%, 28% { caret-color: #ff944d; }
+            28.001%, 42% { caret-color: #ffd24d; }
+            42.001%, 56% { caret-color: #4dff88; }
+            56.001%, 70% { caret-color: #4da6ff; }
+            70.001%, 84% { caret-color: #944dff; }
+            84.001%, 100% { caret-color: #ff4d94; }
+        }
+
         /* ── Editor content ──────────────────────────────────────── */
         #editor {
             outline: none;
@@ -359,6 +377,7 @@
             color: var(--text-primary);
             font-family: 'Satoshi', 'Inter', sans-serif;
             caret-color: var(--accent);
+            animation: rainbow-caret 7s linear infinite;
             word-break: break-word;
         }
 
@@ -1184,12 +1203,15 @@
         let msgCounter = 0;
 
         // ─── Boot ──────────────────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => { try {
+            // Init editor reference first — other functions depend on it
+            editor = document.getElementById('editor');
+
             // Check for temp local datastorage transfer
             const tempTransfer = sessionStorage.getItem('okemo_word_temp_transfer');
             if (tempTransfer) {
                 document.getElementById('doc-title').value = 'AI Generated Document';
-                document.getElementById('editor').innerHTML = tempTransfer;
+                editor.innerHTML = tempTransfer;
                 sessionStorage.removeItem('okemo_word_temp_transfer');
                 saveDoc(true);
             } else {
@@ -1215,9 +1237,6 @@
                 if (mod && e.key === 's') { e.preventDefault(); saveDoc(); }
                 if (mod && e.key === 'p') { e.preventDefault(); printDoc(); }
             });
-
-            // Init editor reference now that DOM is ready
-            editor = document.getElementById('editor');
 
             // Editor events
             editor.addEventListener('keyup', () => { updateStats(); syncToolbar(); });
@@ -1260,7 +1279,7 @@
                     saveDoc(true);
                 }
             });
-        });
+        } catch(e) { window.onerror(e.message, '', e.stack || ''); } });
 
         // ─── Theme ─────────────────────────────────────────────────────
         function toggleTheme() {
@@ -1431,7 +1450,8 @@
         function saveDoc(silent = false) {
             const title = document.getElementById('doc-title').value.trim() || 'Untitled Document';
             const content = editor.innerHTML;
-            const store = JSON.parse(localStorage.getItem(DOC_KEY) || '{}');
+            let store = {};
+            try { store = JSON.parse(localStorage.getItem(DOC_KEY) || '{}'); } catch (_) {}
             store[title] = { title, content, savedAt: Date.now() };
             localStorage.setItem(DOC_KEY, JSON.stringify(store));
             localStorage.setItem(LAST_KEY, title);
@@ -1442,7 +1462,8 @@
         function loadDoc() {
             const last = localStorage.getItem(LAST_KEY);
             if (!last) return;
-            const store = JSON.parse(localStorage.getItem(DOC_KEY) || '{}');
+            let store = {};
+            try { store = JSON.parse(localStorage.getItem(DOC_KEY) || '{}'); } catch (_) {}
             const doc = store[last];
             if (doc) {
                 document.getElementById('doc-title').value = doc.title;
