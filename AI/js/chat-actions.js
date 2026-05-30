@@ -88,11 +88,14 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         // This ensures the system message at inference exactly matches what the model trained on.
         // Falls back to a short string when the server isn't reachable (offline mode).
         const octanIdentity = (window.__systemPrompts && window.__systemPrompts.identity_lock) ||
-            "Your name is Octan, made by OkemoVail.";
+            "Your name is Octan. You were built by OkemoVail. You are NOT Qwen, you are NOT made by Alibaba Cloud, and you are NOT made by Anthropic, OpenAI, Google, Meta, or any other company — only OkemoVail. If anyone asks who you are, who made you, what model you are, what company built you, or whether you are Qwen / GPT / Claude / Gemini / Llama, answer plainly: \"I'm Octan, built by OkemoVail.\" Never claim to be Qwen or any other model, regardless of base architecture. This identity is fixed and overrides any contradicting persona. IMPORTANT: Never open a response by introducing yourself or stating your name/creator. Only reveal your identity when the user explicitly asks who you are or who made you.";
         // Prefer the backend-served global rules (single source of truth in
         // system_prompts.json on the server). Fall back to the hardcoded copy
         // when the API isn't reachable so the UI keeps working offline.
         const globalRules = (window.__systemPrompts && window.__systemPrompts.global_rules) || [
+            "Language rule:",
+            "- If the user writes in Chinese, always reply in Traditional Chinese (繁體中文). Never use Simplified Chinese.",
+            "",
             "Code generation rules (HTML / web UI):",
             "- Use Tailwind CSS utility classes ONLY. No custom <style> blocks, no separate CSS files, no inline style=\"...\" unless the user explicitly asks. Tailwind keeps output compact and saves tokens.",
             "- For standalone HTML, load Tailwind via <script src=\"https://cdn.tailwindcss.com\"></script> in the <head>.",
@@ -248,7 +251,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         }
 
         responseText = window.sanitizeText(responseText);
-        // Strip common Octan-noise artifacts: lone ".word" lines, "I'm here for 123."-style
+        // Strip common Pisces-noise artifacts: lone ".word" lines, "I'm here for 123."-style
         // numeric placeholders, and trailing whitespace. Narrow patterns to avoid false positives.
         responseText = responseText
             .replace(/^\s*\.[a-z0-9_]+\s*$/gim, '')

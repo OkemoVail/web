@@ -118,15 +118,15 @@ window.updateProfileUI = () => {
 
             targetEl.innerHTML = `<div class="relative overflow-hidden rounded-full bg-black" style="width:100%;height:100%;"><img src="${window.settings.userPic}" class="absolute left-1/2 top-1/2" style="max-width:none; height:${size}px; transform: translate(-50%, -50%) translate(${tx}px, ${ty}px) scale(${scale});"></div>`;
         } else {
-            targetEl.className = `w-full h-full rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center font-bold relative overflow-hidden`;
+            targetEl.className = `w-full h-full rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center relative overflow-hidden`;
             if (!isHighRes) {
                 targetEl.style.width = size + 'px';
                 targetEl.style.height = size + 'px';
-                targetEl.className += ' text-xs';
-            } else {
-                targetEl.className += ' text-3xl';
             }
-            targetEl.innerText = currentName[0].toUpperCase();
+            targetEl.style.padding = '5px';
+            targetEl.innerHTML = typeof UNIQUE_SVG_PISCES !== 'undefined'
+                ? UNIQUE_SVG_PISCES
+                : currentName[0].toUpperCase();
         }
     };
 

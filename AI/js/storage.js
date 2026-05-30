@@ -57,13 +57,7 @@ window.StorageController = (() => {
                         map[cursor.value.id] = cursor.value;
                         count++;
 
-                        if (count % 20 === 0) {
-                            setTimeout(() => {
-                                cursor.continue();
-                            }, 0);
-                        } else {
-                            cursor.continue();
-                        }
+                        cursor.continue();
                     } else {
                         resolve(map);
                     }

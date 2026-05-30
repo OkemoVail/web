@@ -223,7 +223,7 @@ window.filterChats = (query) => {
 };
 
 window.selectModel = (key) => {
-    window.currentModel = window.MODELS[key] || window.MODELS.STUART;
+    window.currentModel = window.MODELS[key] || window.MODELS.PISCES;
     window.client = null;
 
     if (window.els.welcomeLogo) {

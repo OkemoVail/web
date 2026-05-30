@@ -1,8 +1,9 @@
-const BUILD_NUMBER = 1010;
+const BUILD_NUMBER = 1011;
 const CHANGELOG = {
-    version: "1.6.0",
+    version: "1.7.0",
     build: BUILD_NUMBER,
     changes: [
+        { type: "sunset", text: "Stuart has been sunset. Pisces is now the only model." },
         "Polaris has been updated to 1.6 (1B Parameters)",
         "OLM North Star has been updated to 1.1"
     ]
@@ -30,10 +31,18 @@ window.showChangelog = (manual = false) => {
 
     const verEl = document.getElementById('changelog-version');
     if (verEl) verEl.innerText = `Build ${buildNum}`;
-    if (content) content.innerHTML = changes.map(change => `<li class="flex items-start gap-3 text-sm text-zinc-600 dark:text-zinc-400">
-        <i class="fa-solid fa-circle-check text-[var(--accent-color, #3b82f6)] mt-1 shrink-0"></i>
-        <span>${change}</span>
-    </li>`).join('');
+    if (content) content.innerHTML = changes.map(change => {
+        if (typeof change === 'object' && change.type === 'sunset') {
+            return `<li class="flex flex-col items-center gap-2 py-3 text-zinc-600 dark:text-zinc-400">
+                <i class="fa-solid fa-sun text-orange-400" style="font-size:2rem;"></i>
+                <span class="text-sm font-semibold text-center">${change.text}</span>
+            </li>`;
+        }
+        return `<li class="flex items-start gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+            <i class="fa-solid fa-circle-check text-[var(--accent-color, #3b82f6)] mt-1 shrink-0"></i>
+            <span>${change}</span>
+        </li>`;
+    }).join('');
 
     modal.classList.add('active');
     if (!manual) {

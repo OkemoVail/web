@@ -29,7 +29,7 @@ window.initChatUI = () => {
     const day = now.getDay();
 
     let options = isGuest ? ['Hi Guest.'] : [
-        'Back at it!', 'Cookie and Oaky time', 'Greetings, whoever you are',
+        'Back at it!', 'Cookie and Oaky time?', 'Greetings, whoever you are',
         'Hey there', 'Hi, how are you?', 'How was your day?', 'How’s it going?',
         `Let’s chat, ${name}`, 'Welcome', 'What’s new?', 'What’s on your mind?'
     ];
@@ -183,7 +183,7 @@ window.initChatUI = () => {
     window.applyTranslations();
     window.updateStorageUsage();
     window.updateGoogleAuthButton();
-    window.selectModel('OCTAN');
+    window.selectModel('PISCES');
     window.render();
     window.updateUI();
     window.checkChangelog();

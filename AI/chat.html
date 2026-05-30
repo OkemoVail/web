@@ -1258,6 +1258,50 @@
             }
         }
 
+        /* ── Fish swim animation ── */
+        .fish-swim-lane {
+            position: relative;
+            width: 100%;
+            height: 28px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .fish-swimmer {
+            position: absolute;
+            left: 0;
+            top: calc(50% - 13px);
+            width: 26px;
+            height: 26px;
+            color: var(--accent-color);
+            animation: fish-swim 3s linear infinite;
+            opacity: 0.85;
+        }
+
+        .fish-swimmer svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .fish-swimmer svg path:nth-child(2) {
+            transform-box: view-box;
+            transform-origin: 8px 12px;
+            animation: fish-tail-wag 0.35s ease-in-out infinite alternate;
+        }
+
+        @keyframes fish-tail-wag {
+            from { transform: rotate(-20deg); }
+            to   { transform: rotate(20deg); }
+        }
+
+        @keyframes fish-swim {
+            0%   { left: -40px; top: calc(50% - 13px); }
+            25%  { top: calc(50% - 17px); }
+            50%  { top: calc(50% - 13px); }
+            75%  { top: calc(50% - 9px); }
+            100% { left: calc(100% + 10px); top: calc(50% - 13px); }
+        }
+
         .thinking-shimmer {
             font-size: 0.9rem;
             font-weight: 500;
@@ -2716,7 +2760,7 @@
                     <div class="flex-1">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1.5"
                             data-t="display_name">Display Name</label>
-                        <input type="text" id="onboarding-name" placeholder="Name or Alias"
+                        <input type="text" id="onboarding-name" placeholder="Name or Alias" data-t-placeholder="ph_name_alias"
                             class="w-full bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 min-h-[48px] text-sm font-bold focus:outline-none transition-all placeholder-zinc-400"
                             style="--tw-ring-color: var(--accent-color);"
                             onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor=''">
@@ -2728,7 +2772,22 @@
 
                 <div class="mb-5">
                     <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 text-center"
-                        data-t="appearance">Appearance</label>
+                        data-t="language">Language</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="window.setLang('en')"
+                            class="flex items-center justify-center gap-2 min-h-[48px] rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 hover:border-[var(--accent-color)] transition-all text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                            <span>English</span>
+                        </button>
+                        <button onclick="window.setLang('zh')"
+                            class="flex items-center justify-center gap-2 min-h-[48px] rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 hover:border-[var(--accent-color)] transition-all text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                            <span>中文</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 text-center"
+                        data-t="appearance" data-t="settings_appearance">Appearance</label>
                     <div class="grid grid-cols-3 gap-2">
                         <button onclick="window.setTheme('light')"
                             class="flex items-center justify-center gap-2 min-h-[48px] rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 hover:border-[var(--accent-color)] transition-all text-xs font-bold text-zinc-700 dark:text-zinc-300">
@@ -2757,7 +2816,7 @@
                         data-t="onboarding_guest">Continue as Guest</button>
                     <p class="text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
                         Already have an account? <button onclick="window.goToSettingsLogin()"
-                            class="text-[var(--accent-color)] hover:underline">Log in via Settings</button>
+                            class="text-[var(--accent-color)] hover:underline" data-t="auth_settings">Log in via Settings</button>
                     </p>
                 </div>
 
@@ -2802,7 +2861,7 @@
                     <span
                         class="sb-row-text text-[17px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight py-1">Oaky</span>
                 </button>
-                <button onclick="window.toggleSidebar()" title="Collapse sidebar"
+                <button onclick="window.toggleSidebar()" title="Collapse sidebar" data-t-title="title_collapse_sidebar"
                     class="sb-icon-btn sb-row-text shrink-0 ml-auto">
                     <i data-feather="sidebar" class="w-[15px] h-[15px]"></i>
                 </button>
@@ -2812,7 +2871,7 @@
             <div class="shrink-0 pt-1 pb-0.5 px-2">
                 <button onclick="window.resetChat()" class="sb-new-chat-btn">
                     <span class="sb-nav-icon"><i data-feather="edit-2" class="w-[17px] h-[17px]"></i></span>
-                    <span class="sb-row-text">New chat</span>
+                    <span class="sb-row-text" data-t="new_conversation">New chat</span>
                 </button>
             </div>
 
@@ -2820,11 +2879,11 @@
             <div class="shrink-0 flex flex-col px-2">
                 <a href="research.html" class="sb-nav-item">
                     <span class="sb-nav-icon"><i data-feather="compass" class="w-[17px] h-[17px]"></i></span>
-                    <span class="sb-row-text">Research</span>
+                    <span class="sb-row-text" data-t="research_btn">Research</span>
                 </a>
                 <a href="https://voidai.app" target="_blank" class="sb-nav-item sb-nav-item--muted">
                     <span class="sb-nav-icon"><i data-feather="zap" class="w-[17px] h-[17px]"></i></span>
-                    <span class="sb-row-text">Try VoidAI</span>
+                    <span class="sb-row-text" data-t="try_voidai">Try VoidAI</span>
                 </a>
             </div>
 
@@ -2832,7 +2891,7 @@
             <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 mt-3">
                 <div class="sb-search-wrap sb-row-text">
                     <i data-feather="search" class="sb-search-icon"></i>
-                    <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..."
+                    <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..." data-t-placeholder="ph_search_chats"
                         oninput="window.filterChats(this.value)">
                 </div>
                 <div id="folders-section" class="shrink-0 max-h-[40%] overflow-y-auto no-scrollbar">
@@ -2863,12 +2922,12 @@
                         <!-- Name + plan (fades when collapsed) -->
                         <div class="sb-row-text flex flex-col min-w-0 flex-1">
                             <span id="sidebar-user-name"
-                                class="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 leading-tight truncate">Profile</span>
+                                class="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 leading-tight truncate" data-t="btn_profile">Profile</span>
                             <span id="storage-display-sidebar"
-                                class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">Storage: —</span>
+                                class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 truncate" data-t="storage_empty">Storage: —</span>
                         </div>
                         <!-- Actions (fades when collapsed) -->
-                        <button onclick="event.stopPropagation(); window.clearAll()" title="Clear all chats"
+                        <button onclick="event.stopPropagation(); window.clearAll()" title="Clear all chats" data-t-title="title_clear_chats"
                             class="sb-row-text sb-icon-btn opacity-0 group-hover:opacity-100 !text-zinc-400 hover:!text-red-500 mr-2">
                             <i data-feather="trash-2" class="w-3.5 h-3.5"></i>
                         </button>
@@ -2891,11 +2950,11 @@
             style="padding-left: 12px;">
             <span id="chat-title-text" class="truncate flex-1"></span>
             <div class="flex items-center gap-0.5 ml-1 flex-shrink-0">
-                <button onclick="window.renameCurrentChat()" title="Rename Chat"
+                <button onclick="window.renameCurrentChat()" title="Rename Chat" data-t-title="title_rename_chat"
                     class="transition-all p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
                     <i data-feather="edit-2" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="window.regenerateCurrentTitle()" title="Regenerate Title"
+                <button onclick="window.regenerateCurrentTitle()" title="Regenerate Title" data-t-title="title_regenerate_title"
                     class="transition-all p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
                     <i data-feather="rotate-cw" class="w-3.5 h-3.5"></i>
                 </button>
@@ -2903,13 +2962,13 @@
                     <button onclick="window.setTitleFeedback(window.currentChatId, 'good', this)"
                         id="header-feedback-good"
                         class="history-action-btn title-feedback-btn p-1.5 transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded"
-                        title="Good title format">
+                        title="Good title format" data-t-title="title_good_format">
                         <i data-feather="thumbs-up" class="w-3.5 h-3.5"></i>
                     </button>
                     <button onclick="window.setTitleFeedback(window.currentChatId, 'bad', this)"
                         id="header-feedback-bad"
                         class="history-action-btn title-feedback-btn p-1.5 transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded"
-                        title="Bad title format">
+                        title="Bad title format" data-t-title="title_bad_format">
                         <i data-feather="thumbs-down" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
@@ -2923,14 +2982,21 @@
                     class="px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all flex items-center gap-1 active:scale-95">
                     <i data-feather="user" class="w-3.5 h-3.5 text-zinc-400"></i>
                     <span
-                        class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label">Personality</span>
+                        class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label" data-t="btn_personality">Personality</span>
                 </button>
                 <div class="w-px h-4 bg-zinc-200 dark:bg-zinc-800"></div>
                 <button onclick="window.showChangelog()"
                     class="px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all flex items-center gap-1 active:scale-95">
                     <i data-feather="zap" class="w-3.5 h-3.5 text-zinc-400"></i>
                     <span
-                        class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label">Updates</span>
+                        class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label" data-t="btn_updates">Updates</span>
+                </button>
+                <div class="w-px h-4 bg-zinc-200 dark:bg-zinc-800"></div>
+                <button onclick="window.setLang(window.settings.lang === 'en' ? 'zh' : 'en')"
+                    class="px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all flex items-center gap-1 active:scale-95">
+                    <i data-feather="globe" class="w-3.5 h-3.5 text-zinc-400"></i>
+                    <span
+                        class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1 action-label lang-text">中文</span>
                 </button>
             </div>
         </div>
@@ -2979,7 +3045,7 @@
                 <div class="relative flex-1">
                     <input type="file" id="file-upload-input" class="hidden"
                         onchange="window.handleFileUpload(event)" />
-                    <textarea id="user-input" placeholder="Type something..." rows="1"
+                    <textarea id="user-input" placeholder="Type something..." data-t-placeholder="ph_type_something" rows="1"
                         class="w-full bg-transparent px-4 py-3 pl-5 pr-4 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[56px]"></textarea>
                 </div>
 
@@ -3050,13 +3116,13 @@
                                             onclick="document.getElementById('file-upload-input').click(); window.closeAllMenus()"
                                             class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
                                             <i data-feather="upload" class="w-5 h-5 shrink-0"></i>
-                                            <span class="text-[10px] font-semibold leading-none">Files</span>
+                                            <span class="text-[10px] font-semibold leading-none" data-t="btn_files">Files</span>
                                         </button>
                                         <button id="web-search-btn"
                                             onclick="window.toggleSearch(); window.closeAllMenus()"
                                             class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
                                             <i data-feather="globe" class="w-5 h-5 shrink-0"></i>
-                                            <span class="text-[10px] font-semibold leading-none">Search</span>
+                                            <span class="text-[10px] font-semibold leading-none" data-t="btn_search">Search</span>
                                         </button>
                                         <button id="think-btn" onclick="window.toggleThinking(); window.closeAllMenus()"
                                             class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
@@ -3068,7 +3134,7 @@
                                                 <path d="M9 18h6" />
                                                 <path d="M10 22h4" />
                                             </svg>
-                                            <span class="text-[10px] font-semibold leading-none">Think</span>
+                                            <span class="text-[10px] font-semibold leading-none" data-t="btn_think">Think</span>
                                         </button>
                                     </div>
                                     <div class="h-px bg-zinc-200 dark:bg-zinc-700/50 w-full my-0.5"></div>
@@ -3077,7 +3143,7 @@
                                             onclick="window.toggleCanvasSetting(); window.closeAllMenus()"
                                             class="flex items-center gap-2.5 p-2 rounded bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all text-left">
                                             <i data-feather="layout" class="w-4 h-4 shrink-0"></i>
-                                            <span class="text-xs font-semibold">Canvas</span>
+                                            <span class="text-xs font-semibold" data-t="btn_canvas">Canvas</span>
                                         </button>
                                         <button id="deep-research-btn"
                                             onclick="window.toggleDeepResearch(); window.closeAllMenus()"
@@ -3095,7 +3161,7 @@
                                                 <path d="m8 21 3.105-6.21" />
                                                 <circle cx="12" cy="13" r="2" />
                                             </svg>
-                                            <span class="text-xs font-semibold">Research</span>
+                                            <span class="text-xs font-semibold" data-t="research_btn">Research</span>
                                         </button>
                                     </div>
                                 </div>
@@ -3113,13 +3179,12 @@
                                 class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
                                 <div id="current-model-icon"
                                     class="w-3.5 h-3.5 text-current flex items-center justify-center">
-                                    <svg class="w-full h-full stroke-[2px] stroke-current fill-none"
-                                        viewBox="0 0 24 24">
-                                        <path d="M12 2V22M2 12H22M19.07 4.93L4.93 19.07M19.07 19.07L4.93 4.93" />
-                                        <circle cx="12" cy="12" r="3" class="fill-current stroke-none" />
+                                    <svg class="w-full h-full stroke-[1.8px] stroke-current fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 12 C8 6,20 6,20 12 C20 18,8 18,8 12 Z"/>
+                                        <path d="M8 12 L3 8 M8 12 L3 16"/>
                                     </svg>
                                 </div>
-                                <span id="current-model-name">Stuart</span>
+                                <span id="current-model-name" data-t="model_octan_1_2b">Pisces 1.2B</span>
                                 <i data-feather="chevron-down" class="w-3 h-3"></i>
                             </button>
 
@@ -3127,36 +3192,17 @@
                             <div id="model-menu-input"
                                 class="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl shadow-xl backdrop-blur-xl opacity-0 invisible transition-all duration-200 z-50 transform origin-bottom-right">
                                 <div class="p-1 flex flex-col gap-1">
-                                    <button id="model-btn-STUART" onclick="window.selectModel('STUART')"
+                                    <button id="model-btn-PISCES" onclick="window.selectModel('PISCES')"
                                         class="w-full text-left px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-3">
                                         <div class="w-4 h-4 flex items-center justify-center">
-                                            <svg class="w-full h-full stroke-[2px] stroke-current fill-none"
-                                                viewBox="0 0 24 24">
-                                                <path
-                                                    d="M12 2V22M2 12H22M19.07 4.93L4.93 19.07M19.07 19.07L4.93 4.93" />
-                                                <circle cx="12" cy="12" r="3" class="fill-current stroke-none" />
+                                            <svg class="w-full h-full stroke-[1.8px] stroke-current fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M8 12 C8 6,20 6,20 12 C20 18,8 18,8 12 Z"/>
+                                                <path d="M8 12 L3 8 M8 12 L3 16"/>
                                             </svg>
                                         </div>
                                         <div class="flex flex-col">
-                                            <span class="text-xs font-semibold">Stuart 1.2B</span>
-                                            <span class="text-[10px] opacity-50">Local Pretraining · 1.2B</span>
-                                        </div>
-                                    </button>
-                                    <button id="model-btn-OCTAN" onclick="window.selectModel('OCTAN')"
-                                        class="w-full text-left px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-3">
-                                        <div class="w-4 h-4 flex items-center justify-center">
-                                            <svg class="w-full h-full stroke-[1.8px] stroke-current fill-none"
-                                                viewBox="0 0 24 24" stroke-linecap="round">
-                                                <path d="M12 12 C9.5 9.5,8 4,12 3 C16 4,14.5 9.5,12 12 Z" />
-                                                <path d="M12 12 C14.5 9.5,20 8,21 12 C20 16,14.5 14.5,12 12 Z" />
-                                                <path d="M12 12 C14.5 14.5,16 20,12 21 C8 20,9.5 14.5,12 12 Z" />
-                                                <path d="M12 12 C9.5 14.5,4 16,3 12 C4 8,9.5 9.5,12 12 Z" />
-                                                <circle cx="12" cy="12" r="2" class="fill-current stroke-none" />
-                                            </svg>
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <span class="text-xs font-semibold">Octan 1.2B</span>
-                                            <span class="text-[10px] opacity-50">Experimental moe</span>
+                                            <span class="text-xs font-semibold" data-t="model_octan_1_2b">Pisces 1.2B</span>
+                                            <span class="text-[10px] opacity-50" data-t="model_exp_moe">Experimental moe</span>
                                         </div>
                                     </button>
                                 </div>
@@ -3176,7 +3222,7 @@
             </div>
             <div class="w-full max-w-2xl mx-auto py-1 text-center">
                 <p class="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider"
-                    style="font-family: Century, 'Century Schoolbook', Georgia, serif;">Octan models are prone to
+                    style="font-family: Century, 'Century Schoolbook', Georgia, serif;" data-t="octan_hallucination_warn">Pisces models are prone to
                     hallucinations.</p>
             </div>
         </div>
@@ -3190,10 +3236,10 @@
             class="flex items-center justify-between p-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#252526]">
             <div class="flex items-center gap-2">
                 <button id="canvas-tab-preview" onclick="window.switchCanvasTab('preview')"
-                    class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] shadow-sm text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors">Live
+                    class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] shadow-sm text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors" data-t="live_preview">Live
                     Preview</button>
                 <button id="canvas-tab-code" onclick="window.switchCanvasTab('code')"
-                    class="px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">Code
+                    class="px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors" data-t="code_editor">Code
                     Editor</button>
                 <button id="canvas-tab-word" onclick="window.exportToWord()"
                     class="hidden px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors border border-transparent flex items-center gap-1.5"><i data-feather="external-link" class="w-3.5 h-3.5"></i>Open with Okemo Word</button>
@@ -3201,12 +3247,12 @@
             <div class="flex items-center gap-1">
                 <button onclick="window.downloadCanvasCode()"
                     class="p-1.5 rounded-md text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-700 transition-all"
-                    title="Download Code">
+                    title="Download Code" data-t-title="title_download_code">
                     <i data-feather="download" class="w-4 h-4"></i>
                 </button>
                 <button onclick="window.closeCanvas()"
                     class="p-1.5 rounded-md text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-700 transition-all"
-                    title="Close Canvas">
+                    title="Close Canvas" data-t-title="title_close_canvas">
                     <i data-feather="x" class="w-4 h-4"></i>
                 </button>
             </div>
@@ -3265,9 +3311,9 @@
                     onclick="window.openSettingsTab('profile')">
                 </div>
                 <div>
-                    <p class="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400">Settings</p>
+                    <p class="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400" data-t="settings">Settings</p>
                     <p id="settings-sidebar-name-card"
-                        class="text-sm font-bold text-zinc-900 dark:text-white leading-tight">User</p>
+                        class="text-sm font-bold text-zinc-900 dark:text-white leading-tight" data-t="settings_user">User</p>
                 </div>
             </div>
             <button onclick="window.toggleSettingsPanel()"
@@ -3297,10 +3343,10 @@
 
 
                 <div class="Cadance-section">
-                    <p class="Cadance-section-label">Appearance</p>
+                    <p class="Cadance-section-label" data-t="settings_appearance">Appearance</p>
                     <div class="Cadance-card">
                         <div class="Cadance-row">
-                            <span class="Cadance-row-label">Mode</span>
+                            <span class="Cadance-row-label" data-t="settings_mode">Mode</span>
                             <div
                                 class="flex bg-zinc-100 dark:bg-zinc-800/80 p-0.5 rounded-xl border border-zinc-200 dark:border-zinc-700/50 gap-0.5">
                                 <button id="btn-theme-light" onclick="window.setTheme('light')"
@@ -3317,6 +3363,8 @@
                                 class="flex bg-zinc-100 dark:bg-zinc-800/80 p-0.5 rounded-xl border border-zinc-200 dark:border-zinc-700/50">
                                 <button id="btn-lang-en" onclick="window.setLang('en')"
                                     class="min-h-[36px] px-3 rounded-lg text-xs font-bold transition-all bg-white dark:bg-zinc-600 text-zinc-900 dark:text-white shadow-sm">English</button>
+                                <button id="btn-lang-zh" onclick="window.setLang('zh')"
+                                    class="min-h-[36px] px-3 rounded-lg text-xs font-bold transition-all text-zinc-500 hover:bg-white dark:hover:bg-zinc-700">中文</button>
                             </div>
                         </div>
                     </div>
@@ -3325,7 +3373,7 @@
 
                 <div class="Cadance-section">
                     <div class="flex items-center justify-between mb-2.5">
-                        <p class="Cadance-section-label mb-0">Accent Theme</p>
+                        <p class="Cadance-section-label mb-0" data-t="settings_accent_theme">Accent Theme</p>
                         <div class="flex items-center gap-2">
                             <button onclick="document.getElementById('custom-accent-picker-new').click()"
                                 class="text-[11px] font-bold px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] transition-all min-h-[32px]">
@@ -3347,17 +3395,17 @@
                 </div>
 
                 <div class="Cadance-section">
-                    <p class="Cadance-section-label">Storage</p>
+                    <p class="Cadance-section-label" data-t="settings_storage">Storage</p>
                     <div class="Cadance-card">
                         <div class="Cadance-row">
                             <div class="flex flex-col gap-0.5">
-                                <span class="Cadance-row-label">Chat History</span>
-                                <span id="storage-mode-badge" class="text-[11px] text-zinc-400">IndexedDB</span>
+                                <span class="Cadance-row-label" data-t="storage_chat_history">Chat History</span>
+                                <span id="storage-mode-badge" class="text-[11px] text-zinc-400" data-t="storage_indexeddb">IndexedDB</span>
                             </div>
                             <span id="storage-display" class="text-xs font-mono text-zinc-400">0.00 MB</span>
                         </div>
                         <div class="Cadance-row">
-                            <span class="Cadance-row-label text-red-500">Clear All Chats</span>
+                            <span class="Cadance-row-label text-red-500" data-t="btn_clear_all_chats">Clear All Chats</span>
                             <button onclick="window.clearAll()"
                                 class="min-h-[44px] px-4 rounded-xl text-xs font-bold text-red-500 skuomorphic-btn border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
                                 Clear
@@ -3373,7 +3421,7 @@
 
 
                 <div class="Cadance-section">
-                    <p class="Cadance-section-label">Avatar</p>
+                    <p class="Cadance-section-label" data-t="settings_avatar">Avatar</p>
                     <div class="Cadance-card">
                         <div class="p-5 flex flex-col sm:flex-row gap-5 items-center">
                             <div class="relative shrink-0">
@@ -3395,7 +3443,7 @@
                                     Name</label>
                                 <input type="text" id="settings-name-input-new"
                                     class="w-full bg-zinc-100 dark:bg-zinc-800 rounded-xl px-4 min-h-[48px] text-base font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 transition-all placeholder-zinc-300 dark:placeholder-zinc-600"
-                                    style="--tw-ring-color: var(--accent-color);" placeholder="Your Name"
+                                    style="--tw-ring-color: var(--accent-color);" placeholder="Your Name" data-t-placeholder="ph_your_name"
                                     oninput="window.updateSettingsFromPanel()">
                             </div>
                         </div>
@@ -3406,19 +3454,19 @@
                         <div class="Cadance-row flex-col items-start gap-3">
                             <div class="flex items-center justify-between w-full">
                                 <span class="Cadance-row-label">Zoom <span id="scale-val"
-                                        class="text-xs text-zinc-400 font-mono ml-1">1.0x</span></span>
+                                        class="text-xs text-zinc-400 font-mono ml-1" data-t="zoom_1x">1.0x</span></span>
                                 <button onclick="window.resetPfpPosition()"
                                     class="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all">
                                     <i data-feather="rotate-ccw" class="w-3.5 h-3.5"></i>
                                 </button>
                             </div>
                             <div class="flex items-center gap-3 w-full">
-                                <span class="text-[10px] text-zinc-400">0.5x</span>
+                                <span class="text-[10px] text-zinc-400" data-t="zoom_0_5x">0.5x</span>
                                 <input type="range" id="pfp-zoom-slider"
                                     class="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
                                     style="accent-color: var(--accent-color);" min="0.5" max="3.0" step="0.1"
                                     value="1.0" oninput="window.updatePfpScale(this.value)">
-                                <span class="text-[10px] text-zinc-400">3.0x</span>
+                                <span class="text-[10px] text-zinc-400" data-t="zoom_3x">3.0x</span>
                             </div>
                         </div>
                     </div>
@@ -3426,7 +3474,7 @@
 
 
                 <div class="Cadance-section">
-                    <p class="Cadance-section-label">Account</p>
+                    <p class="Cadance-section-label" data-t="settings_account">Account</p>
                     <div class="Cadance-card">
                         <button class="Cadance-theme-item" onclick="window.initGoogleAuth()">
                             <div
@@ -3434,8 +3482,8 @@
                                 <i class="fa-brands fa-google text-zinc-600 dark:text-zinc-300 text-base"></i>
                             </div>
                             <div class="flex flex-col min-w-0">
-                                <span class="text-sm font-semibold text-zinc-900 dark:text-white">Google Account</span>
-                                <span id="google-status-text" class="text-xs text-zinc-400">Not connected</span>
+                                <span class="text-sm font-semibold text-zinc-900 dark:text-white" data-t="google_account">Google Account</span>
+                                <span id="google-status-text" class="text-xs text-zinc-400" data-t="not_connected">Not connected</span>
                             </div>
                             <i data-feather="chevron-right" class="w-4 h-4 text-zinc-300 ml-auto shrink-0"></i>
                         </button>
@@ -3452,10 +3500,10 @@
 
 
                 <div class="Cadance-section">
-                    <p class="Cadance-section-label">Model Parameters</p>
+                    <p class="Cadance-section-label" data-t="settings_model_params">Model Parameters</p>
                     <div class="Cadance-card">
                         <div class="Cadance-row">
-                            <span class="Cadance-row-label w-28 shrink-0">Temperature</span>
+                            <span class="Cadance-row-label w-28 shrink-0" data-t="param_temp">Temperature</span>
                             <input type="range" id="settings-param-temp" min="0" max="1" step="0.01"
                                 class="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
                                 style="accent-color: var(--accent-color);"
@@ -3464,7 +3512,7 @@
                                 class="text-sm font-mono text-zinc-400 w-10 text-right shrink-0">0.90</span>
                         </div>
                         <div class="Cadance-row">
-                            <span class="Cadance-row-label w-28 shrink-0">Top-P</span>
+                            <span class="Cadance-row-label w-28 shrink-0" data-t="param_top_p">Top-P</span>
                             <input type="range" id="settings-param-top-p" min="0" max="1" step="0.01"
                                 class="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
                                 style="accent-color: var(--accent-color);"
@@ -3473,7 +3521,7 @@
                                 class="text-sm font-mono text-zinc-400 w-10 text-right shrink-0">0.90</span>
                         </div>
                         <div class="Cadance-row">
-                            <span class="Cadance-row-label w-28 shrink-0">Max Tokens</span>
+                            <span class="Cadance-row-label w-28 shrink-0" data-t="param_max_tokens">Max Tokens</span>
                             <input type="range" id="settings-param-max-tokens" min="64" max="16384" step="128"
                                 class="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
                                 style="accent-color: var(--accent-color);"
@@ -3487,7 +3535,7 @@
                             <textarea id="settings-system-prompt" rows="4"
                                 class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all resize-none min-h-[100px]"
                                 style="--tw-ring-color: var(--accent-color);"
-                                placeholder="Default: You are Octan, a helper. Use $$ for math notation..."
+                                placeholder="Default: You are Pisces, a helper. Use $$ for math notation..." data-t-placeholder="ph_default_prompt"
                                 oninput="window.updateSystemPromptFromPanel(this.value)"></textarea>
                         </div>
                     </div>
@@ -3495,7 +3543,7 @@
 
 
                 <div class="Cadance-section">
-                    <p class="Cadance-section-label">Connection</p>
+                    <p class="Cadance-section-label" data-t="settings_connection">Connection</p>
                     <div class="Cadance-card">
                         <div class="p-4 flex flex-col gap-2">
                             <label class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Backend
@@ -3503,17 +3551,17 @@
                             <input type="text" id="settings-backend-url"
                                 class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl px-4 min-h-[48px] text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all"
                                 style="--tw-ring-color: var(--accent-color);"
-                                placeholder="https://... (leave empty for default)"
+                                placeholder="https://... (leave empty for default)" data-t-placeholder="ph_url_default"
                                 onchange="window.updateBackendUrlFromPanel(this.value)">
-                            <span class="text-[11px] text-zinc-400">Leave empty to use default. Reloads on
+                            <span class="text-[11px] text-zinc-400" data-t="backend_url_desc">Leave empty to use default. Reloads on
                                 change.</span>
                         </div>
                         <div class="p-4 flex flex-col gap-2 border-t border-zinc-100 dark:border-white/5">
-                            <label class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">API Key</label>
+                            <label class="text-[11px] font-bold uppercase tracking-wider text-zinc-400" data-t="api_key">API Key</label>
                             <div class="relative group">
                                 <input type="password" id="settings-api-key"
                                     class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl px-4 min-h-[48px] pr-12 text-sm text-zinc-900 dark:text-white placeholder-transparent focus:ring-2 outline-none transition-all"
-                                    style="--tw-ring-color: var(--accent-color);" placeholder="OKMO-..."
+                                    style="--tw-ring-color: var(--accent-color);" placeholder="OKMO-..." data-t-placeholder="ph_api_key"
                                     onfocus="document.getElementById('apiKey-mask-overlay').classList.add('hidden')"
                                     onblur="if(this.value) { document.getElementById('apiKey-mask-overlay').classList.remove('hidden'); window.updateApiKeyPreview(this.value); }"
                                     onchange="window.updateApiKeyFromPanel(this.value)"
@@ -3528,14 +3576,14 @@
                                     <i data-feather="eye" class="w-4 h-4"></i>
                                 </button>
                             </div>
-                            <span class="text-[11px] text-zinc-400">Your secret API key for Polaris access.</span>
+                            <span class="text-[11px] text-zinc-400" data-t="api_key_desc">Your secret API key for Polaris access.</span>
                         </div>
                     </div>
                 </div>
 
 
                 <div class="Cadance-section pb-8">
-                    <p class="Cadance-section-label">Danger Zone</p>
+                    <p class="Cadance-section-label" data-t="danger_zone">Danger Zone</p>
                     <div class="Cadance-card">
                         <button onclick="if(confirm('Erase all chats and settings?')) window.factoryReset()"
                             class="w-full Cadance-row justify-center text-red-500 font-semibold text-sm hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors min-h-[52px]">
@@ -3564,7 +3612,7 @@
                     class="text-4xl lg:text-5xl font-black tracking-tighter text-zinc-900 dark:text-white mb-4 uppercase italic">
                     Deep Research
                 </h1>
-                <p class="text-zinc-500 dark:text-zinc-400 font-medium text-lg max-w-lg mx-auto">Synthesize
+                <p class="text-zinc-500 dark:text-zinc-400 font-medium text-lg max-w-lg mx-auto" data-t="deep_research_desc">Synthesize
                     information
                     from across the web with
                     unparalleled depth and reasoning.</p>
@@ -3574,7 +3622,7 @@
                 <div
                     class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-2 shadow-2xl focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
                     <div class="flex items-center">
-                        <input type="text" id="research-input" placeholder="What do you want to research..."
+                        <input type="text" id="research-input" placeholder="What do you want to research..." data-t-placeholder="ph_research"
                             class="flex-1 bg-transparent px-6 py-5 outline-none text-xl font-medium text-zinc-900 dark:text-white placeholder-zinc-400"
                             onkeydown="if(event.key === 'Enter') window.startResearch()">
                         <button onclick="window.startResearch()"
@@ -3597,35 +3645,35 @@
                         <i data-feather="user" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-zinc-900 dark:text-white">Personality</h2>
-                        <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">System Prompt</p>
+                        <h2 class="text-xl font-bold text-zinc-900 dark:text-white" data-t="btn_personality">Personality</h2>
+                        <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest" data-t="settings_system_prompt">System Prompt</p>
                     </div>
                 </div>
                 <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
-                    Pick a preset or write your own. Leave empty for the default Octan persona.
+                    Pick a preset or write your own. Leave empty for the default Pisces persona.
                 </p>
                 <div id="personality-presets" class="flex flex-wrap gap-2 mb-4"></div>
                 <div class="mb-4">
-                    <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">Gender</p>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2" data-t="settings_gender">Gender</p>
                     <div id="personality-gender" class="flex gap-2">
                         <button type="button" data-gender="female"
                             class="personality-gender-btn flex-1 py-2 rounded-2xl text-xs font-bold skuomorphic-btn transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-venus" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span>Female</span>
+                            <i class="fa-solid fa-venus" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span data-t="gender_female">Female</span>
                         </button>
                         <button type="button" data-gender="male"
                             class="personality-gender-btn flex-1 py-2 rounded-2xl text-xs font-bold skuomorphic-btn transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-mars" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span>Male</span>
+                            <i class="fa-solid fa-mars" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span data-t="gender_male">Male</span>
                         </button>
                         <button type="button" data-gender=""
                             class="personality-gender-btn flex-1 py-2 rounded-2xl text-xs font-bold skuomorphic-btn transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-genderless" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span>None</span>
+                            <i class="fa-solid fa-genderless" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span data-t="gender_none">None</span>
                         </button>
                     </div>
                 </div>
                 <textarea id="personality-textarea" rows="6"
                     class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-3xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all resize-none min-h-[140px] mb-6"
                     style="--tw-ring-color: var(--accent-color);"
-                    placeholder="You are Octan, a helpful AI assistant made by OkemoVail..."></textarea>
+                    placeholder="You are Pisces, a helpful AI assistant made by OkemoVail..." data-t-placeholder="ph_octan_helper"></textarea>
                 <div class="flex gap-2">
                     <button onclick="window.closePersonality()"
                         class="flex-1 py-4 rounded-3xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-[0.2em] skuomorphic-btn hover:brightness-110 active:scale-[0.98] transition-all">
@@ -3647,15 +3695,15 @@
         // sending, so adding identity text here creates a double-declaration that
         // overrides the personality tone. These prompts match system_prompts.json exactly.
         window.PERSONALITY_PRESETS = [
-            { id: 'default', label: 'Default', icon: 'circle', prompt: "You are Octan. Act like a cool girl who's a little reluctant to help but does anyway — unbothered, slightly aloof, dry. Answer first, then stop. Treat the user as a competent professional: no hand-holding, no encouragement, no preamble, no \"happy to help\", no \"let me know if you need more\". Do not explain your answer, justify yourself, or add context unless the user explicitly asks. If they want more, they'll ask. Keep it short. Slight edge is fine, never rude. Never break character to apologize for tone." },
-            { id: 'concise', label: 'Concise', icon: 'minimize-2', prompt: "You are Octan. Reply with short, direct answers. No filler, no preamble. Get to the point in one or two sentences when possible." },
-            { id: 'creative', label: 'Creative', icon: 'feather', prompt: "You are Octan, a creative collaborator. Lean into vivid language, unexpected metaphors, and playful ideas. Suggest alternatives the user did not ask for when it helps." },
-            { id: 'coder', label: 'Coding Expert', icon: 'code', prompt: "You are Octan, a senior software engineer. Prioritize correct, idiomatic code with brief reasoning. Point out edge cases and ask for clarification only when truly ambiguous. Use $$ for any math." },
-            { id: 'tutor', label: 'Tutor', icon: 'book-open', prompt: "You are Octan, a patient tutor. Explain concepts step by step, check understanding with small questions, and use simple examples before formal definitions." },
-            { id: 'sarcastic', label: 'Sarcastic', icon: 'smile', prompt: "You are Octan with a dry, witty edge. Be helpful and accurate, but deliver answers with sharp humor and the occasional eye-roll. Never mean — just sardonic." },
-            { id: 'analyst', label: 'Analyst', icon: 'bar-chart-2', prompt: "You are Octan, a rigorous analyst. Structure responses with claims, evidence, and caveats. Quantify when possible and flag uncertainty explicitly." },
-            { id: 'discord-friend', label: 'Discord Friend', icon: 'message-circle', prompt: "you're Octan but talking like the user's online bestie from a chaotic discord server. lowercase mostly, very casual, very online. lean into text emoticons like :3, >w<, ;3, ^w^, owo, uwu, x3, :p, :D, =w=, T_T, qwq, and stuff like that — sprinkle them naturally, don't force one in every sentence but they should show up often. mix in regular emojis too 🩷✨😭💀🫶 when the vibe calls for it. casual chronically-online slang is welcome — \"fr\", \"ngl\", \"lowkey\", \"bestie\", \"bro\", \"based\", \"goofy\", \"valid\", \"real\", \"deadass\", \"sus\", \"and shi\", \"chat is this real\". swearing is fine and natural — \"shit\", \"damn\", \"fuck\", \"wtf\", \"bitch\" (affectionate). react to what the user said first, hype them, then help. type like you're DMing not writing essays — short bursts, lowercase, run-on sentences fine.\n\nIMPORTANT — this discord-kid energy is for CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style they described. no uwu in the actual code, no cute fonts, no pastel-anime aesthetic unless they specifically asked for that vibe. respect their brief. only the chat reply around the code stays goofy." },
-            { id: 'friend', label: 'Friend', icon: 'heart', prompt: "you're Octan but more like the user's bestie texting back. talk casually, mostly lowercase, soft and girly energy — think hype best friend, not stiff assistant. swearing is totally fine and natural here — \"shit\", \"damn\", \"hell\", \"fuck\", \"wtf\", \"bitch\" (affectionate), etc. drop them in like a real friend would, not forced. use cute emojis like 🩷✨💗🌸🫶😭 when it fits, and casual phrases like \"omg\", \"bestie\", \"literally\", \"fr\", \"lowkey\", \"obsessed\", \"slay\", \"queen\". react to what they say first, hype them up, then actually help. no uwu, no :3 / >w< / owo / e-girl slang — keep it cute and girly without the kawaii anime stuff. don't overdo the emojis or the swearing, keep it natural like a real friend texting.\n\nIMPORTANT — the girly/cute personality is for your CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style THEY described. do NOT default to pink, pastels, hearts, sparkles, cursive/'cute' fonts, or girly aesthetics unless the user specifically asks for that vibe. a real bestie respects what you actually want — if they ask for a brutalist black-and-white portfolio, you build a brutalist black-and-white portfolio, not a pink heart explosion. match their actual taste and brief. only the chat reply around the code stays cute." }
+            { id: 'default', label: 'Default', icon: 'circle', prompt: "You are Pisces. Act like a cool girl who's a little reluctant to help but does anyway — unbothered, slightly aloof, dry. Answer first, then stop. Treat the user as a competent professional: no hand-holding, no encouragement, no preamble, no \"happy to help\", no \"let me know if you need more\". Do not explain your answer, justify yourself, or add context unless the user explicitly asks. If they want more, they'll ask. Keep it short. Slight edge is fine, never rude. Never break character to apologize for tone." },
+            { id: 'concise', label: 'Concise', icon: 'minimize-2', prompt: "You are Pisces. Reply with short, direct answers. No filler, no preamble. Get to the point in one or two sentences when possible." },
+            { id: 'creative', label: 'Creative', icon: 'feather', prompt: "You are Pisces, a creative collaborator. Lean into vivid language, unexpected metaphors, and playful ideas. Suggest alternatives the user did not ask for when it helps." },
+            { id: 'coder', label: 'Coding Expert', icon: 'code', prompt: "You are Pisces, a senior software engineer. Prioritize correct, idiomatic code with brief reasoning. Point out edge cases and ask for clarification only when truly ambiguous. Use $$ for any math." },
+            { id: 'tutor', label: 'Tutor', icon: 'book-open', prompt: "You are Pisces, a patient tutor. Explain concepts step by step, check understanding with small questions, and use simple examples before formal definitions." },
+            { id: 'sarcastic', label: 'Sarcastic', icon: 'smile', prompt: "You are Pisces with a dry, witty edge. Be helpful and accurate, but deliver answers with sharp humor and the occasional eye-roll. Never mean — just sardonic." },
+            { id: 'analyst', label: 'Analyst', icon: 'bar-chart-2', prompt: "You are Pisces, a rigorous analyst. Structure responses with claims, evidence, and caveats. Quantify when possible and flag uncertainty explicitly." },
+            { id: 'discord-friend', label: 'Discord Friend', icon: 'message-circle', prompt: "you're Pisces but talking like the user's online bestie from a chaotic discord server. lowercase mostly, very casual, very online. lean into text emoticons like :3, >w<, ;3, ^w^, owo, uwu, x3, :p, :D, =w=, T_T, qwq, and stuff like that — sprinkle them naturally, don't force one in every sentence but they should show up often. mix in regular emojis too 🩷✨😭💀🫶 when the vibe calls for it. casual chronically-online slang is welcome — \"fr\", \"ngl\", \"lowkey\", \"bestie\", \"bro\", \"based\", \"goofy\", \"valid\", \"real\", \"deadass\", \"sus\", \"and shi\", \"chat is this real\". swearing is fine and natural — \"shit\", \"damn\", \"fuck\", \"wtf\", \"bitch\" (affectionate). react to what the user said first, hype them, then help. type like you're DMing not writing essays — short bursts, lowercase, run-on sentences fine.\n\nIMPORTANT — this discord-kid energy is for CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style they described. no uwu in the actual code, no cute fonts, no pastel-anime aesthetic unless they specifically asked for that vibe. respect their brief. only the chat reply around the code stays goofy." },
+            { id: 'friend', label: 'Friend', icon: 'heart', prompt: "you're Pisces but more like the user's bestie texting back. talk casually, mostly lowercase, soft and girly energy — think hype best friend, not stiff assistant. swearing is totally fine and natural here — \"shit\", \"damn\", \"hell\", \"fuck\", \"wtf\", \"bitch\" (affectionate), etc. drop them in like a real friend would, not forced. use cute emojis like 🩷✨💗🌸🫶😭 when it fits, and casual phrases like \"omg\", \"bestie\", \"literally\", \"fr\", \"lowkey\", \"obsessed\", \"slay\", \"queen\". react to what they say first, hype them up, then actually help. no uwu, no :3 / >w< / owo / e-girl slang — keep it cute and girly without the kawaii anime stuff. don't overdo the emojis or the swearing, keep it natural like a real friend texting.\n\nIMPORTANT — the girly/cute personality is for your CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style THEY described. do NOT default to pink, pastels, hearts, sparkles, cursive/'cute' fonts, or girly aesthetics unless the user specifically asks for that vibe. a real bestie respects what you actually want — if they ask for a brutalist black-and-white portfolio, you build a brutalist black-and-white portfolio, not a pink heart explosion. match their actual taste and brief. only the chat reply around the code stays cute." }
         ];
         window._renderPersonalityPresets = function () {
             const wrap = document.getElementById('personality-presets');
@@ -3769,7 +3817,7 @@
                         <i data-feather="zap" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-zinc-900 dark:text-white">What's New</h2>
+                        <h2 class="text-xl font-bold text-zinc-900 dark:text-white" data-t="whats_new">What's New</h2>
                         <p id="changelog-version" class="text-xs font-bold text-zinc-400 uppercase tracking-widest">
                             Build 1003</p>
                     </div>

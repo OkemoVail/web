@@ -77,10 +77,10 @@ window.render = () => {
             const _modelName = window.currentModel ? window.currentModel.name : '';
 
             // New unified thinking indicator — shimmer-gradient text reading
-            // "Octan is thinking". Shown before any tokens arrive (replaces
+            // "Pisces is thinking". Shown before any tokens arrive (replaces
             // the old "Thinking…" placeholder + duplicate generating header).
             if (responseText === null && isLast && window.isGenerating) {
-                contentHtml = `<div class="thinking-container"><span class="thinking-text-gradient">Octan is thinking</span></div>`;
+                contentHtml = `<div class="thinking-container"><span class="thinking-text-gradient">Pisces is thinking</span></div>`;
             } else if (responseText) {
                 const { thought, content } = window.parseThought(responseText);
                 if (thought) {
@@ -114,7 +114,7 @@ window.render = () => {
                             <span class="msg-timestamp ai-timestamp">${window.formatDate(timestamp)}</span>
                         </div>
                     </div>` : ''}
-                    <div class="ai-model-logo${(isLast && window.isGenerating) ? ' spinning' : ''}">${_modelIcon}</div>
+                    ${(isLast && window.isGenerating) ? `<div class="fish-swim-lane"><div class="fish-swimmer">${_modelIcon}</div></div>` : ''}
                 </div>
             `;
             window.els.chatMsgs.appendChild(aiRow);
