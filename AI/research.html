@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Research - Ontologic</title>
+    <title>Research - Oaky</title>
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
 
 
@@ -13,7 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../src/design-tokens.css">
     <script>
-        (function() {
+        (function () {
             const stored = localStorage.getItem('vail_theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (stored === 'dark' || (!stored && prefersDark)) {
@@ -27,21 +27,21 @@
             theme: {
                 extend: {
                     colors: {
-                        parchment:      'var(--bg)',
-                        ivory:          'var(--bg-elevated)',
-                        'text-warm':    'var(--text-primary)',
-                        'olive-gray':   'var(--text-secondary)',
-                        'stone-gray':   'var(--text-tertiary)',
-                        rosewood:       'var(--accent)',
+                        parchment: 'var(--bg)',
+                        ivory: 'var(--bg-elevated)',
+                        'text-warm': 'var(--text-primary)',
+                        'olive-gray': 'var(--text-secondary)',
+                        'stone-gray': 'var(--text-tertiary)',
+                        rosewood: 'var(--accent)',
                         'border-cream': 'var(--border)',
-                        'border-warm':  'var(--border-strong)',
-                        'surf-dark':    'var(--surface-dark)',
-                        'deep-dark':    'var(--deep-dark)',
+                        'border-warm': 'var(--border-strong)',
+                        'surf-dark': 'var(--surface-dark)',
+                        'deep-dark': 'var(--deep-dark)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
-                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
-                        mono:  ['"JetBrains Mono"', 'monospace'],
+                        sans: ['Satoshi', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
                     }
                 }
             }
@@ -205,14 +205,14 @@
             background-color: var(--bg-elevated);
             border-radius: 8px;
             border: 1px solid var(--border);
-            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
             transition: all 0.3s ease;
         }
 
         .dark .skuomorphic-card {
             background-color: var(--bg-elevated);
             border-color: var(--border);
-            box-shadow: rgba(0,0,0,0.05) 0px 4px 24px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
         }
 
         .skuomorphic-input {
@@ -233,8 +233,8 @@
     class="bg-parchment text-text-warm dark:bg-deep-dark dark:text-text-warm min-h-screen flex flex-col font-sans selection:bg-rosewood selection:text-text-warm overflow-x-hidden">
 
     <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-md relative z-30">
-        <a href="../AI.html" class="flex items-center gap-3">
+        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md relative z-30">
+        <a href="/AI/index.html" class="flex items-center gap-3">
             <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
                 class="w-8 h-8 text-rosewood fill-current">
                 <path
@@ -248,7 +248,7 @@
                 <path
                     d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
             </svg>
-            <div class='text-xl md:text-2xl font-black text-rosewood'>Ontologic</div>
+            <div class='text-xl md:text-2xl font-black text-rosewood'>Oaky</div>
         </a>
         <div class="hidden md:flex items-center gap-8 text-sm font-medium">
             <a href="goals.html" class="hover:text-rosewood transition-colors">Goals</a>
@@ -297,10 +297,10 @@
         <div class="modal-content relative flex flex-col h-full bg-parchment dark:bg-deep-dark">
             <!-- Reader Header -->
             <div
-                class="sticky top-0 z-20 w-full flex items-center justify-between px-6 lg:px-16 py-6 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-xl">
+                class="sticky top-0 z-20 w-full flex items-center justify-between px-6 lg:px-16 py-6 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl">
                 <div class="flex items-center gap-4">
                     <span
-                        class="text-xs font-black uppercase tracking-[0.2em] text-rosewood/40 dark:text-olive-gray/40">Ontologic
+                        class="text-xs font-black uppercase tracking-[0.2em] text-rosewood/40 dark:text-olive-gray/40">Oaky
                         Research</span>
                 </div>
                 <button onclick="closeReader()"

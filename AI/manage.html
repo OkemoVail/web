@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../src/design-tokens.css">
     <script>
-        (function() {
+        (function () {
             const stored = localStorage.getItem('vail_theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (stored === 'dark' || (!stored && prefersDark)) {
@@ -22,16 +22,16 @@
             theme: {
                 extend: {
                     colors: {
-                        parchment:      'var(--bg)',
-                        ivory:          'var(--bg-elevated)',
-                        'text-warm':    'var(--text-primary)',
-                        'olive-gray':   'var(--text-secondary)',
-                        'stone-gray':   'var(--text-tertiary)',
-                        rosewood:       'var(--accent)',
+                        parchment: 'var(--bg)',
+                        ivory: 'var(--bg-elevated)',
+                        'text-warm': 'var(--text-primary)',
+                        'olive-gray': 'var(--text-secondary)',
+                        'stone-gray': 'var(--text-tertiary)',
+                        rosewood: 'var(--accent)',
                         'border-cream': 'var(--border)',
-                        'border-warm':  'var(--border-strong)',
-                        'surf-dark':    'var(--surface-dark)',
-                        'deep-dark':    'var(--deep-dark)',
+                        'border-warm': 'var(--border-strong)',
+                        'surf-dark': 'var(--surface-dark)',
+                        'deep-dark': 'var(--deep-dark)',
                     },
                     fontFamily: {
                         sans: ['Satoshi', 'Inter', 'sans-serif'],
@@ -44,8 +44,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 
     <style>
         @font-face {
@@ -110,7 +109,7 @@
 </head>
 
 <body class="bg-parchment transition-colors duration-500 overflow-x-hidden">
-    
+
     <header class="fixed top-0 left-0 w-full z-[100] px-6 py-8 pointer-events-none">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="header-island">
@@ -143,7 +142,7 @@
         </div>
 
         <div id="manage-list" class="flex flex-col gap-4">
-            
+
         </div>
 
         <div id="empty-state" class="hidden py-24 text-center">
@@ -242,11 +241,11 @@
             const blogs = JSON.parse(localStorage.getItem('olm_blogs') || '[]');
             const updated = blogs.filter(b => b.id !== id);
 
-            
+
             localStorage.setItem('olm_blogs', JSON.stringify(updated));
             renderList();
 
-            
+
             if (blogsFileHandle) {
                 try {
                     const statusMsg = document.getElementById('status-msg');

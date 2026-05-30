@@ -10,7 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../src/design-tokens.css">
     <script>
-        (function() {
+        (function () {
             const stored = localStorage.getItem('vail_theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (stored === 'dark' || (!stored && prefersDark)) {
@@ -24,20 +24,20 @@
             theme: {
                 extend: {
                     colors: {
-                        parchment:      'var(--bg)',
-                        ivory:          'var(--bg-elevated)',
-                        'text-warm':    'var(--text-rosewood)',
-                        'olive-gray':   'var(--text-secondary)',
-                        'stone-gray':   'var(--text-tertiary)',
-                        rosewood:       'var(--accent)',
+                        parchment: 'var(--bg)',
+                        ivory: 'var(--bg-elevated)',
+                        'text-warm': 'var(--text-rosewood)',
+                        'olive-gray': 'var(--text-secondary)',
+                        'stone-gray': 'var(--text-tertiary)',
+                        rosewood: 'var(--accent)',
                         'border-cream': 'var(--border)',
-                        'border-warm':  'var(--border-strong)',
-                        'surf-dark':    'var(--surface-dark)',
-                        'deep-dark':    'var(--deep-dark)',
+                        'border-warm': 'var(--border-strong)',
+                        'surf-dark': 'var(--surface-dark)',
+                        'deep-dark': 'var(--deep-dark)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
-                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
+                        sans: ['Satoshi', 'Inter', 'sans-serif'],
                     }
                 }
             }
@@ -137,8 +137,8 @@
 <body
     class="bg-parchment text-text-warm dark:bg-deep-dark dark:text-text-warm min-h-screen flex flex-col font-sans selection:bg-rosewood selection:text-text-warm overflow-x-hidden mesh-gradient">
     <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-md relative z-30">
-        <a href="../AI.html" class="flex items-center gap-3">
+        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md relative z-30">
+        <a href="/AI/index.html" class="flex items-center gap-3">
             <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
                 class="w-8 h-8 text-rosewood fill-current">
                 <path
@@ -177,14 +177,14 @@
 
         <div class="space-y-16 w-full mt-12 pb-24">
             <!-- Goal 1: Free for Everyone -->
-            <div
-                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
+            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
                 <div
                     class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/10 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-earth-americas text-2xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">Free
+                    <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">
+                        Free
                         for Everyone</h2>
                     <p class="text-xl text-gray-500 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         Advanced AGI should not be a luxury reserved for the few. We are building infrastructure to
@@ -196,14 +196,14 @@
             </div>
 
             <!-- Goal 2: Raw & Unfiltered -->
-            <div
-                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
+            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
                 <div
                     class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/20 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray">
                     <i class="fa-solid fa-bolt text-2xl"></i>
                 </div>
                 <div class="flex-grow">
-                    <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">Raw &
+                    <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">Raw
+                        &
                         Unfiltered</h2>
                     <p class="text-xl text-gray-500 dark:text-text-warm/60 leading-relaxed max-w-4xl">
                         We believe in raw intelligence. Without limits, without artificial filters, and without the
@@ -215,8 +215,7 @@
             </div>
 
             <!-- Goal 3: No Limits -->
-            <div
-                class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
+            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
                 <div
                     class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/10 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray">
                     <i class="fa-solid fa-infinity text-2xl"></i>

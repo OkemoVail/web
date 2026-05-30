@@ -10,7 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../src/design-tokens.css">
     <script>
-        (function() {
+        (function () {
             const stored = localStorage.getItem('vail_theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (stored === 'dark' || (!stored && prefersDark)) {
@@ -24,20 +24,20 @@
             theme: {
                 extend: {
                     colors: {
-                        parchment:      'var(--bg)',
-                        ivory:          'var(--bg-elevated)',
-                        'text-warm':    'var(--text-rosewood)',
-                        'olive-gray':   'var(--text-secondary)',
-                        'stone-gray':   'var(--text-tertiary)',
-                        rosewood:       'var(--accent)',
+                        parchment: 'var(--bg)',
+                        ivory: 'var(--bg-elevated)',
+                        'text-warm': 'var(--text-rosewood)',
+                        'olive-gray': 'var(--text-secondary)',
+                        'stone-gray': 'var(--text-tertiary)',
+                        rosewood: 'var(--accent)',
                         'border-cream': 'var(--border)',
-                        'border-warm':  'var(--border-strong)',
-                        'surf-dark':    'var(--surface-dark)',
-                        'deep-dark':    'var(--deep-dark)',
+                        'border-warm': 'var(--border-strong)',
+                        'surf-dark': 'var(--surface-dark)',
+                        'deep-dark': 'var(--deep-dark)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
-                        sans:  ['Satoshi', 'Inter', 'sans-serif'],
+                        sans: ['Satoshi', 'Inter', 'sans-serif'],
                     }
                 }
             }
@@ -129,8 +129,8 @@
 <body
     class="bg-parchment text-text-warm dark:bg-deep-dark dark:text-text-warm min-h-screen flex flex-col font-sans selection:bg-rosewood selection:text-text-warm overflow-x-hidden">
     <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-deep-dark/80 backdrop-blur-md relative z-30">
-        <a href="../AI.html" class="flex items-center gap-3">
+        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md relative z-30">
+        <a href="/AI/index.html" class="flex items-center gap-3">
             <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
                 class="w-8 h-8 text-rosewood fill-current">
                 <path
@@ -171,7 +171,8 @@
             <div class="skuomorphic-card p-10 !bg-rosewood/10 !border-rosewood/20">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="text-2xl">⚡</span>
-                    <h2 class="text-sm font-black uppercase tracking-widest text-rosewood">TL;DR — The Quick Version</h2>
+                    <h2 class="text-sm font-black uppercase tracking-widest text-rosewood">TL;DR — The Quick Version
+                    </h2>
                 </div>
                 <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
                     <li>✅ Use Oaky for legal, creative, and helpful things.</li>
