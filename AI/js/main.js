@@ -67,7 +67,9 @@ window.initChatUI = () => {
 
     if (isGuest) {
         setTimeout(() => {
-            if (window.showToast) window.showToast("Create an account to unlock personalization and full features.");
+            if (window.showInputNotice) window.showInputNotice(
+                'Create an account to unlock personalization and full features.'
+            );
         }, 1000);
     }
 
@@ -191,6 +193,11 @@ window.initChatUI = () => {
 
 // --- INITIALIZATION ---
 (async function boot() {
+    // Swap to cloud storage if the user is already signed in
+    if (localStorage.getItem('vail_auth_token') && window.CloudStorageController) {
+        window._OriginalStorageController = window.StorageController;
+        window.StorageController = window.CloudStorageController;
+    }
     await window.StorageController.init();
     const loadedChats = await window.StorageController.getAllChats();
     window.allChats = loadedChats || {};
@@ -213,6 +220,7 @@ window.initChatUI = () => {
 
     try {
         window.initChatUI();
+        if (typeof window.AccountModal !== 'undefined') window.AccountModal.init();
     } catch (e) {
         console.error('Initialization error:', e);
     } finally {
