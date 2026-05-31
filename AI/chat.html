@@ -4033,109 +4033,41 @@
             if (e.target === this) window.closePersonality();
         });
 
-        // ── Memory summarization + animation ────────────────────────
-        window.summarizeAndSaveMemory = async function (rawText) {
-            // Inject a pending animated entry at the top of the memories list
-            const pid = 'mpe-' + Date.now();
-            const list = document.getElementById('memories-list');
-            if (list) {
-                // Clear empty-state placeholder if present
-                if (list.querySelector('[data-mpc-empty]')) list.innerHTML = '';
-                const el = document.createElement('div');
-                el.id = pid;
-                el.className = 'mpc-pending-entry flex items-start gap-3 px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800/60';
-                el.innerHTML =
-                    '<div class="flex-1 min-w-0">' +
-                    '<div class="mpc-bar mb-1.5"></div>' +
-                    '<div id="' + pid + '-text" class="text-[12px] font-mono text-zinc-500 dark:text-zinc-400 leading-snug" data-raw=""><span class="mpc-cursor"></span></div>' +
-                    '<p class="text-[10px] mt-1.5 flex items-center gap-1.5">' +
-                    '<span class="mpc-spinner-inline"></span>' +
-                    '<span class="mpc-label-inline">Encoding memory…</span>' +
-                    '</p></div>';
-                list.prepend(el);
-            }
+        // ── Memory consent card ──────────────────────────────────────
+        window.summarizeAndSaveMemory = function (rawText) {
+            window.showMemoryConsent(rawText);
+        };
 
-            const _updateEntry = (chunk) => {
-                const textEl = document.getElementById(pid + '-text');
-                if (!textEl) return;
-                const current = textEl.getAttribute('data-raw') || '';
-                const updated = current + chunk;
-                textEl.setAttribute('data-raw', updated);
-                textEl.innerHTML = updated.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '<span class="mpc-cursor"></span>';
+        window.showMemoryConsent = function (text) {
+            const stack = document.getElementById('memory-consent-stack');
+            if (!stack) return;
+
+            // Normalise: replace leading "user" with "You"
+            const display = text.replace(/^user\b/i, 'You');
+
+            const card = document.createElement('div');
+            card.className = 'mem-consent-card';
+            card.innerHTML =
+                '<span class="mem-consent-label">🧠 Remember: <strong>' +
+                display.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                '</strong></span>' +
+                '<div class="mem-consent-btns">' +
+                '<button class="mem-consent-save">Save</button>' +
+                '<button class="mem-consent-dismiss">Dismiss</button>' +
+                '</div>';
+
+            const dismiss = () => {
+                card.classList.add('dismissing');
+                card.addEventListener('animationend', () => card.remove(), { once: true });
             };
 
-            const _finalizeEntry = (finalText) => {
-                const el = document.getElementById(pid);
-                if (el) {
-                    // Brief "saved" flash before handing off to renderMemoriesTab
-                    const footer = el.querySelector('p');
-                    if (footer) footer.innerHTML =
-                        '<span class="mpc-check-inline"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>' +
-                        '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;color:#22c55e">Saved</span>';
-                    setTimeout(() => {
-                        if (el.parentNode) el.remove();
-                        window.addMemory(finalText, 'model');
-                    }, 900);
-                } else {
-                    window.addMemory(finalText, 'model');
-                }
-            };
+            card.querySelector('.mem-consent-save').addEventListener('click', () => {
+                window.addMemory(display, 'model');
+                dismiss();
+            });
+            card.querySelector('.mem-consent-dismiss').addEventListener('click', dismiss);
 
-            try {
-                const baseUrl = (typeof window.getOpenAIClient === 'function' ? await window.getOpenAIClient() : null)
-                    || localStorage.getItem('vail_custom_backend_url') || '';
-                if (!baseUrl) throw new Error('no backend');
-
-                const resp = await fetch(baseUrl.replace(/\/$/, '') + '/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': 'true',
-                        'bypass-tunnel-reminder': 'true',
-                        ...(window.settings.apiKey ? { 'Authorization': 'Bearer ' + window.settings.apiKey.trim() } : {})
-                    },
-                    body: JSON.stringify({
-                        model: window.currentModel.id,
-                        messages: [
-                            { role: 'system', content: 'Distill this into one concise memory. Plain language, just the fact. Nothing else.' },
-                            { role: 'user', content: rawText }
-                        ],
-                        max_tokens: 60,
-                        temperature: 0.2,
-                        stream: true,
-                        use_thought: false
-                    })
-                });
-
-                if (!resp.ok) throw new Error('api error');
-
-                const reader = resp.body.getReader();
-                const decoder = new TextDecoder();
-                let summarized = '';
-                let buf = '';
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    buf += decoder.decode(value, { stream: true });
-                    const lines = buf.split('\n');
-                    buf = lines.pop();
-                    for (const line of lines) {
-                        const t = line.trim();
-                        if (!t || t === 'data: [DONE]') continue;
-                        if (t.startsWith('data: ')) {
-                            try {
-                                const delta = JSON.parse(t.slice(6)).choices?.[0]?.delta?.content || '';
-                                if (delta) { summarized += delta; _updateEntry(delta); }
-                            } catch (_) {}
-                        }
-                    }
-                }
-
-                _finalizeEntry(summarized.trim() || rawText);
-            } catch (_) {
-                _finalizeEntry(rawText);
-            }
+            stack.appendChild(card);
         };
 
         window.renderMemoriesTab = function () {
