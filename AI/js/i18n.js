@@ -30,6 +30,7 @@ window.applyTranslations = () => {
         window.els.input.placeholder = window.getT(key, { model: window.currentModel.name });
     }
     document.querySelectorAll('.lang-text').forEach(t => t.innerText = langCode === 'en' ? '中文' : 'EN');
+    if (typeof window.updateLangButtons === 'function') window.updateLangButtons(langCode);
 };
 
 window.setLang = (lang) => {
@@ -40,6 +41,7 @@ window.setLang = (lang) => {
     window.renderHistory();
     window.render();
     window.updateLangButtons(lang);
+    if (typeof window.syncProfileToCloud === 'function') window.syncProfileToCloud();
 };
 
 window.updateLangButtons = (lang) => {

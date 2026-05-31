@@ -76,7 +76,18 @@ window.translations = {
         last_week_header: "Previous 7 Days",
         dust_collecting_header: "Dust Collecting",
         language: "Language",
-        thought_btn: "Think"
+        thought_btn: "Think",
+        ob_sign_in: "Sign In",
+        ob_register: "Register",
+        ob_email: "Email",
+        ph_email: "you@example.com",
+        ob_password: "Password",
+        ob_confirm_password: "Confirm Password",
+        ob_perk_storage: "Free 1GB storage will be provided",
+        ob_welcome_back: "Welcome back",
+        ob_create_account: "Create account",
+        ob_err_req: "Email and password required",
+        ob_err_match: "Passwords do not match"
     ,
 
         auth_settings: "Log in via Settings",
@@ -216,7 +227,18 @@ window.translations = {
         last_week_header: "過去 7 天",
         dust_collecting_header: "積灰塵",
         language: "語言",
-        thought_btn: "思考"
+        thought_btn: "思考",
+        ob_sign_in: "登入",
+        ob_register: "註冊",
+        ob_email: "電子郵件",
+        ph_email: "you@example.com",
+        ob_password: "密碼",
+        ob_confirm_password: "確認密碼",
+        ob_perk_storage: "將提供免費 1GB 儲存空間",
+        ob_welcome_back: "歡迎回來",
+        ob_create_account: "建立帳號",
+        ob_err_req: "需要電子郵件和密碼",
+        ob_err_match: "密碼不一致"
     ,
 
         auth_settings: "透過設定登入",
@@ -318,6 +340,11 @@ window.settings = JSON.parse(localStorage.getItem('vail_settings_v4') || JSON.st
     systemPrompt: '',
     gender: ''
 }));
+// userPic is stored separately to avoid exceeding the localStorage quota
+if (!window.settings.userPic) {
+    const savedPic = localStorage.getItem('vail_user_pic');
+    if (savedPic) window.settings.userPic = savedPic;
+}
 
 if (typeof window.settings.gender !== 'string') window.settings.gender = '';
 

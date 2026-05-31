@@ -117,12 +117,21 @@ window.StorageController = (() => {
 
     const estimateSize = async () => {
         try {
-            if (navigator.storage && navigator.storage.estimate) {
-                const est = await navigator.storage.estimate();
-                return est.usage || 0;
+            // Measure only this app's localStorage keys (UTF-16: 2 bytes per char)
+            const lsKeys = ['vail_settings_v4', 'vail_custom_backend_url', 'vail_theme',
+                'vail_last_seen_build', 'vail_remote_build', 'vail_remote_changelog'];
+            let bytes = lsKeys.reduce((acc, k) => {
+                const v = localStorage.getItem(k);
+                return acc + (v ? (k.length + v.length) * 2 : 0);
+            }, 0);
+
+            if (_sessionOnly) {
+                bytes += new Blob([JSON.stringify(_sessionCache)]).size;
+            } else {
+                const chats = await getAllChats();
+                bytes += new Blob([JSON.stringify(chats)]).size;
             }
-            const json = JSON.stringify(_sessionCache);
-            return new Blob([json]).size;
+            return bytes;
         } catch { return 0; }
     };
 

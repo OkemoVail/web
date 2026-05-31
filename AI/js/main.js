@@ -202,6 +202,28 @@ window.initChatUI = () => {
     const loadedChats = await window.StorageController.getAllChats();
     window.allChats = loadedChats || {};
 
+    // On refresh with existing token, restore cloud profile (pic, name, etc.)
+    if (localStorage.getItem('vail_auth_token') && window.CloudStorageController) {
+        try {
+            const savedProfile = await window.CloudStorageController.loadProfile();
+            if (savedProfile) {
+                let changed = false;
+                if (savedProfile.userName && savedProfile.userName !== window.settings.userName) { window.settings.userName = savedProfile.userName; changed = true; }
+                if (savedProfile.userPic && savedProfile.userPic !== window.settings.userPic) { window.settings.userPic = savedProfile.userPic; changed = true; }
+                if (savedProfile.pfpX != null) { window.settings.pfpX = savedProfile.pfpX; changed = true; }
+                if (savedProfile.pfpY != null) { window.settings.pfpY = savedProfile.pfpY; changed = true; }
+                if (savedProfile.pfpScale != null) { window.settings.pfpScale = savedProfile.pfpScale; changed = true; }
+                if (savedProfile.lang) { window.settings.lang = savedProfile.lang; changed = true; }
+                if (savedProfile.theme) localStorage.setItem('vail_theme', savedProfile.theme);
+                if (savedProfile.systemPrompt != null) { window.settings.systemPrompt = savedProfile.systemPrompt; changed = true; }
+                if (Array.isArray(savedProfile.memories) && savedProfile.memories.length) { window.settings.memories = savedProfile.memories; changed = true; }
+                if (changed && typeof window.saveSettings === 'function') window.saveSettings();
+            }
+        } catch (e) {
+            console.warn('Failed to load cloud profile on boot:', e);
+        }
+    }
+
     // Auto-detect tunnel URL
     try {
         const baseUrl = await window.getOpenAIClient();

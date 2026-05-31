@@ -121,6 +121,7 @@
         }
 
         @media (max-width: 1023px) {
+
             /* Hide top-right actions (personality/updates) on mobile after a chat starts (not empty) */
             body:not(.chat-empty) #top-right-actions {
                 display: none !important;
@@ -1289,16 +1290,37 @@
         }
 
         @keyframes fish-tail-wag {
-            from { transform: rotate(-20deg); }
-            to   { transform: rotate(20deg); }
+            from {
+                transform: rotate(-20deg);
+            }
+
+            to {
+                transform: rotate(20deg);
+            }
         }
 
         @keyframes fish-swim {
-            0%   { left: -40px; top: calc(50% - 13px); }
-            25%  { top: calc(50% - 17px); }
-            50%  { top: calc(50% - 13px); }
-            75%  { top: calc(50% - 9px); }
-            100% { left: calc(100% + 10px); top: calc(50% - 13px); }
+            0% {
+                left: -40px;
+                top: calc(50% - 13px);
+            }
+
+            25% {
+                top: calc(50% - 17px);
+            }
+
+            50% {
+                top: calc(50% - 13px);
+            }
+
+            75% {
+                top: calc(50% - 9px);
+            }
+
+            100% {
+                left: calc(100% + 10px);
+                top: calc(50% - 13px);
+            }
         }
 
         .thinking-shimmer {
@@ -1545,40 +1567,68 @@
         /* ── Memory encoding card ──────────────────────────────────── */
         /* ── Memory pending entry (inline in memories tab) ─────────── */
         .mpc-pending-entry {
-            animation: mpc-slide-in 0.28s cubic-bezier(0.16,1,0.3,1) forwards;
+            animation: mpc-slide-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+
         @keyframes mpc-slide-in {
-            from { opacity: 0; transform: translateY(-6px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .mpc-bar {
             height: 2px;
-            background: rgba(167,139,250,0.1);
+            background: rgba(167, 139, 250, 0.1);
             border-radius: 2px;
             overflow: hidden;
             position: relative;
         }
+
         .mpc-bar::after {
             content: '';
             position: absolute;
             left: -60%;
-            top: 0; bottom: 0;
+            top: 0;
+            bottom: 0;
             width: 60%;
-            background: linear-gradient(90deg, transparent, rgba(167,139,250,0.7), transparent);
+            background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.7), transparent);
             animation: mpc-scan 1.3s ease-in-out infinite;
         }
-        @keyframes mpc-scan { 0%{left:-60%} 100%{left:110%} }
+
+        @keyframes mpc-scan {
+            0% {
+                left: -60%
+            }
+
+            100% {
+                left: 110%
+            }
+        }
+
         .mpc-spinner-inline {
             display: inline-block;
-            width: 10px; height: 10px;
-            border: 1.5px solid rgba(167,139,250,0.2);
+            width: 10px;
+            height: 10px;
+            border: 1.5px solid rgba(167, 139, 250, 0.2);
             border-top-color: #a78bfa;
             border-radius: 50%;
             animation: mpc-spin 0.65s linear infinite;
             vertical-align: middle;
             flex-shrink: 0;
         }
-        @keyframes mpc-spin { to { transform: rotate(360deg); } }
+
+        @keyframes mpc-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .mpc-label-inline {
             font-size: 10px;
             font-weight: 800;
@@ -1586,16 +1636,30 @@
             letter-spacing: 0.11em;
             color: #a78bfa;
         }
+
         .mpc-cursor {
             display: inline-block;
-            width: 2px; height: 12px;
+            width: 2px;
+            height: 12px;
             background: #a78bfa;
             margin-left: 1px;
             vertical-align: text-bottom;
             border-radius: 1px;
             animation: mpc-blink 0.75s steps(1) infinite;
         }
-        @keyframes mpc-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        @keyframes mpc-blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0
+            }
+        }
+
         /* ── Memory consent card (above input bar) ─────────────────── */
         .mem-consent-card {
             display: flex;
@@ -1606,23 +1670,46 @@
             border-radius: 14px;
             background: var(--input-bg, #f4f4f5);
             border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
-            animation: mem-consent-in 0.22s cubic-bezier(0.16,1,0.3,1) forwards;
+            animation: mem-consent-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             pointer-events: auto;
         }
+
         .dark .mem-consent-card {
             background: #27272a;
         }
+
         @keyframes mem-consent-in {
-            from { opacity: 0; transform: translateY(6px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         @keyframes mem-consent-out {
-            from { opacity: 1; transform: translateY(0); max-height: 60px; margin-bottom: 0; }
-            to   { opacity: 0; transform: translateY(4px); max-height: 0; margin-bottom: -8px; }
+            from {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 60px;
+                margin-bottom: 0;
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(4px);
+                max-height: 0;
+                margin-bottom: -8px;
+            }
         }
+
         .mem-consent-card.dismissing {
             animation: mem-consent-out 0.18s ease-in forwards;
         }
+
         .mem-consent-label {
             font-size: 13px;
             color: #71717a;
@@ -1632,18 +1719,22 @@
             flex: 1;
             min-width: 0;
         }
+
         .mem-consent-label strong {
             color: #18181b;
             font-weight: 600;
         }
+
         .dark .mem-consent-label strong {
             color: #f4f4f5;
         }
+
         .mem-consent-btns {
             display: flex;
             gap: 6px;
             flex-shrink: 0;
         }
+
         .mem-consent-save {
             padding: 5px 14px;
             border-radius: 8px;
@@ -1655,7 +1746,11 @@
             border: none;
             transition: opacity 0.15s;
         }
-        .mem-consent-save:hover { opacity: 0.85; }
+
+        .mem-consent-save:hover {
+            opacity: 0.85;
+        }
+
         .mem-consent-dismiss {
             padding: 5px 10px;
             border-radius: 8px;
@@ -1667,14 +1762,27 @@
             cursor: pointer;
             transition: background 0.15s;
         }
-        .dark .mem-consent-dismiss { border-color: #3f3f46; }
-        .mem-consent-dismiss:hover { background: #f4f4f5; }
-        .dark .mem-consent-dismiss:hover { background: #3f3f46; }
+
+        .dark .mem-consent-dismiss {
+            border-color: #3f3f46;
+        }
+
+        .mem-consent-dismiss:hover {
+            background: #f4f4f5;
+        }
+
+        .dark .mem-consent-dismiss:hover {
+            background: #3f3f46;
+        }
+
         .mpc-check-inline {
-            width: 13px; height: 13px;
+            width: 13px;
+            height: 13px;
             border-radius: 50%;
             background: #22c55e;
-            display: inline-flex; align-items: center; justify-content: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
             vertical-align: middle;
         }
@@ -1806,6 +1914,7 @@
             #personality-modal {
                 padding: 0 !important;
             }
+
             #personality-modal .changelog-card {
                 max-width: 100% !important;
                 width: 100% !important;
@@ -1817,7 +1926,8 @@
                 display: flex;
                 flex-direction: column;
             }
-            #personality-modal .changelog-card > div {
+
+            #personality-modal .changelog-card>div {
                 height: 100%;
                 display: flex;
                 flex-direction: column;
@@ -2843,7 +2953,7 @@
     </style>
 </head>
 
-<body class="text-zinc-900 dark:text-zinc-200 font-sans h-full flex overflow-hidden" <!-- APP PRELOADER -->
+<body class="text-zinc-900 dark:text-zinc-200 font-sans h-full flex overflow-hidden"> <!-- APP PRELOADER -->
     <div id="app-preloader">
         <div class="loader-hub" id="loader-interactive-hub">
             <svg class="loader-svg" viewBox="0 0 100 100">
@@ -2862,59 +2972,120 @@
             <div class="onboarding-inner overflow-y-auto no-scrollbar">
 
 
-                <div class="flex flex-col items-center mb-8">
-                    <svg class="h-6 w-auto mb-5" viewBox="0 0 1046.51 912.52" xmlns="http://www.w3.org/2000/svg"
-                        style="color: var(--accent-color);">
-                        <path fill="currentColor"
-                            d="M793.83,28.36c5-18.64-6.17-29.81-24.81-24.81l-307.09,82.28c-18.64,5-22.73,20.25-9.08,33.9l224.81,224.81c13.65,13.65,28.9,9.56,33.9-9.08L793.83,28.36Z" />
-                        <path fill="currentColor"
-                            d="M171.52,324.24c-5,18.64,6.17,29.81,24.81,24.81l307.09-82.29c18.64-5,22.73-20.25,9.08-33.9L287.7,8.07c-13.65-13.65-28.9-9.56-33.9,9.08l-82.28,307.09Z" />
-                        <path fill="currentColor"
-                            d="M232.88,694.51c13.65,13.65,28.9,9.56,33.9-9.08l82.28-307.09c5-18.64-6.17-29.81-24.81-24.81L17.15,435.81c-18.64,5-22.73,20.25-9.08,33.9l224.81,224.8Z" />
-                        <path fill="currentColor"
-                            d="M252.71,884.22c-5,18.64,6.17,29.81,24.81,24.81l307.09-82.28c18.64-5,22.73-20.25,9.08-33.9l-224.81-224.81c-13.65-13.65-28.9-9.56-33.9,9.08l-82.28,307.09Z" />
-                        <path fill="currentColor"
-                            d="M758.81,904.45c13.65,13.65,28.9,9.56,33.9-9.08l82.28-307.09c5-18.64-6.17-29.81-24.81-24.81l-307.09,82.29c-18.64,5-22.73,20.25-9.08,33.9l224.81,224.8Z" />
-                        <path fill="currentColor"
-                            d="M1029.36,477.47c18.64-5,22.73-20.25,9.08-33.9l-224.81-224.81c-13.65-13.65-28.9-9.56-33.9,9.08l-82.28,307.09c-5,18.64,6.17,29.81,24.81,24.81l307.09-82.29Z" />
-                    </svg>
-                    <p class="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.3em]"
-                        data-t="onboarding_welcome">Welcome to Ontologic</p>
-                </div>
+                <!-- Inline Login / Register form -->
+                <div id="onboarding-auth-section">
+                    <!-- Dynamic Auth Heading -->
+                    <h2 id="ob-auth-heading"
+                        class="text-left font-serif text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-4"
+                        style="font-family: 'GFS Didot', serif;" data-t="ob_welcome_back">Welcome back</h2>
 
-
-
-
-                <p class="text-center text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-5">Ontologic has
-                    no
-                    limits for all accounts</p>
-
-                <div class="w-full h-px bg-zinc-100 dark:bg-zinc-800/60 mb-5"></div>
-
-
-                <div class="flex items-center gap-4 mb-5">
-                    <div class="relative flex-shrink-0"
-                        onclick="document.getElementById('onboarding-pfp-input').click()">
-                        <div id="onboarding-pfp-preview">
-                            <i data-feather="camera" class="text-zinc-400 w-5 h-5"></i>
-                        </div>
-                        <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] border-2 border-white dark:border-[#0d0d0d] shadow-md"
-                            style="background: var(--accent-color);">
-                            <i data-feather="plus" class="w-3 h-3"></i>
-                        </div>
+                    <!-- Sign In / Register toggle -->
+                    <div class="flex gap-2 mb-4 bg-zinc-100 dark:bg-zinc-900/60 rounded-xl p-1">
+                        <button id="ob-mode-login" onclick="window.setOnboardingAuthMode('login')"
+                            class="flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                            data-t="ob_sign_in">
+                            Sign In
+                        </button>
+                        <button id="ob-mode-register" onclick="window.setOnboardingAuthMode('register')"
+                            class="flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                            data-t="ob_register">
+                            Register
+                        </button>
                     </div>
-                    <div class="flex-1">
+
+                    <!-- Email -->
+                    <div class="mb-3">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1.5"
-                            data-t="display_name">Display Name</label>
-                        <input type="text" id="onboarding-name" placeholder="Name or Alias" data-t-placeholder="ph_name_alias"
+                            data-t="ob_email">Email</label>
+                        <input type="email" id="ob-email-input" placeholder="you@example.com"
+                            data-t-placeholder="ph_email"
                             class="w-full bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 min-h-[48px] text-sm font-bold focus:outline-none transition-all placeholder-zinc-400"
                             style="--tw-ring-color: var(--accent-color);"
                             onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor=''">
                     </div>
-                    <input type="file" id="onboarding-pfp-input" class="hidden" accept="image/*"
-                        onchange="window.handleOnboardingPfp(event)">
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1.5"
+                            data-t="ob_password">Password</label>
+                        <div class="relative">
+                            <input type="password" id="ob-password-input" placeholder="••••••••"
+                                class="w-full bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 min-h-[48px] text-sm font-bold focus:outline-none transition-all placeholder-zinc-400 pr-12"
+                                style="--tw-ring-color: var(--accent-color);"
+                                onfocus="this.style.borderColor='var(--accent-color)'"
+                                onblur="this.style.borderColor=''"
+                                onkeydown="if(event.key==='Enter') window.submitOnboardingAuth()">
+                            <button onclick="window.toggleObPasswordVisibility()" type="button"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                                <i data-feather="eye" class="w-4 h-4" id="ob-pw-eye-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password (Hidden by default) -->
+                    <div id="ob-confirm-password-section" class="mb-3 hidden">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1.5"
+                            data-t="ob_confirm_password">Confirm Password</label>
+                        <div class="relative">
+                            <input type="password" id="ob-confirm-password-input" placeholder="••••••••"
+                                class="w-full bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 min-h-[48px] text-sm font-bold focus:outline-none transition-all placeholder-zinc-400 pr-12"
+                                style="--tw-ring-color: var(--accent-color);"
+                                onfocus="this.style.borderColor='var(--accent-color)'"
+                                onblur="this.style.borderColor=''"
+                                onkeydown="if(event.key==='Enter') window.submitOnboardingAuth()">
+                            <button onclick="window.toggleObConfirmPasswordVisibility()" type="button"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                                <i data-feather="eye" class="w-4 h-4" id="ob-confirm-pw-eye-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error message -->
+                    <p id="ob-auth-error" class="text-[11px] font-bold text-red-500 min-h-[1rem] mb-3"></p>
+
+                    <!-- Register Perk (Hidden by default) -->
+                    <div id="ob-register-perk"
+                        class="hidden flex items-center justify-center gap-1.5 mb-3 text-[10px] font-bold text-[var(--accent-color)] uppercase tracking-widest transition-all">
+                        <i data-feather="cloud" class="w-4 h-4"></i>
+                        <span data-t="ob_perk_storage">Free 1GB storage will be provided</span>
+                    </div>
+
+                    <!-- Submit -->
+                    <button id="ob-auth-submit" onclick="window.submitOnboardingAuth()"
+                        class="w-full flex items-center justify-center gap-2 min-h-[48px] rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all border-2 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)] hover:text-white active:scale-[0.98]">
+                        <i data-feather="log-in" class="w-4 h-4"></i>
+                        <span data-t="ob_sign_in">Sign In</span>
+                    </button>
                 </div>
 
+                <!-- Verify section (shown after registration, hidden by default) -->
+                <div id="ob-verify-section" class="hidden mt-4">
+                    <p class="text-center text-[11px] text-zinc-400 mb-3">We sent a 6-digit code to <strong
+                            id="ob-verify-email-label" class="text-zinc-700 dark:text-zinc-200"></strong></p>
+                    <input id="ob-verify-code-input" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
+                        autocomplete="one-time-code"
+                        class="w-full text-center text-2xl font-mono tracking-[0.5em] mb-2 px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white placeholder-zinc-300 dark:placeholder-zinc-600 focus:outline-none focus:ring-2"
+                        style="--tw-ring-color: var(--accent-color);"
+                        onkeydown="if(event.key==='Enter') window.AccountModal._submitObVerification()" />
+                    <p id="ob-verify-error" class="text-red-500 text-[11px] mb-3 min-h-[1rem] text-center"></p>
+                    <button id="ob-verify-submit-btn" onclick="window.AccountModal._submitObVerification()"
+                        class="w-full flex items-center justify-center gap-2 min-h-[48px] rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all border-2 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)] hover:text-white active:scale-[0.98] mb-2">
+                        Verify Email
+                    </button>
+                    <button onclick="window.AccountModal._cancelObVerify()"
+                        class="w-full py-1 text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                        ← Back to sign up
+                    </button>
+                </div>
+
+                <!-- Continue as Guest -->
+                <div class="mt-5 flex flex-col items-center gap-1">
+                    <button onclick="window.continueAsGuest()"
+                        class="w-full flex items-center justify-center min-h-[44px] text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        data-t="onboarding_guest">Continue as Guest</button>
+                </div>
+
+                <div class="w-full h-px bg-zinc-100 dark:bg-zinc-800/60 my-5"></div>
 
                 <div class="mb-5">
                     <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 text-center"
@@ -2948,22 +3119,6 @@
                             <i data-feather="moon" class="w-4 h-4"></i> <span data-t="theme_dark">Dark</span>
                         </button>
                     </div>
-                </div>
-
-                <div class="w-full h-px bg-zinc-100 dark:bg-zinc-800/60 mb-5"></div>
-
-
-                <div class="flex flex-col gap-3">
-                    <button onclick="window.completeOnboarding()"
-                        class="w-full flex items-center justify-center min-h-[52px] bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all shadow-xl"
-                        data-t="onboarding_complete">Complete Setup</button>
-                    <button onclick="window.continueAsGuest()"
-                        class="w-full flex items-center justify-center min-h-[44px] text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] hover:text-zinc-900 dark:hover:text-white transition-colors"
-                        data-t="onboarding_guest">Continue as Guest</button>
-                    <p class="text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
-                        Already have an account? <button onclick="window.goToSettingsLogin()"
-                            class="text-[var(--accent-color)] hover:underline" data-t="auth_settings">Log in via Settings</button>
-                    </p>
                 </div>
 
             </div>
@@ -3037,8 +3192,8 @@
             <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 mt-3">
                 <div class="sb-search-wrap sb-row-text">
                     <i data-feather="search" class="sb-search-icon"></i>
-                    <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..." data-t-placeholder="ph_search_chats"
-                        oninput="window.filterChats(this.value)">
+                    <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..."
+                        data-t-placeholder="ph_search_chats" oninput="window.filterChats(this.value)">
                 </div>
                 <div id="folders-section" class="shrink-0 max-h-[40%] overflow-y-auto no-scrollbar">
                     <div id="folders-list" class="pb-1"></div>
@@ -3070,16 +3225,20 @@
                             <span id="sidebar-user-name"
                                 class="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 leading-tight truncate">Profile</span>
                             <span id="storage-display-sidebar"
-                                class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 truncate" data-t="storage_empty">Storage: —</span>
+                                class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 truncate"
+                                data-t="storage_empty">Storage: —</span>
                         </div>
                         <!-- Actions (fades when collapsed) -->
-                        <div id="profile-row-actions" class="sb-row-text flex items-center gap-1 mr-2 opacity-0 group-hover:opacity-100" style="overflow: visible;">
-                            <button onclick="event.stopPropagation(); window.clearAll()" title="Clear all chats" data-t-title="title_clear_chats"
-                                class="sb-icon-btn !text-zinc-400 hover:!text-red-500">
+                        <div id="profile-row-actions"
+                            class="sb-row-text flex items-center gap-1 mr-2"
+                            style="overflow: visible;">
+                            <button onclick="event.stopPropagation(); window.clearAll()" title="Clear all chats"
+                                data-t-title="title_clear_chats" class="sb-icon-btn !text-zinc-400 hover:!text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <i data-feather="trash-2" class="w-3.5 h-3.5"></i>
                             </button>
                             <div class="relative" id="settings-submenu-wrap">
-                                <button onclick="event.stopPropagation(); window.toggleSettingsSubmenu()" title="Settings"
+                                <button onclick="event.stopPropagation(); window.toggleSettingsSubmenu()"
+                                    title="Settings"
                                     class="sb-icon-btn !text-zinc-400 hover:!text-zinc-900 dark:hover:!text-white">
                                     <i data-feather="settings" class="w-3.5 h-3.5"></i>
                                 </button>
@@ -3095,22 +3254,26 @@
                                         <i data-feather="user" class="w-3.5 h-3.5 shrink-0"></i>
                                         <span data-t="btn_profile">Profile</span>
                                     </button>
-                                    <button onclick="event.stopPropagation(); window.openSettingsTo('intelligence')"
-                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
-                                        <i data-feather="cpu" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span data-t="tab_intelligence">Intelligence</span>
-                                    </button>
-                                    <button onclick="event.stopPropagation(); window.openPersonality(); window.closeSettingsSubmenu();"
+                                    <button
+                                        onclick="event.stopPropagation(); window.openPersonality(); window.closeSettingsSubmenu();"
                                         class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
                                         <i data-feather="smile" class="w-3.5 h-3.5 shrink-0"></i>
                                         <span>Personality</span>
                                     </button>
-                                    <button onclick="event.stopPropagation(); window.openSettingsTo('memories'); window.renderMemoriesTab(); window.closeSettingsSubmenu();"
+                                    <button
+                                        onclick="event.stopPropagation(); window.openSettingsTo('memories'); window.renderMemoriesTab(); window.closeSettingsSubmenu();"
                                         class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
                                         <i data-feather="bookmark" class="w-3.5 h-3.5 shrink-0"></i>
                                         <span>Memories</span>
                                     </button>
-                                    <button onclick="event.stopPropagation(); window.showChangelog(); window.closeSettingsSubmenu();"
+                                    <button
+                                        onclick="event.stopPropagation(); window.openSettingsTo('storage'); window.renderStorageTab(); window.closeSettingsSubmenu();"
+                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
+                                        <i data-feather="hard-drive" class="w-3.5 h-3.5 shrink-0"></i>
+                                        <span>Storage</span>
+                                    </button>
+                                    <button
+                                        onclick="event.stopPropagation(); window.showChangelog(); window.closeSettingsSubmenu();"
                                         class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
                                         <i data-feather="zap" class="w-3.5 h-3.5 shrink-0"></i>
                                         <span>Updates</span>
@@ -3142,7 +3305,8 @@
                     class="transition-all p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
                     <i data-feather="edit-2" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="window.regenerateCurrentTitle()" title="Regenerate Title" data-t-title="title_regenerate_title"
+                <button onclick="window.regenerateCurrentTitle()" title="Regenerate Title"
+                    data-t-title="title_regenerate_title"
                     class="transition-all p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
                     <i data-feather="rotate-cw" class="w-3.5 h-3.5"></i>
                 </button>
@@ -3166,10 +3330,16 @@
 
         <div id="top-right-actions" class="animate-fade-in flex items-center gap-2">
             <div class="header-island skuomorphic-btn rounded-lg flex items-center gap-px p-1">
-                <!-- Cloud Sync Indicator -->
-                <div id="cloud-sync-indicator" class="hidden w-8 h-8 rounded items-center justify-center text-zinc-400" title="Syncing to Cloud...">
+                <!-- Okemo Cloud Sync Indicator -->
+                <div id="cloud-sync-indicator" class="hidden w-8 h-8 rounded items-center justify-center text-zinc-400"
+                    title="Syncing to Okemo Cloud...">
                     <i data-feather="refresh-cw" class="w-4 h-4 animate-spin"></i>
                 </div>
+                <button onclick="window.syncProfileToCloud && window.syncProfileToCloud()"
+                    class="w-8 h-8 rounded flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
+                    title="Sync profile to cloud">
+                    <i data-feather="cloud" class="w-4 h-4" style="stroke-width: 3px;"></i>
+                </button>
                 <button onclick="window.openPersonality()"
                     class="w-8 h-8 rounded flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
                     title="Personality" data-t-title="btn_personality">
@@ -3234,7 +3404,8 @@
                 <div class="relative flex-1">
                     <input type="file" id="file-upload-input" class="hidden"
                         onchange="window.handleFileUpload(event)" />
-                    <textarea id="user-input" placeholder="Type something..." data-t-placeholder="ph_type_something" rows="1"
+                    <textarea id="user-input" placeholder="Type something..." data-t-placeholder="ph_type_something"
+                        rows="1"
                         class="w-full bg-transparent px-4 py-3 pl-5 pr-4 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[56px]"></textarea>
                 </div>
 
@@ -3305,13 +3476,15 @@
                                             onclick="document.getElementById('file-upload-input').click(); window.closeAllMenus()"
                                             class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
                                             <i data-feather="upload" class="w-5 h-5 shrink-0"></i>
-                                            <span class="text-[10px] font-semibold leading-none" data-t="btn_files">Files</span>
+                                            <span class="text-[10px] font-semibold leading-none"
+                                                data-t="btn_files">Files</span>
                                         </button>
                                         <button id="web-search-btn"
                                             onclick="window.toggleSearch(); window.closeAllMenus()"
                                             class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
                                             <i data-feather="globe" class="w-5 h-5 shrink-0"></i>
-                                            <span class="text-[10px] font-semibold leading-none" data-t="btn_search">Search</span>
+                                            <span class="text-[10px] font-semibold leading-none"
+                                                data-t="btn_search">Search</span>
                                         </button>
                                         <button id="think-btn" onclick="window.toggleThinking(); window.closeAllMenus()"
                                             class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
@@ -3323,7 +3496,8 @@
                                                 <path d="M9 18h6" />
                                                 <path d="M10 22h4" />
                                             </svg>
-                                            <span class="text-[10px] font-semibold leading-none" data-t="btn_think">Think</span>
+                                            <span class="text-[10px] font-semibold leading-none"
+                                                data-t="btn_think">Think</span>
                                         </button>
                                     </div>
                                     <div class="h-px bg-zinc-200 dark:bg-zinc-700/50 w-full my-0.5"></div>
@@ -3368,9 +3542,10 @@
                                 class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
                                 <div id="current-model-icon"
                                     class="w-3.5 h-3.5 text-current flex items-center justify-center">
-                                    <svg class="w-full h-full stroke-[1.8px] stroke-current fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M8 12 C8 6,20 6,20 12 C20 18,8 18,8 12 Z"/>
-                                        <path d="M8 12 L3 8 M8 12 L3 16"/>
+                                    <svg class="w-full h-full stroke-[1.8px] stroke-current fill-none"
+                                        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 12 C8 6,20 6,20 12 C20 18,8 18,8 12 Z" />
+                                        <path d="M8 12 L3 8 M8 12 L3 16" />
                                     </svg>
                                 </div>
                                 <span id="current-model-name" data-t="model_octan_1_2b">Pisces</span>
@@ -3384,14 +3559,16 @@
                                     <button id="model-btn-PISCES" onclick="window.selectModel('PISCES')"
                                         class="w-full text-left px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-3">
                                         <div class="w-4 h-4 flex items-center justify-center">
-                                            <svg class="w-full h-full stroke-[1.8px] stroke-current fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M8 12 C8 6,20 6,20 12 C20 18,8 18,8 12 Z"/>
-                                                <path d="M8 12 L3 8 M8 12 L3 16"/>
+                                            <svg class="w-full h-full stroke-[1.8px] stroke-current fill-none"
+                                                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M8 12 C8 6,20 6,20 12 C20 18,8 18,8 12 Z" />
+                                                <path d="M8 12 L3 8 M8 12 L3 16" />
                                             </svg>
                                         </div>
                                         <div class="flex flex-col">
                                             <span class="text-xs font-semibold" data-t="model_octan_1_2b">Pisces</span>
-                                            <span class="text-[10px] opacity-50" data-t="model_exp_moe">Okemi model</span>
+                                            <span class="text-[10px] opacity-50" data-t="model_exp_moe">Okemi
+                                                model</span>
                                         </div>
                                     </button>
                                 </div>
@@ -3411,7 +3588,8 @@
             </div>
             <div class="w-full max-w-2xl mx-auto py-1 text-center">
                 <p class="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider"
-                    style="font-family: Century, 'Century Schoolbook', Georgia, serif;" data-t="octan_hallucination_warn">Pisces models are prone to
+                    style="font-family: Century, 'Century Schoolbook', Georgia, serif;"
+                    data-t="octan_hallucination_warn">Pisces models are prone to
                     hallucinations.</p>
             </div>
         </div>
@@ -3425,13 +3603,16 @@
             class="flex items-center justify-between p-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#252526]">
             <div class="flex items-center gap-2">
                 <button id="canvas-tab-preview" onclick="window.switchCanvasTab('preview')"
-                    class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] shadow-sm text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors" data-t="live_preview">Live
+                    class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] shadow-sm text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors"
+                    data-t="live_preview">Live
                     Preview</button>
                 <button id="canvas-tab-code" onclick="window.switchCanvasTab('code')"
-                    class="px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors" data-t="code_editor">Code
+                    class="px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
+                    data-t="code_editor">Code
                     Editor</button>
                 <button id="canvas-tab-word" onclick="window.exportToWord()"
-                    class="hidden px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors border border-transparent flex items-center gap-1.5"><i data-feather="external-link" class="w-3.5 h-3.5"></i>Open with Okemo Word</button>
+                    class="hidden px-3 py-1.5 text-xs font-bold rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors border border-transparent flex items-center gap-1.5"><i
+                        data-feather="external-link" class="w-3.5 h-3.5"></i>Open with Okemo Word</button>
             </div>
             <div class="flex items-center gap-1">
                 <button onclick="window.downloadCanvasCode()"
@@ -3502,9 +3683,11 @@
                     onclick="window.openSettingsTab('profile')">
                 </div>
                 <div>
-                    <p class="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400" data-t="settings">Settings</p>
+                    <p class="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400" data-t="settings">
+                        Settings</p>
                     <p id="settings-sidebar-name-card"
-                        class="text-sm font-bold text-zinc-900 dark:text-white leading-tight" data-t="settings_user">User</p>
+                        class="text-sm font-bold text-zinc-900 dark:text-white leading-tight" data-t="settings_user">
+                        User</p>
                 </div>
             </div>
             <button onclick="window.toggleSettingsPanel()"
@@ -3521,11 +3704,13 @@
             <button class="Cadance-tab-btn" id="ptab-btn-profile" onclick="window.openSettingsTab('profile')">
                 <i data-feather="user" class="w-3.5 h-3.5"></i> Profile
             </button>
-            <button class="Cadance-tab-btn" id="ptab-btn-intelligence" onclick="window.openSettingsTab('intelligence')">
-                <i data-feather="cpu" class="w-3.5 h-3.5"></i> Model
-            </button>
-            <button class="Cadance-tab-btn" id="ptab-btn-memories" onclick="window.openSettingsTab('memories'); window.renderMemoriesTab()">
+            <button class="Cadance-tab-btn" id="ptab-btn-memories"
+                onclick="window.openSettingsTab('memories'); window.renderMemoriesTab()">
                 <i data-feather="bookmark" class="w-3.5 h-3.5"></i> Memories
+            </button>
+            <button class="Cadance-tab-btn" id="ptab-btn-storage"
+                onclick="window.openSettingsTab('storage'); window.renderStorageTab()">
+                <i data-feather="hard-drive" class="w-3.5 h-3.5"></i> Storage
             </button>
         </div>
 
@@ -3594,12 +3779,14 @@
                         <div class="Cadance-row">
                             <div class="flex flex-col gap-0.5">
                                 <span class="Cadance-row-label" data-t="storage_chat_history">Chat History</span>
-                                <span id="storage-mode-badge" class="text-[11px] text-zinc-400" data-t="storage_indexeddb">IndexedDB</span>
+                                <span id="storage-mode-badge" class="text-[11px] text-zinc-400"
+                                    data-t="storage_indexeddb">IndexedDB</span>
                             </div>
                             <span id="storage-display" class="text-xs font-mono text-zinc-400">0.00 MB</span>
                         </div>
                         <div class="Cadance-row">
-                            <span class="Cadance-row-label text-red-500" data-t="btn_clear_all_chats">Clear All Chats</span>
+                            <span class="Cadance-row-label text-red-500" data-t="btn_clear_all_chats">Clear All
+                                Chats</span>
                             <button onclick="window.clearAll()"
                                 class="min-h-[44px] px-4 rounded-xl text-xs font-bold text-red-500 skuomorphic-btn border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
                                 Clear
@@ -3637,8 +3824,8 @@
                                     Name</label>
                                 <input type="text" id="settings-name-input-new"
                                     class="w-full bg-zinc-100 dark:bg-zinc-800 rounded-xl px-4 min-h-[48px] text-base font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 transition-all placeholder-zinc-300 dark:placeholder-zinc-600"
-                                    style="--tw-ring-color: var(--accent-color);" placeholder="Your Name" data-t-placeholder="ph_your_name"
-                                    oninput="window.updateSettingsFromPanel()">
+                                    style="--tw-ring-color: var(--accent-color);" placeholder="Your Name"
+                                    data-t-placeholder="ph_your_name" oninput="window.updateSettingsFromPanel()">
                             </div>
                         </div>
                         <input type="file" id="pfp-upload-settings" class="hidden" accept="image/*"
@@ -3673,136 +3860,155 @@
                         <button id="sign-in-btn" class="Cadance-theme-item text-left">
                             <div
                                 class="w-10 h-10 rounded-full bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 flex items-center justify-center shrink-0 shadow-sm">
-                                <i data-feather="cloud" class="w-5 h-5 text-zinc-600 dark:text-zinc-300"></i>
+                                <i data-feather="cloud" class="w-5 h-5 text-zinc-600 dark:text-zinc-300" style="stroke-width: 3px;"></i>
                             </div>
                             <div class="flex flex-col min-w-0 flex-1">
-                                <span id="sign-in-text" class="text-sm font-semibold text-zinc-900 dark:text-white">Sign In</span>
+                                <span id="sign-in-text" class="text-sm font-semibold text-zinc-900 dark:text-white">Sign
+                                    In</span>
                                 <span id="account-info" class="text-xs text-zinc-400 truncate"></span>
                             </div>
-                            <i data-feather="chevron-right" class="w-4 h-4 text-zinc-300 ml-auto shrink-0"></i>
+                            <i id="sign-in-chevron" data-feather="chevron-right"
+                                class="w-4 h-4 text-zinc-300 ml-auto shrink-0 transition-transform"></i>
                         </button>
-                    </div>
-                </div>
 
-            </div>
-
-
-            <div id="tab-intelligence" class="settings-tab-content hidden">
-
-
-                <div class="Cadance-section">
-                    <p class="Cadance-section-label" data-t="settings_model_params">Model Parameters</p>
-                    <div class="Cadance-card">
-                        <div class="Cadance-row">
-                            <span class="Cadance-row-label w-28 shrink-0" data-t="param_temp">Temperature</span>
-                            <input type="range" id="settings-param-temp" min="0" max="1" step="0.01"
-                                class="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                                style="accent-color: var(--accent-color);"
-                                oninput="window.updateTempFromPanel(this.value)">
-                            <span id="settings-temp-val"
-                                class="text-sm font-mono text-zinc-400 w-10 text-right shrink-0">0.90</span>
-                        </div>
-                        <div class="Cadance-row">
-                            <span class="Cadance-row-label w-28 shrink-0" data-t="param_top_p">Top-P</span>
-                            <input type="range" id="settings-param-top-p" min="0" max="1" step="0.01"
-                                class="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                                style="accent-color: var(--accent-color);"
-                                oninput="window.updateTopPFromPanel(this.value)">
-                            <span id="settings-top-p-val"
-                                class="text-sm font-mono text-zinc-400 w-10 text-right shrink-0">0.90</span>
-                        </div>
-                        <div class="Cadance-row">
-                            <span class="Cadance-row-label w-28 shrink-0" data-t="param_max_tokens">Max Tokens</span>
-                            <input type="range" id="settings-param-max-tokens" min="64" max="16384" step="128"
-                                class="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                                style="accent-color: var(--accent-color);"
-                                oninput="window.updateMaxTokensFromPanel(this.value)">
-                            <span id="settings-max-tokens-val"
-                                class="text-sm font-mono text-zinc-400 w-10 text-right shrink-0">256</span>
-                        </div>
-                        <div class="p-4 flex flex-col gap-2 border-t border-zinc-100 dark:border-white/5">
-                            <label class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">System
-                                Prompt</label>
-                            <textarea id="settings-system-prompt" rows="4"
-                                class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all resize-none min-h-[100px]"
-                                style="--tw-ring-color: var(--accent-color);"
-                                placeholder="Default: You are Pisces, a helper. Use $$ for math notation..." data-t-placeholder="ph_default_prompt"
-                                oninput="window.updateSystemPromptFromPanel(this.value)"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="Cadance-section">
-                    <p class="Cadance-section-label" data-t="settings_connection">Connection</p>
-                    <div class="Cadance-card">
-                        <div class="p-4 flex flex-col gap-2">
-                            <label class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Backend
-                                URL</label>
-                            <input type="text" id="settings-backend-url"
-                                class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl px-4 min-h-[48px] text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all"
-                                style="--tw-ring-color: var(--accent-color);"
-                                placeholder="https://... (leave empty for default)" data-t-placeholder="ph_url_default"
-                                onchange="window.updateBackendUrlFromPanel(this.value)">
-                            <span class="text-[11px] text-zinc-400" data-t="backend_url_desc">Leave empty to use default. Reloads on
-                                change.</span>
-                        </div>
-                        <div class="p-4 flex flex-col gap-2 border-t border-zinc-100 dark:border-white/5">
-                            <label class="text-[11px] font-bold uppercase tracking-wider text-zinc-400" data-t="api_key">API Key</label>
-                            <div class="relative group">
-                                <input type="password" id="settings-api-key"
-                                    class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl px-4 min-h-[48px] pr-12 text-sm text-zinc-900 dark:text-white placeholder-transparent focus:ring-2 outline-none transition-all"
-                                    style="--tw-ring-color: var(--accent-color);" placeholder="OKMO-..." data-t-placeholder="ph_api_key"
-                                    onfocus="document.getElementById('apiKey-mask-overlay').classList.add('hidden')"
-                                    onblur="if(this.value) { document.getElementById('apiKey-mask-overlay').classList.remove('hidden'); window.updateApiKeyPreview(this.value); }"
-                                    onchange="window.updateApiKeyFromPanel(this.value)"
-                                    oninput="window.updateApiKeyPreview(this.value)">
-                                <div id="apiKey-mask-overlay"
-                                    onclick="this.classList.add('hidden'); document.getElementById('settings-api-key').focus()"
-                                    class="absolute inset-0 px-4 flex items-center text-sm font-mono font-bold text-[var(--accent-color)] pointer-events-auto cursor-text bg-zinc-100 dark:bg-[#161715] rounded-xl transition-opacity">
+                        <!-- Settings Inline Auth -->
+                        <div id="settings-inline-auth"
+                            class="hidden flex-col pt-3 border-t border-zinc-100 dark:border-zinc-800/60 mx-4 mb-4">
+                            <!-- Sign In / Register toggle -->
+                            <div id="st-auth-form">
+                                <div class="flex gap-2 mb-3 bg-zinc-100 dark:bg-zinc-900/60 rounded-xl p-1">
+                                    <button id="st-mode-login" onclick="window.setSettingsAuthMode('login')"
+                                        class="flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                                        data-t="ob_sign_in">
+                                        Sign In
+                                    </button>
+                                    <button id="st-mode-register" onclick="window.setSettingsAuthMode('register')"
+                                        class="flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                        data-t="ob_register">
+                                        Register
+                                    </button>
                                 </div>
-                                <button
-                                    onclick="const i = document.getElementById('settings-api-key'); i.type = i.type === 'password' ? 'text' : 'password'; this.innerHTML = feather.icons[i.type === 'password' ? 'eye' : 'eye-off'].toSvg({class:'w-4 h-4'}); if(i.type === 'text') document.getElementById('apiKey-mask-overlay').classList.add('hidden'); else if(i.value && document.activeElement !== i) document.getElementById('apiKey-mask-overlay').classList.remove('hidden');"
-                                    class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-[var(--accent-color)] transition-all z-10">
-                                    <i data-feather="eye" class="w-4 h-4"></i>
+
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label
+                                        class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1.5"
+                                        data-t="ob_email">Email</label>
+                                    <input type="email" id="st-email-input" placeholder="you@example.com"
+                                        class="w-full bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 min-h-[48px] text-sm font-bold focus:outline-none transition-all placeholder-zinc-400"
+                                        style="--tw-ring-color: var(--accent-color);"
+                                        onfocus="this.style.borderColor='var(--accent-color)'"
+                                        onblur="this.style.borderColor=''">
+                                </div>
+
+                                <!-- Password -->
+                                <div class="mb-3">
+                                    <label
+                                        class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1.5"
+                                        data-t="ob_password">Password</label>
+                                    <div class="relative">
+                                        <input type="password" id="st-password-input" placeholder="••••••••"
+                                            class="w-full bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 min-h-[48px] text-sm font-bold focus:outline-none transition-all placeholder-zinc-400 pr-12"
+                                            style="--tw-ring-color: var(--accent-color);"
+                                            onfocus="this.style.borderColor='var(--accent-color)'"
+                                            onblur="this.style.borderColor=''"
+                                            onkeydown="if(event.key==='Enter') window.submitSettingsAuth()">
+                                        <button onclick="window.toggleStPasswordVisibility()" type="button"
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                                            <i data-feather="eye" class="w-4 h-4" id="st-pw-eye-icon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Confirm Password (Hidden by default) -->
+                                <div id="st-confirm-password-section" class="mb-3 hidden">
+                                    <label
+                                        class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1.5"
+                                        data-t="ob_confirm_password">Confirm Password</label>
+                                    <div class="relative">
+                                        <input type="password" id="st-confirm-password-input" placeholder="••••••••"
+                                            class="w-full bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 min-h-[48px] text-sm font-bold focus:outline-none transition-all placeholder-zinc-400 pr-12"
+                                            style="--tw-ring-color: var(--accent-color);"
+                                            onfocus="this.style.borderColor='var(--accent-color)'"
+                                            onblur="this.style.borderColor=''"
+                                            onkeydown="if(event.key==='Enter') window.submitSettingsAuth()">
+                                        <button onclick="window.toggleStConfirmPasswordVisibility()" type="button"
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                                            <i data-feather="eye" class="w-4 h-4" id="st-confirm-pw-eye-icon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Error message -->
+                                <p id="st-auth-error" class="text-[11px] font-bold text-red-500 min-h-[1rem] mb-3"></p>
+
+                                <!-- Submit -->
+                                <button id="st-auth-submit" onclick="window.submitSettingsAuth()"
+                                    class="w-full flex items-center justify-center gap-2 min-h-[48px] rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all border-2 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)] hover:text-white active:scale-[0.98]">
+                                    <i data-feather="log-in" class="w-4 h-4"></i>
+                                    <span data-t="ob_sign_in">Sign In</span>
                                 </button>
                             </div>
-                            <span class="text-[11px] text-zinc-400" data-t="api_key_desc">Your secret API key for Polaris access.</span>
+
+                            <!-- Verify section (shown after registration) -->
+                            <div id="st-verify-section" class="hidden mt-2">
+                                <p class="text-center text-[11px] text-zinc-400 mb-3">We sent a 6-digit code to <strong
+                                        id="st-verify-email-label" class="text-zinc-700 dark:text-zinc-200"></strong>
+                                </p>
+                                <input id="st-verify-code-input" type="text" inputmode="numeric" maxlength="6"
+                                    placeholder="000000" autocomplete="one-time-code"
+                                    class="w-full text-center text-2xl font-mono tracking-[0.5em] mb-2 px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white placeholder-zinc-300 dark:placeholder-zinc-600 focus:outline-none focus:ring-2"
+                                    style="--tw-ring-color: var(--accent-color);"
+                                    onkeydown="if(event.key==='Enter') window.submitStVerification()" />
+                                <p id="st-verify-error" class="text-red-500 text-[11px] mb-3 min-h-[1rem] text-center">
+                                </p>
+                                <button id="st-verify-submit-btn" onclick="window.submitStVerification()"
+                                    class="w-full flex items-center justify-center gap-2 min-h-[48px] rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all border-2 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)] hover:text-white active:scale-[0.98] mb-2">
+                                    Verify Email
+                                </button>
+                                <button onclick="window.cancelStVerify()"
+                                    class="w-full py-1 text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                                    ← Back to sign up
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="clear-cloud-data-row" class="Cadance-row hidden">
+                            <span class="Cadance-row-label text-red-500">Clear Cloud Data</span>
+                            <button onclick="window.clearAllCloudData()"
+                                class="min-h-[44px] px-4 rounded-xl text-xs font-bold text-red-500 skuomorphic-btn border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
+                                Clear
+                            </button>
                         </div>
                     </div>
                 </div>
 
-
-                <div class="Cadance-section pb-8">
-                    <p class="Cadance-section-label" data-t="danger_zone">Danger Zone</p>
-                    <div class="Cadance-card">
-                        <button onclick="if(confirm('Erase all chats and settings?')) window.factoryReset()"
-                            class="w-full Cadance-row justify-center text-red-500 font-semibold text-sm hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors min-h-[52px]">
-                            <i data-feather="trash-2" class="w-4 h-4 mr-2"></i> Erase All Data
-                        </button>
-                    </div>
-                </div>
-
             </div>
+
+
 
             <!-- ── Memories Tab ─────────────────────────────────────── -->
             <div id="tab-memories" class="settings-tab-content hidden">
                 <div class="Cadance-section">
                     <div class="flex items-center justify-between mb-2.5">
                         <p class="Cadance-section-label mb-0">Memories</p>
-                        <button onclick="if(confirm('Clear all memories?')){ window.settings.memories=[]; window.saveSettings(); window.renderMemoriesTab(); }"
+                        <button
+                            onclick="if(confirm('Clear all memories?')){ window.settings.memories=[]; window.saveSettings(); window.renderMemoriesTab(); }"
                             class="text-[11px] font-bold px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:border-red-400 hover:text-red-500 transition-all min-h-[32px]">
                             Clear all
                         </button>
                     </div>
-                    <p class="text-[12px] text-zinc-400 mb-3">Pisces remembers things about you across conversations. You and Pisces can both add memories.</p>
-                    <div id="memories-list" class="Cadance-card divide-y divide-zinc-100 dark:divide-zinc-800/60 mb-3"></div>
+                    <p class="text-[12px] text-zinc-400 mb-3">Pisces remembers things about you across conversations.
+                        You and Pisces can both add memories.</p>
+                    <div id="memories-list" class="Cadance-card divide-y divide-zinc-100 dark:divide-zinc-800/60 mb-3">
+                    </div>
                     <div class="Cadance-card p-3 flex gap-2">
                         <input id="memory-add-input" type="text" placeholder="Add a memory…"
                             class="flex-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl px-3 py-2 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all"
                             style="--tw-ring-color: var(--accent-color);"
                             onkeydown="if(event.key==='Enter'){ window.addMemory(this.value,'user'); this.value=''; }">
-                        <button onclick="const i=document.getElementById('memory-add-input'); window.addMemory(i.value,'user'); i.value='';"
+                        <button
+                            onclick="const i=document.getElementById('memory-add-input'); window.addMemory(i.value,'user'); i.value='';"
                             class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all active:scale-95"
                             style="background: var(--accent-color);">
                             Add
@@ -3811,8 +4017,24 @@
                 </div>
             </div>
 
+            <!-- ── Storage Tab ─────────────────────────────────────────── -->
+            <div id="tab-storage" class="settings-tab-content hidden">
+                <div class="Cadance-section">
+                    <p class="Cadance-section-label">OCloud Storage</p>
+                    <div class="Cadance-card p-5">
+                        <div id="storage-bar"
+                            class="flex h-5 rounded-xl overflow-hidden gap-0.5 mb-4 bg-zinc-100 dark:bg-zinc-800"></div>
+                        <div id="storage-summary"></div>
+                    </div>
+                </div>
+                <div class="Cadance-section">
+                    <p class="Cadance-section-label">Breakdown</p>
+                    <div id="storage-breakdown" class="Cadance-card overflow-hidden"></div>
+                </div>
+            </div>
+
         </div>
-        </div>
+    </div>
     </div>
 
     <div id="research-page-overlay">
@@ -3831,7 +4053,8 @@
                     class="text-4xl lg:text-5xl font-black tracking-tighter text-zinc-900 dark:text-white mb-4 uppercase italic">
                     Deep Research
                 </h1>
-                <p class="text-zinc-500 dark:text-zinc-400 font-medium text-lg max-w-lg mx-auto" data-t="deep_research_desc">Synthesize
+                <p class="text-zinc-500 dark:text-zinc-400 font-medium text-lg max-w-lg mx-auto"
+                    data-t="deep_research_desc">Synthesize
                     information
                     from across the web with
                     unparalleled depth and reasoning.</p>
@@ -3841,7 +4064,8 @@
                 <div
                     class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-2 shadow-2xl focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
                     <div class="flex items-center">
-                        <input type="text" id="research-input" placeholder="What do you want to research..." data-t-placeholder="ph_research"
+                        <input type="text" id="research-input" placeholder="What do you want to research..."
+                            data-t-placeholder="ph_research"
                             class="flex-1 bg-transparent px-6 py-5 outline-none text-xl font-medium text-zinc-900 dark:text-white placeholder-zinc-400"
                             onkeydown="if(event.key === 'Enter') window.startResearch()">
                         <button onclick="window.startResearch()"
@@ -3864,8 +4088,10 @@
                         <i data-feather="user" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-zinc-900 dark:text-white" data-t="btn_personality">Personality</h2>
-                        <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest" data-t="settings_system_prompt">System Prompt</p>
+                        <h2 class="text-xl font-bold text-zinc-900 dark:text-white" data-t="btn_personality">Personality
+                        </h2>
+                        <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest"
+                            data-t="settings_system_prompt">System Prompt</p>
                     </div>
                 </div>
                 <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
@@ -3873,26 +4099,34 @@
                 </p>
                 <div id="personality-presets" class="flex flex-wrap gap-2 mb-4"></div>
                 <div class="mb-4">
-                    <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2" data-t="settings_gender">Gender</p>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2"
+                        data-t="settings_gender">Gender</p>
                     <div id="personality-gender" class="flex gap-2">
                         <button type="button" data-gender="female"
                             class="personality-gender-btn flex-1 py-2 rounded-2xl text-xs font-bold skuomorphic-btn transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-venus" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span data-t="gender_female">Female</span>
+                            <i class="fa-solid fa-venus"
+                                style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span
+                                data-t="gender_female">Female</span>
                         </button>
                         <button type="button" data-gender="male"
                             class="personality-gender-btn flex-1 py-2 rounded-2xl text-xs font-bold skuomorphic-btn transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-mars" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span data-t="gender_male">Male</span>
+                            <i class="fa-solid fa-mars"
+                                style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span
+                                data-t="gender_male">Male</span>
                         </button>
                         <button type="button" data-gender=""
                             class="personality-gender-btn flex-1 py-2 rounded-2xl text-xs font-bold skuomorphic-btn transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-genderless" style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span data-t="gender_none">None</span>
+                            <i class="fa-solid fa-genderless"
+                                style="font-size:0.875rem;width:0.875rem;height:0.875rem;line-height:0.875rem;"></i><span
+                                data-t="gender_none">None</span>
                         </button>
                     </div>
                 </div>
                 <textarea id="personality-textarea" rows="6"
                     class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-3xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all resize-none min-h-[140px] mb-6"
                     style="--tw-ring-color: var(--accent-color);"
-                    placeholder="You are Pisces, a helpful AI assistant made by OkemoVail..." data-t-placeholder="ph_octan_helper"></textarea>
+                    placeholder="You are Pisces, a helpful AI assistant made by OkemoVail..."
+                    data-t-placeholder="ph_octan_helper"></textarea>
                 <div class="flex gap-2">
                     <button onclick="window.closePersonality()"
                         class="flex-1 py-4 rounded-3xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-[0.2em] skuomorphic-btn hover:brightness-110 active:scale-[0.98] transition-all">
@@ -3921,14 +4155,18 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-zinc-900 dark:text-white">Memories</h2>
-                            <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">What Pisces remembers</p>
+                            <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">What Pisces remembers
+                            </p>
                         </div>
                     </div>
-                    <button onclick="window.closeMemoriesPanel()" class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors">
+                    <button onclick="window.closeMemoriesPanel()"
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors">
                         <i data-feather="x" class="w-4 h-4"></i>
                     </button>
                 </div>
-                <div id="memories-list-modal" class="divide-y divide-zinc-100 dark:divide-zinc-800 max-h-72 overflow-y-auto rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 mb-5"></div>
+                <div id="memories-list-modal"
+                    class="divide-y divide-zinc-100 dark:divide-zinc-800 max-h-72 overflow-y-auto rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 mb-5">
+                </div>
                 <div class="flex gap-2">
                     <input id="memories-add-input" type="text" placeholder="Add a memory…"
                         class="flex-1 bg-zinc-100 dark:bg-zinc-800 rounded-2xl px-4 py-2.5 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all"
@@ -3999,8 +4237,8 @@
             // Male sign is always blue and the Female sign is always pink.
             const GENDER_COLOURS = {
                 female: { bg: '#ec4899', fg: '#ffffff' }, // pink-500
-                male:   { bg: '#3b82f6', fg: '#ffffff' }, // blue-500
-                '':     { bg: '#71717a', fg: '#ffffff' }, // zinc-500
+                male: { bg: '#3b82f6', fg: '#ffffff' }, // blue-500
+                '': { bg: '#71717a', fg: '#ffffff' }, // zinc-500
             };
             wrap.querySelectorAll('.personality-gender-btn').forEach(btn => {
                 const g = btn.dataset.gender;
@@ -4063,6 +4301,12 @@
 
         // ── Memory consent card ──────────────────────────────────────
         window.openMemoriesPanel = function () {
+            if (!localStorage.getItem('vail_auth_token')) {
+                window.showInputNotice('Memories require an account.', {
+                    action: { label: 'Sign In', fn: () => window.AccountModal.showModal() }
+                });
+                return;
+            }
             const modal = document.getElementById('memories-modal');
             if (!modal) return;
             modal.style.display = 'flex';
@@ -4126,6 +4370,7 @@
         };
 
         window.showMemoryConsent = function (text) {
+            if (!localStorage.getItem('vail_auth_token')) return;
             const stack = document.getElementById('memory-consent-stack');
             if (!stack) return;
 
@@ -4181,6 +4426,24 @@
         };
 
         window.renderMemoriesTab = function () {
+            if (!localStorage.getItem('vail_auth_token')) {
+                const lockedHTML = `<div class="text-center py-10 px-4">
+                    <div class="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                        <i data-feather="lock" class="w-5 h-5 opacity-40"></i>
+                    </div>
+                    <p class="font-semibold text-zinc-700 dark:text-zinc-200 text-sm mb-1">Account required</p>
+                    <p class="text-xs text-zinc-400 mb-4">Sign in so memories sync across all your devices.</p>
+                    <button onclick="window.AccountModal.showModal()"
+                        class="px-4 py-2 rounded-xl text-xs font-bold text-white transition-all active:scale-95"
+                        style="background: var(--accent-color);">Sign In or Create Account</button>
+                </div>`;
+                ['memories-list', 'memories-list-modal'].forEach(id => {
+                    const list = document.getElementById(id);
+                    if (list) list.innerHTML = lockedHTML;
+                });
+                if (window.feather) feather.replace();
+                return;
+            }
             const memories = window.settings.memories || [];
             const emptyHTML = `<div data-mpc-empty class="text-center py-8 text-zinc-400 text-sm px-4">
                     <div class="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
@@ -4192,7 +4455,7 @@
             const itemsHTML = memories.map(m => `
                 <div class="flex items-start gap-3 px-3 py-2.5 group">
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm text-zinc-800 dark:text-zinc-200 leading-snug">${m.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+                        <p class="text-sm text-zinc-800 dark:text-zinc-200 leading-snug">${m.text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                         <p class="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${m.source === 'model' ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500'}">${m.source === 'model' ? 'Pisces' : 'You'}</span>
                             ${new Date(m.createdAt).toLocaleDateString()}
@@ -4218,6 +4481,12 @@
 
         window.addMemory = function (text, source) {
             if (!text || !text.trim()) return;
+            if (!localStorage.getItem('vail_auth_token')) {
+                if (window.showInputNotice) window.showInputNotice('Sign in to save memories.', {
+                    action: { label: 'Sign In', fn: () => window.AccountModal.showModal() }
+                });
+                return;
+            }
             if (!Array.isArray(window.settings.memories)) window.settings.memories = [];
             window.settings.memories.push({
                 id: Date.now().toString(36) + Math.random().toString(36).slice(2),
@@ -4410,36 +4679,66 @@
     </svg>
 
 
-<!-- Account modal -->
-<div id="account-modal"
-     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold dark:text-white">Account</h2>
-      <button id="modal-close" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
-    </div>
+    <!-- Account modal -->
+    <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold dark:text-white">Account</h2>
+                <button id="modal-close"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
+            </div>
 
-    <!-- Email/password panel -->
-    <div id="panel-email">
-      <div class="flex gap-2 mb-3">
-        <button id="mode-login"
-          class="flex-1 py-1 text-xs rounded bg-gray-100 dark:bg-gray-700 dark:text-gray-200 font-medium">Sign In</button>
-        <button id="mode-register"
-          class="flex-1 py-1 text-xs rounded text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Register</button>
-      </div>
-      <input id="email-input" type="email" placeholder="Email"
-        class="w-full mb-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" />
-      <input id="password-input" type="password" placeholder="Password"
-        class="w-full mb-3 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" />
-      <p id="email-error" class="text-red-500 text-xs mb-2 min-h-[1rem]"></p>
-      <button id="email-submit"
-        class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
-        Sign In
-      </button>
-    </div>
+            <!-- Email/password panel -->
+            <div id="panel-email">
+                <div class="flex gap-2 mb-3">
+                    <button id="mode-login"
+                        class="flex-1 py-1 text-xs rounded bg-gray-100 dark:bg-gray-700 dark:text-gray-200 font-medium">Sign
+                        In</button>
+                    <button id="mode-register"
+                        class="flex-1 py-1 text-xs rounded text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Register</button>
+                </div>
+                <input id="email-input" type="email" placeholder="Email"
+                    class="w-full mb-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" />
+                <input id="password-input" type="password" placeholder="Password"
+                    class="w-full mb-3 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" />
+                <p id="email-error" class="text-red-500 text-xs mb-2 min-h-[1rem]"></p>
+                <button id="email-submit"
+                    class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
+                    Sign In
+                </button>
+            </div>
 
-  </div>
-</div>
+            <!-- Verify panel (shown after registration) -->
+            <div id="panel-verify" class="hidden">
+                <div class="text-center mb-5">
+                    <div
+                        class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-blue-50 dark:bg-blue-900/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <p class="font-semibold text-sm dark:text-white mb-1">Check your email</p>
+                    <p id="verify-email-label" class="text-xs text-gray-400"></p>
+                </div>
+                <input id="verify-code-input" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
+                    autocomplete="one-time-code"
+                    class="w-full text-center text-2xl font-mono tracking-[0.5em] mb-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onkeydown="if(event.key==='Enter') window.AccountModal._submitVerification()" />
+                <p id="verify-error" class="text-red-500 text-xs mb-3 min-h-[1rem] text-center"></p>
+                <button id="verify-submit-btn" onclick="window.AccountModal._submitVerification()"
+                    class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium mb-2">
+                    Verify Email
+                </button>
+                <button onclick="window.AccountModal._cancelVerify()"
+                    class="w-full py-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    ← Back
+                </button>
+            </div>
+
+        </div>
+    </div>
 
 </body>
 

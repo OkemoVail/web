@@ -19,9 +19,31 @@ window.hexToRgba = (hex, alpha) => {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+let _storageUpdateDebounceTimer = null;
 window.saveSettings = () => {
-    localStorage.setItem('vail_settings_v4', JSON.stringify(window.settings));
-    window.updateStorageUsage();
+    // userPic is a base64 data URL that can be several MB — store it separately
+    // so the main settings blob never exceeds the localStorage quota.
+    const { userPic, ...slim } = window.settings;
+    try {
+        localStorage.setItem('vail_settings_v4', JSON.stringify(slim));
+        if (userPic) localStorage.setItem('vail_user_pic', userPic);
+        else localStorage.removeItem('vail_user_pic');
+    } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+            console.warn('saveSettings: quota exceeded, attempting minimal save', e);
+            try {
+                localStorage.setItem('vail_settings_v4', JSON.stringify({ ...slim, memories: [], customAccents: [] }));
+            } catch (e2) {
+                console.error('saveSettings: quota exceeded on minimal save', e2);
+            }
+        } else {
+            throw e;
+        }
+    }
+    // Debounce storage display updates — cloud mode makes an API call, local mode
+    // re-reads IndexedDB; neither needs to run on every keystroke or pfp drag tick.
+    clearTimeout(_storageUpdateDebounceTimer);
+    _storageUpdateDebounceTimer = setTimeout(() => window.updateStorageUsage(), 2000);
 };
 
 window.truncateTitle = (title) => {

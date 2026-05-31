@@ -295,20 +295,18 @@ window.clearAll = async () => {
 window.updateStorageUsage = async () => {
     try {
         const bytes = await window.StorageController.estimateSize();
-        const mbVal = bytes / (1024 * 1024);
-        let label = mbVal < 1 ? `${(bytes / 1024).toFixed(1)} KB` : `${mbVal.toFixed(2)} MB`;
-        
-        const isCloud = window.StorageController && window.CloudStorageController && window.StorageController === window.CloudStorageController;
-        if (isCloud) {
-            label = `${mbVal.toFixed(2)} MB / 1 GB - Cloud`;
-        } else {
-            label += ' - Local';
-        }
+        const kb = bytes / 1024;
+        const mb = bytes / (1024 * 1024);
+        const sizeStr = mb >= 1 ? `${mb.toFixed(2)} MB` : kb >= 1 ? `${kb.toFixed(1)} KB` : `${bytes} B`;
+
+        const isCloud = window.StorageController === window.CloudStorageController;
+        const cloudSvg = window.feather?.icons?.cloud?.toSvg({ class: 'inline w-3 h-3 -mt-0.5' }) || '☁';
+        const label = isCloud ? `${sizeStr} / 1 GB - O${cloudSvg}` : `${sizeStr} - Local`;
 
         const d1 = document.getElementById('storage-display');
         const d2 = document.getElementById('storage-display-sidebar');
-        if (d1) d1.innerText = label;
-        if (d2) d2.innerText = label;
+        if (d1) d1.innerHTML = label;
+        if (d2) d2.innerHTML = label;
     } catch (e) {
         const d1 = document.getElementById('storage-display');
         const d2 = document.getElementById('storage-display-sidebar');

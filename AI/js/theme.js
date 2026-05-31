@@ -48,6 +48,7 @@ window.setTheme = (mode) => {
 
     window.updateAccent(window.settings.accent || 'auto');
     window.updateThemeButtons(mode);
+    if (typeof window.syncProfileToCloud === 'function') window.syncProfileToCloud();
 };
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {

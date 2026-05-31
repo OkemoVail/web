@@ -1,8 +1,11 @@
 // ─── CloudStorageController ─────────────────────────────────────────────────
 // Drop-in replacement for StorageController when vail_auth_token is present.
 // Exposes identical interface: init, getAllChats, saveChat, deleteChat.
+// Profile (including profile picture) is stored as a reserved chat document.
 
 window.CloudStorageController = (() => {
+    const PROFILE_DOC_ID = '__vail_profile__';
+
     const base = () => {
         const url = localStorage.getItem('vail_custom_backend_url');
         return (url ? url : 'https://api.okemovail.com').replace(/\/$/, '');
@@ -32,11 +35,31 @@ window.CloudStorageController = (() => {
         if (!listResp.ok) return {};
         const list = await listResp.json();
         const map = {};
-        await Promise.all(list.map(async (item) => {
-            const r = await fetch(`${base()}/api/accounts/chats/${item.id}`, { headers: authHeaders() });
-            if (r.ok) map[item.id] = await r.json();
-        }));
+        await Promise.all(list
+            .filter(item => item.id !== PROFILE_DOC_ID)
+            .map(async (item) => {
+                const r = await fetch(`${base()}/api/accounts/chats/${item.id}`, { headers: authHeaders() });
+                if (r.ok) map[item.id] = await r.json();
+            }));
         return map;
+    };
+
+    const saveProfile = async (profileData) => {
+        const resp = await fetch(`${base()}/api/accounts/chats/${PROFILE_DOC_ID}`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify({ title: PROFILE_DOC_ID, payload: profileData })
+        });
+        if (resp.status === 401) { _handle401(); return false; }
+        return resp.ok;
+    };
+
+    const loadProfile = async () => {
+        const resp = await fetch(`${base()}/api/accounts/chats/${PROFILE_DOC_ID}`, { headers: authHeaders() });
+        if (resp.status === 401) { _handle401(); return null; }
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        return data || null;
     };
 
     const saveChat = async (chat) => {
@@ -47,7 +70,7 @@ window.CloudStorageController = (() => {
         });
         if (resp.status === 401) { _handle401(); return; }
         if (resp.status === 507) {
-            if (typeof window.showToast === 'function') window.showToast('Cloud storage full (1 GB limit reached)');
+            if (typeof window.showToast === 'function') window.showToast('OCloud storage full (1 GB limit reached)');
             else console.warn('[CloudStorage] Storage full');
         }
     };
@@ -70,5 +93,5 @@ window.CloudStorageController = (() => {
         return 0;
     };
 
-    return { init, getAllChats, saveChat, deleteChat, estimateSize };
+    return { init, getAllChats, saveChat, deleteChat, estimateSize, saveProfile, loadProfile };
 })();

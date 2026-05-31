@@ -39,42 +39,14 @@ window.sendFeedback = async (idx, type, btnEl) => {
                 btnEl.style.color = type === 'good' ? '#22c55e' : '#ef4444';
             }
 
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700/50 text-zinc-900 dark:text-white px-4 py-2.5 rounded-xl shadow-2xl text-sm font-semibold z-[9999] transition-all duration-300 opacity-0 transform -translate-y-4 flex items-center gap-2';
-            toast.innerHTML = feather.icons['check-circle'].toSvg({ class: 'w-4 h-4 text-green-500' }) + `<span>Feedback sent for training (${type === 'good' ? 'Reinforcement' : 'Unlearning'})</span>`;
-            document.body.appendChild(toast);
-
-            requestAnimationFrame(() => {
-                toast.classList.remove('opacity-0', '-translate-y-4');
-                toast.classList.add('opacity-100', 'translate-y-0');
-            });
-
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', '-translate-y-4');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            window.showToast(`Feedback sent for training (${type === 'good' ? 'Reinforcement' : 'Unlearning'})`);
 
         } else {
             throw new Error("Feedback submission failed");
         }
     } catch (e) {
         console.error("Error sending feedback:", e);
-        const toast = document.createElement('div');
-        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2.5 rounded-xl shadow-2xl text-sm font-semibold z-[9999] transition-all duration-300 opacity-0 transform -translate-y-4 flex items-center gap-2';
-        toast.innerHTML = feather.icons['alert-circle'].toSvg({ class: 'w-4 h-4' }) + '<span>Failed to send feedback</span>';
-        document.body.appendChild(toast);
-
-        requestAnimationFrame(() => {
-            toast.classList.remove('opacity-0', '-translate-y-4');
-            toast.classList.add('opacity-100', 'translate-y-0');
-        });
-
-        setTimeout(() => {
-            toast.classList.remove('opacity-100', 'translate-y-0');
-            toast.classList.add('opacity-0', '-translate-y-4');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        window.showToast('Failed to send feedback');
     }
 };
 
@@ -139,19 +111,7 @@ window.setTitleFeedback = async (chatId, type, btnEl) => {
             btnEl.innerHTML = `<i class="fa-solid fa-check text-[12px] text-white"></i>`;
             await new Promise(r => setTimeout(r, 600));
 
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700/50 text-zinc-900 dark:text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold z-[9999] transition-all duration-300 opacity-0 transform -translate-y-4 flex items-center gap-2';
-            toast.innerHTML = feather.icons['check-circle'].toSvg({ class: 'w-4 h-4' }) + `<span class="relative z-10">Title feedback recorded</span>`;
-            document.body.appendChild(toast);
-            requestAnimationFrame(() => {
-                toast.classList.remove('opacity-0', '-translate-y-4');
-                toast.classList.add('opacity-100', 'translate-y-0');
-            });
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', '-translate-y-4');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            window.showToast('Title feedback recorded');
 
         } catch (e) {
             console.error("Error sending title feedback:", e);
