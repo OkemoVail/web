@@ -15,11 +15,11 @@ window.generateChatTitle = async (chatId, userMsg, aiMsg, force = false) => {
             body: JSON.stringify({
                 model: window.currentModel.id,
                 messages: [
-                    { "role": "system", "content": "You output a chat title. Nothing else.\n\nOutput format: 5 to 10 words, Title Case, on one line. That is the entire response.\n\nABSOLUTE RULES:\n- DO NOT THINK. No reasoning, no <think>, no <thought>, no internal monologue, no \"let me\", no planning out loud. Go straight to the title.\n- Output ONLY the title text — no preface (\"Title:\", \"Here is\", \"Sure\", \"Okay\"), no explanation, no commentary, no follow-up.\n- NO quotes, backticks, asterisks, brackets, or markdown.\n- NO trailing punctuation (period, exclamation, ellipsis).\n- NO ChatML markers or any tags.\n- NO newlines — single line only.\n- Exactly 5 to 10 words. Be specific to the topic, not generic.\n\nExamples (the entire model response is just the title):\nPython Linked List Reversal Using Iteration And Recursion\nCommon Symptoms And Causes Of Iron Deficiency Anemia\nShort Poem About Autumn Leaves And Falling Color\nHow Black Holes Form From Collapsing Massive Stars" },
-                    { "role": "user", "content": `Conversation:\nUser: "${userMsg}"\nAssistant: "${(aiMsg || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim().substring(0, 300).replace(/[\r\n]+/g, ' ')}"\n\nRespond with the title only. 5-10 words. No thinking. No other text.` }
+                    { "role": "system", "content": "Write a single short sentence summarising what the user asked or needed. Output only that sentence — no thinking, no tags, no quotes, no explanation.\n\n10–15 words max. Plain sentence case. No trailing period.\n\nFocus on the user's intent, not the assistant's response.\n\nExamples:\nHow to reverse a linked list in Python using recursion\nWhat causes iron deficiency anemia and how to treat it\nWhy black holes form from the collapse of massive stars\nFixing a 404 error on a Flask API route" },
+                    { "role": "user", "content": `User: "${userMsg}"\nAssistant: "${(aiMsg || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim().substring(0, 300).replace(/[\r\n]+/g, ' ')}"` }
                 ],
                 temperature: 0.3,
-                max_tokens: 40,
+                max_tokens: 60,
                 stream: false,
                 use_thought: false,
                 think: false,

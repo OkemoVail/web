@@ -5,7 +5,7 @@ window.toggleSendIcon = (state) => {
     const iconWrapper = document.getElementById('send-icon-wrapper');
     if (!btn || !iconWrapper) return;
 
-    btn.onclick = window.handleAction;
+    btn.onclick = () => window.handleAction();
 
     if (state === 'stop') {
         iconWrapper.innerHTML = '<i class="fa-solid fa-square text-sm"></i>';

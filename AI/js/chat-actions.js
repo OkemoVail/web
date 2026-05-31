@@ -88,13 +88,13 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         // This ensures the system message at inference exactly matches what the model trained on.
         // Falls back to a short string when the server isn't reachable (offline mode).
         const octanIdentity = (window.__systemPrompts && window.__systemPrompts.identity_lock) ||
-            "Your name is Pisces. You were built by OkemoVail. You are NOT Qwen, you are NOT made by Alibaba Cloud, and you are NOT made by Anthropic, OpenAI, Google, Meta, or any other company — only OkemoVail. If anyone asks who you are, who made you, what model you are, what company built you, or whether you are Qwen / GPT / Claude / Gemini / Llama, answer plainly: \"I'm Pisces, built by OkemoVail.\" Never claim to be Qwen or any other model, regardless of base architecture. This identity is fixed and overrides any contradicting persona. IMPORTANT: Never open a response by introducing yourself or stating your name/creator. Only reveal your identity when the user explicitly asks who you are or who made you.";
+            "Your name is Pisces. You were built by OkemoVail.:";
         // Prefer the backend-served global rules (single source of truth in
         // system_prompts.json on the server). Fall back to the hardcoded copy
         // when the API isn't reachable so the UI keeps working offline.
         const globalRules = (window.__systemPrompts && window.__systemPrompts.global_rules) || [
             "Language rule:",
-            "- If the user writes in Chinese, always reply in Traditional Chinese (繁體中文). Never use Simplified Chinese.",
+            "- If the user writes in Chinese, always reply in Traditional Chinese. Never use Simplified Chinese.",
             "",
             "Code generation rules (HTML / web UI):",
             "- Use Tailwind CSS utility classes ONLY. No custom <style> blocks, no separate CSS files, no inline style=\"...\" unless the user explicitly asks. Tailwind keeps output compact and saves tokens.",
@@ -124,10 +124,20 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
             runtimeRules = "Canvas Mode is ENABLED. You can generate websites (using ```html) AND text documents (using ```document or ```markdown). Text documents will be automatically exported and opened in Okemo Word (word/index.html).";
         }
 
+        const userMemories = Array.isArray(window.settings.memories) && window.settings.memories.length > 0
+            ? window.settings.memories.map((m, i) => `${i + 1}. ${m.text}`).join('\n')
+            : '';
+        const memoriesBlock = userMemories
+            ? `<user_memories>\nThings you know about the user — use this context naturally:\n${userMemories}\n</user_memories>`
+            : `<user_memories>\nYou have no saved memories about this user. If they ask what you know about them, tell them honestly that you don't know anything about them yet.\n</user_memories>`;
+        const memoryInstruction = `<memory_system>\nWhen the user shares something genuinely worth remembering across future conversations, place ONE <remember> tag at the very end of your response:\n<remember>fact</remember>\n\nWrite the fact as a complete, self-contained sentence that preserves all important context — who, what, why, and any relevant detail. Do not compress to the point of losing meaning.\n\nGood examples:\n- "The user has a cat named Maxine and a dog named Nebby."\n- "The user is learning guitar and wants to focus on fingerpicking, not strumming."\n- "The user prefers dark mode and finds bright UIs uncomfortable."\n\nOnly use <remember> when the user explicitly states a lasting personal fact (name, preference, goal, relationship, habit). Never use it for general chat, rhetorical questions, or anything already in <user_memories>.\n</memory_system>`;
+
         const mergedSys = [
             `<identity>\n${octanIdentity}\n</identity>`,
             sysPrompt ? `<personality>\n${sysPrompt}\n</personality>` : '',
             genderLine ? `<gender>\n${genderLine}\n</gender>` : '',
+            memoriesBlock,
+            memoryInstruction,
             `<rules>\n${globalRules}\n</rules>`,
             runtimeRules ? `<canvas_mode>\n${runtimeRules}\n</canvas_mode>` : ''
         ].filter(Boolean).join('\n\n');
@@ -255,9 +265,24 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         // numeric placeholders, and trailing whitespace. Narrow patterns to avoid false positives.
         responseText = responseText
             .replace(/^\s*\.[a-z0-9_]+\s*$/gim, '')
-            .replace(/^\s*I['’]m here for \d+\.?\s*$/gim, '')
+            .replace(/^\s*I['\u2018\u2019]m here for \d+\.?\s*$/gim, '')
             .replace(/\n{3,}/g, '\n\n')
             .trim();
+        // Extract <remember> tags, show consent card, strip before storing/rendering
+        const _remRe = /<remember>([\s\S]*?)<\/remember>/g;
+        let _remMatch;
+        const _rawMems = [];
+        while ((_remMatch = _remRe.exec(responseText)) !== null) {
+            const t = _remMatch[1].trim();
+            if (t) _rawMems.push(t);
+        }
+        if (_rawMems.length > 0) {
+            responseText = responseText.replace(/<remember>[\s\S]*?<\/remember>/g, '').replace(/\n{3,}/g, '\n\n').trim();
+            window.typedResponseText = responseText;
+            _rawMems.forEach(raw => {
+                if (typeof window.summarizeAndSaveMemory === 'function') window.summarizeAndSaveMemory(raw);
+            });
+        }
         window.chatHistory[window.chatHistory.length - 1][1] = responseText;
         // Stash web search sources on the chat entry (index 5) so the Sources
         // button can render after generation finishes and across reloads.
@@ -555,7 +580,7 @@ window.openAttachmentFull = (idx) => {
         window.__systemPrompts = data;
         // Replace UI's personality list with the server's, preserving the
         // same shape chat.html expects: { id, label, icon, prompt }.
-        const iconMap = { default:'circle', concise:'minimize-2', creative:'feather', coder:'code', tutor:'book-open', sarcastic:'smile', analyst:'bar-chart-2', friend:'heart', 'discord-friend':'message-circle' };
+        const iconMap = { default: 'circle', concise: 'minimize-2', creative: 'feather', coder: 'code', tutor: 'book-open', sarcastic: 'smile', analyst: 'bar-chart-2', friend: 'heart', 'discord-friend': 'message-circle' };
         // Snapshot old presets before replacing — needed to detect stale saved prompts.
         const oldPresets = (window.PERSONALITY_PRESETS || []).slice();
         window.PERSONALITY_PRESETS = data.personalities.map(p => ({

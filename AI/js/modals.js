@@ -2,23 +2,55 @@
 
 window.showToast = (message, duration = 4000) => {
     const toast = document.createElement('div');
-    toast.className = 'fixed top-4 right-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700/50 text-zinc-900 dark:text-white px-4 py-3 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-3 transform -translate-y-[150%] opacity-0 transition-all duration-500 z-[9999] text-[13px] font-medium max-w-[300px] pointer-events-none select-none';
-    toast.innerHTML = `<i data-feather="info" class="w-4 h-4 shrink-0" style="color: var(--accent-color, #3b82f6)"></i> <span>${message}</span>`;
+    toast.style.cssText = [
+        'position:fixed',
+        'bottom:24px',
+        'right:24px',
+        'z-index:9999',
+        'display:flex',
+        'align-items:center',
+        'gap:10px',
+        'padding:10px 14px',
+        'border-radius:14px',
+        'background:var(--input-bg,#f4f4f5)',
+        'border:1px solid color-mix(in srgb,var(--accent-color,#3b82f6) 30%,transparent)',
+        'font-size:13px',
+        'font-weight:500',
+        'color:#71717a',
+        'box-shadow:0 4px 24px rgba(0,0,0,0.10)',
+        'max-width:320px',
+        'pointer-events:auto',
+        'opacity:0',
+        'transform:translateY(8px)',
+        'transition:opacity 0.22s cubic-bezier(0.16,1,0.3,1),transform 0.22s cubic-bezier(0.16,1,0.3,1)',
+    ].join(';');
+
+    const dismiss = () => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 250);
+    };
+
+    toast.innerHTML =
+        `<i data-feather="info" style="color:var(--accent-color,#3b82f6);flex-shrink:0;width:16px;height:16px;"></i>` +
+        `<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${message}</span>` +
+        `<button style="flex-shrink:0;background:none;border:none;cursor:pointer;padding:2px 0 2px 4px;color:#a1a1aa;display:flex;align-items:center;line-height:1;" title="Dismiss">` +
+        `<i data-feather="x" style="width:14px;height:14px;"></i></button>`;
+
+    toast.querySelector('button').addEventListener('click', dismiss);
     document.body.appendChild(toast);
-    if (window.feather) feather.replace({ 'stroke-width': 2.5, 'width': 16, 'height': 16 }, toast);
+    if (window.feather) feather.replace({ 'stroke-width': 2.5 });
 
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            toast.style.transform = 'translateY(0)';
             toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
         });
     });
 
-    setTimeout(() => {
-        toast.style.transform = 'translateY(-150%)';
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 500);
-    }, duration);
+    let timer = setTimeout(dismiss, duration);
+    toast.addEventListener('mouseenter', () => clearTimeout(timer));
+    toast.addEventListener('mouseleave', () => { timer = setTimeout(dismiss, 1500); });
 };
 
 window.showCustomConfirm = (title, message, onConfirm, isDanger = false) => {

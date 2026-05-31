@@ -323,6 +323,7 @@ if (typeof window.settings.gender !== 'string') window.settings.gender = '';
 
 if (!Array.isArray(window.settings.folders)) window.settings.folders = [];
 if (!Array.isArray(window.settings.customAccents)) window.settings.customAccents = [];
+if (!Array.isArray(window.settings.memories)) window.settings.memories = [];
 
 window.els = {};
 
