@@ -4042,8 +4042,10 @@
             const stack = document.getElementById('memory-consent-stack');
             if (!stack) return;
 
-            // Normalise: replace leading "user" with "You"
-            const display = text.replace(/^user\b/i, 'You');
+            // Normalise: replace all occurrences of "user" with "you", then capitalise first
+            const display = text
+                .replace(/\buser\b/gi, 'you')
+                .replace(/^you\b/, 'You');
 
             const card = document.createElement('div');
             card.className = 'mem-consent-card';
