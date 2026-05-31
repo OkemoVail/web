@@ -7,6 +7,29 @@ window.updateAssistantDisplay = (text, isFinal = false) => {
     if (thinkingPlaceholder) thinkingPlaceholder.remove();
 
     if (isFinal) {
+        // Extract <remember> tags → summarize via API, strip from displayed text
+        const rememberRe = /<remember>([\s\S]*?)<\/remember>/g;
+        let remMatch;
+        const rawMemories = [];
+        while ((remMatch = rememberRe.exec(text)) !== null) {
+            const memText = remMatch[1].trim();
+            if (memText) rawMemories.push(memText);
+        }
+        if (rawMemories.length > 0) {
+            text = text.replace(/<remember>[\s\S]*?<\/remember>/g, '').replace(/\n{3,}/g, '\n\n').trim();
+            window.typedResponseText = text;
+            if (window.chatHistory.length > 0) window.chatHistory[window.chatHistory.length - 1][1] = text;
+            rawMemories.forEach(raw => {
+                if (typeof window.summarizeAndSaveMemory === 'function') {
+                    window.summarizeAndSaveMemory(raw);
+                } else {
+                    if (!Array.isArray(window.settings.memories)) window.settings.memories = [];
+                    window.settings.memories.push({ id: Date.now().toString(36), text: raw, source: 'model', createdAt: new Date().toISOString() });
+                    window.saveSettings();
+                }
+            });
+        }
+
         const genHeader = lastProse.querySelector('.model-generating-header');
         if (genHeader) {
             genHeader.classList.add('done');
@@ -43,8 +66,12 @@ window.updateAssistantDisplay = (text, isFinal = false) => {
         mainContentDiv.className = 'main-response-content';
         lastProse.appendChild(mainContentDiv);
     }
-    if (content.trim()) {
-        const displayContent = !isFinal ? window.ensureClosedCodeBlocks(window.sanitizeText(content)) : window.sanitizeText(content);
+    const visibleContent = content
+        .replace(/<remember>[\s\S]*?<\/remember>/gi, '')
+        .replace(/<remember>[^]*$/i, '')
+        .trim();
+    if (visibleContent) {
+        const displayContent = !isFinal ? window.ensureClosedCodeBlocks(window.sanitizeText(visibleContent)) : window.sanitizeText(visibleContent);
         mainContentDiv.innerHTML = marked.parse(displayContent);
         window.applyContentFeatures(mainContentDiv);
     }
