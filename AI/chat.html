@@ -4058,7 +4058,10 @@
 
             const dismiss = () => {
                 card.classList.add('dismissing');
-                card.addEventListener('animationend', () => card.remove(), { once: true });
+                let removed = false;
+                const cleanup = () => { if (!removed) { removed = true; card.remove(); } };
+                card.addEventListener('animationend', cleanup, { once: true });
+                setTimeout(cleanup, 250);
             };
 
             card.querySelector('.mem-consent-save').addEventListener('click', () => {
