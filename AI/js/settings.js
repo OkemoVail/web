@@ -156,6 +156,7 @@ window.updateSettingsFromPanel = () => {
     const nameInput = document.getElementById('settings-name-input-new') || document.getElementById('settings-name-input');
     if (nameInput) window.settings.userName = nameInput.value.trim();
     window.saveSettings(); window.updateProfileUI();
+    if (typeof window.syncProfileToCloud === 'function') window.syncProfileToCloud();
     if (window.chatHistory.length === 0) window.render();
 };
 

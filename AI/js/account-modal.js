@@ -13,21 +13,7 @@ window.AccountModal = (() => {
     const showModal = () => $('account-modal').classList.remove('hidden');
     const hideModal = () => $('account-modal').classList.add('hidden');
 
-    const setTab = (tab) => {
-        const emailActive = tab === 'email';
-        $('tab-email').className = `flex-1 py-1.5 text-sm rounded-lg font-medium ${
-            emailActive
-            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200'
-            : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
-        }`;
-        $('tab-google').className = `flex-1 py-1.5 text-sm rounded-lg font-medium ${
-            !emailActive
-            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200'
-            : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
-        }`;
-        $('panel-email').classList.toggle('hidden', !emailActive);
-        $('panel-google').classList.toggle('hidden', emailActive);
-    };
+
 
     const setMode = (mode) => {
         _mode = mode;
@@ -46,21 +32,35 @@ window.AccountModal = (() => {
 
     const updateSidebar = () => {
         const token = localStorage.getItem('vail_auth_token');
-        const btn = $('sign-in-btn');
+        const btnText = $('sign-in-text');
         const info = $('account-info');
-        if (!btn) return;
+        if (!btnText) return;
         if (token) {
-            btn.textContent = 'Sign Out';
+            btnText.textContent = 'Sign Out';
             fetch(`${base()}/api/accounts/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             }).then(r => r.ok ? r.json() : null).then(d => {
                 if (d && info) {
                     const mb = (d.storage_used_bytes / 1048576).toFixed(1);
-                    info.textContent = `${d.email} · ${mb} MB used`;
+                    info.textContent = `${d.email} · ${mb} MB / 1 GB used - Cloud`;
+                    
+                    let changed = false;
+                    if (d.username && d.username !== window.settings.userName) {
+                        window.settings.userName = d.username;
+                        changed = true;
+                    }
+                    if (d.profile_pic && d.profile_pic !== window.settings.userPic) {
+                        window.settings.userPic = d.profile_pic;
+                        changed = true;
+                    }
+                    if (changed) {
+                        if (typeof window.saveSettings === 'function') window.saveSettings();
+                        if (typeof window.updateProfileUI === 'function') window.updateProfileUI();
+                    }
                 }
             }).catch(() => {});
         } else {
-            btn.textContent = 'Sign In';
+            btnText.textContent = 'Sign In';
             if (info) info.textContent = '';
         }
     };
@@ -117,48 +117,65 @@ window.AccountModal = (() => {
         }
     };
 
-    const initGoogleCloudSignIn = () => {
-        const btn = $('google-cloud-signin');
-        if (!btn) return;
-        btn.addEventListener('click', () => {
-            const _prev = window.onGoogleSignIn;
-            window.onGoogleSignIn = async (googleUser) => {
-                window.onGoogleSignIn = _prev;
-                const id_token = googleUser.credential
-                    || googleUser?.getAuthResponse?.()?.id_token;
-                if (!id_token) { $('google-error').textContent = 'Could not get Google token'; return; }
-                try {
-                    const resp = await fetch(`${base()}/api/accounts/google-auth`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id_token })
-                    });
-                    const data = await resp.json();
-                    if (!resp.ok) { $('google-error').textContent = data.detail || 'Error'; return; }
-                    await onLogin(data.token);
-                } catch (e) {
-                    $('google-error').textContent = 'Network error';
-                }
-            };
-            if (typeof google !== 'undefined' && google.accounts) {
-                google.accounts.id.prompt();
-            } else {
-                $('google-error').textContent = 'Google sign-in not available';
-            }
-        });
-    };
+
 
     const init = () => {
         $('sign-in-btn')?.addEventListener('click', handleSignInOut);
         $('modal-close')?.addEventListener('click', hideModal);
-        $('tab-email')?.addEventListener('click', () => setTab('email'));
-        $('tab-google')?.addEventListener('click', () => setTab('google'));
         $('mode-login')?.addEventListener('click', () => setMode('login'));
         $('mode-register')?.addEventListener('click', () => setMode('register'));
         $('email-submit')?.addEventListener('click', submitEmail);
-        initGoogleCloudSignIn();
         updateSidebar();
     };
 
     return { init, showModal, hideModal, updateSidebar, onLogin };
 })();
+
+window.syncProfileToCloud = async () => {
+    const token = localStorage.getItem('vail_auth_token');
+    if (!token) return;
+    const url = localStorage.getItem('vail_custom_backend_url');
+    const base = (url ? url : 'https://api.okemovail.com').replace(/\/$/, '');
+    
+    const indicator = document.getElementById('cloud-sync-indicator');
+    if (indicator) {
+        indicator.classList.remove('hidden');
+        indicator.classList.add('flex');
+        indicator.innerHTML = '<i data-feather="refresh-cw" class="w-4 h-4 animate-spin"></i>';
+        if (window.feather) window.feather.replace();
+    }
+    
+    try {
+        const resp = await fetch(`${base}/api/accounts/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                username: window.settings.userName || null,
+                profile_pic: window.settings.userPic || null
+            })
+        });
+        
+        if (!resp.ok) throw new Error(`Server responded ${resp.status}`);
+        if (indicator) {
+            indicator.innerHTML = '<i data-feather="check" class="w-4 h-4 text-green-500"></i>';
+            if (window.feather) window.feather.replace();
+            setTimeout(() => {
+                indicator.classList.add('hidden');
+                indicator.classList.remove('flex');
+            }, 2000);
+        }
+    } catch (e) {
+        console.error('Failed to sync profile to cloud', e);
+        if (indicator) {
+            indicator.innerHTML = '<i data-feather="x" class="w-4 h-4 text-red-500"></i>';
+            if (window.feather) window.feather.replace();
+            setTimeout(() => {
+                indicator.classList.add('hidden');
+                indicator.classList.remove('flex');
+            }, 2000);
+        }
+    }
+};

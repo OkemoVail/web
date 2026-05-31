@@ -60,5 +60,15 @@ window.CloudStorageController = (() => {
         if (resp.status === 401) _handle401();
     };
 
-    return { init, getAllChats, saveChat, deleteChat };
+    const estimateSize = async () => {
+        const resp = await fetch(`${base()}/api/accounts/me`, { headers: authHeaders() });
+        if (resp.status === 401) { _handle401(); return 0; }
+        if (resp.ok) {
+            const data = await resp.json();
+            return data.storage_used_bytes || 0;
+        }
+        return 0;
+    };
+
+    return { init, getAllChats, saveChat, deleteChat, estimateSize };
 })();

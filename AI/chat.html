@@ -20,8 +20,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+
     <!-- Monaco Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
@@ -2884,21 +2883,7 @@
                 </div>
 
 
-                <button id="google-auth-btn-onboarding" onclick="window.initGoogleAuthOnboarding()"
-                    class="w-full flex items-center justify-center gap-2.5 min-h-[52px] px-5 rounded-2xl font-bold text-sm transition-all shadow-lg hover:brightness-110 active:scale-[0.98] mb-4 relative overflow-hidden"
-                    style="background-color: var(--accent-color); color: var(--accent-contrast);">
-                    <div id="google-spinner-onboarding"
-                        class="hidden absolute inset-0 flex items-center justify-center bg-inherit z-20">
-                        <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
-                    </div>
-                    <div id="google-btn-content-onboarding" class="flex items-center justify-center gap-2.5">
-                        <img id="google-pfp-onboarding"
-                            class="w-7 h-7 rounded-full object-cover hidden border-2 border-white/30" src="" alt="">
-                        <span id="google-btn-text-onboarding">
-                            <i class="fa-brands fa-google mr-2"></i>Continue with Google
-                        </span>
-                    </div>
-                </button>
+
 
                 <p class="text-center text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-5">Ontologic has
                     no
@@ -3136,14 +3121,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Cloud account -->
-            <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 mt-1">
-              <button id="sign-in-btn"
-                class="w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-gray-300">
-                Sign In
-              </button>
-              <p id="account-info" class="text-xs text-gray-400 px-3 mt-0.5 truncate"></p>
-            </div>
+
         </div>
 
         <!-- Stub for JS compatibility -->
@@ -3188,6 +3166,10 @@
 
         <div id="top-right-actions" class="animate-fade-in flex items-center gap-2">
             <div class="header-island skuomorphic-btn rounded-lg flex items-center gap-px p-1">
+                <!-- Cloud Sync Indicator -->
+                <div id="cloud-sync-indicator" class="hidden w-8 h-8 rounded items-center justify-center text-zinc-400" title="Syncing to Cloud...">
+                    <i data-feather="refresh-cw" class="w-4 h-4 animate-spin"></i>
+                </div>
                 <button onclick="window.openPersonality()"
                     class="w-8 h-8 rounded flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
                     title="Personality" data-t-title="btn_personality">
@@ -3484,7 +3466,7 @@
     <script src="js/thought.js"></script>
     <script src="js/content-features.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/google-auth.js"></script>
+
     <script src="js/profile.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/folders.js"></script>
@@ -3688,19 +3670,16 @@
                 <div class="Cadance-section">
                     <p class="Cadance-section-label" data-t="settings_account">Account</p>
                     <div class="Cadance-card">
-                        <button class="Cadance-theme-item" onclick="window.initGoogleAuth()">
+                        <button id="sign-in-btn" class="Cadance-theme-item text-left">
                             <div
                                 class="w-10 h-10 rounded-full bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 flex items-center justify-center shrink-0 shadow-sm">
-                                <i class="fa-brands fa-google text-zinc-600 dark:text-zinc-300 text-base"></i>
+                                <i data-feather="cloud" class="w-5 h-5 text-zinc-600 dark:text-zinc-300"></i>
                             </div>
-                            <div class="flex flex-col min-w-0">
-                                <span class="text-sm font-semibold text-zinc-900 dark:text-white" data-t="google_account">Google Account</span>
-                                <span id="google-status-text" class="text-xs text-zinc-400" data-t="not_connected">Not connected</span>
+                            <div class="flex flex-col min-w-0 flex-1">
+                                <span id="sign-in-text" class="text-sm font-semibold text-zinc-900 dark:text-white">Sign In</span>
+                                <span id="account-info" class="text-xs text-zinc-400 truncate"></span>
                             </div>
                             <i data-feather="chevron-right" class="w-4 h-4 text-zinc-300 ml-auto shrink-0"></i>
-                        </button>
-                        <button id="google-auth-btn" class="hidden Cadance-theme-item">
-
                         </button>
                     </div>
                 </div>
@@ -4439,17 +4418,7 @@
       <h2 class="text-lg font-semibold dark:text-white">Account</h2>
       <button id="modal-close" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
     </div>
-    <!-- Tabs -->
-    <div class="flex gap-2 mb-4">
-      <button id="tab-email"
-        class="flex-1 py-1.5 text-sm rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-medium">
-        Email
-      </button>
-      <button id="tab-google"
-        class="flex-1 py-1.5 text-sm rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
-        Google
-      </button>
-    </div>
+
     <!-- Email/password panel -->
     <div id="panel-email">
       <div class="flex gap-2 mb-3">
@@ -4468,17 +4437,7 @@
         Sign In
       </button>
     </div>
-    <!-- Google panel -->
-    <div id="panel-google" class="hidden text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Sign in with your Google account to sync chats to the cloud.
-      </p>
-      <button id="google-cloud-signin"
-        class="w-full py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white">
-        Sign in with Google
-      </button>
-      <p id="google-error" class="text-red-500 text-xs mt-2 min-h-[1rem]"></p>
-    </div>
+
   </div>
 </div>
 

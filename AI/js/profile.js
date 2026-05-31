@@ -50,6 +50,7 @@ window.handleProfilePicUpload = (e) => {
         window.settings.pfpX = 0; window.settings.pfpY = 0; window.settings.pfpScale = 1.0;
         window.saveSettings(); window.els.pfpMovableImg.src = window.settings.userPic;
         window.applyMovableStyles(); window.updateProfileUI();
+        if (typeof window.syncProfileToCloud === 'function') window.syncProfileToCloud();
     };
     reader.readAsDataURL(file);
 };
@@ -81,6 +82,7 @@ window.completeOnboarding = () => {
     }
     window.settings.userName = name;
     window.updateProfileUI();
+    if (typeof window.syncProfileToCloud === 'function') window.syncProfileToCloud();
     window.finalizeOnboarding();
 };
 
@@ -144,7 +146,7 @@ window.updateProfileUI = () => {
     const sidebarCardPfp = document.getElementById('settings-sidebar-pfp-card');
     if (sidebarCardPfp) renderAvatar(sidebarCardPfp, 48, true);
 
-    window.updateGoogleAuthButton();
+
 
     if (window.renderThemes) window.renderThemes();
 };

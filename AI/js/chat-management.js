@@ -296,7 +296,15 @@ window.updateStorageUsage = async () => {
     try {
         const bytes = await window.StorageController.estimateSize();
         const mbVal = bytes / (1024 * 1024);
-        const label = mbVal < 1 ? `${(bytes / 1024).toFixed(1)} KB` : `${mbVal.toFixed(2)} MB`;
+        let label = mbVal < 1 ? `${(bytes / 1024).toFixed(1)} KB` : `${mbVal.toFixed(2)} MB`;
+        
+        const isCloud = window.StorageController && window.CloudStorageController && window.StorageController === window.CloudStorageController;
+        if (isCloud) {
+            label = `${mbVal.toFixed(2)} MB / 1 GB - Cloud`;
+        } else {
+            label += ' - Local';
+        }
+
         const d1 = document.getElementById('storage-display');
         const d2 = document.getElementById('storage-display-sidebar');
         if (d1) d1.innerText = label;

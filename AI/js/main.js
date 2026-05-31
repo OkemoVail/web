@@ -184,7 +184,7 @@ window.initChatUI = () => {
 
     window.applyTranslations();
     window.updateStorageUsage();
-    window.updateGoogleAuthButton();
+
     window.selectModel('PISCES');
     window.render();
     window.updateUI();
