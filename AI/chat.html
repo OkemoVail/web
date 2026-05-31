@@ -3125,11 +3125,24 @@
                                         <i data-feather="bookmark" class="w-3.5 h-3.5 shrink-0"></i>
                                         <span>Memories</span>
                                     </button>
+                                    <button onclick="event.stopPropagation(); window.showChangelog(); window.closeSettingsSubmenu();"
+                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
+                                        <i data-feather="zap" class="w-3.5 h-3.5 shrink-0"></i>
+                                        <span>Updates</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- Cloud account -->
+            <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 mt-1">
+              <button id="sign-in-btn"
+                class="w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-gray-300">
+                Sign In
+              </button>
+              <p id="account-info" class="text-xs text-gray-400 px-3 mt-0.5 truncate"></p>
             </div>
         </div>
 
@@ -3180,10 +3193,10 @@
                     title="Personality" data-t-title="btn_personality">
                     <i data-feather="user" class="w-4 h-4"></i>
                 </button>
-                <button onclick="window.showChangelog()"
+                <button onclick="window.openMemoriesPanel()"
                     class="w-8 h-8 rounded flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
-                    title="Updates" data-t-title="btn_updates">
-                    <i data-feather="zap" class="w-4 h-4"></i>
+                    title="Memories">
+                    <i data-feather="bookmark" class="w-4 h-4"></i>
                 </button>
                 <button onclick="window.setLang(window.settings.lang === 'en' ? 'zh' : 'en')"
                     class="w-8 h-8 rounded flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
@@ -3464,6 +3477,7 @@
     <script src="js/state.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/cloud-storage.js"></script>
     <script src="js/modals.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/theme.js"></script>
@@ -3490,6 +3504,7 @@
     <script src="js/ui.js"></script>
     <script src="js/mini-logo.js"></script>
     <script src="js/loader.js"></script>
+    <script src="js/account-modal.js"></script>
     <script src="js/main.js"></script>
 
     <div id="settings-overlay" onclick="window.toggleSettingsPanel()"></div>
@@ -3914,6 +3929,40 @@
         </div>
     </div>
 
+    <!-- Memories modal -->
+    <div id="memories-modal"
+        style="position:fixed;inset:0;z-index:4000;background:rgba(15,15,15,0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;padding:1rem;">
+        <div class="changelog-card skuomorphic-card" style="max-width:520px;width:100%;">
+            <div class="p-8 relative z-10">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                            style="background:color-mix(in srgb, var(--accent-color) 15%, transparent);color:var(--accent-color);">
+                            <i data-feather="bookmark" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-zinc-900 dark:text-white">Memories</h2>
+                            <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">What Pisces remembers</p>
+                        </div>
+                    </div>
+                    <button onclick="window.closeMemoriesPanel()" class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors">
+                        <i data-feather="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="memories-list-modal" class="divide-y divide-zinc-100 dark:divide-zinc-800 max-h-72 overflow-y-auto rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 mb-5"></div>
+                <div class="flex gap-2">
+                    <input id="memories-add-input" type="text" placeholder="Add a memory…"
+                        class="flex-1 bg-zinc-100 dark:bg-zinc-800 rounded-2xl px-4 py-2.5 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all"
+                        style="--tw-ring-color: var(--accent-color);"
+                        onkeydown="if(event.key==='Enter') window.addMemoryFromInput()" />
+                    <button onclick="window.addMemoryFromInput()"
+                        class="px-4 py-2.5 rounded-2xl font-bold text-xs uppercase tracking-wider skuomorphic-btn hover:brightness-110 active:scale-[0.98] transition-all"
+                        style="background:var(--accent-color);color:var(--accent-contrast);">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Personality body only — NO identity prefix here.
         // chat-actions.js prepends identity_lock (from /api/system_prompts) before
@@ -4034,6 +4083,65 @@
         });
 
         // ── Memory consent card ──────────────────────────────────────
+        window.openMemoriesPanel = function () {
+            const modal = document.getElementById('memories-modal');
+            if (!modal) return;
+            modal.style.display = 'flex';
+            window.renderMemoriesTab();
+            setTimeout(() => {
+                const inp = document.getElementById('memories-add-input');
+                if (inp) inp.focus();
+            }, 50);
+        };
+        window.closeMemoriesPanel = function () {
+            const modal = document.getElementById('memories-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        document.addEventListener('click', function (e) {
+            const modal = document.getElementById('memories-modal');
+            if (modal && e.target === modal) window.closeMemoriesPanel();
+        });
+        window.addMemoryFromInput = function () {
+            const inp = document.getElementById('memories-add-input');
+            if (!inp || !inp.value.trim()) return;
+            window.addMemory(inp.value.trim(), 'user');
+            inp.value = '';
+        };
+
+        window.showInputNotice = function (message, opts) {
+            const stack = document.getElementById('memory-consent-stack');
+            if (!stack) { if (window.showToast) window.showToast(message); return; }
+            opts = opts || {};
+            const card = document.createElement('div');
+            card.className = 'mem-consent-card';
+            let btns = '<button class="mem-consent-dismiss">Dismiss</button>';
+            if (opts.action) {
+                btns = '<button class="mem-consent-save mem-notice-action">' + opts.action.label + '</button>' + btns;
+            }
+            card.innerHTML =
+                '<span class="mem-consent-label"><strong>' +
+                message.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                '</strong></span>' +
+                '<div class="mem-consent-btns">' + btns + '</div>';
+            const dismiss = () => {
+                clearTimeout(autoTimer);
+                card.classList.add('dismissing');
+                let removed = false;
+                const cleanup = () => { if (!removed) { removed = true; card.remove(); } };
+                card.addEventListener('animationend', cleanup, { once: true });
+                setTimeout(cleanup, 250);
+            };
+            const autoTimer = setTimeout(dismiss, 10000);
+            if (opts.action) {
+                card.querySelector('.mem-notice-action').addEventListener('click', () => {
+                    opts.action.fn();
+                    dismiss();
+                });
+            }
+            card.querySelector('.mem-consent-dismiss').addEventListener('click', dismiss);
+            stack.appendChild(card);
+        };
+
         window.summarizeAndSaveMemory = function (rawText) {
             window.showMemoryConsent(rawText);
         };
@@ -4042,10 +4150,7 @@
             const stack = document.getElementById('memory-consent-stack');
             if (!stack) return;
 
-            // Normalise: replace all occurrences of "user" with "you", then capitalise first
-            const display = text
-                .replace(/\buser\b/gi, 'you')
-                .replace(/^you\b/, 'You');
+            const display = text;
 
             const card = document.createElement('div');
             card.className = 'mem-consent-card';
@@ -4059,6 +4164,7 @@
                 '</div>';
 
             const dismiss = () => {
+                clearTimeout(autoTimer);
                 card.classList.add('dismissing');
                 let removed = false;
                 const cleanup = () => { if (!removed) { removed = true; card.remove(); } };
@@ -4066,8 +4172,28 @@
                 setTimeout(cleanup, 250);
             };
 
+            const autoTimer = setTimeout(dismiss, 10000);
+
             card.querySelector('.mem-consent-save').addEventListener('click', () => {
                 window.addMemory(display, 'model');
+                const phrases = [
+                    'Noted. 🧠',
+                    'Got it!',
+                    'Locked in.',
+                    'I\'ll keep that in mind.',
+                    'Consider it remembered.',
+                    'On it. ✓',
+                ];
+                const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+                const allResponses = document.querySelectorAll('.main-response-content');
+                const lastResponse = allResponses[allResponses.length - 1];
+                if (lastResponse) {
+                    const ack = document.createElement('p');
+                    ack.textContent = phrase;
+                    ack.style.cssText = 'margin-top:0.5em;color:var(--accent-color,#a78bfa);font-size:0.875rem;opacity:0;transition:opacity 0.3s ease;';
+                    lastResponse.appendChild(ack);
+                    requestAnimationFrame(() => { ack.style.opacity = '1'; });
+                }
                 dismiss();
             });
             card.querySelector('.mem-consent-dismiss').addEventListener('click', dismiss);
@@ -4076,21 +4202,15 @@
         };
 
         window.renderMemoriesTab = function () {
-            const list = document.getElementById('memories-list');
-            if (!list) return;
             const memories = window.settings.memories || [];
-            if (memories.length === 0) {
-                list.innerHTML = `<div data-mpc-empty class="text-center py-8 text-zinc-400 text-sm px-4">
+            const emptyHTML = `<div data-mpc-empty class="text-center py-8 text-zinc-400 text-sm px-4">
                     <div class="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
                         <i data-feather="bookmark" class="w-5 h-5 opacity-40"></i>
                     </div>
                     <p class="font-medium">No memories yet</p>
                     <p class="text-xs mt-1 opacity-70">Pisces will save facts as you chat, or add one manually.</p>
                 </div>`;
-                if (window.feather) feather.replace();
-                return;
-            }
-            list.innerHTML = memories.map(m => `
+            const itemsHTML = memories.map(m => `
                 <div class="flex items-start gap-3 px-3 py-2.5 group">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm text-zinc-800 dark:text-zinc-200 leading-snug">${m.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
@@ -4100,7 +4220,7 @@
                         </p>
                     </div>
                     <div class="opacity-0 group-hover:opacity-100 flex flex-col gap-1 mt-0.5 shrink-0 transition-opacity">
-                        <button onclick="window.regenerateMemory('${m.id}')" title="Regenerate" class="w-6 h-6 flex items-center justify-center rounded-lg text-zinc-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all">
+                        <button onclick="window.regenerateMemory('${m.id}', this)" title="Regenerate" class="w-6 h-6 flex items-center justify-center rounded-lg text-zinc-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all">
                             <i data-feather="refresh-cw" class="w-3 h-3"></i>
                         </button>
                         <button onclick="window.deleteMemory('${m.id}')" title="Delete" class="w-6 h-6 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
@@ -4109,6 +4229,11 @@
                     </div>
                 </div>
             `).join('');
+            ['memories-list', 'memories-list-modal'].forEach(id => {
+                const list = document.getElementById(id);
+                if (!list) return;
+                list.innerHTML = memories.length === 0 ? emptyHTML : itemsHTML;
+            });
             if (window.feather) feather.replace();
         };
 
@@ -4131,11 +4256,56 @@
             window.renderMemoriesTab();
         };
 
-        window.regenerateMemory = function (id) {
+        window.regenerateMemory = async function (id, btn) {
             const mem = (window.settings.memories || []).find(m => m.id === id);
             if (!mem) return;
-            window.deleteMemory(id);
-            window.summarizeAndSaveMemory(mem.text);
+
+            const row = btn ? btn.closest('.flex.items-start') : null;
+            const textEl = row ? row.querySelector('p.text-sm') : null;
+            const originalText = mem.text;
+
+            if (textEl) textEl.innerHTML = '<span class="opacity-40 animate-pulse">Rewriting…</span>';
+            if (btn) btn.disabled = true;
+
+            try {
+                const baseUrl = await window.getOpenAIClient();
+                const res = await fetch(baseUrl + '/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true',
+                        'bypass-tunnel-reminder': 'true',
+                        ...(window.settings.apiKey ? { 'Authorization': `Bearer ${window.settings.apiKey.trim()}` } : {})
+                    },
+                    body: JSON.stringify({
+                        model: window.currentModel.id,
+                        messages: [
+                            { role: 'system', content: 'Rewrite the following memory fact about the user into a single clear, concise sentence. Keep all factual information intact. Output only the rewritten sentence — no explanation, no tags, no quotes.' },
+                            { role: 'user', content: originalText }
+                        ],
+                        temperature: 0.4,
+                        max_tokens: 60,
+                        stream: false,
+                        use_thought: false,
+                        think: false,
+                        thinking: false
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    let newText = (data.choices[0].message.content || '').trim()
+                        .replace(/<[^>]+>/g, '').replace(/^["']|["']$/g, '').trim();
+                    if (newText) {
+                        mem.text = newText;
+                        mem.source = 'model';
+                        window.saveSettings();
+                    }
+                }
+            } catch (e) {
+                console.error('Memory regenerate failed:', e);
+            }
+
+            window.renderMemoriesTab();
         };
 
         window.showMemoryToast = function () {
@@ -4143,18 +4313,51 @@
             if (old) old.remove();
             const toast = document.createElement('div');
             toast.id = 'memory-toast';
-            toast.style.cssText = 'position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(8px);z-index:9999;display:flex;align-items:center;gap:8px;padding:8px 16px;background:#18181b;color:#fff;font-size:13px;font-weight:500;border-radius:999px;box-shadow:0 4px 24px rgba(0,0,0,0.3);pointer-events:none;opacity:0;transition:opacity 0.2s ease,transform 0.2s ease;';
-            toast.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg> Memory saved`;
+            toast.style.cssText = [
+                'position:fixed',
+                'bottom:24px',
+                'right:24px',
+                'z-index:9999',
+                'display:flex',
+                'align-items:center',
+                'gap:10px',
+                'padding:10px 14px',
+                'border-radius:14px',
+                'background:var(--input-bg,#f4f4f5)',
+                'border:1px solid color-mix(in srgb,var(--accent-color,#a78bfa) 30%,transparent)',
+                'font-size:13px',
+                'font-weight:500',
+                'color:#71717a',
+                'box-shadow:0 4px 24px rgba(0,0,0,0.10)',
+                'max-width:320px',
+                'pointer-events:auto',
+                'opacity:0',
+                'transform:translateY(8px)',
+                'transition:opacity 0.22s cubic-bezier(0.16,1,0.3,1),transform 0.22s cubic-bezier(0.16,1,0.3,1)',
+            ].join(';');
+
+            const dismiss = () => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 250);
+            };
+
+            toast.innerHTML =
+                `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color,#a78bfa)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>` +
+                `<span style="flex:1;">Memory saved</span>` +
+                `<button onclick="this.closest('#memory-toast').remove()" style="flex-shrink:0;background:none;border:none;cursor:pointer;padding:2px 0 2px 4px;color:#a1a1aa;display:flex;align-items:center;line-height:1;" title="Dismiss">` +
+                `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>`;
+
             document.body.appendChild(toast);
             requestAnimationFrame(() => {
-                toast.style.opacity = '1';
-                toast.style.transform = 'translateX(-50%) translateY(0)';
+                requestAnimationFrame(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateY(0)';
+                });
             });
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(-50%) translateY(8px)';
-                setTimeout(() => toast.remove(), 220);
-            }, 2500);
+            let timer = setTimeout(dismiss, 2500);
+            toast.addEventListener('mouseenter', () => clearTimeout(timer));
+            toast.addEventListener('mouseleave', () => { timer = setTimeout(dismiss, 1500); });
         };
 
         window.toggleSettingsSubmenu = function () {
@@ -4227,6 +4430,57 @@
         </defs>
     </svg>
 
+
+<!-- Account modal -->
+<div id="account-modal"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold dark:text-white">Account</h2>
+      <button id="modal-close" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
+    </div>
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-4">
+      <button id="tab-email"
+        class="flex-1 py-1.5 text-sm rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-medium">
+        Email
+      </button>
+      <button id="tab-google"
+        class="flex-1 py-1.5 text-sm rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+        Google
+      </button>
+    </div>
+    <!-- Email/password panel -->
+    <div id="panel-email">
+      <div class="flex gap-2 mb-3">
+        <button id="mode-login"
+          class="flex-1 py-1 text-xs rounded bg-gray-100 dark:bg-gray-700 dark:text-gray-200 font-medium">Sign In</button>
+        <button id="mode-register"
+          class="flex-1 py-1 text-xs rounded text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Register</button>
+      </div>
+      <input id="email-input" type="email" placeholder="Email"
+        class="w-full mb-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" />
+      <input id="password-input" type="password" placeholder="Password"
+        class="w-full mb-3 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" />
+      <p id="email-error" class="text-red-500 text-xs mb-2 min-h-[1rem]"></p>
+      <button id="email-submit"
+        class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
+        Sign In
+      </button>
+    </div>
+    <!-- Google panel -->
+    <div id="panel-google" class="hidden text-center">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        Sign in with your Google account to sync chats to the cloud.
+      </p>
+      <button id="google-cloud-signin"
+        class="w-full py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white">
+        Sign in with Google
+      </button>
+      <p id="google-error" class="text-red-500 text-xs mt-2 min-h-[1rem]"></p>
+    </div>
+  </div>
+</div>
 
 </body>
 
