@@ -12,7 +12,7 @@ window.DEFAULT_BACKEND_URL = window.CF_BACKEND_URL;
 window.CUSTOM_BACKEND_URL = localStorage.getItem('vail_custom_backend_url') || window.DEFAULT_BACKEND_URL;
 
 window.MODELS = {
-    PISCES: { id: "Pisces-1.2B", name: "Pisces", icon: UNIQUE_SVG_PISCES }
+    PISCES: { id: "Pisces", name: "Pisces", icon: UNIQUE_SVG_PISCES }
 };
 
 window.translations = {
@@ -91,9 +91,9 @@ window.translations = {
         btn_think: "Think",
         btn_canvas: "Canvas",
         model_stuart: "Stuart",
-        model_stuart_1_2b: "Stuart 1.2B",
-        model_local_pretraining: "Local Pretraining · 1.2B",
-        model_octan_1_2b: "Pisces 1.2B",
+        model_stuart_1_2b: "Stuart",
+        model_local_pretraining: "Local Pretraining",
+        model_octan_1_2b: "Pisces",
         model_exp_moe: "Okemi model",
         octan_hallucination_warn: "Pisces models are prone to hallucinations.",
         live_preview: "Live Preview",
@@ -233,7 +233,7 @@ window.translations = {
         model_stuart: "Stuart",
         model_stuart_1_2b: "Stuart 1.2B",
         model_local_pretraining: "本機預先訓練 · 1.2B",
-        model_octan_1_2b: "Pisces 1.2B",
+        model_octan_1_2b: "Pisces",
         model_exp_moe: "Okemi 模型",
         octan_hallucination_warn: "Pisces 模型容易產生幻覺。",
         live_preview: "即時預覽",
