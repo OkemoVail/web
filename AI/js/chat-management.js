@@ -257,6 +257,12 @@ window.resetChat = () => {
         window.closeCanvas();
     }
 
+    // Evict KV cache for outgoing chat
+    const oldChatId = window.currentChatId;
+    if (window.KVContext && oldChatId) {
+        window.KVContext.evictKV(oldChatId);
+    }
+
     // Reset toggles to 0 when starting a new chat
     window.isWebSearch = false;
     window.isDeepResearch = false;
@@ -290,6 +296,19 @@ window.clearAll = async () => {
     window.resetChat();
     window.renderHistory();
     window.updateStorageUsage();
+};
+
+window.switchToChat = async function (newChatId) {
+    if (window.KVContext) {
+        const outgoing = window.currentChatId;
+        if (outgoing && outgoing !== newChatId) {
+            await window.KVContext.saveKVToCloud(outgoing);
+        }
+        window.currentChatId = newChatId;
+        await window.KVContext.loadKVFromCloud(newChatId);
+    } else {
+        window.currentChatId = newChatId;
+    }
 };
 
 window.updateStorageUsage = async () => {
