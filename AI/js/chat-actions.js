@@ -180,6 +180,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                 chat_id: window.currentChatId,
                 job_id: window.currentJobId,
                 user_name: (window.settings && window.settings.userName) || "",
+                user_token: null, // web/AI has no account auth; backend silently skips web_search for unauthenticated requests
                 attachment: attachment ? {
                     name: attachment.name,
                     type: attachment.type,
