@@ -2870,6 +2870,26 @@
             letter-spacing: 0.12px;
             color: var(--text-tertiary);
         }
+        #voice-overlay {
+            position: fixed; inset: 0; z-index: 200; display: none;
+            flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+            background: rgba(10, 10, 12, 0.92); backdrop-filter: blur(18px);
+        }
+        #voice-overlay.active { display: flex; }
+        #voice-orb {
+            width: 132px; height: 132px; border-radius: 9999px;
+            background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent-color), white 35%), var(--accent-color) 60%, color-mix(in srgb, var(--accent-color), black 25%) 100%);
+            box-shadow: 0 0 50px color-mix(in srgb, var(--accent-color), transparent 45%);
+            animation: voice-pulse 2.4s ease-in-out infinite; cursor: pointer;
+        }
+        #voice-overlay.speaking #voice-orb { animation: voice-pulse 0.9s ease-in-out infinite; }
+        @keyframes voice-pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+        #voice-state { color: #ececec; font-size: 19px; font-weight: 600; }
+        #voice-transcript { color: #9a9aa0; font-size: 14px; max-width: 70%; text-align: center; min-height: 20px; }
+        .voice-ctrl { width: 54px; height: 54px; border-radius: 9999px; background: #1c1c20; color: #dcdce0;
+            display: flex; align-items: center; justify-content: center; border: 1px solid #2c2c31; cursor: pointer; }
+        .voice-ctrl.end { background: #3a1116; color: #ff6b6b; border-color: #52181d; }
+        .voice-ctrl.muted { color: #ff6b6b; }
     </style>
 
     <style>
@@ -4744,6 +4764,22 @@
                 </button>
             </div>
 
+        </div>
+    </div>
+
+    <div id="voice-overlay" role="dialog" aria-label="Voice mode">
+        <div id="voice-orb" onclick="window.VoiceMode && window.VoiceMode.interrupt()"></div>
+        <div id="voice-state">Listening…</div>
+        <div id="voice-transcript"></div>
+        <div style="display:flex; gap:18px;">
+            <button id="voice-mute" class="voice-ctrl" title="Mute mic"
+                    onclick="window.VoiceMode && window.VoiceMode.toggleMute()">
+                <i class="fa-solid fa-microphone text-sm"></i>
+            </button>
+            <button id="voice-end" class="voice-ctrl end" title="End voice"
+                    onclick="window.VoiceMode && window.VoiceMode.stop()">
+                <i class="fa-solid fa-stop text-sm"></i>
+            </button>
         </div>
     </div>
 
