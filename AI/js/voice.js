@@ -114,10 +114,18 @@
 
     function playAudio(url) {
         return new Promise((resolve) => {
+            let done = false;
+            const finish = () => {
+                if (done) return;
+                done = true;
+                try { URL.revokeObjectURL(url); } catch (_) {}
+                resolve();
+            };
             audioEl = new Audio(url);
-            audioEl.onended = () => { URL.revokeObjectURL(url); resolve(); };
-            audioEl.onerror = () => { resolve(); };
-            audioEl.play().catch(() => resolve());
+            audioEl.onended = finish;
+            audioEl.onerror = finish;
+            audioEl.onpause = finish;   // barge-in / stop() mid-playback resolves the loop
+            audioEl.play().catch(finish);
         });
     }
 
@@ -160,9 +168,16 @@
     function toggleMute() {
         muted = !muted;
         if (els.mute) els.mute.classList.toggle('muted', muted);
+        if (active && muted) setState('Muted', false);
+        else if (active) setState('Listening…', false);
     }
 
-    function interrupt() { /* barge-in wired in Task 11 */ }
+    function interrupt() {
+        // Tapping the orb during playback stops speech; playAudio's onpause resolves
+        // the loop, which then returns to Listening (active is still true).
+        if (els.overlay) els.overlay.classList.remove('speaking');
+        if (audioEl) { try { audioEl.pause(); } catch (_) {} }
+    }
 
     window.VoiceMode = {
         start, stop, toggleMute, interrupt, isSupported,
