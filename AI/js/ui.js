@@ -6,9 +6,15 @@ window.updateUI = () => {
     const sendBtn = document.getElementById('send-btn');
     const input = document.getElementById('user-input');
 
+    const VOICE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="10" x2="4" y2="14"/><line x1="8" y1="7" x2="8" y2="17"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="16" y1="7" x2="16" y2="17"/><line x1="20" y1="10" x2="20" y2="14"/></svg>';
+
+    const voiceReady = !window.isGenerating
+        && !(input && input.value.trim().length > 0)
+        && !!(window.VoiceMode && window.VoiceMode.isSupported && window.VoiceMode.isSupported());
+
     if (sendBtn) {
         const hasText = input && input.value.trim().length > 0;
-        const shouldEnable = window.isGenerating || hasText;
+        const shouldEnable = window.isGenerating || hasText || voiceReady;
 
         if (shouldEnable) {
             sendBtn.disabled = false;
@@ -19,13 +25,25 @@ window.updateUI = () => {
             sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
             sendBtn.classList.remove('opacity-100', 'cursor-pointer', 'hover:opacity-90');
         }
+
+        if (window.isGenerating || hasText) {
+            sendBtn.onclick = () => window.handleAction();
+        } else if (voiceReady) {
+            sendBtn.onclick = () => window.VoiceMode.start();
+        } else {
+            sendBtn.onclick = () => window.handleAction();
+        }
     }
 
     if (iconWrapper) {
         if (window.isGenerating) {
             iconWrapper.innerHTML = '<i class="fa-solid fa-square text-sm"></i>';
+        } else if (input && input.value.trim().length > 0) {
+            iconWrapper.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
+        } else if (voiceReady) {
+            iconWrapper.innerHTML = VOICE;
         } else {
-            iconWrapper.innerHTML = '<i class="fa-solid fa-paper-plane text-sm"></i>';
+            iconWrapper.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
         }
     }
 
