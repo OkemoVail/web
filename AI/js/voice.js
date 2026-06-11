@@ -144,7 +144,13 @@
     function stop() {
         active = false;
         try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch (_) {}
-        try { if (audioEl) audioEl.pause(); } catch (_) {}
+        try {
+            if (audioEl) {
+                audioEl.pause();
+                if (audioEl.src) { URL.revokeObjectURL(audioEl.src); audioEl.src = ''; }
+            }
+        } catch (_) {}
+        audioEl = null;
         if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
         if (els.overlay) els.overlay.classList.remove('active', 'speaking');
         setTranscript('');
