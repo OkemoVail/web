@@ -3823,6 +3823,34 @@
                     </div>
                 </div>
 
+                <div class="Cadance-section">
+                    <p class="Cadance-section-label">Model Parameters</p>
+                    <div class="Cadance-card px-4 py-2">
+                        <div class="flex items-center justify-between py-2">
+                            <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Max tokens <span id="settings-max-tokens-val" class="text-xs text-zinc-400 font-mono ml-1">256</span></span>
+                            <input type="range" id="settings-param-max-tokens"
+                                   min="64" max="4096" step="64" value="256"
+                                   oninput="window.updateMaxTokensFromPanel(this.value)"
+                                   class="w-32" style="accent-color: var(--accent-color);" />
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Voice mode</span>
+                            <input type="checkbox" id="settings-voice-enabled" checked
+                                   onchange="window.toggleVoiceEnabled(this.checked)" />
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Voice</span>
+                            <select id="settings-voice-name" onchange="window.updateVoiceName(this.value)"
+                                    class="bg-transparent text-sm text-zinc-700 dark:text-zinc-300 outline-none">
+                                <option value="af_sarah">Sarah (US female)</option>
+                                <option value="am_adam">Adam (US male)</option>
+                                <option value="bf_emma">Emma (UK female)</option>
+                                <option value="bm_george">George (UK male)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
 

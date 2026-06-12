@@ -30,6 +30,11 @@ window.toggleSettingsPanel = () => {
             document.getElementById('settings-max-tokens-val').innerText = window.settings.max_tokens || 256;
         }
 
+        const vEn = document.getElementById('settings-voice-enabled');
+        if (vEn) vEn.checked = window.settings.voiceEnabled !== false;
+        const vName = document.getElementById('settings-voice-name');
+        if (vName) vName.value = window.settings.voiceName || 'af_sarah';
+
         const toggleBtn = document.getElementById('toggle-smart-sidebar');
         if (toggleBtn) {
             const thumb = toggleBtn.querySelector('div');
@@ -186,6 +191,17 @@ window.updateMaxTokensFromPanel = (val) => {
     window.settings.max_tokens = parseInt(val);
     const el = document.getElementById('settings-max-tokens-val');
     if (el) el.innerText = window.settings.max_tokens;
+    window.saveSettings();
+};
+
+window.toggleVoiceEnabled = (on) => {
+    window.settings.voiceEnabled = !!on;
+    window.saveSettings();
+    if (window.updateUI) window.updateUI();
+};
+
+window.updateVoiceName = (val) => {
+    window.settings.voiceName = val;
     window.saveSettings();
 };
 
