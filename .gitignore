@@ -24,6 +24,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# Brainstorming visual companion
+.superpowers/
+
 # Backups
 diabrowser_backup
 SKILLS/DESIGN.md
