@@ -16,6 +16,11 @@ window.updateUI = () => {
         const hasText = input && input.value.trim().length > 0;
         const shouldEnable = window.isGenerating || hasText || voiceReady;
 
+        const isDarkSend = document.documentElement.classList.contains('dark');
+        const sendActive = window.isGenerating || hasText;
+        sendBtn.style.backgroundColor = sendActive ? 'var(--accent-color)' : (isDarkSend ? '#3a3a3d' : '#e4e4e7');
+        sendBtn.style.color = sendActive ? 'var(--accent-contrast)' : (isDarkSend ? '#e9e9ec' : '#52525b');
+
         if (shouldEnable) {
             sendBtn.disabled = false;
             sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');

@@ -10,6 +10,6 @@ window.toggleSendIcon = (state) => {
     if (state === 'stop') {
         iconWrapper.innerHTML = '<i class="fa-solid fa-square text-sm"></i>';
     } else {
-        iconWrapper.innerHTML = '<i class="fa-solid fa-paper-plane text-sm"></i>';
+        iconWrapper.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
     }
 };
