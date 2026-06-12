@@ -4753,18 +4753,24 @@
     </div>
 
     <div id="voice-overlay" role="dialog" aria-label="Voice mode">
-        <div id="voice-orb" onclick="window.VoiceMode && window.VoiceMode.interrupt()"></div>
-        <div id="voice-state">Listening…</div>
-        <div id="voice-transcript"></div>
-        <div style="display:flex; gap:18px;">
-            <button id="voice-mute" class="voice-ctrl" title="Mute mic"
-                    onclick="window.VoiceMode && window.VoiceMode.toggleMute()">
-                <i class="fa-solid fa-microphone text-sm"></i>
-            </button>
-            <button id="voice-end" class="voice-ctrl end" title="End voice"
-                    onclick="window.VoiceMode && window.VoiceMode.stop()">
-                <i class="fa-solid fa-stop text-sm"></i>
-            </button>
+        <div id="voice-rail">
+            <div id="voice-rail-logo"></div>
+            <span id="voice-rail-label">Voice</span>
+        </div>
+        <div id="voice-stage">
+            <div id="voice-orb" onclick="window.VoiceMode && window.VoiceMode.interrupt()"></div>
+            <div id="voice-state">Listening…</div>
+            <div id="voice-transcript"></div>
+            <div id="voice-controls">
+                <button id="voice-mute" class="voice-ctrl" title="Mute mic"
+                        onclick="window.VoiceMode && window.VoiceMode.toggleMute()">
+                    <i class="fa-solid fa-microphone text-sm"></i>
+                </button>
+                <button id="voice-end" class="voice-ctrl end" title="End voice"
+                        onclick="window.VoiceMode && window.VoiceMode.stop()">
+                    <i class="fa-solid fa-stop text-sm"></i>
+                </button>
+            </div>
         </div>
     </div>
 

@@ -106,7 +106,9 @@
         const reply = (last && last[1]) ? String(last[1]) : '';
         if (reply) {
             setState('Speaking…', true);
-            const url = await synthesize(reply.replace(/<[^>]+>/g, ' ').slice(0, 2000));
+            const spoken = reply.replace(/<[^>]+>/g, ' ').slice(0, 2000);
+            setTranscript(spoken);
+            const url = await synthesize(spoken);
             await playAudio(url);
         }
         if (active) return loopOnce();
