@@ -144,7 +144,9 @@
         try {
             await loopOnce();
         } catch (e) {
-            if (window.showToast) window.showToast('Voice error: ' + (e.message || e));
+            const msg = /50\d/.test(String(e.message)) ? 'Voice is unavailable on the server right now'
+                                                       : 'Voice error: ' + (e.message || e);
+            if (window.showToast) window.showToast(msg);
             stop();
         }
     }

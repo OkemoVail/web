@@ -38,6 +38,10 @@ The load order matters. Later files depend on earlier ones:
 12. `ui.js` — `window.updateUI()` syncs button states to global flags
 13. `mini-logo.js`, `loader.js` — cosmetic/preloader
 14. `main.js` — `boot()` async IIFE that initializes storage, detects tunnel URL, then calls `window.initChatUI()`
+15. `voice.js` — `window.VoiceMode`: full hands-free voice conversation. Records mic
+  (MediaRecorder) → `POST /v1/audio/transcriptions` (Whisper) → `window.sendMessage()` →
+  `POST /v1/audio/speech` (Kokoro-82M) → playback, looped. Loaded after `chat-actions.js`.
+  Backend audio endpoints live in the separate `okemollm/` repo (`train.py`).
 
 Note: `AI/updatenotes.js` (not inside `AI/js/`) is loaded separately. It defines `window.checkChangelog()` / `window.showChangelog()` and reads build numbers from `localStorage` and remote overrides.
 
