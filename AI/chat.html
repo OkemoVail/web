@@ -2872,10 +2872,27 @@
         }
         #voice-overlay {
             position: fixed; inset: 0; z-index: 200; display: none;
-            flex-direction: column; align-items: center; justify-content: center; gap: 26px;
-            background: rgba(10, 10, 12, 0.92); backdrop-filter: blur(18px);
+            background: #000; flex-direction: row;
         }
         #voice-overlay.active { display: flex; }
+
+        #voice-rail {
+            width: 60px; flex: none; background: #000;
+            border-right: 1px solid #141416;
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 14px; gap: 6px;
+        }
+        #voice-rail-logo {
+            width: 30px; height: 30px; border-radius: 9999px;
+            background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent-color), white 40%), var(--accent-color) 60%, color-mix(in srgb, var(--accent-color), black 25%) 100%);
+            box-shadow: 0 0 14px color-mix(in srgb, var(--accent-color), transparent 45%);
+        }
+        #voice-rail-label { color: #8a8a8f; font-size: 10px; font-weight: 600; }
+
+        #voice-stage {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 24px; position: relative;
+        }
         #voice-orb {
             width: 132px; height: 132px; border-radius: 9999px;
             background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent-color), white 35%), var(--accent-color) 60%, color-mix(in srgb, var(--accent-color), black 25%) 100%);
@@ -2884,8 +2901,11 @@
         }
         #voice-overlay.speaking #voice-orb { animation: voice-pulse 0.9s ease-in-out infinite; }
         @keyframes voice-pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+
         #voice-state { color: #ececec; font-size: 19px; font-weight: 600; }
-        #voice-transcript { color: #9a9aa0; font-size: 14px; max-width: 70%; text-align: center; min-height: 20px; }
+        #voice-transcript { color: #9a9aa0; font-size: 14px; max-width: 70%; text-align: center; min-height: 20px; line-height: 1.5; }
+
+        #voice-controls { position: absolute; bottom: 34px; display: flex; gap: 18px; }
         .voice-ctrl { width: 54px; height: 54px; border-radius: 9999px; background: #1c1c20; color: #dcdce0;
             display: flex; align-items: center; justify-content: center; border: 1px solid #2c2c31; cursor: pointer; }
         .voice-ctrl.end { background: #3a1116; color: #ff6b6b; border-color: #52181d; }
@@ -4754,7 +4774,7 @@
 
     <div id="voice-overlay" role="dialog" aria-label="Voice mode">
         <div id="voice-rail">
-            <div id="voice-rail-logo"></div>
+            <div id="voice-rail-logo" aria-hidden="true"></div>
             <span id="voice-rail-label">Voice</span>
         </div>
         <div id="voice-stage">
