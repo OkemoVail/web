@@ -63,10 +63,8 @@ window.updateUI = () => {
     const plusActiveIcon = document.getElementById('plus-active-icon');
     const plusSearchIndicator = document.getElementById('plus-search-indicator');
     const plusResearchIndicator = document.getElementById('plus-research-indicator');
-    const plusThinkIndicator = document.getElementById('plus-think-indicator');
     const plusCanvasIndicator = document.getElementById('plus-canvas-indicator');
     const deepResearchBtn = document.getElementById('deep-research-btn');
-    const thinkBtn = document.getElementById('think-btn');
     const canvasToggleBtn = document.getElementById('canvas-toggle-btn');
     const activeColor = isDark ? '#ffffff' : 'var(--accent-color)';
 
@@ -98,19 +96,10 @@ window.updateUI = () => {
         }
     }
 
-    if (thinkBtn) {
-        if (window.isThinkingEnabled) {
-            thinkBtn.classList.add('active');
-            thinkBtn.style.color = activeColor;
-            thinkBtn.style.background = 'var(--accent-glow)';
-            if (plusThinkIndicator) plusThinkIndicator.style.display = 'flex';
-        } else {
-            thinkBtn.classList.remove('active');
-            thinkBtn.style.color = '';
-            thinkBtn.style.background = '';
-            if (plusThinkIndicator) plusThinkIndicator.style.display = 'none';
-        }
-    }
+    const modeLabel = document.getElementById('mode-label');
+    const modeDot = document.getElementById('mode-dot');
+    if (modeLabel) modeLabel.textContent = window.isThinkingEnabled ? 'Thinking' : 'Fast';
+    if (modeDot) modeDot.style.background = window.isThinkingEnabled ? 'var(--accent-color)' : 'var(--text-tertiary)';
 
     if (canvasToggleBtn) {
         if (window.canvasEnabled) {
@@ -168,6 +157,15 @@ window.toggleDeepResearch = () => {
 window.toggleThinking = () => {
     window.isThinkingEnabled = !window.isThinkingEnabled;
     window.updateUI();
+    if (window.chatHistory && window.chatHistory.length > 0 && typeof window.save === 'function') {
+        window.save();
+    }
+};
+
+window.setThinkingMode = (on) => {
+    window.isThinkingEnabled = !!on;
+    window.updateUI();
+    if (typeof window.closeAllMenus === 'function') window.closeAllMenus();
     if (window.chatHistory && window.chatHistory.length > 0 && typeof window.save === 'function') {
         window.save();
     }
