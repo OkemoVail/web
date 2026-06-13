@@ -61,6 +61,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
     window.charAccu = 0;
     window._canvasStreamOpened = false;
     window.els.input.value = ""; window.els.input.style.height = "auto";
+    if (window.refreshInputLayout) window.refreshInputLayout();
     // Detach the file from the UI but keep a local copy for this request
     if (typeof window.clearUploadedFile === 'function') window.clearUploadedFile();
 
@@ -499,6 +500,7 @@ window.editMsg = (idx) => {
     window.els.input.value = msg;
     window.els.input.style.height = 'auto';
     window.els.input.style.height = window.els.input.scrollHeight + 'px';
+    if (window.refreshInputLayout) window.refreshInputLayout();
     window.els.input.focus();
     window.render(); window.updateUI(); window.save();
 };

@@ -119,11 +119,32 @@ window.initChatUI = () => {
     window.renderThemes();
 
     // 5. Input Listeners
+    window.refreshInputLayout = () => {
+        const ta = window.els.input;
+        if (!ta) return;
+        ta.style.height = 'auto';
+        const newHeight = Math.min(ta.scrollHeight, 600);
+        ta.style.height = newHeight + 'px';
+        // Single-row pill normally; stack the bar once the message has a new line.
+        const inner = document.getElementById('input-inner');
+        if (!inner) return;
+        const wasMulti = inner.classList.contains('is-multiline');
+        const willMulti = ta.value.includes('\n');
+        if (wasMulti === willMulti) return;
+        clearTimeout(inner._collapseTimer);
+        if (willMulti) {
+            inner.classList.remove('is-collapsing');
+            inner.classList.add('is-multiline');
+        } else {
+            // Collapsing back to one row: play the mirrored reverse settle.
+            inner.classList.remove('is-multiline');
+            inner.classList.add('is-collapsing');
+            inner._collapseTimer = setTimeout(() => inner.classList.remove('is-collapsing'), 460);
+        }
+    };
     if (window.els.input) {
         window.els.input.oninput = () => {
-            window.els.input.style.height = 'auto';
-            const newHeight = Math.min(window.els.input.scrollHeight, 600);
-            window.els.input.style.height = newHeight + 'px';
+            window.refreshInputLayout();
             window.updateUI();
         };
         window.els.input.onkeydown = (e) => {

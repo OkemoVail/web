@@ -1017,7 +1017,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border-strong);
-            border-radius: 9999px;
+            border-radius: 28px;
             box-shadow:
                 0 6px 16px -2px rgba(0, 0, 0, 0.08),
                 0 2px 4px -1px rgba(0, 0, 0, 0.04);
@@ -1073,6 +1073,67 @@
         body.is-generating .input-box-wrap::before {
             opacity: 1;
             animation: rotate-gradient 3s linear infinite;
+        }
+
+        /* Composer: single-row pill in the normal state (image #7),
+           stacks into two rows once the message gains a new line (image #8).
+           Like the sidebar, the + and Fast/send controls stay bottom-anchored
+           and stationary; only the field expands upward around them. */
+        #input-inner {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            transition: gap 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #input-inner .input-textarea-wrap {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        /* Field grows/shrinks fluidly as lines are added or removed. */
+        #user-input {
+            transition: height 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #input-inner.is-multiline {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #input-inner.is-multiline #input-actions {
+            margin-left: auto;
+        }
+
+        /* Only the field animates as it moves to its own row; the buttons hold still. */
+        #input-inner.is-multiline .input-textarea-wrap {
+            order: -1;
+            flex: 1 0 100%;
+            animation: ib-textarea-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #input-inner.is-collapsing .input-textarea-wrap {
+            animation: ib-textarea-sink 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes ib-textarea-rise {
+            0%   { opacity: 0.4; transform: translateY(8px); }
+            100% { opacity: 1;   transform: translateY(0); }
+        }
+
+        @keyframes ib-textarea-sink {
+            0%   { opacity: 0.7; transform: translateY(-5px); }
+            100% { opacity: 1;   transform: translateY(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #input-inner,
+            #user-input,
+            #input-inner.is-multiline .input-textarea-wrap,
+            #input-inner.is-collapsing .input-textarea-wrap {
+                transition: none;
+                animation: none;
+            }
         }
 
 
@@ -2476,7 +2537,7 @@
 
         /* Send button: active (has text / generating) vs inactive */
         #send-btn {
-            border-radius: 8px;
+            border-radius: 9999px;
         }
 
         #send-btn:disabled {
@@ -2871,7 +2932,7 @@
             color: var(--text-tertiary);
         }
         #voice-overlay {
-            position: fixed; inset: 0; z-index: 200; display: none;
+            position: fixed; inset: 0; z-index: 9000; display: none;
             background: #000; flex-direction: row;
         }
         #voice-overlay.active { display: flex; }
@@ -2894,13 +2955,28 @@
             align-items: center; justify-content: center; gap: 24px; position: relative;
         }
         #voice-orb {
-            width: 132px; height: 132px; border-radius: 9999px;
-            background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent-color), white 35%), var(--accent-color) 60%, color-mix(in srgb, var(--accent-color), black 25%) 100%);
-            box-shadow: 0 0 50px color-mix(in srgb, var(--accent-color), transparent 45%);
-            animation: voice-pulse 2.4s ease-in-out infinite; cursor: pointer;
+            position: relative; overflow: hidden;
+            width: 150px; height: 150px; border-radius: 9999px;
+            box-shadow: 0 0 60px color-mix(in srgb, var(--accent-color), transparent 42%),
+                        inset 0 0 28px color-mix(in srgb, var(--accent-color), black 30%);
+            animation: voice-pulse 4.5s ease-in-out infinite; cursor: pointer;
+            transition: box-shadow .45s ease;
         }
-        #voice-overlay.speaking #voice-orb { animation: voice-pulse 0.9s ease-in-out infinite; }
-        @keyframes voice-pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+        #voice-orb .orb-svg { width: 100%; height: 100%; display: block; }
+        /* Cloud gradient is fully accent-driven: light top → accent → deep accent bottom */
+        #voice-orb .orb-s0 { stop-color: color-mix(in srgb, var(--accent-color), white 80%); }
+        #voice-orb .orb-s1 { stop-color: color-mix(in srgb, var(--accent-color), white 30%); }
+        #voice-orb .orb-s2 { stop-color: var(--accent-color); }
+        #voice-orb .orb-s3 { stop-color: color-mix(in srgb, var(--accent-color), black 26%); }
+        #voice-overlay.speaking #voice-orb {
+            animation: voice-pulse 1.8s ease-in-out infinite;
+            box-shadow: 0 0 92px color-mix(in srgb, var(--accent-color), transparent 22%),
+                        inset 0 0 28px color-mix(in srgb, var(--accent-color), black 30%);
+        }
+        @keyframes voice-pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
+        @media (prefers-reduced-motion: reduce) {
+            #voice-orb, #voice-overlay.speaking #voice-orb { animation: none; }
+        }
 
         #voice-state { color: #ececec; font-size: 19px; font-weight: 600; }
         #voice-transcript { color: #9a9aa0; font-size: 14px; max-width: 70%; text-align: center; min-height: 20px; line-height: 1.5; }
@@ -3437,13 +3513,13 @@
             <div id="memory-consent-stack" class="flex flex-col gap-2 mb-2 w-full"></div>
 
             <div
-                class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none rounded-full relative flex flex-col !overflow-visible pointer-events-auto">
+                class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none rounded-[28px] relative flex flex-col !overflow-visible pointer-events-auto">
 
                 <div id="upload-preview-container" class="hidden px-4 pt-3 flex gap-2 overflow-x-auto w-full"></div>
 
-                <div class="flex items-end gap-2 w-full px-2 py-1.5">
+                <div id="input-inner" class="flex w-full px-3 py-2.5">
 
-                    <!-- LEFT: existing #plus-menu-container block, moved here unchanged -->
+                    <!-- LEFT: plus / attach menu -->
                     <div id="plus-menu-container" class="relative z-50 shrink-0">
                         <button id="plus-menu-btn" onclick="window.toggleMenu(event, 'plus-menu')"
                             class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
@@ -3536,17 +3612,17 @@
                         </div>
                     </div>
 
-                    <!-- MIDDLE: growable textarea -->
-                    <div class="relative flex-1">
+                    <!-- CENTER: growable textarea -->
+                    <div class="input-textarea-wrap relative">
                         <input type="file" id="file-upload-input" class="hidden"
                             onchange="window.handleFileUpload(event)" />
                         <textarea id="user-input" placeholder="What do you want to know?"
                             rows="1"
-                            class="w-full bg-transparent px-2 py-2.5 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[44px]"></textarea>
+                            class="w-full bg-transparent px-1 py-1.5 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[28px]"></textarea>
                     </div>
 
                     <!-- RIGHT: Fast/Thinking pill + send button -->
-                    <div class="flex items-center gap-2 shrink-0 pb-0.5">
+                    <div id="input-actions" class="flex items-center gap-2 shrink-0">
 
                         <div id="mode-selector-container" class="relative z-50">
                             <button id="mode-pill-btn" onclick="window.toggleMenu(event, 'mode-menu-input')"
@@ -3573,7 +3649,7 @@
                         </div>
 
                         <button id="send-btn" onclick="window.handleAction()" disabled
-                            class="skuomorphic-btn w-10 h-10 flex items-center justify-center rounded-full opacity-50 cursor-not-allowed transition-all active:scale-95"
+                            class="skuomorphic-btn w-11 h-11 flex items-center justify-center rounded-full opacity-50 cursor-not-allowed transition-all active:scale-95"
                             style="transition: background 0.2s, opacity 0.2s;">
                             <span id="send-icon-wrapper" class="flex items-center justify-center h-full w-full">
                                 <i class="fa-solid fa-arrow-up text-sm"></i>
@@ -4778,7 +4854,41 @@
             <span id="voice-rail-label">Voice</span>
         </div>
         <div id="voice-stage">
-            <div id="voice-orb" onclick="window.VoiceMode && window.VoiceMode.interrupt()"></div>
+            <div id="voice-orb" onclick="window.VoiceMode && window.VoiceMode.interrupt()">
+                <svg class="orb-svg" viewBox="0 0 220 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="orbGrad" x1="0.15" y1="0" x2="0.4" y2="1">
+                            <stop class="orb-s0" offset="0%"/>
+                            <stop class="orb-s1" offset="40%"/>
+                            <stop class="orb-s2" offset="74%"/>
+                            <stop class="orb-s3" offset="100%"/>
+                        </linearGradient>
+                        <radialGradient id="orbGlow" cx="36%" cy="28%" r="62%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
+                            <stop offset="46%" stop-color="#ffffff" stop-opacity="0"/>
+                        </radialGradient>
+                        <filter id="orbClouds" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.011 0.014" numOctaves="4" seed="7" result="noise">
+                                <animate attributeName="baseFrequency" dur="24s" repeatCount="indefinite"
+                                         values="0.011 0.014;0.016 0.019;0.009 0.012;0.011 0.014"/>
+                            </feTurbulence>
+                            <feDisplacementMap in="SourceGraphic" in2="noise" scale="36" xChannelSelector="R" yChannelSelector="G">
+                                <animate attributeName="scale" dur="10s" values="26;46;26" repeatCount="indefinite"/>
+                            </feDisplacementMap>
+                        </filter>
+                        <clipPath id="orbClip"><circle cx="110" cy="110" r="110"/></clipPath>
+                    </defs>
+                    <g clip-path="url(#orbClip)">
+                        <g>
+                            <rect x="-55" y="-55" width="330" height="330" fill="url(#orbGrad)" filter="url(#orbClouds)"/>
+                            <animateTransform attributeName="transform" type="rotate" dur="28s" repeatCount="indefinite"
+                                              calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1"
+                                              values="-8 110 110;8 110 110;-8 110 110"/>
+                        </g>
+                        <circle cx="110" cy="110" r="110" fill="url(#orbGlow)"/>
+                    </g>
+                </svg>
+            </div>
             <div id="voice-state">Listening…</div>
             <div id="voice-transcript"></div>
             <div id="voice-controls">
