@@ -55,3 +55,24 @@ code, pre, .font-mono, [class*="code"] {
   background: var(--border-strong);
   border-radius: 10px;
 }
+
+/* ── Global active-press accent (site-wide) ─────────────────────
+   Every button shows an adaptive accent gradient while pressed (:active only).
+   Applied as a translucent background-image overlay so it tints any base color
+   without replacing it. Lightened accent at top, darkened at bottom — adaptive,
+   so a light accent darkens toward the bottom and a dark accent lightens toward
+   the top, and neither stop blows out. Resolves --accent-color (chat app) →
+   --accent (token pages) → rosewood fallback. */
+button:active:not(:disabled),
+[role="button"]:active,
+.btn:active,
+input[type="button"]:active:not(:disabled),
+input[type="submit"]:active:not(:disabled),
+input[type="reset"]:active:not(:disabled) {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, color-mix(in srgb, var(--accent-color, var(--accent, #c96478)), white 22%) 20%, transparent),
+    color-mix(in srgb, color-mix(in srgb, var(--accent-color, var(--accent, #c96478)), black 22%) 20%, transparent)
+  ) !important;
+}
+

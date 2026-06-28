@@ -125,22 +125,8 @@ window.initChatUI = () => {
         ta.style.height = 'auto';
         const newHeight = Math.min(ta.scrollHeight, 600);
         ta.style.height = newHeight + 'px';
-        // Single-row pill normally; stack the bar once the message has a new line.
-        const inner = document.getElementById('input-inner');
-        if (!inner) return;
-        const wasMulti = inner.classList.contains('is-multiline');
-        const willMulti = ta.value.includes('\n');
-        if (wasMulti === willMulti) return;
-        clearTimeout(inner._collapseTimer);
-        if (willMulti) {
-            inner.classList.remove('is-collapsing');
-            inner.classList.add('is-multiline');
-        } else {
-            // Collapsing back to one row: play the mirrored reverse settle.
-            inner.classList.remove('is-multiline');
-            inner.classList.add('is-collapsing');
-            inner._collapseTimer = setTimeout(() => inner.classList.remove('is-collapsing'), 460);
-        }
+        // Layout is permanently two-row (Claude-style): textarea on top, controls
+        // beneath. No single-row/multiline toggling needed.
     };
     if (window.els.input) {
         window.els.input.oninput = () => {

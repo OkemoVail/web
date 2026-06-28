@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OkemoVail</title>
-  <meta name="description" content="OkemoVail — developer, builder, and creator. Explore projects in AI, writing tools, and autonomous systems.">
+  <meta name="description"
+    content="OkemoVail — developer, builder, and creator. Explore projects in AI, writing tools, and autonomous systems.">
   <link rel="stylesheet" href="src/design-tokens.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
@@ -38,23 +39,23 @@
       theme: {
         extend: {
           colors: {
-            parchment:      'var(--bg)',
-            ivory:          'var(--bg-elevated)',
-            'text-warm':    'var(--text-primary)',
-            'olive-gray':   'var(--text-secondary)',
-            'stone-gray':   'var(--text-tertiary)',
-            rosewood:       'var(--accent)',
-            'rose-light':   'var(--accent-light)',
+            parchment: 'var(--bg)',
+            ivory: 'var(--bg-elevated)',
+            'text-warm': 'var(--text-primary)',
+            'olive-gray': 'var(--text-secondary)',
+            'stone-gray': 'var(--text-tertiary)',
+            rosewood: 'var(--accent)',
+            'rose-light': 'var(--accent-light)',
             'border-cream': 'var(--border)',
-            'border-warm':  'var(--border-strong)',
-            'ring-warm':    'var(--shadow-ring)',
-            'surf-dark':    'var(--surface-dark)',
-            'deep-dark':    'var(--deep-dark)',
+            'border-warm': 'var(--border-strong)',
+            'ring-warm': 'var(--shadow-ring)',
+            'surf-dark': 'var(--surface-dark)',
+            'deep-dark': 'var(--deep-dark)',
           },
           fontFamily: {
             serif: ['Century', '"Century Schoolbook"', 'Georgia', 'serif'],
-            sans:  ['Satoshi', 'Inter', 'sans-serif'],
-            mono:  ['"JetBrains Mono"', 'monospace'],
+            sans: ['Satoshi', 'Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
           },
         }
       }
@@ -68,6 +69,7 @@
       font-display: swap;
       font-style: normal;
     }
+
     @font-face {
       font-family: 'Satoshi';
       src: url('Fonts/Satoshi-VariableItalic.ttf') format('truetype');
@@ -76,50 +78,106 @@
       font-style: italic;
     }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
 
-    .serif-text { font-family: 'Century', 'Century Schoolbook', Georgia, serif; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .serif-text {
+      font-family: 'Century', 'Century Schoolbook', Georgia, serif;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
 
     /* ── Entrance animations ─────────────────────────────────── */
     @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
+
     @keyframes fadeSlideRight {
-      from { opacity: 0; transform: translateX(-16px); }
-      to   { opacity: 1; transform: translateX(0); }
+      from {
+        opacity: 0;
+        transform: translateX(-16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
+
     @keyframes accentGrow {
-      from { width: 0; }
-      to   { width: 48px; }
+      from {
+        width: 0;
+      }
+
+      to {
+        width: 48px;
+      }
     }
+
     @keyframes gentleFloat {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-6px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-6px);
+      }
     }
 
     .fade-up {
       animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
+
     .fade-right {
       animation: fadeSlideRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     /* Stagger delays */
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-    .delay-3 { animation-delay: 0.35s; }
-    .delay-4 { animation-delay: 0.5s; }
-    .delay-5 { animation-delay: 0.65s; }
+    .delay-1 {
+      animation-delay: 0.1s;
+    }
+
+    .delay-2 {
+      animation-delay: 0.2s;
+    }
+
+    .delay-3 {
+      animation-delay: 0.35s;
+    }
+
+    .delay-4 {
+      animation-delay: 0.5s;
+    }
+
+    .delay-5 {
+      animation-delay: 0.65s;
+    }
 
     /* ── Nav scroll shadow ───────────────────────────────────── */
     .nav-scrolled {
-      box-shadow: 0 1px 12px rgba(0,0,0,0.06);
+      box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
     }
+
     .dark .nav-scrolled {
-      box-shadow: 0 1px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
     }
 
     /* ── Project row hover ───────────────────────────────────── */
@@ -127,13 +185,15 @@
       transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
       border-radius: 12px;
     }
+
     .project-row:not(.project-disabled):hover {
       background-color: var(--bg-elevated);
       transform: translateY(-2px);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
     }
+
     .dark .project-row:not(.project-disabled):hover {
-      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
     }
 
     /* ── Button micro-interactions ────────────────────────────── */
@@ -142,34 +202,47 @@
       overflow: hidden;
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, opacity 0.25s ease;
     }
+
     .btn-primary::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
+
     .btn-primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(201,100,120,0.25);
+      box-shadow: 0 6px 20px rgba(201, 100, 120, 0.25);
     }
-    .btn-primary:hover::after { opacity: 1; }
-    .btn-primary:active { transform: translateY(0) scale(0.98); }
+
+    .btn-primary:hover::after {
+      opacity: 1;
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+    }
 
     .btn-secondary {
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, border-color 0.25s ease;
     }
+
     .btn-secondary:hover {
       transform: translateY(-1px);
     }
-    .btn-secondary:active { transform: translateY(0) scale(0.98); }
+
+    .btn-secondary:active {
+      transform: translateY(0) scale(0.98);
+    }
 
     /* ── Nav link underline animation ─────────────────────────── */
     .nav-link {
       position: relative;
       transition: color 0.25s ease;
     }
+
     .nav-link::after {
       content: '';
       position: absolute;
@@ -180,9 +253,11 @@
       background: var(--accent);
       transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     .nav-link:hover::after {
       width: 100%;
     }
+
     .nav-link:hover {
       color: var(--text-primary);
     }
@@ -191,16 +266,18 @@
     .profile-img {
       transition: filter 0.7s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
     }
+
     .profile-img:hover {
       filter: grayscale(0);
       transform: scale(1.04);
-      box-shadow: 0 8px 32px rgba(201,100,120,0.15);
+      box-shadow: 0 8px 32px rgba(201, 100, 120, 0.15);
     }
 
     /* ── Quote hover ──────────────────────────────────────────── */
     .quote-block {
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     .quote-block:hover {
       transform: scale(1.02);
     }
@@ -233,6 +310,7 @@
       transform: translateY(24px);
       transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     .section-visible {
       opacity: 1;
       transform: translateY(0);
@@ -242,10 +320,11 @@
     .project-explore-btn {
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
+
     .project-row:not(.project-disabled):hover .project-explore-btn {
       border-color: var(--accent);
       color: var(--accent);
-      box-shadow: 0 2px 12px rgba(201,100,120,0.1);
+      box-shadow: 0 2px 12px rgba(201, 100, 120, 0.1);
     }
   </style>
 </head>
@@ -253,9 +332,11 @@
 <body class="font-sans antialiased transition-colors duration-500">
 
 
-  <nav id="main-nav" class="fixed top-0 w-full z-50 bg-parchment/80 dark:bg-[#121212]/80 backdrop-blur-md border-b border-border-cream dark:border-surf-dark transition-shadow duration-300">
+  <nav id="main-nav"
+    class="fixed top-0 w-full z-50 bg-parchment/80 dark:bg-[#121212]/80 backdrop-blur-md border-b border-border-cream dark:border-surf-dark transition-shadow duration-300">
     <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="serif-text text-2xl font-medium text-rosewood tracking-tight hover:opacity-80 transition-opacity">okemovail.</a>
+      <a href="/"
+        class="serif-text text-2xl font-medium text-rosewood tracking-tight hover:opacity-80 transition-opacity">okemovail.</a>
       <div class="hidden md:flex space-x-10 text-sm font-medium text-olive-gray">
         <a href="#work" class="nav-link">Projects</a>
         <a href="/AI/index.html" class="nav-link">OkemoAI</a>
@@ -280,16 +361,17 @@
           alt="OkemoVail Profile"
           class="profile-img w-24 h-24 rounded-2xl border border-border-cream dark:border-surf-dark grayscale bg-ivory object-cover">
       </div>
-      <h1 class="serif-text text-5xl md:text-7xl text-text-warm mb-2 opacity-0 fade-up delay-2" style="line-height: 1.08;">
+      <h1 class="serif-text text-5xl md:text-7xl text-text-warm mb-2 opacity-0 fade-up delay-2"
+        style="line-height: 1.08;">
         Hey, I'm OkemoVail
       </h1>
       <div class="accent-bar mt-5 mb-6 delay-3"></div>
-      <p class="text-olive-gray text-base md:text-lg leading-relaxed max-w-lg opacity-0 fade-up delay-3" style="letter-spacing: 0.01em;">
-        Builder. Thinker. Exploring the frontier of AI&nbsp;and&nbsp;code.
+      <p class="text-olive-gray text-base md:text-lg leading-relaxed max-w-lg opacity-0 fade-up delay-3"
+        style="letter-spacing: 0.01em;">
+        I make everything
       </p>
       <div class="mt-12 flex flex-wrap gap-4 opacity-0 fade-up delay-4">
-        <a href="#work"
-          class="btn-primary bg-rosewood text-ivory px-8 py-3 rounded-lg font-medium"
+        <a href="#work" class="btn-primary bg-rosewood text-ivory px-8 py-3 rounded-lg font-medium"
           style="box-shadow: 0 0 0 1px var(--accent)">
           Explore Projects
         </a>
@@ -301,20 +383,23 @@
     </section>
 
 
-    <section class="py-16 md:py-24 border-t border-border-cream dark:border-surf-dark italic text-center section-hidden">
+    <section
+      class="py-16 md:py-24 border-t border-border-cream dark:border-surf-dark italic text-center section-hidden">
       <div class="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
         <div class="quote-block cursor-default">
           <blockquote class="serif-text text-3xl md:text-4xl text-olive-gray leading-snug">
             "Stay Hungry, Stay Foolish"
           </blockquote>
-          <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray not-italic">— Steve Jobs</cite>
+          <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray not-italic">— Steve
+            Jobs</cite>
         </div>
         <div class="hidden md:block w-px h-16 bg-border-cream dark:bg-surf-dark self-center"></div>
         <div class="quote-block cursor-default">
           <blockquote class="serif-text text-3xl md:text-4xl text-olive-gray leading-snug">
             "Don't be evil"
           </blockquote>
-          <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray not-italic">— Google</cite>
+          <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray not-italic">—
+            Google</cite>
         </div>
       </div>
     </section>
@@ -324,15 +409,22 @@
       <div class="flex items-baseline justify-between mb-4">
         <h2 class="serif-text text-4xl text-text-warm">Projects</h2>
       </div>
-      <p class="text-olive-gray text-sm mb-12" style="letter-spacing: 0.02em;">A selection of things I've built and am building.</p>
+      <p class="text-olive-gray text-sm mb-12" style="letter-spacing: 0.02em;">A selection of things I've built and am
+        building.</p>
       <div>
         <table class="w-full text-left border-collapse">
           <thead class="hidden md:table-header-group">
             <tr class="border-b border-border-cream dark:border-surf-dark">
-              <th class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium w-1/4">Project</th>
-              <th class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium">Description</th>
-              <th class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium text-right">Details</th>
-              <th class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium text-right">Action</th>
+              <th class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium w-1/4">
+                Project</th>
+              <th class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium">
+                Description</th>
+              <th
+                class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium text-right">
+                Details</th>
+              <th
+                class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium text-right">
+                Action</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border-cream dark:divide-surf-dark">
@@ -380,7 +472,8 @@
               <td class="md:py-8 pr-4">
                 <div class="flex items-center justify-between md:block">
                   <h3 class="serif-text text-2xl text-text-warm inline-block">OkemoAI Labs</h3>
-                  <span class="md:hidden text-[10px] uppercase tracking-widest font-bold text-stone-gray">Coming Soon</span>
+                  <span class="md:hidden text-[10px] uppercase tracking-widest font-bold text-stone-gray">Coming
+                    Soon</span>
                 </div>
               </td>
               <td class="py-4 md:py-8">
@@ -404,10 +497,12 @@
 
 
     <footer class="py-12 border-t border-border-cream dark:border-surf-dark section-hidden">
-      <div class="flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-[0.2em] font-bold text-stone-gray gap-6">
+      <div
+        class="flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-[0.2em] font-bold text-stone-gray gap-6">
         <p>2026 OKEMOVAIL.COM</p>
         <div class="flex space-x-8">
-          <a href="https://github.com/ar12c" target="_blank" class="hover:text-rosewood transition-colors duration-300">Github</a>
+          <a href="https://github.com/ar12c" target="_blank"
+            class="hover:text-rosewood transition-colors duration-300">Github</a>
           <a href="/AI/index.html" class="hover:text-rosewood transition-colors duration-300">OkemoAI</a>
         </div>
       </div>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Oaky</title>
+    <title>Labs21</title>
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
 
@@ -51,6 +51,20 @@
             --sidebar-tint: rgba(0, 0, 0, 0);
             --accent-contrast: #faf9f5;
 
+            /* Sidebar — its own recessed surface, distinct from the chat canvas */
+            --sidebar-surface: #f3f1e8;
+            --sb-edge: rgba(20, 20, 19, 0.07);
+            --sb-edge-highlight: rgba(255, 255, 255, 0.65);
+            --sb-divider: rgba(20, 20, 19, 0.06);
+            --sb-item-hover: color-mix(in srgb, var(--accent-color) 7%, transparent);
+            --sb-active: color-mix(in srgb, var(--accent-color) 15%, transparent);
+            --sb-active-soft: color-mix(in srgb, var(--accent-color) 8%, transparent);
+            /* Active-highlight vertical gradient: lightened accent at top, darkened at bottom.
+               Same 15% alpha as --sb-active; only lightness shifts, so it adapts to any accent. */
+            --sb-active-top: color-mix(in srgb, color-mix(in srgb, var(--accent-color), white 22%) 15%, transparent);
+            --sb-active-bottom: color-mix(in srgb, color-mix(in srgb, var(--accent-color), black 22%) 15%, transparent);
+            --sb-depth: 6px 0 30px -22px rgba(20, 20, 19, 0.32);
+
             /* Background system — chat bg + sidebar locked to rosewood accent (no light/dark variation) */
             --bg-color: #c96478;
             --sidebar-bg: #c96478;
@@ -77,6 +91,18 @@
             --accent-glow: rgba(217, 119, 144, 0.4);
             --accent-contrast: #141413;
             --bg-elevated: #1e1e1c;
+
+            /* Sidebar — sits a touch deeper than the chat canvas for a recessed feel */
+            --sidebar-surface: #191917;
+            --sb-edge: rgba(255, 255, 255, 0.055);
+            --sb-edge-highlight: rgba(255, 255, 255, 0.05);
+            --sb-divider: rgba(255, 255, 255, 0.06);
+            --sb-item-hover: color-mix(in srgb, var(--accent-color) 14%, transparent);
+            --sb-active: color-mix(in srgb, var(--accent-color) 22%, transparent);
+            --sb-active-soft: color-mix(in srgb, var(--accent-color) 12%, transparent);
+            --sb-active-top: color-mix(in srgb, color-mix(in srgb, var(--accent-color), white 22%) 22%, transparent);
+            --sb-active-bottom: color-mix(in srgb, color-mix(in srgb, var(--accent-color), black 22%) 22%, transparent);
+            --sb-depth: 8px 0 36px -24px rgba(0, 0, 0, 0.65);
 
             /* dark mode keeps chat bg + sidebar pinned to the same rosewood — no shift */
             --bg-color: #c96478;
@@ -301,9 +327,32 @@
             aside {
                 transition: none !important;
             }
+
+            .sb-nav-item:active,
+            .sb-new-chat-btn:active {
+                transform: none !important;
+            }
         }
 
         /* ── Sidebar redesign ─────────────────────────────────────── */
+
+        /* Recessed surface: crisp inner edges + a soft depth shadow to the
+           right so the sidebar reads as a distinct plane under the chat. */
+        #sidebar {
+            box-shadow:
+                inset 0 1px 0 var(--sb-edge-highlight),
+                inset -1px 0 0 var(--sb-edge),
+                var(--sb-depth);
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            #sidebar {
+                transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                            box-shadow 0.3s ease;
+            }
+        }
+
         .sb-icon-btn {
             width: 28px;
             height: 28px;
@@ -333,7 +382,8 @@
             justify-content: center;
             flex-shrink: 0;
             border-radius: 8px;
-            transition: background 0.12s ease;
+            color: var(--text-secondary);
+            transition: background 0.18s ease, color 0.2s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         /* Collapsed: suppress full-width rect, highlight only icon slot */
@@ -343,16 +393,19 @@
 
         body.sidebar-collapsed .sb-new-chat-btn {
             background: transparent !important;
+            box-shadow: none !important;
+            /* Container is px-4 (16px); pull back 8px so the 28px icon centers in the 44px rail. */
+            margin-left: -8px;
         }
 
         body.sidebar-collapsed .sb-nav-item:hover .sb-nav-icon,
         body.sidebar-collapsed .sb-new-chat-btn:hover .sb-nav-icon {
-            background: rgba(0, 0, 0, 0.07);
+            background: var(--sb-item-hover);
         }
 
         .dark body.sidebar-collapsed .sb-nav-item:hover .sb-nav-icon,
         .dark body.sidebar-collapsed .sb-new-chat-btn:hover .sb-nav-icon {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--sb-item-hover);
         }
 
         body.sidebar-collapsed .sb-profile-btn {
@@ -369,11 +422,11 @@
         }
 
         body.sidebar-collapsed .sb-profile-btn:hover .sb-nav-icon {
-            background: rgba(0, 0, 0, 0.07);
+            background: var(--sb-item-hover);
         }
 
         .dark body.sidebar-collapsed .sb-profile-btn:hover .sb-nav-icon {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--sb-item-hover);
         }
 
         /* Hide folder icon (keep chevron) */
@@ -384,66 +437,199 @@
         .sb-nav-item {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 6px 0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 400;
+            gap: 12px;
+            padding: 7px 0;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
             color: var(--text-primary);
             text-decoration: none;
             cursor: pointer;
-            transition: background 0.12s ease;
+            transition: background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        transform 0.15s ease;
             white-space: nowrap;
             overflow: hidden;
         }
 
         .sb-nav-item:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: var(--sb-item-hover);
         }
 
         .dark .sb-nav-item:hover {
-            background: rgba(255, 255, 255, 0.07);
+            background: var(--sb-item-hover);
+        }
+
+        /* ── Tile system (New chat / Research / VoidAI) ──────────────
+           Scoped to .sb-tile so the Labs21 wordmark row stays untouched. */
+        .sb-tile {
+            position: relative;
+        }
+
+        /* Accent indicator bar — sits at the tile's left edge, shown only on the active tile */
+        .sb-tile::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 3px;
+            height: 20px;
+            border-radius: 3px;
+            background: var(--accent-color);
+            opacity: 0;
+            transform: translateY(-50%) scaleY(0.35);
+            transition: opacity 0.2s ease,
+                        transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Hover: a clean rounded fill — plain icons, no box */
+        .sb-tile:hover {
+            background: var(--sb-item-hover);
+        }
+
+        .sb-tile:hover .sb-nav-icon {
+            color: var(--accent-color);
+        }
+
+        .sb-tile:active .sb-nav-icon {
+            transform: scale(0.9);
         }
 
         .sb-nav-item--muted {
             color: var(--text-secondary);
             font-size: 13px;
+            font-weight: 450;
+        }
+
+        .sb-nav-item--muted .sb-nav-icon {
+            color: var(--text-tertiary);
         }
 
         .sb-nav-item--muted:hover {
-            background: rgba(0, 0, 0, 0.04);
+            background: var(--sb-active-soft);
         }
 
         .dark .sb-nav-item--muted:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--sb-active-soft);
         }
 
-        /* New chat button */
+        .sb-nav-item--muted:hover .sb-nav-icon {
+            color: var(--accent-color);
+        }
+
+        /* External-link affordance — reveals on hover, defers otherwise */
+        .sb-nav-ext-icon {
+            margin-left: auto;
+            margin-right: 10px;
+            color: var(--text-tertiary);
+            opacity: 0;
+            transform: translateX(-3px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .sb-nav-item--muted:hover .sb-nav-ext-icon {
+            opacity: 0.9;
+            transform: translateX(0);
+        }
+
+        body.sidebar-collapsed .sb-nav-ext-icon {
+            display: none !important;
+        }
+
+        /* New chat — the primary "active" item: a clean raised card, left bar + chevron */
         .sb-new-chat-btn {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 6px 0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 400;
+            gap: 12px;
+            padding: 8px 0;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
             color: var(--text-primary);
             cursor: pointer;
-            transition: background 0.12s ease;
             white-space: nowrap;
-            overflow: hidden;
-            background: transparent;
             border: none;
             width: 100%;
             text-align: left;
+            background: var(--bg-elevated);
+            box-shadow:
+                inset 0 0 0 1px var(--sb-edge),
+                0 1px 2px rgba(20, 20, 19, 0.05);
+            transition: background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        box-shadow 0.25s ease,
+                        transform 0.15s ease;
+        }
+
+        .sb-new-chat-btn .sb-nav-icon {
+            color: var(--accent-color);
+        }
+
+        /* Indicator bar pinned on — this is the active item.
+           Pulled to the sidebar's absolute left edge (button is inset 16px by px-4). */
+        .sb-new-chat-btn::before {
+            opacity: 1;
+            left: -16px;
+            border-radius: 0 3px 3px 0;
+            transform: translateY(-50%) scaleY(1);
+        }
+
+        /* Chevron affordance on the right, like the reference */
+        .sb-new-chat-chevron {
+            margin-left: auto;
+            margin-right: 0;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+            transition: transform 0.2s ease, color 0.2s ease;
         }
 
         .sb-new-chat-btn:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: var(--bg-elevated);
+            box-shadow:
+                inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 22%, transparent),
+                0 2px 8px -2px rgba(20, 20, 19, 0.12);
+        }
+
+        .sb-new-chat-btn:hover .sb-new-chat-chevron {
+            color: var(--text-secondary);
+            transform: translateX(2px);
+        }
+
+        .dark .sb-new-chat-btn {
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
         }
 
         .dark .sb-new-chat-btn:hover {
-            background: rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow:
+                inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 30%, transparent),
+                0 2px 10px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Expanded: match the Grok reference — no leading icon, just label + chevron.
+           The icon slot is kept for the collapsed rail, where it's the only affordance. */
+        body:not(.sidebar-collapsed) .sb-new-chat-btn {
+            padding: 8px 10px;
+            gap: 8px;
+        }
+
+        /* Pencil icon only in the collapsed rail; expanded shows label + chevron. */
+        body:not(.sidebar-collapsed) .sb-new-chat-btn .sb-nav-icon {
+            display: none;
+        }
+
+        /* Rail icon swaps: pencil on a fresh/empty chat, chat bubble once a chat is active. */
+        .sb-new-chat-btn .nc-icon-active {
+            display: none;
+        }
+
+        body:not(.chat-empty) .sb-new-chat-btn .nc-icon-new {
+            display: none;
+        }
+
+        body:not(.chat-empty) .sb-new-chat-btn .nc-icon-active {
+            display: block;
         }
 
         /* Recents section label */
@@ -478,12 +664,13 @@
             width: 100%;
             padding: 7px 10px 7px 32px;
             font-size: 13px;
-            background: rgba(0, 0, 0, 0.04);
+            background: var(--bg-elevated);
             border: 1px solid transparent;
-            border-radius: 8px;
+            border-radius: 9px;
             outline: none;
             color: var(--text-primary);
-            transition: background 0.15s ease, border-color 0.15s ease;
+            box-shadow: inset 0 0 0 1px var(--sb-edge);
+            transition: background 0.15s ease, box-shadow 0.15s ease;
         }
 
         .sb-search-input::placeholder {
@@ -491,17 +678,18 @@
         }
 
         .sb-search-input:focus {
-            background: rgba(0, 0, 0, 0.06);
-            border-color: rgba(0, 0, 0, 0.08);
+            background: var(--bg-elevated);
+            box-shadow:
+                inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 45%, transparent),
+                0 0 0 3px color-mix(in srgb, var(--accent-color) 12%, transparent);
         }
 
         .dark .sb-search-input {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .dark .sb-search-input:focus {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .sb-search-wrap:focus-within .sb-search-icon {
@@ -519,11 +707,18 @@
         }
 
         .sb-profile-btn:hover {
-            background: rgba(0, 0, 0, 0.05);
+            background: var(--sb-item-hover);
         }
 
         .dark .sb-profile-btn:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: var(--sb-item-hover);
+        }
+
+        /* Footer zone: hairline separates the profile from the chat list.
+           Only padding here — margin stays `auto` (Tailwind) to pin it to the bottom. */
+        #sidebar-bottom-actions {
+            border-top: 1px solid var(--sb-divider);
+            padding-top: 6px;
         }
 
         .sb-mini-btn {
@@ -973,10 +1168,27 @@
         }
 
         .history-item-active {
-            background: var(--accent-tint, rgba(0, 0, 0, 0.08));
+            background: linear-gradient(180deg, var(--sb-active-top), var(--sb-active-bottom));
             color: var(--accent-color);
             font-weight: 600;
-            box-shadow: inset 3px 0 0 var(--accent-color);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 18%, transparent);
+        }
+
+        .history-item-active::before {
+            content: "";
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 15px;
+            border-radius: 3px;
+            background: var(--accent-color);
+        }
+
+        /* Drop the active chat's left accent bar in the expanded sidebar. */
+        body:not(.sidebar-collapsed) .history-item-active::before {
+            display: none;
         }
 
         .history-item-active>button {
@@ -984,7 +1196,12 @@
         }
 
         .dark .history-item-active {
-            background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+            background: linear-gradient(180deg, var(--sb-active-top), var(--sb-active-bottom));
+        }
+
+        /* Inactive rows: accent-aware hover across the whole row, not just the label */
+        .history-btn-container:not(.history-item-active):hover {
+            background: var(--sb-item-hover);
         }
 
         .dropdown-menu {
@@ -1019,12 +1236,19 @@
             border: 1px solid var(--border-strong);
             border-radius: 28px;
             box-shadow:
-                0 6px 16px -2px rgba(0, 0, 0, 0.08),
-                0 2px 4px -1px rgba(0, 0, 0, 0.04);
+                0 2px 10px -3px rgba(0, 0, 0, 0.07),
+                0 1px 2px -1px rgba(0, 0, 0, 0.04);
             position: relative;
             z-index: 40;
             overflow: hidden;
             pointer-events: auto;
+        }
+
+        .input-box-wrap:focus-within {
+            border-color: color-mix(in srgb, var(--accent-color), transparent 55%);
+            box-shadow:
+                0 4px 22px -6px rgba(0, 0, 0, 0.12),
+                0 0 0 3px color-mix(in srgb, var(--accent-color), transparent 90%);
         }
 
         .dark .input-box-wrap {
@@ -1034,7 +1258,10 @@
         }
 
         .dark .input-box-wrap:focus-within {
-            box-shadow: 0 8px 18px -4px rgba(0, 0, 0, 0.5);
+            border-color: color-mix(in srgb, var(--accent-color), transparent 50%);
+            box-shadow:
+                0 8px 24px -8px rgba(0, 0, 0, 0.55),
+                0 0 0 3px color-mix(in srgb, var(--accent-color), transparent 88%);
             outline: none;
         }
 
@@ -1075,20 +1302,25 @@
             animation: rotate-gradient 3s linear infinite;
         }
 
-        /* Composer: single-row pill in the normal state (image #7),
-           stacks into two rows once the message gains a new line (image #8).
-           Like the sidebar, the + and Fast/send controls stay bottom-anchored
-           and stationary; only the field expands upward around them. */
+        /* Composer: Claude-style two-row layout — the textarea sits full-width on
+           its own row; controls (+ on the left, mode/send on the right) sit on the
+           row beneath. The field still grows upward as lines are added. */
         #input-inner {
             display: flex;
-            align-items: flex-end;
+            flex-wrap: wrap;
+            align-items: center;
             gap: 8px;
-            transition: gap 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            row-gap: 6px;
         }
 
         #input-inner .input-textarea-wrap {
-            flex: 1 1 auto;
+            order: -1;
+            flex: 1 0 100%;
             min-width: 0;
+        }
+
+        #input-actions {
+            margin-left: auto;
         }
 
         /* Field grows/shrinks fluidly as lines are added or removed. */
@@ -1243,6 +1475,7 @@
             gap: 4px;
             padding: 0 4px;
             position: relative;
+            transition: background 0.15s ease;
         }
 
         .history-action-btn {
@@ -2536,8 +2769,9 @@
         }
 
         /* Send button: active (has text / generating) vs inactive */
+        /* Radius follows nesting rule: outer 20px (.input-box-wrap) − 12px gap (#input-inner px-3) = 8px inside */
         #send-btn {
-            border-radius: 9999px;
+            border-radius: 8px;
         }
 
         #send-btn:disabled {
@@ -3090,6 +3324,9 @@
 
                 <!-- Inline Login / Register form -->
                 <div id="onboarding-auth-section">
+                    <!-- Brand wordmark -->
+                    <p class="text-left text-sm tracking-[0.18em] uppercase text-zinc-400 dark:text-zinc-500 mb-1"
+                        style="font-family: Century, 'Century Schoolbook', Georgia, serif; letter-spacing:0.18em;">Labs21</p>
                     <!-- Dynamic Auth Heading -->
                     <h2 id="ob-auth-heading"
                         class="text-left font-serif text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-4"
@@ -3245,7 +3482,7 @@
     </div>
 
     <aside id="sidebar" class="-translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 flex flex-col"
-        style="width: var(--sidebar-width); background: var(--bg-elevated); border-right: 1px solid var(--border);">
+        style="width: var(--sidebar-width); background: var(--sidebar-surface);">
 
         <!--
             Single content div — fixed width, never shrinks.
@@ -3258,8 +3495,8 @@
 
             <!-- Header: wordmark + actions -->
             <div class="h-[var(--header-height)] flex items-center shrink-0 px-2">
-                <button onclick="window.toggleSidebar()" class="sb-nav-item text-left bg-transparent border-none pr-3"
-                    style="gap: 8px;">
+                <button onclick="document.body.classList.contains('sidebar-collapsed') ? window.toggleSidebar() : (window.location.href='index.html')" class="sb-nav-item text-left bg-transparent border-none pr-2"
+                    style="gap: 8px; padding-top: 4px; padding-bottom: 4px;">
                     <span class="sb-nav-icon">
                         <svg class="mini-logo-svg w-5 h-5 fill-current vail-logo-ai" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 1080 1080">
@@ -3276,7 +3513,7 @@
                         </svg>
                     </span>
                     <span
-                        class="sb-row-text text-[17px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight py-1">Oaky</span>
+                        class="sb-row-text text-[19px] font-normal text-zinc-900 dark:text-zinc-100 tracking-wide">Labs21</span>
                 </button>
                 <button onclick="window.toggleSidebar()" title="Collapse sidebar" data-t-title="title_collapse_sidebar"
                     class="sb-icon-btn sb-row-text shrink-0 ml-auto">
@@ -3285,22 +3522,27 @@
             </div>
 
             <!-- New chat -->
-            <div class="shrink-0 pt-1 pb-0.5 px-2">
-                <button onclick="window.resetChat()" class="sb-new-chat-btn">
-                    <span class="sb-nav-icon"><i data-feather="edit-2" class="w-[17px] h-[17px]"></i></span>
+            <div class="shrink-0 pt-1.5 pb-2 px-4">
+                <button onclick="window.resetChat()" class="sb-new-chat-btn sb-tile">
+                    <span class="sb-nav-icon">
+                        <i data-feather="edit-2" class="nc-icon-new w-[17px] h-[17px]"></i>
+                        <i data-feather="message-square" class="nc-icon-active w-[17px] h-[17px]"></i>
+                    </span>
                     <span class="sb-row-text" data-t="new_conversation">New chat</span>
+                    <i data-feather="chevron-right" class="sb-new-chat-chevron sb-row-text w-4 h-4"></i>
                 </button>
             </div>
 
             <!-- Nav items -->
             <div class="shrink-0 flex flex-col px-2">
-                <a href="research.html" class="sb-nav-item">
+                <a href="research.html" class="sb-nav-item sb-tile">
                     <span class="sb-nav-icon"><i data-feather="compass" class="w-[17px] h-[17px]"></i></span>
                     <span class="sb-row-text" data-t="research_btn">Research</span>
                 </a>
-                <a href="https://voidai.app" target="_blank" class="sb-nav-item sb-nav-item--muted">
+                <a href="https://voidai.app" target="_blank" class="sb-nav-item sb-nav-item--muted sb-tile -mt-[6px]">
                     <span class="sb-nav-icon"><i data-feather="zap" class="w-[17px] h-[17px]"></i></span>
                     <span class="sb-row-text" data-t="try_voidai">Try VoidAI</span>
+                    <i data-feather="arrow-up-right" class="sb-nav-ext-icon sb-row-text w-3.5 h-3.5"></i>
                 </a>
             </div>
 
@@ -3491,6 +3733,9 @@
 
                 <div id="welcome-logo-container"></div>
 
+                <p class="text-base tracking-[0.18em] text-zinc-400 dark:text-zinc-500 mb-2 uppercase"
+                    style="font-family: Century, 'Century Schoolbook', Georgia, serif; letter-spacing:0.18em;">Labs21</p>
+
                 <div class="mb-1 relative flex items-center justify-center">
 
                     <h2 id="welcome-greeting"
@@ -3513,7 +3758,7 @@
             <div id="memory-consent-stack" class="flex flex-col gap-2 mb-2 w-full"></div>
 
             <div
-                class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none rounded-[28px] relative flex flex-col !overflow-visible pointer-events-auto">
+                class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none rounded-[20px] relative flex flex-col !overflow-visible pointer-events-auto">
 
                 <div id="upload-preview-container" class="hidden px-4 pt-3 flex gap-2 overflow-x-auto w-full"></div>
 
@@ -3612,16 +3857,16 @@
                         </div>
                     </div>
 
-                    <!-- CENTER: growable textarea -->
+                    <!-- TOP ROW: growable textarea (full width) -->
                     <div class="input-textarea-wrap relative">
                         <input type="file" id="file-upload-input" class="hidden"
                             onchange="window.handleFileUpload(event)" />
                         <textarea id="user-input" placeholder="What do you want to know?"
                             rows="1"
-                            class="w-full bg-transparent px-1 py-1.5 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[28px]"></textarea>
+                            class="w-full bg-transparent px-2 pt-1.5 pb-2 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[40px]"></textarea>
                     </div>
 
-                    <!-- RIGHT: Fast/Thinking pill + send button -->
+                    <!-- BOTTOM ROW (right side): Fast/Thinking pill + send button -->
                     <div id="input-actions" class="flex items-center gap-2 shrink-0">
 
                         <div id="mode-selector-container" class="relative z-50">
@@ -3649,7 +3894,7 @@
                         </div>
 
                         <button id="send-btn" onclick="window.handleAction()" disabled
-                            class="skuomorphic-btn w-11 h-11 flex items-center justify-center rounded-full opacity-50 cursor-not-allowed transition-all active:scale-95"
+                            class="skuomorphic-btn w-11 h-11 flex items-center justify-center rounded-[8px] opacity-50 cursor-not-allowed transition-all active:scale-95"
                             style="transition: background 0.2s, opacity 0.2s;">
                             <span id="send-icon-wrapper" class="flex items-center justify-center h-full w-full">
                                 <i class="fa-solid fa-arrow-up text-sm"></i>

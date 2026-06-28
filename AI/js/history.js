@@ -99,7 +99,7 @@ window.renderChatItem = (c, dict) => {
          draggable="true" 
          ondragstart="window.onChatDragStart(event, '${c.id}')"
          ondragend="window.onChatDragEnd(event)">
-        <button onclick="window.loadChat('${c.id}')" class="flex-1 text-left px-3 py-2.5 rounded-lg text-xs font-medium truncate ${c.id === window.currentChatId ? '' : 'text-zinc-500 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'}">${window.truncateTitle(c.title)}</button>
+        <button onclick="window.loadChat('${c.id}')" class="flex-1 text-left px-3 py-2.5 rounded-lg text-xs font-medium truncate ${c.id === window.currentChatId ? '' : 'text-zinc-500'}">${window.truncateTitle(c.title)}</button>
         <div class="flex items-center gap-1 pr-1">
             <button onclick="window.showChatMenu('${c.id}', this, event)" class="history-action-btn" title="More actions">
                 <i data-feather="more-vertical" class="w-3 h-3"></i>
