@@ -495,6 +495,31 @@
             transform: scale(0.9);
         }
 
+        /* Research (compass) + VoidAI (zap) icons:
+           shifted right when expanded for balanced padding, then slide
+           seamlessly to the centered rail position (translateX 0 → glyph
+           at 22px = 44/2) when collapsed. Mirrors the profile avatar and
+           is synced to the sidebar width transition (0.3s, same easing). */
+        .sb-nav-item.sb-tile .sb-nav-icon {
+            transform: translateX(8px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                        background 0.18s ease,
+                        color 0.2s ease;
+        }
+
+        body.sidebar-collapsed .sb-nav-item.sb-tile .sb-nav-icon {
+            transform: translateX(0);
+        }
+
+        /* Preserve the press feedback while keeping the horizontal offset. */
+        .sb-nav-item.sb-tile:active .sb-nav-icon {
+            transform: translateX(8px) scale(0.9);
+        }
+
+        body.sidebar-collapsed .sb-nav-item.sb-tile:active .sb-nav-icon {
+            transform: translateX(0) scale(0.9);
+        }
+
         .sb-nav-item--muted {
             color: var(--text-secondary);
             font-size: 13px;
@@ -558,6 +583,7 @@
                 0 1px 2px rgba(20, 20, 19, 0.05);
             transition: background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
                         box-shadow 0.25s ease,
+                        margin 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                         transform 0.15s ease;
         }
 
@@ -645,7 +671,8 @@
 
         .sb-search-wrap {
             position: relative;
-            margin: 0 8px 8px;
+            /* 16px sides to match the New chat button's px-4 container. */
+            margin: 0 16px 8px;
         }
 
         .sb-search-icon {
@@ -662,14 +689,17 @@
 
         .sb-search-input {
             width: 100%;
-            padding: 7px 10px 7px 32px;
+            /* Taller than New chat (11px vs 8px vertical); otherwise matches its card. */
+            padding: 11px 10px 11px 32px;
             font-size: 13px;
             background: var(--bg-elevated);
-            border: 1px solid transparent;
-            border-radius: 9px;
+            border: none;
+            border-radius: 10px;
             outline: none;
             color: var(--text-primary);
-            box-shadow: inset 0 0 0 1px var(--sb-edge);
+            box-shadow:
+                inset 0 0 0 1px var(--sb-edge),
+                0 1px 2px rgba(20, 20, 19, 0.05);
             transition: background 0.15s ease, box-shadow 0.15s ease;
         }
 
@@ -685,7 +715,8 @@
         }
 
         .dark .sb-search-input {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
         }
 
         .dark .sb-search-input:focus {
@@ -1172,6 +1203,8 @@
             color: var(--accent-color);
             font-weight: 600;
             box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 18%, transparent);
+            /* Tighter corners than the rounded-xl (12px) row default. */
+            border-radius: 8px !important;
         }
 
         .history-item-active::before {
@@ -1202,6 +1235,22 @@
         /* Inactive rows: accent-aware hover across the whole row, not just the label */
         .history-btn-container:not(.history-item-active):hover {
             background: var(--sb-item-hover);
+        }
+
+        /* ── Drag-to-reorder ─────────────────────────────────────────── */
+        /* The row being dragged dims so the drop indicator reads as the target. */
+        .history-btn-container.chat-dragging {
+            opacity: 0.4;
+        }
+
+        /* 2px accent line shown between rows at the drop slot. */
+        .chat-drop-indicator {
+            height: 2px;
+            margin: 1px 8px;
+            border-radius: 2px;
+            background: var(--accent-color);
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-color) 35%, transparent);
+            pointer-events: none;
         }
 
         .dropdown-menu {
@@ -3560,7 +3609,9 @@
                     <div id="recents-scroll-area" class="flex-1 overflow-y-auto no-scrollbar"
                         ondragenter="window.onFolderDragEnter(event)" ondragleave="window.onFolderDragLeave(event)"
                         ondragover="window.onFolderDragOver(event)" ondrop="window.onFolderDrop(event, null)">
-                        <div id="history-list" class="flex flex-col pb-20 px-2 gap-0.5"></div>
+                        <div id="history-list" class="flex flex-col pb-20 px-2 gap-0.5"
+                            ondragover="window.onChatListDragOver(event)"
+                            ondrop="window.onChatListDrop(event, null)"></div>
                     </div>
                 </div>
             </div>
@@ -3731,11 +3782,6 @@
             <div id="welcome-state"
                 class="absolute inset-0 flex flex-col items-center justify-center p-6 pt-[150px] text-center animate-fade-in z-0">
 
-                <div id="welcome-logo-container"></div>
-
-                <p class="text-base tracking-[0.18em] text-zinc-400 dark:text-zinc-500 mb-2 uppercase"
-                    style="font-family: Century, 'Century Schoolbook', Georgia, serif; letter-spacing:0.18em;">Labs21</p>
-
                 <div class="mb-1 relative flex items-center justify-center">
 
                     <h2 id="welcome-greeting"
@@ -3866,32 +3912,8 @@
                             class="w-full bg-transparent px-2 pt-1.5 pb-2 outline-none resize-none text-base max-h-[200px] no-scrollbar leading-relaxed text-zinc-900 dark:text-[#ececec] placeholder-zinc-400 dark:placeholder-zinc-500 font-sans min-h-[40px]"></textarea>
                     </div>
 
-                    <!-- BOTTOM ROW (right side): Fast/Thinking pill + send button -->
+                    <!-- BOTTOM ROW (right side): send button -->
                     <div id="input-actions" class="flex items-center gap-2 shrink-0">
-
-                        <div id="mode-selector-container" class="relative z-50">
-                            <button id="mode-pill-btn" onclick="window.toggleMenu(event, 'mode-menu-input')"
-                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
-                                <span id="mode-dot" class="w-1.5 h-1.5 rounded-full" style="background: var(--accent-color);"></span>
-                                <span id="mode-label">Fast</span>
-                                <i data-feather="chevron-down" class="w-3 h-3"></i>
-                            </button>
-                            <div id="mode-menu-input"
-                                class="absolute bottom-full right-0 mb-2 w-44 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl shadow-xl opacity-0 invisible transition-all duration-200 z-50 transform origin-bottom-right">
-                                <div class="p-1 flex flex-col gap-1">
-                                    <button onclick="window.setThinkingMode(false)"
-                                        class="w-full text-left px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 transition-colors flex flex-col">
-                                        <span class="text-xs font-semibold">Fast</span>
-                                        <span class="text-[10px] opacity-50">Quick replies</span>
-                                    </button>
-                                    <button onclick="window.setThinkingMode(true)"
-                                        class="w-full text-left px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 transition-colors flex flex-col">
-                                        <span class="text-xs font-semibold">Thinking</span>
-                                        <span class="text-[10px] opacity-50">Step-by-step reasoning</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
 
                         <button id="send-btn" onclick="window.handleAction()" disabled
                             class="skuomorphic-btn w-11 h-11 flex items-center justify-center rounded-[8px] opacity-50 cursor-not-allowed transition-all active:scale-95"

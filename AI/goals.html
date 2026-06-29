@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goals | Oaky</title>
+    <title>Goals | Labs21</title>
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -39,18 +39,21 @@
                     colors: {
                         parchment: 'var(--bg)',
                         ivory: 'var(--bg-elevated)',
-                        'text-warm': 'var(--text-rosewood)',
+                        'text-warm': 'var(--text-primary)',
                         'olive-gray': 'var(--text-secondary)',
                         'stone-gray': 'var(--text-tertiary)',
                         rosewood: 'var(--accent)',
+                        'rose-light': 'var(--accent-light)',
                         'border-cream': 'var(--border)',
                         'border-warm': 'var(--border-strong)',
+                        'ring-warm': 'var(--shadow-ring)',
                         'surf-dark': 'var(--surface-dark)',
                         'deep-dark': 'var(--deep-dark)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
                         sans: ['Satoshi', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
                     }
                 }
             }
@@ -101,38 +104,49 @@
         /* --- Global Flat Styles --- */
         .skuomorphic-button {
             position: relative;
-            background: #f4f4f2;
+            padding: 10px 24px;
+            background: var(--accent);
             border-radius: 9999px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            transition: all 0.2s ease;
-            cursor: pointer;
+            color: white;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .dark .skuomorphic-button {
-            background: #2a2a28;
-            border-color: rgba(255, 255, 255, 0.05);
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .skuomorphic-button:hover {
-            transform: translateY(-1px);
-            background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .skuomorphic-button:hover {
-            background: #3a3a38;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: var(--accent-light);
         }
 
         .skuomorphic-button:active {
             transform: translateY(0);
         }
 
+        .dark .skuomorphic-button {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .skuomorphic-button.discord {
+            background: #5865F2;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .skuomorphic-button.discord:hover {
+            background: #6a76f5;
+        }
+
+        .skuomorphic-button.discord:active {
+            background: #4d59d6;
+        }
+
         .skuomorphic-card {
-            background: #ffffff;
+            background: var(--bg-elevated);
             border-radius: 24px;
             border: 1px solid rgba(0, 0, 0, 0.05);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -141,16 +155,16 @@
 
         .dark .skuomorphic-card {
             background: var(--bg-elevated);
-            border-color: var(--border);
+            border-color: rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
 
 <body
-    class="bg-parchment text-text-warm dark:bg-deep-dark dark:text-text-warm min-h-screen flex flex-col font-sans selection:bg-rosewood selection:text-text-warm overflow-x-hidden mesh-gradient">
+    class="bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
     <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md relative z-30">
+        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-border-cream dark:border-gray-800/50 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md relative z-30">
         <a href="/AI/index.html" class="flex items-center gap-3">
             <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
                 class="w-8 h-8 text-rosewood fill-current">
@@ -165,14 +179,18 @@
                 <path
                     d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
             </svg>
-            <div class='text-xl md:text-2xl font-black text-rosewood'>Oaky</div>
+            <div class='text-xl md:text-2xl font-normal text-rosewood'>Labs21</div>
         </a>
-        <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-olive-gray dark:text-stone-gray">
             <a href="goals.html" class="text-rosewood transition-colors">Goals</a>
-            <a href="research.html" class="hover:text-rosewood transition-colors">Research</a>
-            <a href="privacy.html" class="hover:text-rosewood transition-colors">Privacy</a>
-            <a href="tos.html" class="hover:text-rosewood transition-colors">TOS</a>
+            <a href="research.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Research</a>
+            <a href="privacy.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Privacy</a>
+            <a href="tos.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">TOS</a>
         </div>
+        <a href="https://discord.gg/BxjTsjvR8Z" target="_blank"
+            class="skuomorphic-button discord !px-4 !py-1.5 text-xs md:text-sm">
+            <i class="fa-brands fa-discord mr-2"></i> Join Discord
+        </a>
     </nav>
 
     <main class="flex-1 flex flex-col items-center p-6 md:p-12 z-10 max-w-[1000px] mx-auto w-full">
@@ -190,9 +208,9 @@
 
         <div class="space-y-16 w-full mt-12 pb-24">
             <!-- Goal 1: Free for Everyone -->
-            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
+            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-border-cream animate-fade-in">
                 <div
-                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/10 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray group-hover:scale-110 transition-transform">
+                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-earth-americas text-2xl"></i>
                 </div>
                 <div class="flex-grow">
@@ -209,9 +227,9 @@
             </div>
 
             <!-- Goal 2: Raw & Unfiltered -->
-            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
+            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-border-cream animate-fade-in">
                 <div
-                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/20 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray">
+                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
                     <i class="fa-solid fa-bolt text-2xl"></i>
                 </div>
                 <div class="flex-grow">
@@ -228,9 +246,9 @@
             </div>
 
             <!-- Goal 3: No Limits -->
-            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-rosewood/10 animate-fade-in">
+            <div class="flex flex-col md:flex-row gap-10 items-start pb-16 border-b border-border-cream animate-fade-in">
                 <div
-                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/10 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray">
+                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
                     <i class="fa-solid fa-infinity text-2xl"></i>
                 </div>
                 <div class="flex-grow">
@@ -248,14 +266,14 @@
             <!-- Goal 4: Universal Access -->
             <div class="flex flex-col md:flex-row gap-10 items-start animate-fade-in">
                 <div
-                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rosewood/20 dark:bg-rosewood/5 text-rosewood dark:text-olive-gray">
+                    class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
                     <i class="fa-solid fa-microchip text-2xl"></i>
                 </div>
                 <div class="flex-grow">
                     <h2 class="serif-text text-4xl font-medium mb-4 text-rosewood dark:text-text-warm leading-tight">
                         Universal Access</h2>
                     <p class="text-xl text-gray-500 dark:text-text-warm/60 leading-relaxed max-w-4xl">
-                        Whether you're a student, a researcher, or a dreamer, Oaky provides the tools to amplify
+                        Whether you're a student, a researcher, or a dreamer, Labs21 provides the tools to amplify
                         your
                         innate potential. We are democratizing the future of humanity by putting world-class
                         computational intelligence in everyone's hands.
@@ -268,7 +286,7 @@
     </main>
 
     <footer class="p-12 text-center text-[10px] uppercase tracking-widest text-gray-400">
-        Oaky is built for the future of humanity.
+        Labs21 is built for the future of humanity.
     </footer>
 
     <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>

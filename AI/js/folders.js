@@ -88,10 +88,97 @@ window.renameFolder = (id) => {
 
 window.onChatDragStart = (e, chatId) => {
     e.dataTransfer.setData('text/plain', chatId);
+    e.dataTransfer.effectAllowed = 'move';
+    window.__draggingChatId = chatId;
+    const el = e.currentTarget;
+    // Defer so the drag image is captured before the row dims.
+    requestAnimationFrame(() => el.classList.add('chat-dragging'));
 };
 
 window.onChatDragEnd = (e) => {
-    // cleanup if needed
+    if (e.currentTarget) e.currentTarget.classList.remove('chat-dragging');
+    window.__clearDropIndicator();
+    // Clear any folder-drop highlight left armed when a reorder drop swallowed
+    // the event (stopPropagation skips onFolderDrop's own cleanup).
+    document.querySelectorAll('.drag-over').forEach(el => {
+        el.classList.remove('drag-over');
+        el._dragCounter = 0;
+    });
+    window.__draggingChatId = null;
+};
+
+// ─── Reorder (drag chats up/down within recents or a folder) ───────
+
+// The slot the cursor is over: the first row whose vertical midpoint sits
+// below the cursor → insert before it; null → append at the end.
+window.__getReorderTarget = (container, y) => {
+    const rows = [...container.querySelectorAll(':scope > .history-btn-container')];
+    for (const row of rows) {
+        const box = row.getBoundingClientRect();
+        if (y < box.top + box.height / 2) return row;
+    }
+    return null;
+};
+
+window.__clearDropIndicator = () => {
+    document.querySelectorAll('.chat-drop-indicator').forEach(el => el.remove());
+};
+
+window.__showDropIndicator = (container, beforeEl) => {
+    let ind = document.querySelector('.chat-drop-indicator');
+    if (!ind) {
+        ind = document.createElement('div');
+        ind.className = 'chat-drop-indicator';
+    }
+    if (beforeEl) container.insertBefore(ind, beforeEl);
+    else container.appendChild(ind);
+};
+
+window.onChatListDragOver = (e) => {
+    if (!window.__draggingChatId) return;        // only react to chat drags
+    if (window.__lastHistoryQuery) return;       // no reordering in a filtered view
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    const container = e.currentTarget;
+    const before = window.__getReorderTarget(container, e.clientY);
+    window.__showDropIndicator(container, before);
+};
+
+window.onChatListDrop = async (e, folderId) => {
+    if (!window.__draggingChatId) return;
+    if (window.__lastHistoryQuery) { window.__clearDropIndicator(); return; }
+    e.preventDefault();
+    e.stopPropagation();
+    const chatId = e.dataTransfer.getData('text/plain') || window.__draggingChatId;
+    const container = e.currentTarget;
+    const before = window.__getReorderTarget(container, e.clientY);
+    const beforeId = before ? before.getAttribute('data-chat-id') : null;
+    window.__clearDropIndicator();
+    await window.reorderChat(chatId, beforeId, folderId || null);
+};
+
+// Place chatId immediately before beforeId (or at the end) in the global
+// manual order, moving it into/out of a folder if the drop target differs.
+window.reorderChat = async (chatId, beforeId, folderId) => {
+    if (!chatId || !window.allChats[chatId] || chatId === beforeId) return;
+
+    const chat = window.allChats[chatId];
+    const newFolder = folderId || null;
+    if ((chat.folderId || null) !== newFolder) {
+        chat.folderId = newFolder;
+        await window.StorageController.saveChat(chat);
+    }
+
+    if (!Array.isArray(window.settings.chatOrder)) window.settings.chatOrder = [];
+    const order = window.settings.chatOrder.filter(id => id !== chatId);
+    let idx = beforeId ? order.indexOf(beforeId) : -1;
+    if (idx === -1) idx = order.length;
+    order.splice(idx, 0, chatId);
+    window.settings.chatOrder = order;
+    window.saveSettings();
+
+    window.renderHistory(window.__lastHistoryQuery || "");
 };
 
 window.onFolderDrop = async (e, folderId) => {

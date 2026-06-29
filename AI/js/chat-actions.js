@@ -172,7 +172,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                 max_tokens: window.settings.max_tokens || 4096,
                 stream: true,
                 web_search: window.currentGenerationIsSearch,
-                use_thought: window.isThinkingEnabled,
+                use_thought: true,  // thinking is the only mode (fast mode removed)
                 use_canvas: window.canvasEnabled,
                 deep_research: window.isDeepResearch,
                 temperature: window.settings.temp,

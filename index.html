@@ -86,456 +86,526 @@
       font-family: 'Century', 'Century Schoolbook', Georgia, serif;
     }
 
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    /* ── Type: Swiss grotesque display ─────────────────────────── */
+    .display {
+      font-family: 'Satoshi', 'Inter', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 0.92;
     }
 
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
     }
 
-    /* ── Entrance animations ─────────────────────────────────── */
-    @keyframes fadeSlideUp {
-      from {
-        opacity: 0;
-        transform: translateY(24px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeSlideRight {
-      from {
-        opacity: 0;
-        transform: translateX(-16px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes accentGrow {
-      from {
-        width: 0;
-      }
-
-      to {
-        width: 48px;
-      }
-    }
-
-    @keyframes gentleFloat {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-6px);
-      }
-    }
-
-    .fade-up {
-      animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .fade-right {
-      animation: fadeSlideRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    /* Stagger delays */
-    .delay-1 {
-      animation-delay: 0.1s;
-    }
-
-    .delay-2 {
-      animation-delay: 0.2s;
-    }
-
-    .delay-3 {
-      animation-delay: 0.35s;
-    }
-
-    .delay-4 {
-      animation-delay: 0.5s;
-    }
-
-    .delay-5 {
-      animation-delay: 0.65s;
-    }
-
-    /* ── Nav scroll shadow ───────────────────────────────────── */
-    .nav-scrolled {
-      box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
-    }
-
-    .dark .nav-scrolled {
-      box-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    /* ── Project row hover ───────────────────────────────────── */
-    .project-row {
-      transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-      border-radius: 12px;
-    }
-
-    .project-row:not(.project-disabled):hover {
-      background-color: var(--bg-elevated);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-    }
-
-    .dark .project-row:not(.project-disabled):hover {
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-    }
-
-    /* ── Button micro-interactions ────────────────────────────── */
-    .btn-primary {
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, opacity 0.25s ease;
-    }
-
-    .btn-primary::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(201, 100, 120, 0.25);
-    }
-
-    .btn-primary:hover::after {
-      opacity: 1;
-    }
-
-    .btn-primary:active {
-      transform: translateY(0) scale(0.98);
-    }
-
-    .btn-secondary {
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, border-color 0.25s ease;
-    }
-
-    .btn-secondary:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary:active {
-      transform: translateY(0) scale(0.98);
-    }
-
-    /* ── Nav link underline animation ─────────────────────────── */
-    .nav-link {
-      position: relative;
-      transition: color 0.25s ease;
-    }
-
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 1.5px;
-      background: var(--accent);
-      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .nav-link:hover::after {
-      width: 100%;
-    }
-
-    .nav-link:hover {
-      color: var(--text-primary);
-    }
-
-    /* ── Profile image ────────────────────────────────────────── */
-    .profile-img {
-      transition: filter 0.7s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
-    }
-
-    .profile-img:hover {
-      filter: grayscale(0);
-      transform: scale(1.04);
-      box-shadow: 0 8px 32px rgba(201, 100, 120, 0.15);
-    }
-
-    /* ── Quote hover ──────────────────────────────────────────── */
-    .quote-block {
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .quote-block:hover {
-      transform: scale(1.02);
-    }
-
-    /* ── Accent bar animation ─────────────────────────────────── */
-    .accent-bar {
-      height: 2px;
-      background: var(--accent);
-      animation: accentGrow 0.8s 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      width: 0;
-      border-radius: 2px;
-    }
-
-    /* ── Grain texture overlay ────────────────────────────────── */
-    body::before {
-      content: '';
+    /* ── Floating liquid-glass nav (the signature) ─────────────── */
+    /* matches main's container (max-w-5xl px-6) so clusters line up with content margins */
+    .nav-wrap {
       position: fixed;
-      inset: 0;
-      z-index: 9999;
-      pointer-events: none;
-      opacity: 0.025;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-repeat: repeat;
-      background-size: 200px 200px;
+      top: 1.1rem;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      max-width: 64rem;
+      padding: 0 1.5rem;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      transition: gap 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* ── Section reveal (used by IntersectionObserver) ─────────── */
-    .section-hidden {
+    .nav-wrap.scrolled { gap: 0.45rem; }
+
+    /* one liquid-glass capsule per category */
+    .glass {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.34rem;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--bg) 52%, transparent);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      backdrop-filter: blur(22px) saturate(180%);
+      border: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.10);
+      transition: box-shadow 0.4s ease, background 0.4s ease;
+    }
+
+    .nav-wrap.scrolled .glass {
+      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      box-shadow: 0 10px 34px rgba(0, 0, 0, 0.14);
+    }
+
+    .dark .glass {
+      background: color-mix(in srgb, var(--bg) 48%, transparent);
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+    }
+
+    .dark .nav-wrap.scrolled .glass {
+      background: color-mix(in srgb, var(--bg) 64%, transparent);
+    }
+
+    .g-link {
+      position: relative;
+      z-index: 1;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 0.5rem 0.95rem;
+      border-radius: 999px;
+      white-space: nowrap;
+      transition: color 0.25s ease, background-color 0.25s ease;
+    }
+
+    .g-link:hover {
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+    }
+
+    /* prominent (tinted glass) action */
+    .g-cta {
+      position: relative;
+      z-index: 1;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #fff;
+      background: color-mix(in srgb, var(--accent) 82%, transparent);
+      padding: 0.5rem 1.05rem;
+      border-radius: 999px;
+      white-space: nowrap;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease;
+    }
+
+    .g-cta:hover { transform: translateY(-1px); background: var(--accent); }
+    .g-cta:active { transform: translateY(0) scale(0.97); }
+
+    .g-icon {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 999px;
+      color: var(--text-secondary);
+      transition: color 0.25s ease, background-color 0.25s ease;
+    }
+
+    .g-icon:hover {
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+    }
+
+    /* theme icon swap */
+    .icon-sun { display: none; }
+    .dark .icon-sun { display: block; }
+    .dark .icon-moon { display: none; }
+
+    /* mobile menu */
+    #mobile-panel {
+      position: fixed;
+      top: 4.2rem;
+      right: 1.5rem;
+      z-index: 49;
+      width: min(20rem, calc(100vw - 1.5rem));
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid var(--border-strong);
+      border-radius: 1.25rem;
+      padding: 0.5rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .section-visible {
+    #mobile-panel.open {
       opacity: 1;
+      pointer-events: auto;
       transform: translateY(0);
     }
 
-    /* ── Explore button on project rows ────────────────────────── */
-    .project-explore-btn {
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    .mobile-link {
+      display: block;
+      padding: 0.85rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      border-radius: 0.85rem;
+      transition: background-color 0.2s ease;
     }
 
-    .project-row:not(.project-disabled):hover .project-explore-btn {
-      border-color: var(--accent);
+    .mobile-link:hover { background: var(--bg-elevated); }
+
+    /* ── Hero profile picture ──────────────────────────────────── */
+    .hero-pfp {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 1rem;
+      object-fit: cover;
+      filter: grayscale(1);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-elevated);
+      transition: filter 0.6s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hero-pfp:hover {
+      filter: grayscale(0);
+      transform: scale(1.04);
+    }
+
+    /* ── Hero buttons ──────────────────────────────────────────── */
+    .btn-ink {
+      background: var(--text-primary);
+      color: var(--bg);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    }
+
+    .btn-ink:hover { transform: translateY(-2px); opacity: 0.9; }
+    .btn-ink:active { transform: translateY(0) scale(0.98); }
+
+    .btn-line {
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+    }
+
+    .btn-line:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .btn-line:active { transform: translateY(0) scale(0.98); }
+
+    /* ── Project catalog rows ──────────────────────────────────── */
+    .work-row {
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 0.5rem 1.5rem;
+      padding: 2rem 0.75rem;
+      border-top: 1px solid var(--border);
+      border-radius: 14px;
+      transition: background-color 0.3s ease, padding-left 0.3s ease;
+    }
+
+    /* mobile: title, description and action stack in the right column */
+    .work-row > div,
+    .work-desc,
+    .work-action {
+      grid-column: 2;
+    }
+
+    @media (min-width: 768px) {
+      .work-row {
+        grid-template-columns: 3.5rem minmax(0, 14rem) 1fr auto;
+        align-items: baseline;
+        padding: 2.25rem 1.25rem;
+      }
+
+      .work-row > div,
+      .work-desc,
+      .work-action {
+        grid-column: auto;
+      }
+    }
+
+    .work-row:not(.is-soon):hover {
+      background: var(--bg-elevated);
+      padding-left: 1.5rem;
+    }
+
+    .work-index {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+      padding-top: 0.55rem;
+      transition: color 0.3s ease;
+    }
+
+    .work-row:not(.is-soon):hover .work-index { color: var(--accent); }
+
+    .work-title {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 600;
+      font-size: 1.65rem;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .work-arrow {
+      opacity: 0;
+      transform: translateX(-6px);
       color: var(--accent);
-      box-shadow: 0 2px 12px rgba(201, 100, 120, 0.1);
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .work-row:not(.is-soon):hover .work-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .work-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      max-width: 34rem;
+    }
+
+    .work-action {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      transition: color 0.3s ease;
+    }
+
+    .work-row:not(.is-soon):hover .work-action { color: var(--text-primary); }
+    .is-soon { opacity: 0.5; }
+
+    /* ── Reveal ────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    .load {
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .d1 { animation-delay: 0.05s; }
+    .d2 { animation-delay: 0.18s; }
+    .d3 { animation-delay: 0.32s; }
+    .d4 { animation-delay: 0.46s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 4px;
     }
   </style>
 </head>
 
-<body class="font-sans antialiased transition-colors duration-500">
+<body class="font-sans antialiased">
 
+  <!-- ── Floating liquid-glass nav ─────────────────────────────── -->
+  <nav id="nav" class="nav-wrap" aria-label="Primary">
+    <!-- Pages -->
+    <div class="glass hidden md:flex">
+      <a href="#work" class="g-link">Work</a>
+      <a href="/AI/index.html" class="g-cta">Labs21</a>
+    </div>
 
-  <nav id="main-nav"
-    class="fixed top-0 w-full z-50 bg-parchment/80 dark:bg-[#121212]/80 backdrop-blur-md border-b border-border-cream dark:border-surf-dark transition-shadow duration-300">
-    <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/"
-        class="serif-text text-2xl font-medium text-rosewood tracking-tight hover:opacity-80 transition-opacity">okemovail.</a>
-      <div class="hidden md:flex space-x-10 text-sm font-medium text-olive-gray">
-        <a href="#work" class="nav-link">Projects</a>
-        <a href="/AI/index.html" class="nav-link">OkemoAI</a>
-        <a href="https://github.com/ar12c" target="_blank" class="nav-link">GitHub</a>
-      </div>
-      <a href="/AI/index.html"
-        class="md:hidden text-sm font-medium text-olive-gray hover:text-text-warm transition-all border border-border-warm dark:border-surf-dark px-5 py-2 rounded-full backdrop-blur-sm">
-        OkemoAI
-      </a>
+    <!-- Social -->
+    <div class="glass hidden md:flex">
+      <a href="https://github.com/ar12c" target="_blank" rel="noopener" class="g-link">GitHub</a>
+      <a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener" class="g-link">YouTube</a>
+    </div>
+
+    <!-- Settings -->
+    <div class="glass">
+      <button id="theme-toggle" class="g-icon" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button id="menu-toggle" class="g-icon md:hidden" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
     </div>
   </nav>
 
+  <div id="mobile-panel">
+    <a href="#work" class="mobile-link">Work</a>
+    <a href="/AI/index.html" class="mobile-link">Labs21</a>
+    <a href="https://github.com/ar12c" target="_blank" rel="noopener" class="mobile-link">GitHub</a>
+    <a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener" class="mobile-link">YouTube</a>
+  </div>
 
 
-  <main class="max-w-5xl mx-auto px-6 pt-32">
+  <main class="max-w-5xl mx-auto px-6">
 
-
-    <section class="py-20 md:py-32">
-      <div class="mb-10 opacity-0 fade-up delay-1">
-        <img
-          src="https://avatars.githubusercontent.com/u/179893130?s=400&u=d8a0d805e4137f21f0dd19fcf5163a1c746f02fd&v=4"
-          alt="OkemoVail Profile"
-          class="profile-img w-24 h-24 rounded-2xl border border-border-cream dark:border-surf-dark grayscale bg-ivory object-cover">
-      </div>
-      <h1 class="serif-text text-5xl md:text-7xl text-text-warm mb-2 opacity-0 fade-up delay-2"
-        style="line-height: 1.08;">
-        Hey, I'm OkemoVail
+    <!-- ── Hero ────────────────────────────────────────────────── -->
+    <section class="pt-40 md:pt-52 pb-24 md:pb-36">
+      <img
+        src="https://avatars.githubusercontent.com/u/179893130?s=400&u=d8a0d805e4137f21f0dd19fcf5163a1c746f02fd&v=4"
+        alt="OkemoVail"
+        class="hero-pfp load d1">
+      <p class="eyebrow load d1 mt-7">Hey — I'm OkemoVail</p>
+      <h1 class="display text-text-warm mt-7 load d2"
+        style="font-size: clamp(3.25rem, 13vw, 9rem);">
+        I make<br>everything.
       </h1>
-      <div class="accent-bar mt-5 mb-6 delay-3"></div>
-      <p class="text-olive-gray text-base md:text-lg leading-relaxed max-w-lg opacity-0 fade-up delay-3"
-        style="letter-spacing: 0.01em;">
-        I make everything
-      </p>
-      <div class="mt-12 flex flex-wrap gap-4 opacity-0 fade-up delay-4">
-        <a href="#work" class="btn-primary bg-rosewood text-ivory px-8 py-3 rounded-lg font-medium"
-          style="box-shadow: 0 0 0 1px var(--accent)">
-          Explore Projects
-        </a>
-        <a href="https://github.com/ar12c" target="_blank"
-          class="btn-secondary border border-border-warm dark:border-surf-dark text-text-warm px-8 py-3 rounded-lg font-medium hover:bg-ivory dark:hover:bg-surf-dark">
-          GitHub Profile
-        </a>
+      <div class="flex flex-wrap items-center gap-3 mt-11 load d4">
+        <a href="#work" class="btn-ink px-7 py-3.5 rounded-full text-sm font-medium">Selected work</a>
+        <a href="https://github.com/ar12c" target="_blank" rel="noopener"
+          class="btn-line px-7 py-3.5 rounded-full text-sm font-medium">GitHub profile</a>
       </div>
     </section>
 
 
-    <section
-      class="py-16 md:py-24 border-t border-border-cream dark:border-surf-dark italic text-center section-hidden">
-      <div class="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
-        <div class="quote-block cursor-default">
-          <blockquote class="serif-text text-3xl md:text-4xl text-olive-gray leading-snug">
-            "Stay Hungry, Stay Foolish"
-          </blockquote>
-          <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray not-italic">— Steve
-            Jobs</cite>
+    <!-- ── Selected work ───────────────────────────────────────── -->
+    <section id="work" class="py-20 md:py-28 reveal">
+      <div class="flex items-baseline justify-between mb-10">
+        <h2 class="eyebrow" style="font-size:0.72rem;">Selected work</h2>
+        <span class="eyebrow" style="font-size:0.72rem;">03 projects</span>
+      </div>
+
+      <a href="/AI/index.html" class="work-row">
+        <span class="work-index">01</span>
+        <div>
+          <span class="work-title">Pisces <span class="work-arrow">→</span></span>
         </div>
-        <div class="hidden md:block w-px h-16 bg-border-cream dark:bg-surf-dark self-center"></div>
-        <div class="quote-block cursor-default">
-          <blockquote class="serif-text text-3xl md:text-4xl text-olive-gray leading-snug">
-            "Don't be evil"
+        <p class="work-desc md:pt-2">Advanced AI model for seamless chat and deep research integration.</p>
+        <span class="work-action md:pt-2.5">Explore</span>
+      </a>
+
+      <a href="/word/index.html" class="work-row">
+        <span class="work-index">02</span>
+        <div>
+          <span class="work-title">Okemo Word <span class="work-arrow">→</span></span>
+        </div>
+        <p class="work-desc md:pt-2">A minimal, distraction-free writing experience built for focused thinking.</p>
+        <span class="work-action md:pt-2.5">Open</span>
+      </a>
+
+      <div class="work-row is-soon"
+        style="border-bottom:1px solid var(--border);">
+        <span class="work-index">03</span>
+        <div>
+          <span class="work-title">OkemoAI Labs</span>
+        </div>
+        <p class="work-desc md:pt-2">Exploring the boundaries of agentic coding and autonomous systems.</p>
+        <span class="work-action md:pt-2.5">Coming soon</span>
+      </div>
+    </section>
+
+
+    <!-- ── Words ───────────────────────────────────────────────── -->
+    <section class="py-20 md:py-28 border-t border-border-cream reveal">
+      <h2 class="eyebrow mb-12" style="font-size:0.72rem;">Words I build by</h2>
+      <div class="grid md:grid-cols-2 gap-12 md:gap-16">
+        <figure>
+          <blockquote class="serif-text text-2xl md:text-3xl text-text-warm leading-snug">
+            "Stay hungry, stay foolish."
           </blockquote>
-          <cite class="block mt-4 text-xs uppercase tracking-[0.2em] font-bold text-stone-gray not-italic">—
-            Google</cite>
+          <figcaption class="eyebrow mt-5" style="font-size:0.68rem;">— Steve Jobs</figcaption>
+        </figure>
+        <figure class="md:border-l border-border-cream md:pl-16">
+          <blockquote class="serif-text text-2xl md:text-3xl text-text-warm leading-snug">
+            "Don't be evil."
+          </blockquote>
+          <figcaption class="eyebrow mt-5" style="font-size:0.68rem;">— Google</figcaption>
+        </figure>
+      </div>
+    </section>
+
+
+    <!-- ── About + links ───────────────────────────────────────── -->
+    <section class="py-20 md:py-28 border-t border-border-cream reveal">
+      <div class="grid md:grid-cols-[14rem_1fr] gap-8 md:gap-16">
+        <h2 class="eyebrow" style="font-size:0.72rem;">About</h2>
+        <div>
+          <p class="text-text-warm text-xl md:text-2xl leading-relaxed max-w-2xl">
+            I'm a builder who'd rather make the whole thing — model, interface, and the
+            tools in between. Most of what I ship starts as a question I couldn't stop
+            poking at, and ends as something you can actually use.
+          </p>
+          <div class="flex flex-wrap gap-x-8 gap-y-3 mt-10">
+            <a href="https://github.com/ar12c" target="_blank" rel="noopener"
+              class="eyebrow hover:text-rosewood transition-colors" style="font-size:0.72rem;">GitHub ↗</a>
+            <a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener"
+              class="eyebrow hover:text-rosewood transition-colors" style="font-size:0.72rem;">YouTube ↗</a>
+            <a href="/AI/index.html"
+              class="eyebrow hover:text-rosewood transition-colors" style="font-size:0.72rem;">Labs21 ↗</a>
+          </div>
         </div>
       </div>
     </section>
 
 
-    <section id="work" class="py-32 border-t border-border-cream dark:border-surf-dark section-hidden">
-      <div class="flex items-baseline justify-between mb-4">
-        <h2 class="serif-text text-4xl text-text-warm">Projects</h2>
-      </div>
-      <p class="text-olive-gray text-sm mb-12" style="letter-spacing: 0.02em;">A selection of things I've built and am
-        building.</p>
-      <div>
-        <table class="w-full text-left border-collapse">
-          <thead class="hidden md:table-header-group">
-            <tr class="border-b border-border-cream dark:border-surf-dark">
-              <th class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium w-1/4">
-                Project</th>
-              <th class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium">
-                Description</th>
-              <th
-                class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium text-right">
-                Details</th>
-              <th
-                class="py-4 serif-text text-[11px] uppercase tracking-[0.18em] text-stone-gray font-medium text-right">
-                Action</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-border-cream dark:divide-surf-dark">
-            <tr class="project-row flex flex-col md:table-row py-8 md:py-0">
-              <td class="md:py-8 pr-4">
-                <div class="flex items-center justify-between md:block">
-                  <h3 class="serif-text text-2xl text-text-warm inline-block">Pisces</h3>
-                </div>
-              </td>
-              <td class="py-4 md:py-8">
-                <p class="text-olive-gray text-sm leading-relaxed max-w-md">
-                  Advanced AI model for seamless chatting and deep research integration.
-                </p>
-              </td>
-              <td class="hidden md:table-cell py-8 text-right">
-              </td>
-              <td class="py-4 md:py-8 text-right">
-                <a href="/AI/index.html"
-                  class="project-explore-btn inline-block w-full md:w-auto text-center border border-border-warm dark:border-surf-dark text-text-warm px-6 py-2 rounded-lg text-xs font-medium hover:bg-ivory dark:hover:bg-surf-dark">
-                  Explore
-                </a>
-              </td>
-            </tr>
-            <tr class="project-row flex flex-col md:table-row py-8 md:py-0">
-              <td class="md:py-8 pr-4">
-                <div class="flex items-center justify-between md:block">
-                  <h3 class="serif-text text-2xl text-text-warm inline-block">Okemo Word</h3>
-                </div>
-              </td>
-              <td class="py-4 md:py-8">
-                <p class="text-olive-gray text-sm leading-relaxed max-w-md">
-                  A minimal, distraction-free writing experience built for focused thinking.
-                </p>
-              </td>
-              <td class="hidden md:table-cell py-8 text-right">
-              </td>
-              <td class="py-4 md:py-8 text-right">
-                <a href="/word/index.html"
-                  class="project-explore-btn inline-block w-full md:w-auto text-center border border-border-warm dark:border-surf-dark text-text-warm px-6 py-2 rounded-lg text-xs font-medium hover:bg-ivory dark:hover:bg-surf-dark">
-                  Open
-                </a>
-              </td>
-            </tr>
-            <tr class="project-row project-disabled opacity-60 flex flex-col md:table-row py-8 md:py-0">
-              <td class="md:py-8 pr-4">
-                <div class="flex items-center justify-between md:block">
-                  <h3 class="serif-text text-2xl text-text-warm inline-block">OkemoAI Labs</h3>
-                  <span class="md:hidden text-[10px] uppercase tracking-widest font-bold text-stone-gray">Coming
-                    Soon</span>
-                </div>
-              </td>
-              <td class="py-4 md:py-8">
-                <p class="text-olive-gray text-sm leading-relaxed max-w-md">
-                  Exploring the boundaries of agentic coding and autonomous systems.
-                </p>
-              </td>
-              <td class="hidden md:table-cell py-8 text-right">
-                <span class="text-[10px] uppercase tracking-widest font-bold text-stone-gray">Coming Soon</span>
-              </td>
-              <td class="py-4 md:py-8 text-right">
-                <span class="block md:inline-block w-full md:w-auto text-center text-xs text-stone-gray italic">
-                  Under Construction
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-
-    <footer class="py-12 border-t border-border-cream dark:border-surf-dark section-hidden">
-      <div
-        class="flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-[0.2em] font-bold text-stone-gray gap-6">
-        <p>2026 OKEMOVAIL.COM</p>
-        <div class="flex space-x-8">
-          <a href="https://github.com/ar12c" target="_blank"
-            class="hover:text-rosewood transition-colors duration-300">Github</a>
-          <a href="/AI/index.html" class="hover:text-rosewood transition-colors duration-300">OkemoAI</a>
+    <!-- ── Footer ──────────────────────────────────────────────── -->
+    <footer class="py-12 border-t border-border-cream">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-6 eyebrow" style="font-size:0.66rem;">
+        <p>© 2026 Okemovail.com</p>
+        <div class="flex gap-8">
+          <a href="https://github.com/ar12c" target="_blank" rel="noopener" class="hover:text-rosewood transition-colors">GitHub</a>
+          <a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener" class="hover:text-rosewood transition-colors">YouTube</a>
+          <a href="/AI/index.html" class="hover:text-rosewood transition-colors">Labs21</a>
         </div>
       </div>
     </footer>
 
   </main>
 
+
   <script>
-    // ── Nav shadow on scroll ────────────────────────────────────
-    const nav = document.getElementById('main-nav');
-    let lastScrollY = 0;
+    // ── Glass nav morph on scroll ──────────────────────────────
+    const nav = document.getElementById('nav');
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 20) {
-        nav.classList.add('nav-scrolled');
-      } else {
-        nav.classList.remove('nav-scrolled');
-      }
-      lastScrollY = window.scrollY;
+      nav.classList.toggle('scrolled', window.scrollY > 20);
     }, { passive: true });
 
-    // ── Section reveal via IntersectionObserver ──────────────────
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('section-visible');
-          revealObserver.unobserve(entry.target);
-        }
+    // ── Theme toggle ───────────────────────────────────────────
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const isDark = !document.documentElement.classList.contains('dark');
+      document.documentElement.classList.toggle('dark', isDark);
+      localStorage.setItem('vail_theme', isDark ? 'dark' : 'light');
+    });
+
+    // ── Mobile menu ────────────────────────────────────────────
+    const menuBtn = document.getElementById('menu-toggle');
+    const panel = document.getElementById('mobile-panel');
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = panel.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', open);
+    });
+    document.addEventListener('click', (e) => {
+      if (!panel.contains(e.target) && !menuBtn.contains(e.target)) {
+        panel.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', false);
+      }
+    });
+    panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      panel.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', false);
+    }));
+
+    // ── Scroll reveal ──────────────────────────────────────────
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting) { en.target.classList.add('in'); obs.unobserve(en.target); }
       });
     }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.section-hidden').forEach(el => {
-      revealObserver.observe(el);
-    });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
   </script>
 </body>
 

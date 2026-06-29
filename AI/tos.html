@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service | Oaky</title>
+    <title>Terms of Service | Labs21</title>
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -39,18 +39,21 @@
                     colors: {
                         parchment: 'var(--bg)',
                         ivory: 'var(--bg-elevated)',
-                        'text-warm': 'var(--text-rosewood)',
+                        'text-warm': 'var(--text-primary)',
                         'olive-gray': 'var(--text-secondary)',
                         'stone-gray': 'var(--text-tertiary)',
                         rosewood: 'var(--accent)',
+                        'rose-light': 'var(--accent-light)',
                         'border-cream': 'var(--border)',
                         'border-warm': 'var(--border-strong)',
+                        'ring-warm': 'var(--shadow-ring)',
                         'surf-dark': 'var(--surface-dark)',
                         'deep-dark': 'var(--deep-dark)',
                     },
                     fontFamily: {
                         serif: ['Century', 'Georgia', 'serif'],
                         sans: ['Satoshi', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
                     }
                 }
             }
@@ -93,38 +96,49 @@
         /* --- Global Flat Styles --- */
         .skuomorphic-button {
             position: relative;
-            background: #f4f4f2;
+            padding: 10px 24px;
+            background: var(--accent);
             border-radius: 9999px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            transition: all 0.2s ease;
-            cursor: pointer;
+            color: white;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .dark .skuomorphic-button {
-            background: #2a2a28;
-            border-color: rgba(255, 255, 255, 0.05);
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .skuomorphic-button:hover {
-            transform: translateY(-1px);
-            background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .skuomorphic-button:hover {
-            background: #3a3a38;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: var(--accent-light);
         }
 
         .skuomorphic-button:active {
             transform: translateY(0);
         }
 
+        .dark .skuomorphic-button {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .skuomorphic-button.discord {
+            background: #5865F2;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .skuomorphic-button.discord:hover {
+            background: #6a76f5;
+        }
+
+        .skuomorphic-button.discord:active {
+            background: #4d59d6;
+        }
+
         .skuomorphic-card {
-            background: #ffffff;
+            background: var(--bg-elevated);
             border-radius: 24px;
             border: 1px solid rgba(0, 0, 0, 0.05);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -133,16 +147,16 @@
 
         .dark .skuomorphic-card {
             background: var(--bg-elevated);
-            border-color: var(--border);
+            border-color: rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
 
 <body
-    class="bg-parchment text-text-warm dark:bg-deep-dark dark:text-text-warm min-h-screen flex flex-col font-sans selection:bg-rosewood selection:text-text-warm overflow-x-hidden">
+    class="bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
     <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md relative z-30">
+        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-border-cream dark:border-gray-800/50 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md relative z-30">
         <a href="/AI/index.html" class="flex items-center gap-3">
             <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
                 class="w-8 h-8 text-rosewood fill-current">
@@ -157,21 +171,25 @@
                 <path
                     d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
             </svg>
-            <div class='text-xl md:text-2xl font-black text-rosewood'>Oaky</div>
+            <div class='text-xl md:text-2xl font-normal text-rosewood'>Labs21</div>
         </a>
-        <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="goals.html" class="hover:text-rosewood transition-colors">Goals</a>
-            <a href="research.html" class="hover:text-rosewood transition-colors">Research</a>
-            <a href="privacy.html" class="hover:text-rosewood transition-colors">Privacy</a>
-            <a href="tos.html" class="hover:text-rosewood transition-colors">TOS</a>
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-olive-gray dark:text-stone-gray">
+            <a href="goals.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Goals</a>
+            <a href="research.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Research</a>
+            <a href="privacy.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Privacy</a>
+            <a href="tos.html" class="text-rosewood transition-colors">TOS</a>
         </div>
+        <a href="https://discord.gg/BxjTsjvR8Z" target="_blank"
+            class="skuomorphic-button discord !px-4 !py-1.5 text-xs md:text-sm">
+            <i class="fa-brands fa-discord mr-2"></i> Join Discord
+        </a>
     </nav>
 
     <main class="max-w-4xl mx-auto px-6 py-12 lg:py-24">
         <div class="mb-16 text-center lg:text-left">
             <h1 class="text-4xl md:text-6xl font-serif mb-6 tracking-tight">Terms of Service</h1>
             <p class="text-gray-500 dark:text-gray-400 max-w-2xl text-lg leading-relaxed">
-                Relax — this isn't a 47-page document designed to trick you. We kept it human. By using Oaky, you
+                Relax — this isn't a 47-page document designed to trick you. We kept it human. By using Labs21, you
                 agree
                 to these terms.
             </p>
@@ -188,7 +206,7 @@
                     </h2>
                 </div>
                 <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                    <li>✅ Use Oaky for legal, creative, and helpful things.</li>
+                    <li>✅ Use Labs21 for legal, creative, and helpful things.</li>
                     <li>🚫 Don't use it to harm people or generate illegal content.</li>
                     <li>🤝 We provide this for free — please don't abuse it.</li>
                     <li>🧠 AI can be wrong. Double-check important stuff.</li>
@@ -200,7 +218,7 @@
                 <div class="skuomorphic-card p-10">
                     <h3 class="text-xl font-bold mb-4">Acceptance</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                        When you open Oaky and start chatting, you're agreeing to these Terms. If you do not agree,
+                        When you open Labs21 and start chatting, you're agreeing to these Terms. If you do not agree,
                         that's totally fine, just close the tab. No hard feelings.
                     </p>
                 </div>
@@ -242,7 +260,7 @@
                 <div class="skuomorphic-card p-10">
                     <h3 class="text-xl font-bold mb-4">Intellectual Property</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                        The interface and Oaky metadata belong to us. Any content <strong>you</strong> generate —
+                        The interface and Labs21 metadata belong to us. Any content <strong>you</strong> generate —
                         that's
                         yours. Go build something cool.
                     </p>
@@ -252,7 +270,7 @@
 
             <footer class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800/50 text-center">
                 <p class="text-gray-400 text-xs mb-6">
-                    These terms govern your use of Oaky and services operated by Okemo / ar12c.
+                    These terms govern your use of Labs21 and services operated by Okemo / ar12c.
                 </p>
                 <div class="flex justify-center gap-6">
                     <a href="privacy.html"

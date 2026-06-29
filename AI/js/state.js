@@ -335,6 +335,7 @@ window.settings = JSON.parse(localStorage.getItem('vail_settings_v4') || JSON.st
     sidebarMode: 'manual',
     customAccents: [],
     folders: [],
+    chatOrder: [],
     systemPrompt: '',
     gender: ''
 }));
@@ -347,6 +348,7 @@ if (!window.settings.userPic) {
 if (typeof window.settings.gender !== 'string') window.settings.gender = '';
 
 if (!Array.isArray(window.settings.folders)) window.settings.folders = [];
+if (!Array.isArray(window.settings.chatOrder)) window.settings.chatOrder = [];
 if (!Array.isArray(window.settings.customAccents)) window.settings.customAccents = [];
 if (!Array.isArray(window.settings.memories)) window.settings.memories = [];
 
