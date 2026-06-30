@@ -18,40 +18,37 @@
   --surface-dark:    #30302e;
   --deep-dark:       #141413;
   --skuo-accent: var(--accent-color, var(--accent, #c96478));
-  /* ── Chrome (Chromify) button recipe — consumed via --skuo-surface ── */
+  /* ── Soft gradient button recipe — consumed via --skuo-surface ──
+     A gentle top→bottom fade: lighter at the top, darker at the bottom
+     (inverted under .dark). No metallic reflection band — just a clean,
+     soft skeuomorphic dome with a subtle top edge highlight and lift. */
   --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 78%);
-  --chrome-border: color-mix(in srgb, var(--skuo-surface, #eceae2), black 18%);
+  --chrome-border: color-mix(in srgb, var(--skuo-surface, #eceae2), black 16%);
   --chrome-fill: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 60%),
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 18%) 46%,
-    var(--skuo-surface, #eceae2) 54%,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), black 16%)
+    color-mix(in srgb, var(--skuo-surface, #eceae2), white 24%),
+    var(--skuo-surface, #eceae2) 50%,
+    color-mix(in srgb, var(--skuo-surface, #eceae2), black 13%)
   );
   --chrome-fill-hover: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 70%),
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 26%) 46%,
-    var(--skuo-surface, #eceae2) 54%,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), black 12%)
+    color-mix(in srgb, var(--skuo-surface, #eceae2), white 32%),
+    color-mix(in srgb, var(--skuo-surface, #eceae2), white 3%) 50%,
+    color-mix(in srgb, var(--skuo-surface, #eceae2), black 9%)
   );
   --chrome-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -3px 4px rgba(0, 0, 0, 0.10),
-    0 1px 1px rgba(0, 0, 0, 0.14),
-    0 6px 16px -6px rgba(0, 0, 0, 0.30),
-    0 4px 18px -4px var(--skuo-glow);
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 1px rgba(0, 0, 0, 0.10),
+    0 4px 12px -4px rgba(0, 0, 0, 0.22),
+    0 4px 16px -6px var(--skuo-glow);
   --chrome-shadow-hover:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.18),
-    0 10px 22px -6px rgba(0, 0, 0, 0.34),
-    0 6px 26px -4px var(--skuo-glow);
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.14),
+    0 8px 20px -6px rgba(0, 0, 0, 0.26),
+    0 6px 22px -6px var(--skuo-glow);
   --chrome-shadow-active:
-    inset 0 2px 4px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    0 1px 1px rgba(0, 0, 0, 0.14);
+    inset 0 2px 4px rgba(0, 0, 0, 0.18),
+    0 1px 1px rgba(0, 0, 0, 0.12);
 }
 
 /* ── Dark tokens ────────────────────────────────────────────── */
@@ -70,40 +67,36 @@
   --border-strong:   #3d3d3a;
   --shadow-ring:     #3d3d3a;
   --skuo-accent: var(--accent-color, var(--accent, #d97790));
-  /* ── Chrome recipe — dark mode ── */
+  /* ── Soft gradient recipe — dark mode (inverted: darker top → lighter bottom) ── */
   --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 72%);
   --chrome-border: rgba(0, 0, 0, 0.5);
   --chrome-fill: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 22%),
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 6%) 46%,
-    var(--skuo-surface, #3a3a37) 54%,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 26%)
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 18%),
+    var(--skuo-surface, #3a3a37) 52%,
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 16%)
   );
   --chrome-fill-hover: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 30%),
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 10%) 46%,
-    var(--skuo-surface, #3a3a37) 54%,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 22%)
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 12%),
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 4%) 52%,
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 24%)
   );
   --chrome-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -3px 4px rgba(0, 0, 0, 0.35),
-    0 1px 2px rgba(0, 0, 0, 0.45),
-    0 6px 16px -6px rgba(0, 0, 0, 0.55),
-    0 4px 18px -4px var(--skuo-glow);
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 4px 12px -4px rgba(0, 0, 0, 0.5),
+    0 4px 16px -6px var(--skuo-glow);
   --chrome-shadow-hover:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 2px 4px rgba(0, 0, 0, 0.5),
-    0 10px 22px -6px rgba(0, 0, 0, 0.6),
-    0 6px 26px -4px var(--skuo-glow);
+    inset 0 -1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 4px rgba(0, 0, 0, 0.45),
+    0 8px 20px -6px rgba(0, 0, 0, 0.55),
+    0 6px 22px -6px var(--skuo-glow);
   --chrome-shadow-active:
-    inset 0 2px 4px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 1px 2px rgba(0, 0, 0, 0.4);
+    inset 0 2px 4px rgba(0, 0, 0, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 /* ── Global resets ──────────────────────────────────────────── */
@@ -227,11 +220,14 @@ input[type="reset"]:active:not(:disabled) {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Accent / primary — deep accent-metal, white text */
+/* Accent / primary — deep accent surface, white text.
+   Border derives from --chrome-border (same --skuo-surface as the fill)
+   so the outline carries the exact same tint as the fill, not a darker,
+   more-saturated ring. */
 .skuo-accent {
-  --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 8%);
+  --skuo-surface: var(--skuo-accent);
   color: var(--accent-contrast, #ffffff);
-  border-color: color-mix(in srgb, var(--skuo-accent), black 26%);
+  border-color: var(--chrome-border);
 }
 
 /* Explicit neutral pale-accent (overrides accent if both present) */
@@ -316,8 +312,8 @@ input[type="reset"]:active:not(:disabled) {
 }
 
 .dark .skuo-accent {
-  --skuo-surface: color-mix(in srgb, var(--skuo-accent), black 8%);
-  border-color: color-mix(in srgb, var(--skuo-accent), black 34%);
+  --skuo-surface: var(--skuo-accent);
+  border-color: var(--chrome-border);
 }
 
 .dark .skuo-neutral { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }

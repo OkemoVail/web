@@ -153,7 +153,7 @@
         }
 
         .btn-primary {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 8%);
+            --skuo-surface: var(--skuo-accent);
             color: var(--accent-contrast, #fff);
             padding: 12px 24px;
             border-radius: 12px;
@@ -162,14 +162,14 @@
             letter-spacing: 0.1em;
             font-size: 11px;
             transition: all 0.2s;
-            border: 1px solid color-mix(in srgb, var(--skuo-accent), black 26%);
+            border: 1px solid var(--chrome-border);
             background-image: var(--chrome-fill);
             box-shadow: var(--chrome-shadow);
         }
 
         .btn-primary:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
         .btn-primary:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
-        .dark .btn-primary { --skuo-surface: color-mix(in srgb, var(--skuo-accent), black 8%); }
+        .dark .btn-primary { --skuo-surface: var(--skuo-accent); }
     </style>
     <script src="updatenotes.js"></script>
 </head>

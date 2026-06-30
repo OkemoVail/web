@@ -126,24 +126,30 @@ Notes for future button work:
 - `whitename.html` has no buttons.
 - Design/plan docs: `docs/superpowers/specs/2026-06-30-skeuomorphic-buttons-design.md` and `docs/superpowers/plans/2026-06-30-skeuomorphic-buttons.md`.
 
-### Chrome (Chromify) button language
+### Soft gradient button language
 
-As of 2026-06-30 the glossy buttons were retuned into one **accent-tinted chrome**
-family. The look is defined once in `src/design-tokens.css` as reusable custom
+As of 2026-06-30 the glossy buttons use one **accent-tinted soft gradient**
+family (this replaced the earlier "chrome" metallic look — same recipe vars, new
+values). The look is defined once in `src/design-tokens.css` as reusable custom
 properties — `--chrome-fill`, `--chrome-fill-hover`, `--chrome-shadow`,
 `--chrome-shadow-hover`, `--chrome-shadow-active`, `--chrome-border`, `--skuo-glow`
-— which resolve lazily against the consumer's `--skuo-surface`. To make any button
-chrome: set `--skuo-surface` (+ optional surface for `.dark`) and apply
+(the `--chrome-*` names were kept so all consumers stay in sync; the values are no
+longer chrome) — which resolve lazily against the consumer's `--skuo-surface`. To
+make any button match: set `--skuo-surface` (+ optional surface for `.dark`) and apply
 `background-image: var(--chrome-fill); box-shadow: var(--chrome-shadow);` with
 `:hover` → `*-hover` and `:active` → `--chrome-shadow-active`.
 
+- **Fill** = a gentle top→bottom gradient: **lighter at the top, darker at the
+  bottom** in light mode, **inverted** (darker top, lighter bottom) under `.dark`.
+  No metallic mid-band; a subtle edge highlight + soft lift shadow + accent glow.
 - **Neutral** surface = `color-mix(in srgb, var(--skuo-accent), white 82%)` (dark text).
 - **Primary** surface = `color-mix(in srgb, var(--skuo-accent), white 8%)` (white text).
 - **Dark neutral** = `color-mix(in srgb, var(--skuo-accent), #2a2a28 80%)`.
 
 Hierarchy is by **intensity, not hue** — everything is accent-tinted. The per-page
-override blocks (chat, landing, editor, version, word) now consume the recipe instead
-of hand-writing gradients. Spec/plan: `docs/superpowers/specs/2026-06-30-chrome-button-design-language.md`,
+override blocks (chat, landing, editor, version, word) consume the recipe instead
+of hand-writing gradients, so editing the recipe updates every page (incl. the
+`design.html` showcase). Spec/plan: `docs/superpowers/specs/2026-06-30-chrome-button-design-language.md`,
 `docs/superpowers/plans/2026-06-30-chrome-button-design-language.md`.
 
 - **`.skuo-soft`** — an accent-tinted *satin* surface modifier in the skuo family

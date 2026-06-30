@@ -374,36 +374,30 @@
             background: rgba(255, 255, 255, 0.07);
         }
 
-        /* Glossy icon buttons (consume the shared skeuomorphic look) */
+        /* Glossy icon buttons (consume the shared soft-gradient recipe) */
         .sb-icon-btn,
         .sb-mini-btn,
         .history-action-btn {
-            border: 1px solid color-mix(in srgb, var(--skuo-surface, #efece4), black 22%);
-            background-image: linear-gradient(
-                180deg,
-                color-mix(in srgb, var(--skuo-surface, #f4f2ec), white 42%),
-                color-mix(in srgb, var(--skuo-surface, #f4f2ec), white 8%) 47%,
-                var(--skuo-surface, #f4f2ec) 50%,
-                color-mix(in srgb, var(--skuo-surface, #f4f2ec), black 30%)
-            );
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.7),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.18),
-                0 1px 2px rgba(0, 0, 0, 0.2);
+            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+            border: 1px solid var(--chrome-border);
+            background-image: var(--chrome-fill);
+            box-shadow: var(--chrome-shadow);
+        }
+        .sb-icon-btn:hover,
+        .sb-mini-btn:hover,
+        .history-action-btn:hover {
+            background-image: var(--chrome-fill-hover);
+            box-shadow: var(--chrome-shadow-hover);
         }
         .dark .sb-icon-btn,
         .dark .sb-mini-btn,
         .dark .history-action-btn {
-            --skuo-surface: #3a3a37;
-            border-color: rgba(0, 0, 0, 0.6);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.24),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.4),
-                0 1px 2px rgba(0, 0, 0, 0.45);
+            --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%);
+            border-color: var(--chrome-border);
         }
         .sb-icon-btn:active,
         .sb-mini-btn:active,
-        .history-action-btn:active { transform: translateY(1px); }
+        .history-action-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
 
         .sb-nav-icon {
             width: 28px;
@@ -3322,9 +3316,9 @@
         }
         .Cadance-tab-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
         .Cadance-tab-btn.active {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 8%);
+            --skuo-surface: var(--skuo-accent);
             color: var(--accent-contrast, #fff) !important;
-            border-color: color-mix(in srgb, var(--skuo-accent), black 26%);
+            border-color: var(--chrome-border);
             background-image: var(--chrome-fill);
             box-shadow: var(--chrome-shadow);
         }
@@ -3333,9 +3327,9 @@
 
         /* Memory consent buttons */
         .mem-consent-save {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 8%);
+            --skuo-surface: var(--skuo-accent);
             color: var(--accent-contrast, #fff);
-            border: 1px solid color-mix(in srgb, var(--skuo-accent), black 26%);
+            border: 1px solid var(--chrome-border);
             background-image: var(--chrome-fill);
             box-shadow: var(--chrome-shadow);
         }

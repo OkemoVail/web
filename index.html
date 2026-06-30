@@ -414,9 +414,9 @@
 
     /* ── Chrome buttons (landing) — consume shared --chrome-* recipe ── */
     .g-cta {
-      --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 8%);
+      --skuo-surface: var(--skuo-accent);
       color: var(--accent-contrast, #fff);
-      border: 1px solid color-mix(in srgb, var(--skuo-accent), black 26%);
+      border: 1px solid var(--chrome-border);
       background-image: var(--chrome-fill);
       box-shadow: var(--chrome-shadow);
     }
@@ -455,7 +455,7 @@
     .g-icon:hover { background-image: var(--chrome-fill-hover); }
     .g-icon:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
 
-    .dark .g-cta   { --skuo-surface: color-mix(in srgb, var(--skuo-accent), black 8%); }
+    .dark .g-cta   { --skuo-surface: var(--skuo-accent); }
     .dark .btn-ink,
     .dark .btn-line,
     .dark .g-icon  { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
