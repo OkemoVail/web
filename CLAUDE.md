@@ -146,6 +146,14 @@ override blocks (chat, landing, editor, version, word) now consume the recipe in
 of hand-writing gradients. Spec/plan: `docs/superpowers/specs/2026-06-30-chrome-button-design-language.md`,
 `docs/superpowers/plans/2026-06-30-chrome-button-design-language.md`.
 
+- **`.skuo-soft`** — an accent-tinted *satin* surface modifier in the skuo family
+  (YouTube-style: thin soft top highlight + smooth even gradient, matte rather
+  than glossy). Purely additive; composes with `.skuo-accent` / `.skuo-neutral` /
+  `.skuo-pill` / `.skuo-icon` and tracks `--skuo-surface`, so it inherits accent
+  tint and dark mode. Demoed on `design.html` ("Soft / Satin Buttons"). Spec/plan:
+  `docs/superpowers/specs/2026-06-30-soft-satin-button-variant-design.md`,
+  `docs/superpowers/plans/2026-06-30-soft-satin-button-variant.md`.
+
 ## Unified inputs, cards, and the showcase page
 
 `src/design-tokens.css` also unifies form inputs and cards:
