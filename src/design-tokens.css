@@ -240,6 +240,48 @@ input[type="reset"]:active:not(:disabled) {
   color: var(--text-primary);
 }
 
+/* Soft / satin surface — thin top highlight + smooth even gradient.
+   Composes over any --skuo-surface (neutral, accent, dark). Matte, not glossy. */
+.skuo-soft {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--skuo-surface, #eceae2), white 12%),
+    var(--skuo-surface, #eceae2) 55%,
+    color-mix(in srgb, var(--skuo-surface, #eceae2), black 7%)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 3px 14px -8px var(--skuo-glow);
+}
+
+.skuo-soft::before {
+  inset: 1px 1px auto 1px;
+  height: 38%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.32),
+    rgba(255, 255, 255, 0)
+  );
+}
+
+.skuo-soft:hover {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--skuo-surface, #eceae2), white 18%),
+    color-mix(in srgb, var(--skuo-surface, #eceae2), white 2%) 55%,
+    color-mix(in srgb, var(--skuo-surface, #eceae2), black 4%)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.13),
+    0 5px 18px -8px var(--skuo-glow);
+}
+
+.skuo-soft:active {
+  box-shadow: var(--chrome-shadow-active);
+}
+
 /* Compact icon buttons — smaller radius + gentler glow */
 .skuo-icon {
   border-radius: 9px;
@@ -279,6 +321,32 @@ input[type="reset"]:active:not(:disabled) {
 }
 
 .dark .skuo-neutral { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
+
+.dark .skuo-soft {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 10%),
+    var(--skuo-surface, #3a3a37) 55%,
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 12%)
+  );
+}
+
+.dark .skuo-soft::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0)
+  );
+}
+
+.dark .skuo-soft:hover {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 4%),
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 3%) 55%,
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 18%)
+  );
+}
 
 /* ── Unified text inputs (site-wide, low specificity) ───────────
    Element-attribute selectors only, so any page rule that uses a
