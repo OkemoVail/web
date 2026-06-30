@@ -731,7 +731,7 @@
             min-width: 170px;
         }
 
-        /* .export-item removed — uses shared .skuo .skuo-soft */
+        /* .export-item appearance via shared .skuo .skuo-soft; class kept for icon layout below */
         .export-item i {
             color: var(--accent);
             width: 14px;
@@ -940,12 +940,12 @@
 
         <!-- ── Export menu ─────────────────────────────────────────── -->
         <div id="export-menu">
-            <button class="skuo skuo-soft" onclick="exportHTML()"><i class="fa-brands fa-html5"></i> Export as
+            <button class="export-item skuo skuo-soft" onclick="exportHTML()"><i class="fa-brands fa-html5"></i> Export as
                 HTML</button>
-            <button class="skuo skuo-soft" onclick="exportText()"><i class="fa-regular fa-file-lines"></i> Export as
+            <button class="export-item skuo skuo-soft" onclick="exportText()"><i class="fa-regular fa-file-lines"></i> Export as
                 Text</button>
-            <button class="skuo skuo-soft" onclick="copyAsHTML()"><i class="fa-regular fa-copy"></i> Copy HTML</button>
-            <button class="skuo skuo-soft" onclick="copyAsText()"><i class="fa-solid fa-clipboard"></i> Copy Text</button>
+            <button class="export-item skuo skuo-soft" onclick="copyAsHTML()"><i class="fa-regular fa-copy"></i> Copy HTML</button>
+            <button class="export-item skuo skuo-soft" onclick="copyAsText()"><i class="fa-solid fa-clipboard"></i> Copy Text</button>
         </div>
 
         <!-- ── Main ────────────────────────────────────────────────── -->
@@ -973,7 +973,7 @@
                         <button class="skuo skuo-accent" onclick="clearAIChat()" title="Clear conversation">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
-                        <button class="skuo skuo-icon skuo-accent" onclick="toggleAIPanel()" title="Close AI panel">
+                        <button class="ai-mobile-close skuo skuo-icon skuo-accent" onclick="toggleAIPanel()" title="Close AI panel">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
