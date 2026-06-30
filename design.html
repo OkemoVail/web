@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System — Okemovail</title>
+  <link rel="stylesheet" href="src/output.css">
+  <link rel="stylesheet" href="src/design-tokens.css">
+  <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
+  <style>
+    body { font-family: ui-sans-serif, system-ui, sans-serif; }
+    .ds-wrap { max-width: 880px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+    .ds-section { margin-top: 3rem; }
+    .ds-h { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--text-tertiary); margin-bottom: 1rem; }
+    .ds-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+    .ds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; }
+    .swatch { height: 64px; border-radius: 10px; border: 1px solid var(--border);
+              display: flex; align-items: flex-end; padding: 0.4rem; font-size: 0.6rem;
+              color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .ds-topbar { display: flex; justify-content: space-between; align-items: center; }
+    .ds-title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); }
+    .stack > * + * { margin-top: 0.6rem; }
+  </style>
+</head>
+<body>
+  <div class="ds-wrap">
+    <div class="ds-topbar">
+      <div class="ds-title">Design System</div>
+      <button id="theme-toggle" class="skuo skuo-icon" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+
+    <section class="ds-section">
+      <div class="ds-h">Buttons</div>
+      <div class="ds-row">
+        <button class="skuo skuo-accent" style="padding:0.55rem 1.1rem;border-radius:10px;">Accent</button>
+        <button class="skuo" style="padding:0.55rem 1.1rem;border-radius:10px;">Neutral</button>
+        <button class="skuo skuo-neutral" style="padding:0.55rem 1.1rem;border-radius:10px;">Neutral alt</button>
+        <button class="skuo skuo-pill skuo-accent" style="padding:0.55rem 1.3rem;">Pill</button>
+        <button class="skuo skuo-icon" aria-label="Icon" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button class="skuo" disabled style="padding:0.55rem 1.1rem;border-radius:10px;opacity:0.5;">Disabled</button>
+      </div>
+    </section>
+
+    <section class="ds-section">
+      <div class="ds-h">Inputs</div>
+      <div class="stack" style="max-width:380px;">
+        <input type="text" placeholder="Text input">
+        <input type="email" placeholder="email@example.com">
+        <textarea rows="3" placeholder="Textarea"></textarea>
+        <select><option>Select option</option><option>Another</option></select>
+        <input type="text" value="Disabled" disabled>
+      </div>
+    </section>
+
+    <section class="ds-section">
+      <div class="ds-h">Cards</div>
+      <div class="ds-row" style="align-items:stretch;">
+        <div class="card card-pad" style="flex:1;min-width:220px;">
+          <strong>Card title</strong>
+          <p style="color:var(--text-secondary);margin-top:0.35rem;font-size:0.9rem;">A unified skeuomorphic surface, dark-mode aware.</p>
+        </div>
+        <div class="card card-pad" style="flex:1;min-width:220px;">
+          <strong>With a button</strong>
+          <div style="margin-top:0.75rem;">
+            <button class="skuo skuo-accent" style="padding:0.45rem 0.9rem;border-radius:8px;">Action</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-section">
+      <div class="ds-h">Color tokens</div>
+      <div class="ds-grid">
+        <div class="swatch" style="background:var(--accent);">--accent</div>
+        <div class="swatch" style="background:var(--accent-light);">--accent-light</div>
+        <div class="swatch" style="background:var(--bg);color:var(--text-primary);text-shadow:none;">--bg</div>
+        <div class="swatch" style="background:var(--bg-elevated);color:var(--text-primary);text-shadow:none;">--bg-elevated</div>
+        <div class="swatch" style="background:var(--bg-white);color:var(--text-primary);text-shadow:none;">--bg-white</div>
+        <div class="swatch" style="background:var(--border-strong);color:var(--text-primary);text-shadow:none;">--border-strong</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Match the site's theme convention: .dark on <html>, persisted to vail_theme.
+    (function () {
+      var saved = localStorage.getItem('vail_theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (saved !== 'light' && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+      var btn = document.getElementById('theme-toggle');
+      btn.addEventListener('click', function () {
+        var isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('vail_theme', isDark ? 'dark' : 'light');
+      });
+    })();
+  </script>
+</body>
+</html>
