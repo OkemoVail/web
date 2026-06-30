@@ -132,6 +132,8 @@ Notes for future button work:
 - **Inputs:** bare `input[type=text|email|search|password|number|url|tel]`, `textarea`, and `select` get a recessed parchment look + accent focus ring, styled globally at *element-attribute specificity* so any page-level class/id rule (chat input bar, word `#doc-title`/`#ai-input`, editor) overrides automatically. Never add `!important` to these rules.
 - **Cards:** opt-in via the `.card` class (raised skeuomorphic surface, dark-mode aware); `.card-pad` adds internal padding. Nothing is styled as a card unless it has `.card`.
 
+Reusable components beyond buttons/inputs/cards live in `src/design-tokens.css` under the **`ui-` namespace** (opt-in, themeable, dark-mode aware): `.ui-badge` (+ `--accent`/`--tiny`), `.ui-crumb`, `.ui-accordion` (on `<details>`), `.ui-bullet`, `.ui-opt` (checkbox/radio rows, `.is-disabled`), `.ui-field` (input with leading `.lead` icon), `.ui-info`, `.ui-seg` (segmented control), `.ui-cell`. Inner element selectors are scoped under their `ui-` parent (e.g. `.ui-cell .av`) so plain names never style anything globally. The `ui-` prefix was verified collision-free across all pages — edit a rule here and it updates that component on every page that uses the class.
+
 `design.html` (repo root) is the public showcase — buttons, inputs, cards, and color-token swatches rendered live from `design-tokens.css`, with its own `.dark`/`vail_theme` toggle. It's linked from `index.html` (desktop nav, mobile menu, footer). Keep it in sync when adding new shared components.
 
 Design/plan docs: `docs/superpowers/specs/2026-06-30-unified-design-system-showcase-design.md` and `docs/superpowers/plans/2026-06-30-unified-design-system-showcase.md`.

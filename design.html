@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="src/design-tokens.css">
   <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
   <style>
-    /* ── Page scaffolding only (no shared component styles redefined) ── */
+    /* ── Showcase layout scaffolding ONLY.
+       Every component (.ui-*, .skuo*, inputs, .card) lives in
+       src/design-tokens.css so editing it there updates every page. ── */
     body { font-family: ui-sans-serif, system-ui, sans-serif; }
 
     .ds-frame {
@@ -52,74 +54,11 @@
       font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
       color: var(--text-tertiary); margin: 0 0 0.85rem;
     }
-    .row  { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
-    .col  { display: flex; flex-direction: column; gap: 0.6rem; }
-    .btn  { padding: 0.5rem 1.05rem; border-radius: 10px; font-size: 0.85rem; font-weight: 500; }
-    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 9px; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
+    .col { display: flex; flex-direction: column; gap: 0.6rem; }
+    .btn { padding: 0.5rem 1.05rem; border-radius: 10px; font-size: 0.85rem; font-weight: 500; }
 
-    /* Tags & badges (page-local demo) */
-    .badge {
-      display: inline-flex; align-items: center; gap: 0.3rem;
-      padding: 0.32rem 0.8rem; border-radius: 999px; font-size: 0.78rem; font-weight: 500;
-      background: var(--bg-elevated); border: 1px solid var(--border-strong); color: var(--text-secondary);
-    }
-    .badge-accent { background: var(--skuo-accent); border-color: transparent; color: #fff; }
-    .badge-tiny { font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.22rem 0.5rem; color: var(--text-tertiary); }
-
-    /* Breadcrumb */
-    .crumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--text-tertiary); }
-    .crumb .sep { opacity: 0.5; }
-    .crumb .current { color: var(--text-primary); font-weight: 500; }
-
-    /* Accordion */
-    .acc { border-top: 1px solid var(--border); }
-    .acc:first-of-type { border-top: none; }
-    .acc summary {
-      list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
-      gap: 0.75rem; padding: 0.7rem 0; font-weight: 600; font-size: 0.92rem; color: var(--text-primary);
-    }
-    .acc summary::-webkit-details-marker { display: none; }
-    .acc .plus { color: var(--text-tertiary); font-size: 1.1rem; line-height: 1; }
-    .acc[open] .plus { transform: rotate(45deg); }
-    .acc .body { padding: 0 0 0.85rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
-    .acc .body a { color: var(--skuo-accent); text-decoration: none; font-weight: 500; }
-
-    /* Bullets */
-    .bullet { display: flex; align-items: center; gap: 0.55rem; font-size: 0.88rem; color: var(--text-primary); }
-    .bullet .dot {
-      flex: none; width: 20px; height: 20px; border-radius: 999px; background: var(--text-primary);
-      color: var(--bg-white); display: grid; place-items: center;
-    }
-
-    /* Checkboxes / radios — native controls, accent-tinted */
-    .opt { display: flex; align-items: center; gap: 0.55rem; font-size: 0.86rem; color: var(--text-primary); }
-    .opt input { accent-color: var(--skuo-accent); width: 16px; height: 16px; }
-    .opt.disabled { color: var(--text-tertiary); }
-
-    /* Search input with leading icon */
-    .field { position: relative; }
-    .field .lead { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); pointer-events: none; }
-    .field input { padding-left: 2.1rem; width: 100%; }
-
-    /* Info block */
-    .info { display: flex; gap: 0.6rem; padding: 0.9rem; border-radius: 12px; background: var(--bg-elevated); border: 1px solid var(--border-strong); }
-    .info .ic { flex: none; width: 20px; height: 20px; border-radius: 999px; background: var(--text-primary); color: var(--bg-white); display: grid; place-items: center; }
-    .info p { margin: 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
-    .info strong { color: var(--text-primary); }
-
-    /* Segmented control */
-    .seg { display: inline-flex; padding: 0.25rem; gap: 0.2rem; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border-strong); }
-    .seg button { border: none; background: transparent; color: var(--text-secondary); padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.82rem; cursor: pointer; }
-    .seg button.on { background: var(--text-primary); color: var(--bg-white); }
-
-    /* Cell */
-    .cell { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem; border-radius: 12px; border: 1px solid var(--border); }
-    .cell .av { flex: none; width: 38px; height: 38px; border-radius: 999px; background: var(--skuo-accent); color: #fff; display: grid; place-items: center; font-weight: 600; }
-    .cell .nm { font-weight: 600; font-size: 0.88rem; color: var(--text-primary); }
-    .cell .mt { font-size: 0.74rem; color: var(--text-tertiary); }
-    .cell .price { margin-left: auto; font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
-
-    /* Swatches */
+    /* Swatches (showcase-only) */
     .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
     .swatch { height: 52px; border-radius: 10px; border: 1px solid var(--border);
               display: flex; align-items: flex-end; padding: 0.35rem; font-size: 0.55rem;
@@ -170,25 +109,25 @@
       <section class="dsc">
         <p class="dsc-label">Tags &amp; Badges</p>
         <div class="row" style="margin-bottom:0.6rem;">
-          <span class="badge badge-accent">All</span>
-          <span class="badge">Moodboard</span>
-          <span class="badge">Ratings
+          <span class="ui-badge ui-badge--accent">All</span>
+          <span class="ui-badge">Moodboard</span>
+          <span class="ui-badge">Ratings
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           </span>
         </div>
         <div class="row">
-          <span class="badge">Clear All
+          <span class="ui-badge">Clear All
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </span>
-          <span class="badge-tiny">Art Deco</span>
-          <span class="badge-tiny">Silver</span>
+          <span class="ui-badge--tiny">Art Deco</span>
+          <span class="ui-badge--tiny">Silver</span>
         </div>
       </section>
 
       <!-- Breadcrumb -->
       <section class="dsc">
         <p class="dsc-label">Breadcrumb</p>
-        <nav class="crumb" aria-label="Breadcrumb">
+        <nav class="ui-crumb" aria-label="Breadcrumb">
           <span>Home Page</span>
           <span class="sep">·</span>
           <span class="current">Case Study Details</span>
@@ -198,11 +137,11 @@
       <!-- Accordion -->
       <section class="dsc">
         <p class="dsc-label">Accordion</p>
-        <details class="acc">
+        <details class="ui-accordion">
           <summary>What is Milray Park? <span class="plus">+</span></summary>
           <div class="body">A self-contained design language shared across every page of the site.</div>
         </details>
-        <details class="acc" open>
+        <details class="ui-accordion" open>
           <summary>What makes it unique? <span class="plus">+</span></summary>
           <div class="body">One stylesheet, <a href="#">themeable tokens</a>, and skeuomorphic glossy controls that adapt to <a href="#">light and dark</a> automatically.</div>
         </details>
@@ -211,7 +150,7 @@
       <!-- Bullets -->
       <section class="dsc">
         <p class="dsc-label">Bullets</p>
-        <div class="bullet">
+        <div class="ui-bullet">
           <span class="dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
           Highly professional
         </div>
@@ -221,10 +160,10 @@
       <section class="dsc">
         <p class="dsc-label">Checkboxes</p>
         <div class="col">
-          <label class="opt"><input type="checkbox" checked> Checked</label>
-          <label class="opt"><input type="checkbox"> Unchecked</label>
-          <label class="opt disabled"><input type="checkbox" checked disabled> Disabled checked</label>
-          <label class="opt disabled"><input type="checkbox" disabled> Disabled unchecked</label>
+          <label class="ui-opt"><input type="checkbox" checked> Checked</label>
+          <label class="ui-opt"><input type="checkbox"> Unchecked</label>
+          <label class="ui-opt is-disabled"><input type="checkbox" checked disabled> Disabled checked</label>
+          <label class="ui-opt is-disabled"><input type="checkbox" disabled> Disabled unchecked</label>
         </div>
       </section>
 
@@ -232,10 +171,10 @@
       <section class="dsc">
         <p class="dsc-label">Radios</p>
         <div class="col">
-          <label class="opt"><input type="radio" name="r" checked> Checked</label>
-          <label class="opt"><input type="radio" name="r"> Unchecked</label>
-          <label class="opt disabled"><input type="radio" name="r2" checked disabled> Disabled checked</label>
-          <label class="opt disabled"><input type="radio" name="r2" disabled> Disabled unchecked</label>
+          <label class="ui-opt"><input type="radio" name="r" checked> Checked</label>
+          <label class="ui-opt"><input type="radio" name="r"> Unchecked</label>
+          <label class="ui-opt is-disabled"><input type="radio" name="r2" checked disabled> Disabled checked</label>
+          <label class="ui-opt is-disabled"><input type="radio" name="r2" disabled> Disabled unchecked</label>
         </div>
       </section>
 
@@ -243,7 +182,7 @@
       <section class="dsc">
         <p class="dsc-label">Text Inputs</p>
         <div class="col">
-          <div class="field">
+          <div class="ui-field">
             <span class="lead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
             <input type="search" placeholder="Search for desktops">
           </div>
@@ -256,7 +195,7 @@
       <!-- Info blocks -->
       <section class="dsc">
         <p class="dsc-label">Info blocks</p>
-        <div class="info">
+        <div class="ui-info">
           <span class="ic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
           <p><strong>Like a particular brand?</strong> Just let your designer know. Otherwise, leave it up to the team to source the best pieces for your look.</p>
         </div>
@@ -266,11 +205,11 @@
       <section class="dsc">
         <p class="dsc-label">Segmented Controls</p>
         <div class="col">
-          <div class="seg">
+          <div class="ui-seg">
             <button class="on" aria-pressed="true">Grid</button>
             <button aria-pressed="false">List</button>
           </div>
-          <div class="seg">
+          <div class="ui-seg">
             <button class="on">Label</button>
             <button>Label</button>
             <button>Label</button>
@@ -294,7 +233,7 @@
       <!-- Cells -->
       <section class="dsc">
         <p class="dsc-label">Cells</p>
-        <div class="cell">
+        <div class="ui-cell">
           <span class="av">JC</span>
           <div>
             <div class="nm">Jane Cooper</div>

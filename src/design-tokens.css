@@ -318,3 +318,79 @@ select:focus {
     0 8px 24px -12px rgba(0, 0, 0, 0.6);
 }
 
+/* ── Reusable UI components (site-wide, `ui-` namespace) ─────────
+   Opt-in classes, all themeable via the shared tokens and dark-mode
+   aware. Authored once here; every page that links this file can use
+   them, so editing a rule here updates that component everywhere.
+   Inner element selectors are scoped under their `ui-` parent so the
+   plain names (.av, .dot, .sep…) never style anything globally. */
+
+/* Tags & badges */
+.ui-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.32rem 0.8rem; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 500;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+}
+.ui-badge--accent { background: var(--skuo-accent); border-color: transparent; color: #fff; }
+.ui-badge--tiny {
+  font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.22rem 0.5rem; color: var(--text-tertiary);
+}
+
+/* Breadcrumb */
+.ui-crumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--text-tertiary); }
+.ui-crumb .sep { opacity: 0.5; }
+.ui-crumb .current { color: var(--text-primary); font-weight: 500; }
+
+/* Accordion (use on <details class="ui-accordion">) */
+.ui-accordion { border-top: 1px solid var(--border); }
+.ui-accordion summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: space-between; gap: 0.75rem; padding: 0.7rem 0;
+  font-weight: 600; font-size: 0.92rem; color: var(--text-primary);
+}
+.ui-accordion summary::-webkit-details-marker { display: none; }
+.ui-accordion .plus { color: var(--text-tertiary); font-size: 1.1rem; line-height: 1; transition: transform 0.15s ease; }
+.ui-accordion[open] .plus { transform: rotate(45deg); }
+.ui-accordion .body { padding: 0 0 0.85rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+.ui-accordion .body a { color: var(--skuo-accent); text-decoration: none; font-weight: 500; }
+
+/* Bullets */
+.ui-bullet { display: flex; align-items: center; gap: 0.55rem; font-size: 0.88rem; color: var(--text-primary); }
+.ui-bullet .dot {
+  flex: none; width: 20px; height: 20px; border-radius: 999px;
+  background: var(--text-primary); color: var(--bg-white);
+  display: grid; place-items: center;
+}
+
+/* Checkbox / radio options (native control, accent-tinted) */
+.ui-opt { display: flex; align-items: center; gap: 0.55rem; font-size: 0.86rem; color: var(--text-primary); }
+.ui-opt input { accent-color: var(--skuo-accent); width: 16px; height: 16px; }
+.ui-opt.is-disabled { color: var(--text-tertiary); }
+
+/* Input with a leading icon */
+.ui-field { position: relative; }
+.ui-field .lead { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); pointer-events: none; }
+.ui-field input { padding-left: 2.1rem; width: 100%; }
+
+/* Info / callout block */
+.ui-info { display: flex; gap: 0.6rem; padding: 0.9rem; border-radius: 12px; background: var(--bg-elevated); border: 1px solid var(--border-strong); }
+.ui-info .ic { flex: none; width: 20px; height: 20px; border-radius: 999px; background: var(--text-primary); color: var(--bg-white); display: grid; place-items: center; }
+.ui-info p { margin: 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
+.ui-info strong { color: var(--text-primary); }
+
+/* Segmented control */
+.ui-seg { display: inline-flex; padding: 0.25rem; gap: 0.2rem; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border-strong); }
+.ui-seg button { border: none; background: transparent; color: var(--text-secondary); padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.82rem; cursor: pointer; }
+.ui-seg button.on { background: var(--text-primary); color: var(--bg-white); }
+
+/* List cell */
+.ui-cell { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem; border-radius: 12px; border: 1px solid var(--border); }
+.ui-cell .av { flex: none; width: 38px; height: 38px; border-radius: 999px; background: var(--skuo-accent); color: #fff; display: grid; place-items: center; font-weight: 600; }
+.ui-cell .nm { font-weight: 600; font-size: 0.88rem; color: var(--text-primary); }
+.ui-cell .mt { font-size: 0.74rem; color: var(--text-tertiary); }
+.ui-cell .price { margin-left: auto; font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
+
