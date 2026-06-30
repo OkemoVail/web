@@ -172,6 +172,22 @@
         .btn-primary:active {
             transform: scale(0.98);
         }
+
+        /* Glossy skeuomorphic upgrade */
+        .btn-primary {
+            background-image: linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--accent), white 20%),
+                var(--accent) 55%,
+                color-mix(in srgb, var(--accent), black 14%)
+            );
+            border: 1px solid color-mix(in srgb, var(--accent), black 22%);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.45),
+                inset 0 -1px 1px rgba(0,0,0,.15),
+                0 1px 2px rgba(0,0,0,.18),
+                0 4px 10px -3px rgba(0,0,0,.28);
+        }
     </style>
     <script src="updatenotes.js"></script>
 </head>

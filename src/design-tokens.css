@@ -172,9 +172,11 @@ input[type="reset"]:active:not(:disabled) {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Accent / primary variant — gradient base is the resolved accent */
-.skuo-accent,
-.skuomorphic-button {
+/* Accent / primary variant — gradient base is the resolved accent.
+   NB: .skuomorphic-button is intentionally NOT aliased here — pages
+   define it as a neutral pill locally; forcing accent text would make
+   neutral buttons unreadable. Add .skuo-accent explicitly for accent. */
+.skuo-accent {
   --skuo-surface: var(--skuo-accent);
   color: var(--accent-contrast, #ffffff);
   border-color: color-mix(in srgb, var(--skuo-accent), black 22%);
@@ -224,8 +226,7 @@ input[type="reset"]:active:not(:disabled) {
   );
 }
 
-.dark .skuo-accent,
-.dark .skuomorphic-button {
+.dark .skuo-accent {
   --skuo-surface: var(--skuo-accent);
   border-color: color-mix(in srgb, var(--skuo-accent), black 30%);
 }

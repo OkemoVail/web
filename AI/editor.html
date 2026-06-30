@@ -234,6 +234,50 @@
             background: var(--surface-dark);
         }
 
+        /* Glossy skeuomorphic upgrade */
+        .toolbar-btn {
+            border: 1px solid color-mix(in srgb, var(--bg-elevated), black 12%);
+            background-image: linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--bg-elevated), white 14%),
+                var(--bg-elevated) 55%,
+                color-mix(in srgb, var(--bg-elevated), black 8%)
+            );
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.5),
+                0 1px 2px rgba(0,0,0,.14);
+        }
+        .dark .toolbar-btn {
+            border-color: rgba(0,0,0,.4);
+            background-image: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03) 55%, rgba(0,0,0,.12));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 1px 2px rgba(0,0,0,.4);
+        }
+        .toolbar-btn:active { transform: translateY(1px); }
+        .toolbar-btn.active {
+            background-image: linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--accent-color, var(--accent)), white 18%),
+                var(--accent-color, var(--accent)) 55%,
+                color-mix(in srgb, var(--accent-color, var(--accent)), black 12%)
+            );
+            color: #fff;
+            border-color: color-mix(in srgb, var(--accent-color, var(--accent)), black 22%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 2px 6px -1px rgba(0,0,0,.25);
+        }
+        .control-btn {
+            background-image: linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--surface-dark), white 22%),
+                var(--surface-dark) 55%,
+                color-mix(in srgb, var(--surface-dark), black 16%)
+            );
+            border: 1px solid color-mix(in srgb, var(--surface-dark), black 24%);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.22),
+                0 1px 2px rgba(0,0,0,.22);
+        }
+        .control-btn:active { transform: translateY(1px); }
+
         .float-left {
             float: left;
             margin-right: 20px;
