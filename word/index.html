@@ -174,7 +174,18 @@
             white-space: nowrap;
         }
 
-        /* header action buttons — appearance via shared .skuo .skuo-icon */
+        /* header action buttons — layout only; appearance via shared .skuo .skuo-icon */
+        .hdr-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            flex-shrink: 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
         .hdr-profile {
             width: 28px;
@@ -216,7 +227,18 @@
             display: none;
         }
 
-        /* toolbar buttons — appearance via shared .skuo .skuo-icon */
+        /* toolbar buttons — layout only; appearance via shared .skuo .skuo-icon */
+        .tb-btn {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            flex-shrink: 0;
+            cursor: pointer;
+            font-size: 13px;
+        }
 
         .tb-sep {
             width: 1px;
@@ -471,7 +493,17 @@
             gap: 6px;
         }
 
-        /* .ai-clear-btn removed — uses shared .skuo .skuo-accent */
+        /* .ai-clear-btn — layout only; appearance via shared .skuo .skuo-accent */
+        .ai-clear-btn {
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 11px;
+        }
 
         /* messages */
         #ai-messages {
@@ -731,7 +763,19 @@
             min-width: 170px;
         }
 
-        /* .export-item appearance via shared .skuo .skuo-soft; class kept for icon layout below */
+        /* .export-item — row layout only; appearance via shared .skuo .skuo-soft */
+        .export-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            padding: 7px 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 6px;
+            font-family: inherit;
+        }
         .export-item i {
             color: var(--accent);
             width: 14px;
@@ -757,8 +801,17 @@
         }
 
         /* ── Mobile FAB & close ─────────────────────────────────── */
-        /* .ai-mobile-close uses shared .skuo .skuo-icon .skuo-accent; hidden until mobile */
-        .ai-mobile-close { display: none; }
+        /* .ai-mobile-close — layout only; appearance via shared .skuo .skuo-icon .skuo-accent */
+        .ai-mobile-close {
+            display: none;
+            width: 26px;
+            height: 26px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+        }
 
         #ai-fab {
             display: none;
@@ -874,16 +927,16 @@
             <div style="flex:1;"></div>
             <span id="hdr-word-count" class="hdr-word-pill">0 words</span>
             <div class="vr"></div>
-            <button class="skuo skuo-icon" onclick="newDoc()" title="New document"><i class="fa-regular fa-file"></i></button>
-            <button class="skuo skuo-icon" id="save-btn" onclick="saveDoc()" title="Save  Ctrl+S"><i
+            <button class="hdr-btn skuo skuo-icon" onclick="newDoc()" title="New document"><i class="fa-regular fa-file"></i></button>
+            <button class="hdr-btn skuo skuo-icon" id="save-btn" onclick="saveDoc()" title="Save  Ctrl+S"><i
                     class="fa-regular fa-floppy-disk"></i></button>
-            <button class="skuo skuo-icon" onclick="showExportMenu(event)" title="Export"><i
+            <button class="hdr-btn skuo skuo-icon" onclick="showExportMenu(event)" title="Export"><i
                     class="fa-solid fa-arrow-up-from-bracket"></i></button>
-            <button class="skuo skuo-icon" onclick="printDoc()" title="Print"><i class="fa-solid fa-print"></i></button>
+            <button class="hdr-btn skuo skuo-icon" onclick="printDoc()" title="Print"><i class="fa-solid fa-print"></i></button>
             <div class="vr"></div>
-            <button class="skuo skuo-icon" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"><i
+            <button class="hdr-btn skuo skuo-icon" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"><i
                     class="fa-solid fa-moon"></i></button>
-            <button class="skuo skuo-icon" id="ai-toggle-btn" onclick="toggleAIPanel()" title="Oaky AI  —  writing assistant">
+            <button class="hdr-btn skuo skuo-icon" id="ai-toggle-btn" onclick="toggleAIPanel()" title="Oaky AI  —  writing assistant">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
             </button>
             <div id="hdr-profile" class="hdr-profile"></div>
@@ -901,40 +954,40 @@
                 <option value="pre">Code Block</option>
             </select>
             <div class="tb-sep"></div>
-            <button class="skuo skuo-icon" id="tb-bold" onclick="fmt('bold')" title="Bold  Ctrl+B"><b>B</b></button>
-            <button class="skuo skuo-icon" id="tb-italic" onclick="fmt('italic')" title="Italic  Ctrl+I"><em
+            <button class="tb-btn skuo skuo-icon" id="tb-bold" onclick="fmt('bold')" title="Bold  Ctrl+B"><b>B</b></button>
+            <button class="tb-btn skuo skuo-icon" id="tb-italic" onclick="fmt('italic')" title="Italic  Ctrl+I"><em
                     style="font-style:italic;">I</em></button>
-            <button class="skuo skuo-icon" id="tb-underline" onclick="fmt('underline')" title="Underline  Ctrl+U"
+            <button class="tb-btn skuo skuo-icon" id="tb-underline" onclick="fmt('underline')" title="Underline  Ctrl+U"
                 style="text-decoration:underline;">U</button>
-            <button class="skuo skuo-icon" id="tb-strike" onclick="fmt('strikeThrough')" title="Strikethrough"
+            <button class="tb-btn skuo skuo-icon" id="tb-strike" onclick="fmt('strikeThrough')" title="Strikethrough"
                 style="text-decoration:line-through;">S</button>
             <div class="tb-sep"></div>
-            <button class="skuo skuo-icon" id="tb-al" onclick="fmt('justifyLeft')" title="Align left"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-al" onclick="fmt('justifyLeft')" title="Align left"><i
                     class="fa-solid fa-align-left" style="font-size:12px;"></i></button>
-            <button class="skuo skuo-icon" id="tb-ac" onclick="fmt('justifyCenter')" title="Align center"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-ac" onclick="fmt('justifyCenter')" title="Align center"><i
                     class="fa-solid fa-align-center" style="font-size:12px;"></i></button>
-            <button class="skuo skuo-icon" id="tb-ar" onclick="fmt('justifyRight')" title="Align right"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-ar" onclick="fmt('justifyRight')" title="Align right"><i
                     class="fa-solid fa-align-right" style="font-size:12px;"></i></button>
-            <button class="skuo skuo-icon" id="tb-aj" onclick="fmt('justifyFull')" title="Justify"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-aj" onclick="fmt('justifyFull')" title="Justify"><i
                     class="fa-solid fa-align-justify" style="font-size:12px;"></i></button>
             <div class="tb-sep"></div>
-            <button class="skuo skuo-icon" id="tb-ul" onclick="fmt('insertUnorderedList')" title="Bullet list"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-ul" onclick="fmt('insertUnorderedList')" title="Bullet list"><i
                     class="fa-solid fa-list-ul" style="font-size:12px;"></i></button>
-            <button class="skuo skuo-icon" id="tb-ol" onclick="fmt('insertOrderedList')" title="Numbered list"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-ol" onclick="fmt('insertOrderedList')" title="Numbered list"><i
                     class="fa-solid fa-list-ol" style="font-size:12px;"></i></button>
-            <button class="skuo skuo-icon" onclick="fmt('outdent')" title="Decrease indent"><i class="fa-solid fa-outdent"
+            <button class="tb-btn skuo skuo-icon" onclick="fmt('outdent')" title="Decrease indent"><i class="fa-solid fa-outdent"
                     style="font-size:12px;"></i></button>
-            <button class="skuo skuo-icon" onclick="fmt('indent')" title="Increase indent"><i class="fa-solid fa-indent"
-                    style="font-size:12px;"></i></button>
-            <div class="tb-sep"></div>
-            <button class="skuo skuo-icon" onclick="insertLink()" title="Insert link"><i class="fa-solid fa-link"
-                    style="font-size:12px;"></i></button>
-            <button class="skuo skuo-icon" onclick="insertTable()" title="Insert table"><i class="fa-solid fa-table"
-                    style="font-size:12px;"></i></button>
-            <button class="skuo skuo-icon" onclick="insertHR()" title="Insert divider"><i class="fa-solid fa-minus"
+            <button class="tb-btn skuo skuo-icon" onclick="fmt('indent')" title="Increase indent"><i class="fa-solid fa-indent"
                     style="font-size:12px;"></i></button>
             <div class="tb-sep"></div>
-            <button class="skuo skuo-icon" onclick="fmt('removeFormat')" title="Clear formatting"><i
+            <button class="tb-btn skuo skuo-icon" onclick="insertLink()" title="Insert link"><i class="fa-solid fa-link"
+                    style="font-size:12px;"></i></button>
+            <button class="tb-btn skuo skuo-icon" onclick="insertTable()" title="Insert table"><i class="fa-solid fa-table"
+                    style="font-size:12px;"></i></button>
+            <button class="tb-btn skuo skuo-icon" onclick="insertHR()" title="Insert divider"><i class="fa-solid fa-minus"
+                    style="font-size:12px;"></i></button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn skuo skuo-icon" onclick="fmt('removeFormat')" title="Clear formatting"><i
                     class="fa-solid fa-text-slash" style="font-size:12px;"></i></button>
         </div>
 
@@ -970,7 +1023,7 @@
                         <span class="ai-title">Oaky AI</span>
                     </div>
                     <div class="ai-header-right">
-                        <button class="skuo skuo-accent" onclick="clearAIChat()" title="Clear conversation">
+                        <button class="ai-clear-btn skuo skuo-accent" onclick="clearAIChat()" title="Clear conversation">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
                         <button class="ai-mobile-close skuo skuo-icon skuo-accent" onclick="toggleAIPanel()" title="Close AI panel">
