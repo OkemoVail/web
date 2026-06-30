@@ -412,83 +412,53 @@
       border-radius: 4px;
     }
 
-    /* ── Skeuomorphic glossy buttons (landing) ─────────────────── */
+    /* ── Chrome buttons (landing) — consume shared --chrome-* recipe ── */
     .g-cta {
-      background: var(--accent);
-      background-image: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--accent), white 36%),
-        color-mix(in srgb, var(--accent), white 6%) 47%,
-        var(--accent) 50%,
-        color-mix(in srgb, var(--accent), black 28%)
-      );
-      border: 1px solid color-mix(in srgb, var(--accent), black 30%);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.6),
-        inset 0 -2px 2px rgba(0, 0, 0, 0.2),
-        0 1px 2px rgba(0, 0, 0, 0.2),
-        0 4px 10px -3px rgba(0, 0, 0, 0.3);
+      --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 8%);
+      color: var(--accent-contrast, #fff);
+      border: 1px solid color-mix(in srgb, var(--skuo-accent), black 26%);
+      background-image: var(--chrome-fill);
+      box-shadow: var(--chrome-shadow);
     }
-    .g-cta:hover {
-      background-image: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--accent), white 44%),
-        color-mix(in srgb, var(--accent), white 10%) 47%,
-        var(--accent) 50%,
-        color-mix(in srgb, var(--accent), black 24%)
-      );
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.65),
-        0 2px 4px rgba(0, 0, 0, 0.22),
-        0 8px 16px -4px rgba(0, 0, 0, 0.34);
-    }
+    .g-cta:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
+    .g-cta:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
 
+    /* btn-ink folded into the one accent-metal family (neutral pale chrome) */
     .btn-ink {
-      background-image: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--text-primary), white 42%),
-        color-mix(in srgb, var(--text-primary), white 12%) 47%,
-        var(--text-primary) 50%,
-        color-mix(in srgb, var(--text-primary), black 30%)
-      );
-      border: 1px solid color-mix(in srgb, var(--text-primary), black 40%);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.32),
-        inset 0 -2px 2px rgba(0, 0, 0, 0.35),
-        0 1px 2px rgba(0, 0, 0, 0.24),
-        0 4px 10px -3px rgba(0, 0, 0, 0.32);
+      --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+      color: var(--text-primary);
+      border: 1px solid var(--chrome-border);
+      background-image: var(--chrome-fill);
+      box-shadow: var(--chrome-shadow);
     }
+    .btn-ink:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
+    .btn-ink:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
 
     .btn-line {
-      background-image: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--bg-elevated), white 42%),
-        color-mix(in srgb, var(--bg-elevated), white 8%) 47%,
-        var(--bg-elevated) 50%,
-        color-mix(in srgb, var(--bg-elevated), black 28%)
-      );
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.7),
-        inset 0 -2px 2px rgba(0, 0, 0, 0.16),
-        0 1px 2px rgba(0, 0, 0, 0.16),
-        0 4px 10px -4px rgba(0, 0, 0, 0.22);
+      --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+      border: 1px solid var(--chrome-border);
+      background-image: var(--chrome-fill);
+      box-shadow: var(--chrome-shadow);
     }
+    .btn-line:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
+    .btn-line:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
 
     .g-icon {
-      background-image: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--bg-elevated), white 42%),
-        color-mix(in srgb, var(--bg-elevated), white 8%) 47%,
-        var(--bg-elevated) 50%,
-        color-mix(in srgb, var(--bg-elevated), black 28%)
-      );
-      border: 1px solid color-mix(in srgb, var(--bg-elevated), black 22%);
+      --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+      border: 1px solid var(--chrome-border);
+      background-image: var(--chrome-fill);
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.7),
-        inset 0 -2px 2px rgba(0, 0, 0, 0.14),
-        0 1px 2px rgba(0, 0, 0, 0.16);
+        0 1px 2px rgba(0, 0, 0, 0.16),
+        0 3px 12px -4px var(--skuo-glow);
     }
-    .g-icon:active { transform: translateY(1px); }
+    .g-icon:hover { background-image: var(--chrome-fill-hover); }
+    .g-icon:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
+
+    .dark .g-cta   { --skuo-surface: color-mix(in srgb, var(--skuo-accent), black 8%); }
+    .dark .btn-ink,
+    .dark .btn-line,
+    .dark .g-icon  { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
   </style>
 </head>
 
