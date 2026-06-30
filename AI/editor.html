@@ -125,39 +125,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .toolbar-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            color: var(--text-secondary);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .toolbar-btn:hover {
-            background-image: var(--chrome-fill-hover);
-            box-shadow: var(--chrome-shadow-hover);
-            color: var(--text-primary);
-        }
-
-        .dark .toolbar-btn:hover {
-            background-image: var(--chrome-fill-hover);
-            box-shadow: var(--chrome-shadow-hover);
-            color: var(--text-primary);
-        }
-
-        .toolbar-btn.active {
-            --skuo-surface: var(--skuo-accent);
-            background-image: var(--chrome-fill);
-            color: var(--accent-contrast, #fff);
-            border-color: var(--chrome-border);
-            box-shadow: var(--chrome-shadow);
-        }
-
-        
         .editor-container {
             max-width: 900px;
             margin: 0 auto;
@@ -226,41 +193,6 @@
             display: flex;
         }
 
-        .control-btn {
-            padding: 4px 8px;
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-            border-radius: 4px;
-            white-space: nowrap;
-        }
-
-        .control-btn:hover {
-            background-image: var(--chrome-fill-hover);
-            box-shadow: var(--chrome-shadow-hover);
-        }
-
-        /* Chrome recipe upgrade */
-        .toolbar-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .dark .toolbar-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%);
-        }
-        .toolbar-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
-        .control-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .dark .control-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%);
-        }
-        .control-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
 
         .float-left {
             float: left;
@@ -358,19 +290,19 @@
             
             <div class="flex justify-center mb-6 sticky top-20 z-40">
                 <div class="editor-toolbar">
-                    <button onclick="execCmd('bold')" class="toolbar-btn" title="Bold"><i
+                    <button onclick="execCmd('bold')" class="skuo skuo-icon" title="Bold"><i
                             class="fa-solid fa-bold"></i></button>
-                    <button onclick="execCmd('italic')" class="toolbar-btn" title="Italic"><i
+                    <button onclick="execCmd('italic')" class="skuo skuo-icon" title="Italic"><i
                             class="fa-solid fa-italic"></i></button>
                     <div class="w-px h-6 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
-                    <button onclick="execCmd('formatBlock', 'H1')" class="toolbar-btn text-[10px] font-black"
+                    <button onclick="execCmd('formatBlock', 'H1')" class="skuo skuo-icon text-[10px] font-black"
                         title="Heading 1">H1</button>
-                    <button onclick="execCmd('formatBlock', 'H2')" class="toolbar-btn text-[10px] font-black"
+                    <button onclick="execCmd('formatBlock', 'H2')" class="skuo skuo-icon text-[10px] font-black"
                         title="Heading 2">H2</button>
-                    <button onclick="execCmd('formatBlock', 'P')" class="toolbar-btn text-[10px] font-black"
+                    <button onclick="execCmd('formatBlock', 'P')" class="skuo skuo-icon text-[10px] font-black"
                         title="Paragraph">P</button>
                     <div class="w-px h-6 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
-                    <button onclick="execCmd('insertUnorderedList')" class="toolbar-btn" title="Bullet List"><i
+                    <button onclick="execCmd('insertUnorderedList')" class="skuo skuo-icon" title="Bullet List"><i
                             class="fa-solid fa-list-ul"></i></button>
                     <div class="w-px h-6 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
                     <select onchange="execCmd('fontSize', this.value)"
@@ -466,11 +398,11 @@
     <div class="editor-image-container inline" contenteditable="false">
         <img src="${event.target.result}" style="width: 300px;">
         <div class="image-controls">
-            <button class="control-btn" onclick="alignImg(this, 'float-left')">Left</button>
-            <button class="control-btn" onclick="alignImg(this, 'inline')">Center</button>
-            <button class="control-btn" onclick="alignImg(this, 'float-right')">Right</button>
-            <button class="control-btn" onclick="resizeImg(this, -50)">-</button>
-            <button class="control-btn" onclick="resizeImg(this, 50)">+</button>
+            <button class="skuo" onclick="alignImg(this, 'float-left')">Left</button>
+            <button class="skuo" onclick="alignImg(this, 'inline')">Center</button>
+            <button class="skuo" onclick="alignImg(this, 'float-right')">Right</button>
+            <button class="skuo skuo-icon" onclick="resizeImg(this, -50)">-</button>
+            <button class="skuo skuo-icon" onclick="resizeImg(this, 50)">+</button>
         </div>
     </div>
     `;
