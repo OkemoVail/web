@@ -3301,112 +3301,55 @@
         .voice-ctrl.end { background: #3a1116; color: #ff6b6b; border-color: #52181d; }
         .voice-ctrl.muted { color: #ff6b6b; }
 
-        /* ── Skeuomorphic glossy overrides for chat-specific buttons ──
-           Appended last so the glossy gradient wins over each class's
-           own solid background / box-shadow. */
+        /* ── Chrome overrides for chat-specific buttons ──
+           Consume the shared --chrome-* recipe; set surface + glow only. */
         .sb-new-chat-btn {
-            background-image: linear-gradient(
-                180deg,
-                color-mix(in srgb, var(--bg-elevated), white 42%),
-                color-mix(in srgb, var(--bg-elevated), white 8%) 47%,
-                var(--bg-elevated) 50%,
-                color-mix(in srgb, var(--bg-elevated), black 28%)
-            );
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.8),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.16),
-                inset 0 0 0 1px var(--sb-edge),
-                0 1px 2px rgba(20, 20, 19, 0.18);
+            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+            border: 1px solid var(--chrome-border);
+            background-image: var(--chrome-fill);
+            box-shadow: var(--chrome-shadow), inset 0 0 0 1px var(--sb-edge);
         }
-        .dark .sb-new-chat-btn {
-            background-image: linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.22),
-                rgba(255, 255, 255, 0.06) 47%,
-                rgba(0, 0, 0, 0.06) 50%,
-                rgba(0, 0, 0, 0.3)
-            );
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.24),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.3),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-                0 1px 2px rgba(0, 0, 0, 0.45);
-        }
-        .sb-new-chat-btn:active { transform: translateY(1px); }
+        .sb-new-chat-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover), inset 0 0 0 1px var(--sb-edge); }
+        .sb-new-chat-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
+        .dark .sb-new-chat-btn { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
 
-        /* Settings tabs — glossy chips; active tab gets accent gloss */
+        /* Settings tabs — pale chrome chips; active tab gets deep accent chrome */
         .Cadance-tab-btn {
-            background-image: linear-gradient(
-                180deg,
-                color-mix(in srgb, var(--bg-elevated), white 42%),
-                color-mix(in srgb, var(--bg-elevated), white 8%) 47%,
-                var(--bg-elevated) 50%,
-                color-mix(in srgb, var(--bg-elevated), black 28%)
-            );
-            border: 1px solid color-mix(in srgb, var(--bg-elevated), black 22%);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.7),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.14),
-                0 1px 2px rgba(0, 0, 0, 0.16);
+            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+            border: 1px solid var(--chrome-border);
+            background-image: var(--chrome-fill);
+            box-shadow: var(--chrome-shadow);
         }
+        .Cadance-tab-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
         .Cadance-tab-btn.active {
-            background-image: linear-gradient(
-                180deg,
-                color-mix(in srgb, var(--accent-color), white 34%),
-                color-mix(in srgb, var(--accent-color), white 6%) 47%,
-                var(--accent-color) 50%,
-                color-mix(in srgb, var(--accent-color), black 26%)
-            );
+            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 8%);
             color: var(--accent-contrast, #fff) !important;
-            border-color: color-mix(in srgb, var(--accent-color), black 30%);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.55),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.2),
-                0 2px 6px -1px rgba(0, 0, 0, 0.3);
+            border-color: color-mix(in srgb, var(--skuo-accent), black 26%);
+            background-image: var(--chrome-fill);
+            box-shadow: var(--chrome-shadow);
         }
-        .dark .Cadance-tab-btn {
-            background-image: linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.2),
-                rgba(255, 255, 255, 0.05) 47%,
-                rgba(0, 0, 0, 0.06) 50%,
-                rgba(0, 0, 0, 0.3)
-            );
-            border-color: rgba(0, 0, 0, 0.4);
-        }
-        .Cadance-tab-btn:active { transform: translateY(1px); }
+        .dark .Cadance-tab-btn { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
+        .Cadance-tab-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
 
         /* Memory consent buttons */
         .mem-consent-save {
-            background-image: linear-gradient(
-                180deg,
-                color-mix(in srgb, var(--accent-color), white 34%),
-                color-mix(in srgb, var(--accent-color), white 6%) 47%,
-                var(--accent-color) 50%,
-                color-mix(in srgb, var(--accent-color), black 28%)
-            );
-            border: 1px solid color-mix(in srgb, var(--accent-color), black 30%);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.55),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.18),
-                0 1px 2px rgba(0, 0, 0, 0.22);
+            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 8%);
+            color: var(--accent-contrast, #fff);
+            border: 1px solid color-mix(in srgb, var(--skuo-accent), black 26%);
+            background-image: var(--chrome-fill);
+            box-shadow: var(--chrome-shadow);
         }
-        .mem-consent-save:active { transform: translateY(1px); }
+        .mem-consent-save:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
+        .mem-consent-save:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
         .mem-consent-dismiss {
-            background-image: linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.75),
-                rgba(255, 255, 255, 0.1) 48%,
-                rgba(0, 0, 0, 0.04) 52%,
-                rgba(0, 0, 0, 0.16)
-            );
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -2px 2px rgba(0,0,0,.12), 0 1px 2px rgba(0, 0, 0, 0.16);
+            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+            border: 1px solid var(--chrome-border);
+            background-image: var(--chrome-fill);
+            box-shadow: var(--chrome-shadow);
         }
-        .dark .mem-consent-dismiss {
-            background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.06) 50%, rgba(0, 0, 0, 0.3));
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -2px 2px rgba(0,0,0,.3), 0 1px 2px rgba(0, 0, 0, 0.45);
-        }
-        .mem-consent-dismiss:active { transform: translateY(1px); }
+        .dark .mem-consent-dismiss { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
+        .mem-consent-dismiss:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
+        .mem-consent-dismiss:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
     </style>
 
     <style>
