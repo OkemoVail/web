@@ -8,82 +8,305 @@
   <link rel="stylesheet" href="src/design-tokens.css">
   <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
   <style>
+    /* ── Page scaffolding only (no shared component styles redefined) ── */
     body { font-family: ui-sans-serif, system-ui, sans-serif; }
-    .ds-wrap { max-width: 880px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
-    .ds-section { margin-top: 3rem; }
-    .ds-h { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
-            color: var(--text-tertiary); margin-bottom: 1rem; }
-    .ds-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
-    .ds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; }
-    .swatch { height: 64px; border-radius: 10px; border: 1px solid var(--border);
-              display: flex; align-items: flex-end; padding: 0.4rem; font-size: 0.6rem;
+
+    .ds-frame {
+      max-width: 1080px;
+      margin: 2.5rem auto;
+      padding: 1.25rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 28px;
+      background: var(--bg);
+    }
+    @media (min-width: 768px) { .ds-frame { padding: 2.25rem; } }
+
+    .ds-topbar { display: flex; align-items: center; justify-content: flex-end; min-height: 1.5rem; }
+    .ds-title {
+      text-align: center;
+      font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+      font-weight: 600;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin: 0.25rem 0 2rem;
+    }
+
+    /* Masonry-style bento grid */
+    .ds-masonry { columns: 1; column-gap: 1rem; }
+    @media (min-width: 640px)  { .ds-masonry { columns: 2; } }
+    @media (min-width: 1000px) { .ds-masonry { columns: 3; } }
+
+    .dsc {
+      break-inside: avoid;
+      margin: 0 0 1rem;
+      padding: 1.1rem 1.15rem 1.2rem;
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 26px -16px rgba(0,0,0,0.22);
+    }
+    .dark .dsc { background: var(--bg-elevated); border-color: var(--border-strong); }
+
+    .dsc-label {
+      font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-tertiary); margin: 0 0 0.85rem;
+    }
+    .row  { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
+    .col  { display: flex; flex-direction: column; gap: 0.6rem; }
+    .btn  { padding: 0.5rem 1.05rem; border-radius: 10px; font-size: 0.85rem; font-weight: 500; }
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 9px; }
+
+    /* Tags & badges (page-local demo) */
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.32rem 0.8rem; border-radius: 999px; font-size: 0.78rem; font-weight: 500;
+      background: var(--bg-elevated); border: 1px solid var(--border-strong); color: var(--text-secondary);
+    }
+    .badge-accent { background: var(--skuo-accent); border-color: transparent; color: #fff; }
+    .badge-tiny { font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.22rem 0.5rem; color: var(--text-tertiary); }
+
+    /* Breadcrumb */
+    .crumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--text-tertiary); }
+    .crumb .sep { opacity: 0.5; }
+    .crumb .current { color: var(--text-primary); font-weight: 500; }
+
+    /* Accordion */
+    .acc { border-top: 1px solid var(--border); }
+    .acc:first-of-type { border-top: none; }
+    .acc summary {
+      list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem; padding: 0.7rem 0; font-weight: 600; font-size: 0.92rem; color: var(--text-primary);
+    }
+    .acc summary::-webkit-details-marker { display: none; }
+    .acc .plus { color: var(--text-tertiary); font-size: 1.1rem; line-height: 1; }
+    .acc[open] .plus { transform: rotate(45deg); }
+    .acc .body { padding: 0 0 0.85rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+    .acc .body a { color: var(--skuo-accent); text-decoration: none; font-weight: 500; }
+
+    /* Bullets */
+    .bullet { display: flex; align-items: center; gap: 0.55rem; font-size: 0.88rem; color: var(--text-primary); }
+    .bullet .dot {
+      flex: none; width: 20px; height: 20px; border-radius: 999px; background: var(--text-primary);
+      color: var(--bg-white); display: grid; place-items: center;
+    }
+
+    /* Checkboxes / radios — native controls, accent-tinted */
+    .opt { display: flex; align-items: center; gap: 0.55rem; font-size: 0.86rem; color: var(--text-primary); }
+    .opt input { accent-color: var(--skuo-accent); width: 16px; height: 16px; }
+    .opt.disabled { color: var(--text-tertiary); }
+
+    /* Search input with leading icon */
+    .field { position: relative; }
+    .field .lead { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); pointer-events: none; }
+    .field input { padding-left: 2.1rem; width: 100%; }
+
+    /* Info block */
+    .info { display: flex; gap: 0.6rem; padding: 0.9rem; border-radius: 12px; background: var(--bg-elevated); border: 1px solid var(--border-strong); }
+    .info .ic { flex: none; width: 20px; height: 20px; border-radius: 999px; background: var(--text-primary); color: var(--bg-white); display: grid; place-items: center; }
+    .info p { margin: 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
+    .info strong { color: var(--text-primary); }
+
+    /* Segmented control */
+    .seg { display: inline-flex; padding: 0.25rem; gap: 0.2rem; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border-strong); }
+    .seg button { border: none; background: transparent; color: var(--text-secondary); padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.82rem; cursor: pointer; }
+    .seg button.on { background: var(--text-primary); color: var(--bg-white); }
+
+    /* Cell */
+    .cell { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem; border-radius: 12px; border: 1px solid var(--border); }
+    .cell .av { flex: none; width: 38px; height: 38px; border-radius: 999px; background: var(--skuo-accent); color: #fff; display: grid; place-items: center; font-weight: 600; }
+    .cell .nm { font-weight: 600; font-size: 0.88rem; color: var(--text-primary); }
+    .cell .mt { font-size: 0.74rem; color: var(--text-tertiary); }
+    .cell .price { margin-left: auto; font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
+
+    /* Swatches */
+    .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .swatch { height: 52px; border-radius: 10px; border: 1px solid var(--border);
+              display: flex; align-items: flex-end; padding: 0.35rem; font-size: 0.55rem;
               color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-    .ds-topbar { display: flex; justify-content: space-between; align-items: center; }
-    .ds-title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); }
-    .stack > * + * { margin-top: 0.6rem; }
+    .swatch.lt { color: var(--text-primary); text-shadow: none; }
+
+    /* And more pill */
+    .more { text-align: center; margin-top: 0.5rem; }
+    .more span {
+      display: inline-block; padding: 0.55rem 1.4rem; border-radius: 999px; font-size: 0.85rem;
+      color: var(--text-secondary); background: var(--bg-elevated); border: 1px solid var(--border-strong);
+    }
   </style>
 </head>
 <body>
-  <div class="ds-wrap">
+  <div class="ds-frame">
     <div class="ds-topbar">
-      <div class="ds-title">Design System</div>
       <button id="theme-toggle" class="skuo skuo-icon" aria-label="Toggle theme" title="Toggle theme">
         <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
     </div>
 
-    <section class="ds-section">
-      <div class="ds-h">Buttons</div>
-      <div class="ds-row">
-        <button class="skuo skuo-accent" style="padding:0.55rem 1.1rem;border-radius:10px;">Accent</button>
-        <button class="skuo" style="padding:0.55rem 1.1rem;border-radius:10px;">Neutral</button>
-        <button class="skuo skuo-neutral" style="padding:0.55rem 1.1rem;border-radius:10px;">Neutral alt</button>
-        <button class="skuo skuo-pill skuo-accent" style="padding:0.55rem 1.3rem;">Pill</button>
-        <button class="skuo skuo-icon" aria-label="Icon" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        </button>
-        <button class="skuo" disabled style="padding:0.55rem 1.1rem;border-radius:10px;opacity:0.5;">Disabled</button>
-      </div>
-    </section>
+    <h1 class="ds-title">Design System</h1>
 
-    <section class="ds-section">
-      <div class="ds-h">Inputs</div>
-      <div class="stack" style="max-width:380px;">
-        <input type="text" placeholder="Text input">
-        <input type="email" placeholder="email@example.com">
-        <textarea rows="3" placeholder="Textarea"></textarea>
-        <select><option>Select option</option><option>Another</option></select>
-        <input type="text" value="Disabled" disabled>
-      </div>
-    </section>
+    <div class="ds-masonry">
 
-    <section class="ds-section">
-      <div class="ds-h">Cards</div>
-      <div class="ds-row" style="align-items:stretch;">
-        <div class="card card-pad" style="flex:1;min-width:220px;">
-          <strong>Card title</strong>
-          <p style="color:var(--text-secondary);margin-top:0.35rem;font-size:0.9rem;">A unified skeuomorphic surface, dark-mode aware.</p>
+      <!-- Buttons -->
+      <section class="dsc">
+        <p class="dsc-label">Buttons</p>
+        <div class="row" style="margin-bottom:0.55rem;">
+          <button class="skuo skuo-accent btn skuo-pill">Button</button>
+          <button class="skuo btn skuo-pill">Button</button>
+          <button class="skuo skuo-icon" aria-label="Expand" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
         </div>
-        <div class="card card-pad" style="flex:1;min-width:220px;">
-          <strong>With a button</strong>
-          <div style="margin-top:0.75rem;">
-            <button class="skuo skuo-accent" style="padding:0.45rem 0.9rem;border-radius:8px;">Action</button>
+        <div class="row">
+          <button class="skuo skuo-neutral btn skuo-pill">Button</button>
+          <button class="skuo btn">Button</button>
+          <button class="skuo skuo-accent btn">Button</button>
+          <button class="skuo skuo-icon" aria-label="Next" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Tags & Badges -->
+      <section class="dsc">
+        <p class="dsc-label">Tags &amp; Badges</p>
+        <div class="row" style="margin-bottom:0.6rem;">
+          <span class="badge badge-accent">All</span>
+          <span class="badge">Moodboard</span>
+          <span class="badge">Ratings
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </span>
+        </div>
+        <div class="row">
+          <span class="badge">Clear All
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </span>
+          <span class="badge-tiny">Art Deco</span>
+          <span class="badge-tiny">Silver</span>
+        </div>
+      </section>
+
+      <!-- Breadcrumb -->
+      <section class="dsc">
+        <p class="dsc-label">Breadcrumb</p>
+        <nav class="crumb" aria-label="Breadcrumb">
+          <span>Home Page</span>
+          <span class="sep">·</span>
+          <span class="current">Case Study Details</span>
+        </nav>
+      </section>
+
+      <!-- Accordion -->
+      <section class="dsc">
+        <p class="dsc-label">Accordion</p>
+        <details class="acc">
+          <summary>What is Milray Park? <span class="plus">+</span></summary>
+          <div class="body">A self-contained design language shared across every page of the site.</div>
+        </details>
+        <details class="acc" open>
+          <summary>What makes it unique? <span class="plus">+</span></summary>
+          <div class="body">One stylesheet, <a href="#">themeable tokens</a>, and skeuomorphic glossy controls that adapt to <a href="#">light and dark</a> automatically.</div>
+        </details>
+      </section>
+
+      <!-- Bullets -->
+      <section class="dsc">
+        <p class="dsc-label">Bullets</p>
+        <div class="bullet">
+          <span class="dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+          Highly professional
+        </div>
+      </section>
+
+      <!-- Checkboxes -->
+      <section class="dsc">
+        <p class="dsc-label">Checkboxes</p>
+        <div class="col">
+          <label class="opt"><input type="checkbox" checked> Checked</label>
+          <label class="opt"><input type="checkbox"> Unchecked</label>
+          <label class="opt disabled"><input type="checkbox" checked disabled> Disabled checked</label>
+          <label class="opt disabled"><input type="checkbox" disabled> Disabled unchecked</label>
+        </div>
+      </section>
+
+      <!-- Radios -->
+      <section class="dsc">
+        <p class="dsc-label">Radios</p>
+        <div class="col">
+          <label class="opt"><input type="radio" name="r" checked> Checked</label>
+          <label class="opt"><input type="radio" name="r"> Unchecked</label>
+          <label class="opt disabled"><input type="radio" name="r2" checked disabled> Disabled checked</label>
+          <label class="opt disabled"><input type="radio" name="r2" disabled> Disabled unchecked</label>
+        </div>
+      </section>
+
+      <!-- Text Inputs -->
+      <section class="dsc">
+        <p class="dsc-label">Text Inputs</p>
+        <div class="col">
+          <div class="field">
+            <span class="lead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+            <input type="search" placeholder="Search for desktops">
+          </div>
+          <select><option>What is your inquiry about?</option><option>General</option></select>
+          <input type="text" placeholder="Name">
+          <input type="text" value="Disabled" disabled>
+        </div>
+      </section>
+
+      <!-- Info blocks -->
+      <section class="dsc">
+        <p class="dsc-label">Info blocks</p>
+        <div class="info">
+          <span class="ic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+          <p><strong>Like a particular brand?</strong> Just let your designer know. Otherwise, leave it up to the team to source the best pieces for your look.</p>
+        </div>
+      </section>
+
+      <!-- Segmented controls -->
+      <section class="dsc">
+        <p class="dsc-label">Segmented Controls</p>
+        <div class="col">
+          <div class="seg">
+            <button class="on" aria-pressed="true">Grid</button>
+            <button aria-pressed="false">List</button>
+          </div>
+          <div class="seg">
+            <button class="on">Label</button>
+            <button>Label</button>
+            <button>Label</button>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="ds-section">
-      <div class="ds-h">Color tokens</div>
-      <div class="ds-grid">
-        <div class="swatch" style="background:var(--accent);">--accent</div>
-        <div class="swatch" style="background:var(--accent-light);">--accent-light</div>
-        <div class="swatch" style="background:var(--bg);color:var(--text-primary);text-shadow:none;">--bg</div>
-        <div class="swatch" style="background:var(--bg-elevated);color:var(--text-primary);text-shadow:none;">--bg-elevated</div>
-        <div class="swatch" style="background:var(--bg-white);color:var(--text-primary);text-shadow:none;">--bg-white</div>
-        <div class="swatch" style="background:var(--border-strong);color:var(--text-primary);text-shadow:none;">--border-strong</div>
-      </div>
-    </section>
+      <!-- Color tokens -->
+      <section class="dsc">
+        <p class="dsc-label">Color Tokens</p>
+        <div class="swatches">
+          <div class="swatch" style="background:var(--accent);">accent</div>
+          <div class="swatch" style="background:var(--accent-light);">accent-light</div>
+          <div class="swatch" style="background:var(--text-primary);">text</div>
+          <div class="swatch lt" style="background:var(--bg);">bg</div>
+          <div class="swatch lt" style="background:var(--bg-elevated);">elevated</div>
+          <div class="swatch lt" style="background:var(--bg-white);">white</div>
+        </div>
+      </section>
+
+      <!-- Cells -->
+      <section class="dsc">
+        <p class="dsc-label">Cells</p>
+        <div class="cell">
+          <span class="av">JC</span>
+          <div>
+            <div class="nm">Jane Cooper</div>
+            <div class="mt">Sydney · Available now</div>
+          </div>
+          <span class="price">$599</span>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="more"><span>And more…</span></div>
   </div>
 
   <script>
