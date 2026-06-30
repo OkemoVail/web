@@ -111,3 +111,17 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 - `Themes/Themes.html` — theme browser
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
+
+## Skeuomorphic glossy buttons (site-wide)
+
+All 14 pages link `src/design-tokens.css`, which is the single shared stylesheet. It owns:
+- The accent tokens (`--accent` / `--accent-light`, dark-swapped under `.dark`) and a convenience var `--skuo-accent` that resolves `--accent-color (chat) → --accent (token pages) → rosewood`.
+- A global `:active` press gradient (every button tints with accent while pressed).
+- The **skeuomorphic glossy button system**: classes `.skuo` (neutral base), `.skuo-accent` (accent fill, white text), `.skuo-neutral`, `.skuo-icon` (compact), `.skuo-pill` (keeps `rounded-full`). Each glossy button = top-light→bottom-dark gradient + `inset 0 1px 0 white` highlight + bevel + lift shadow; hover lifts, active sinks. Dark mode handled via `.dark`.
+
+Notes for future button work:
+- `.skuomorphic-btn` (chat) is treated as **neutral** glossy by the shared file. `.skuomorphic-button` is intentionally NOT aliased to accent in the shared file (info pages use it as a neutral pill); it's made glossy per-page via a translucent overlay so it works over whatever local base color the page sets (accent on `AI/index.html`, neutral on info pages, `#5865F2` for `.discord`).
+- Pages that define their own button classes in an inline `<style>` win over the shared file by source order, so those are upgraded by appending a glossy override at the end of that page's `<style>` (chat `.sb-new-chat-btn`/`.Cadance-tab-btn`/`.mem-consent-*`, landing `.g-cta`/`.btn-ink`/`.btn-line`/`.g-icon`, editor `.toolbar-btn`/`.control-btn`, version `.btn-primary`, word `.hdr-btn`/`.tb-btn`).
+- The shared `.skuo::before` wet-glass sheen sits at `z-index:-1`, so on opaque-filled buttons it's hidden behind the fill; the glossy read comes from the gradient + inset highlight. Only relevant for translucent buttons.
+- `whitename.html` has no buttons.
+- Design/plan docs: `docs/superpowers/specs/2026-06-30-skeuomorphic-buttons-design.md` and `docs/superpowers/plans/2026-06-30-skeuomorphic-buttons.md`.
