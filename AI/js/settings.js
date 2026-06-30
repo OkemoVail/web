@@ -62,9 +62,13 @@ window.toggleSettingsPanel = () => {
 window.openSettingsTab = (tabName) => {
     document.querySelectorAll('.Cadance-tab-btn').forEach(btn => {
         btn.classList.remove('active');
+        btn.classList.remove('skuo-accent');
     });
     const activeBtn = document.getElementById(`ptab-btn-${tabName}`);
-    if (activeBtn) activeBtn.classList.add('active');
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.classList.add('skuo-accent');
+    }
 
     document.querySelectorAll('.settings-tab-content').forEach(el => {
         el.classList.add('hidden');

@@ -365,39 +365,8 @@
             transition: background 0.15s ease, color 0.15s ease;
         }
 
-        .sb-icon-btn:hover {
-            background: rgba(0, 0, 0, 0.06);
-            color: var(--text-primary);
-        }
-
-        .dark .sb-icon-btn:hover {
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        /* Glossy icon buttons (consume the shared soft-gradient recipe) */
-        .sb-icon-btn,
-        .sb-mini-btn,
-        .history-action-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .sb-icon-btn:hover,
-        .sb-mini-btn:hover,
-        .history-action-btn:hover {
-            background-image: var(--chrome-fill-hover);
-            box-shadow: var(--chrome-shadow-hover);
-        }
-        .dark .sb-icon-btn,
-        .dark .sb-mini-btn,
-        .dark .history-action-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%);
-            border-color: var(--chrome-border);
-        }
-        .sb-icon-btn:active,
-        .sb-mini-btn:active,
-        .history-action-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
+        /* sb-icon-btn hover bg removed — shared .skuo.skuo-icon handles appearance */
+        /* Glossy icon buttons — appearance handled by shared .skuo.skuo-icon in design-tokens.css */
 
         .sb-nav-icon {
             width: 28px;
@@ -602,10 +571,7 @@
             border: none;
             width: 100%;
             text-align: left;
-            background: var(--bg-elevated);
-            box-shadow:
-                inset 0 0 0 1px var(--sb-edge),
-                0 1px 2px rgba(20, 20, 19, 0.05);
+            /* background + box-shadow removed — shared .skuo handles appearance */
             transition: background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
                         box-shadow 0.25s ease,
                         margin 0.3s cubic-bezier(0.16, 1, 0.3, 1),
@@ -634,29 +600,14 @@
             transition: transform 0.2s ease, color 0.2s ease;
         }
 
-        .sb-new-chat-btn:hover {
-            background: var(--bg-elevated);
-            box-shadow:
-                inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 22%, transparent),
-                0 2px 8px -2px rgba(20, 20, 19, 0.12);
-        }
+        /* .sb-new-chat-btn:hover — appearance removed, shared .skuo handles it */
 
         .sb-new-chat-btn:hover .sb-new-chat-chevron {
             color: var(--text-secondary);
             transform: translateX(2px);
         }
 
-        .dark .sb-new-chat-btn {
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-        }
-
-        .dark .sb-new-chat-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow:
-                inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 30%, transparent),
-                0 2px 10px -3px rgba(0, 0, 0, 0.5);
-        }
+        /* .dark .sb-new-chat-btn / .dark .sb-new-chat-btn:hover — appearance removed, shared .skuo handles it */
 
         /* Expanded: match the Grok reference — no leading icon, just label + chevron.
            The icon slot is kept for the collapsed rail, where it's the only affordance. */
@@ -2108,15 +2059,8 @@
             border-radius: 8px;
             font-size: 12px;
             font-weight: 700;
-            color: white;
-            background: var(--accent-color);
             cursor: pointer;
-            border: none;
-            transition: opacity 0.15s;
-        }
-
-        .mem-consent-save:hover {
-            opacity: 0.85;
+            /* color/background/border appearance removed — shared .skuo.skuo-accent handles it */
         }
 
         .mem-consent-dismiss {
@@ -2124,23 +2068,8 @@
             border-radius: 8px;
             font-size: 12px;
             font-weight: 600;
-            color: #71717a;
-            background: transparent;
-            border: 1px solid #d4d4d8;
             cursor: pointer;
-            transition: background 0.15s;
-        }
-
-        .dark .mem-consent-dismiss {
-            border-color: #3f3f46;
-        }
-
-        .mem-consent-dismiss:hover {
-            background: #f4f4f5;
-        }
-
-        .dark .mem-consent-dismiss:hover {
-            background: #3f3f46;
+            /* color/background/border appearance removed — shared .skuo.skuo-neutral handles it */
         }
 
         .mpc-check-inline {
@@ -2404,30 +2333,16 @@
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
-            border: 1px solid transparent;
-            background: transparent;
+            /* border + background appearance removed — shared .skuo handles it */
         }
 
         .dark .Cadance-tab-btn {
             color: var(--text-secondary);
         }
 
+        /* Active tab gets accent fill via shared .skuo-accent behaviour */
         .Cadance-tab-btn.active {
-            color: var(--accent-contrast);
-        }
-
-        .Cadance-tab-btn.active {
-            position: relative;
-            background: rgba(0, 0, 0, 0.05);
-            color: var(--accent-color);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .Cadance-tab-btn.active {
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--accent-contrast, #fff);
         }
 
 
@@ -2820,52 +2735,8 @@
         }
 
         /* --- Flat Styles --- */
-        .skuomorphic-btn {
-            position: relative;
-            transition: all 0.2s ease !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
-        }
-
-        .dark .skuomorphic-btn {
-            border-color: rgba(255, 255, 255, 0.08) !important;
-        }
-
-        .skuomorphic-btn:hover {
-            border-color: rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .dark .skuomorphic-btn:hover {
-            border-color: rgba(255, 255, 255, 0.15) !important;
-        }
-
-        .skuomorphic-btn:active {
-            box-shadow: none !important;
-        }
-
-        /* Send button: active (has text / generating) vs inactive */
-        /* Radius follows nesting rule: outer 20px (.input-box-wrap) − 12px gap (#input-inner px-3) = 8px inside */
-        #send-btn {
-            border-radius: 8px;
-        }
-
-        #send-btn:disabled {
-            background-color: var(--border-strong) !important;
-            color: var(--text-secondary) !important;
-        }
-
-        .skuomorphic-card {
-            position: relative;
-            background: #fff;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            border-radius: 24px;
-        }
-
-        .dark .skuomorphic-card {
-            background: var(--bg-elevated);
-            border-color: var(--border);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        }
+        /* .skuomorphic-btn appearance removed — shared .skuo alias in design-tokens.css handles it */
+        /* #send-btn appearance removed — shared .skuo.skuo-accent handles it; layout via Tailwind on the element */
 
         .skuomorphic-toast {
             position: relative;
@@ -3295,55 +3166,9 @@
         .voice-ctrl.end { background: #3a1116; color: #ff6b6b; border-color: #52181d; }
         .voice-ctrl.muted { color: #ff6b6b; }
 
-        /* ── Chrome overrides for chat-specific buttons ──
-           Consume the shared --chrome-* recipe; set surface + glow only. */
-        .sb-new-chat-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow), inset 0 0 0 1px var(--sb-edge);
-        }
-        .sb-new-chat-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover), inset 0 0 0 1px var(--sb-edge); }
-        .sb-new-chat-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
-        .dark .sb-new-chat-btn { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
-
-        /* Settings tabs — pale chrome chips; active tab gets deep accent chrome */
-        .Cadance-tab-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .Cadance-tab-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
-        .Cadance-tab-btn.active {
-            --skuo-surface: var(--skuo-accent);
-            color: var(--accent-contrast, #fff) !important;
-            border-color: var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .dark .Cadance-tab-btn { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
-        .Cadance-tab-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
-
-        /* Memory consent buttons */
-        .mem-consent-save {
-            --skuo-surface: var(--skuo-accent);
-            color: var(--accent-contrast, #fff);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .mem-consent-save:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
-        .mem-consent-save:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
-        .mem-consent-dismiss {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .dark .mem-consent-dismiss { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
-        .mem-consent-dismiss:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
-        .mem-consent-dismiss:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
+        /* ── Chrome override blocks removed ──
+           All chat-specific buttons now use shared .skuo / .skuo-accent / .skuo-neutral / .skuo-icon
+           classes from design-tokens.css. No per-page --chrome-* wiring needed. */
     </style>
 
     <style>
@@ -3640,14 +3465,14 @@
                         class="sb-row-text text-[19px] font-normal text-zinc-900 dark:text-zinc-100 tracking-wide">Labs21</span>
                 </button>
                 <button onclick="window.toggleSidebar()" title="Collapse sidebar" data-t-title="title_collapse_sidebar"
-                    class="sb-icon-btn sb-row-text shrink-0 ml-auto">
+                    class="sb-icon-btn skuo skuo-icon sb-row-text shrink-0 ml-auto">
                     <i data-feather="sidebar" class="w-[15px] h-[15px]"></i>
                 </button>
             </div>
 
             <!-- New chat -->
             <div class="shrink-0 pt-1.5 pb-2 px-4">
-                <button onclick="window.resetChat()" class="sb-new-chat-btn sb-tile">
+                <button onclick="window.resetChat()" class="sb-new-chat-btn skuo sb-tile">
                     <span class="sb-nav-icon">
                         <i data-feather="edit-2" class="nc-icon-new w-[17px] h-[17px]"></i>
                         <i data-feather="message-square" class="nc-icon-active w-[17px] h-[17px]"></i>
@@ -3717,13 +3542,13 @@
                             class="sb-row-text flex items-center gap-1 mr-2"
                             style="overflow: visible;">
                             <button onclick="event.stopPropagation(); window.clearAll()" title="Clear all chats"
-                                data-t-title="title_clear_chats" class="sb-icon-btn !text-zinc-400 hover:!text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                data-t-title="title_clear_chats" class="sb-icon-btn skuo skuo-icon !text-zinc-400 hover:!text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <i data-feather="trash-2" class="w-3.5 h-3.5"></i>
                             </button>
                             <div class="relative" id="settings-submenu-wrap">
                                 <button onclick="event.stopPropagation(); window.toggleSettingsSubmenu()"
                                     title="Settings"
-                                    class="sb-icon-btn !text-zinc-400 hover:!text-zinc-900 dark:hover:!text-white">
+                                    class="sb-icon-btn skuo skuo-icon !text-zinc-400 hover:!text-zinc-900 dark:hover:!text-white">
                                     <i data-feather="settings" class="w-3.5 h-3.5"></i>
                                 </button>
                                 <div id="settings-submenu"
@@ -4120,17 +3945,17 @@
 
 
         <div class="Cadance-tab-bar shrink-0">
-            <button class="Cadance-tab-btn active" id="ptab-btn-general" onclick="window.openSettingsTab('general')">
+            <button class="Cadance-tab-btn skuo skuo-accent active" id="ptab-btn-general" onclick="window.openSettingsTab('general')">
                 <i data-feather="sliders" class="w-3.5 h-3.5"></i> General
             </button>
-            <button class="Cadance-tab-btn" id="ptab-btn-profile" onclick="window.openSettingsTab('profile')">
+            <button class="Cadance-tab-btn skuo" id="ptab-btn-profile" onclick="window.openSettingsTab('profile')">
                 <i data-feather="user" class="w-3.5 h-3.5"></i> Profile
             </button>
-            <button class="Cadance-tab-btn" id="ptab-btn-memories"
+            <button class="Cadance-tab-btn skuo" id="ptab-btn-memories"
                 onclick="window.openSettingsTab('memories'); window.renderMemoriesTab()">
                 <i data-feather="bookmark" class="w-3.5 h-3.5"></i> Memories
             </button>
-            <button class="Cadance-tab-btn" id="ptab-btn-storage"
+            <button class="Cadance-tab-btn skuo" id="ptab-btn-storage"
                 onclick="window.openSettingsTab('storage'); window.renderStorageTab()">
                 <i data-feather="hard-drive" class="w-3.5 h-3.5"></i> Storage
             </button>
@@ -4530,7 +4355,7 @@
 
     <div id="personality-modal"
         style="position:fixed;inset:0;z-index:4000;background:rgba(15, 15, 15, 0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;padding:1rem;">
-        <div class="changelog-card skuomorphic-card" style="max-width:520px;">
+        <div class="changelog-card card" style="max-width:520px;">
             <div class="p-8 relative z-10">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center"
@@ -4595,7 +4420,7 @@
     <!-- Memories modal -->
     <div id="memories-modal"
         style="position:fixed;inset:0;z-index:4000;background:rgba(15,15,15,0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;padding:1rem;">
-        <div class="changelog-card skuomorphic-card" style="max-width:520px;width:100%;">
+        <div class="changelog-card card" style="max-width:520px;width:100%;">
             <div class="p-8 relative z-10">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-3">
@@ -4787,9 +4612,9 @@
             opts = opts || {};
             const card = document.createElement('div');
             card.className = 'mem-consent-card';
-            let btns = '<button class="mem-consent-dismiss">Dismiss</button>';
+            let btns = '<button class="mem-consent-dismiss skuo skuo-neutral">Dismiss</button>';
             if (opts.action) {
-                btns = '<button class="mem-consent-save mem-notice-action">' + opts.action.label + '</button>' + btns;
+                btns = '<button class="mem-consent-save skuo skuo-accent mem-notice-action">' + opts.action.label + '</button>' + btns;
             }
             card.innerHTML =
                 '<span class="mem-consent-label"><strong>' +
@@ -4833,8 +4658,8 @@
                 display.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
                 '</strong></span>' +
                 '<div class="mem-consent-btns">' +
-                '<button class="mem-consent-save">Save</button>' +
-                '<button class="mem-consent-dismiss">Dismiss</button>' +
+                '<button class="mem-consent-save skuo skuo-accent">Save</button>' +
+                '<button class="mem-consent-dismiss skuo skuo-neutral">Dismiss</button>' +
                 '</div>';
 
             const dismiss = () => {
@@ -5088,7 +4913,7 @@
     </script>
 
     <div id="changelog-modal">
-        <div class="changelog-card skuomorphic-card">
+        <div class="changelog-card card">
             <div class="p-8 relative z-10">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
