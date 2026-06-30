@@ -121,55 +121,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        input,
-        textarea {
-            background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 12px;
-            padding: 12px 16px;
-            width: 100%;
-            outline: none;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-
-        .dark input,
-        .dark textarea {
-            background: rgba(255, 255, 255, 0.03);
-            border-color: rgba(255, 255, 255, 0.05);
-            color: white;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: var(--accent);
-            background: var(--bg-elevated);
-            box-shadow: 0 0 0 4px var(--accent-light);
-        }
-
-        .dark input:focus,
-        .dark textarea:focus {
-            background: var(--surface-dark);
-        }
-
-        .btn-primary {
-            --skuo-surface: var(--skuo-accent);
-            color: var(--accent-contrast, #fff);
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-size: 11px;
-            transition: all 0.2s;
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-
-        .btn-primary:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
-        .btn-primary:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
-        .dark .btn-primary { --skuo-surface: var(--skuo-accent); }
     </style>
     <script src="updatenotes.js"></script>
 </head>
@@ -212,9 +163,9 @@
                 </div>
 
                 <div class="pt-4 flex gap-3">
-                    <button onclick="saveBuild()" class="btn-primary flex-1">Apply & Push</button>
+                    <button onclick="saveBuild()" class="skuo skuo-accent flex-1">Apply & Push</button>
                     <button onclick="resetSeen()"
-                        class="px-6 py-3 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all">Reset
+                        class="skuo skuo-neutral px-6 py-3 rounded-xl text-xs font-bold transition-all">Reset
                         Seen</button>
                 </div>
 
