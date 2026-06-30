@@ -17,7 +17,8 @@
       "Bash(scripts/start-server.sh *)",
       "Bash(python3 \"C:\\\\Users\\\\okemo\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"sidebar navigation collapsed expanded animation\" --domain ux -n 5)",
       "PowerShell(\\(Get-Content \"C:\\\\Users\\\\okemo\\\\Desktop\\\\Projects\\\\web\\\\word\\\\index.html\"\\).Count)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const c=require\\('fs'\\).readFileSync\\('src/design-tokens.css','utf8'\\);const o=\\(c.match\\(/{/g\\)||[]\\).length,cl=\\(c.match\\(/}/g\\)||[]\\).length;console.log\\('open',o,'close',cl,o===cl?'BALANCED':'MISMATCH'\\);\")"
     ]
   }
 }
