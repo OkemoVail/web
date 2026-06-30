@@ -183,100 +183,7 @@
             transform: translateY(0);
         }
 
-        /* --- Global Flat Styles --- */
-        .skuomorphic-button {
-            position: relative;
-            background: var(--bg-elevated);
-            border-radius: 9999px;
-            border: 1px solid var(--border-strong);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
 
-        .dark .skuomorphic-button {
-            background: var(--bg-elevated);
-            border-color: var(--border);
-        }
-
-        .skuomorphic-button:hover {
-            transform: translateY(-1px);
-            background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .skuomorphic-button:hover {
-            background: #3a3a38;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .skuomorphic-button:active {
-            transform: translateY(0);
-        }
-
-        .skuomorphic-button.discord {
-            background: #5865F2;
-            border-color: rgba(255, 255, 255, 0.2);
-            color: #fff;
-        }
-
-        .skuomorphic-button.discord:hover {
-            background: #6a76f5;
-        }
-
-        .skuomorphic-button.discord:active {
-            background: #4d59d6;
-        }
-
-        /* Glossy skeuomorphic upgrade (translucent overlay — works over any base color) */
-        .skuomorphic-button,
-        .skuomorphic-button.discord {
-            background-image: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.12) 48%, rgba(0,0,0,.05) 52%, rgba(0,0,0,.3));
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,.7),
-                inset 0 -2px 2px rgba(0,0,0,.2),
-                0 1px 2px rgba(0,0,0,.18),
-                0 4px 10px -3px rgba(0,0,0,.26);
-        }
-        .dark .skuomorphic-button,
-        .dark .skuomorphic-button.discord {
-            background-image: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.05) 48%, rgba(0,0,0,.12) 52%, rgba(0,0,0,.45));
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,.22),
-                inset 0 -2px 2px rgba(0,0,0,.4),
-                0 1px 2px rgba(0,0,0,.4),
-                0 4px 12px -3px rgba(0,0,0,.5);
-        }
-        .skuomorphic-button:active { transform: translateY(1px); }
-
-        .skuomorphic-card {
-            background-color: var(--bg-elevated);
-            border-radius: 24px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .dark .skuomorphic-card {
-            background-color: var(--bg-elevated);
-            border-color: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .skuomorphic-input {
-            background-color: var(--bg-elevated);
-            border-radius: 12px;
-            border: 1px solid var(--border-strong);
-            color: var(--text-primary);
-            transition: all 0.2s ease;
-        }
-
-        .dark .skuomorphic-input {
-            background-color: var(--bg-elevated);
-            border-color: var(--border-strong);
-        }
     </style>
 
 <body
@@ -329,7 +236,7 @@
                         <i class="fa-solid fa-magnifying-glass text-lg"></i>
                     </div>
                     <input type="text" id="article-search" placeholder="Search papers, updates, and architecture..."
-                        class="skuomorphic-input w-full py-5 pl-16 pr-8 outline-none transition-all text-lg font-medium placeholder-gray-400 dark:placeholder-gray-600 focus:border-rosewood/30"
+                        class="w-full py-5 pl-16 pr-8 outline-none transition-all text-lg font-medium placeholder-gray-400 dark:placeholder-gray-600 focus:border-rosewood/30"
                         oninput="handleSearch()">
                 </div>
             </div>
@@ -358,7 +265,7 @@
                         Research</span>
                 </div>
                 <button onclick="closeReader()"
-                    class="skuomorphic-button !w-12 !h-12 !rounded-full group transition-all">
+                    class="skuo skuo-icon !w-12 !h-12 !rounded-full group transition-all">
                     <i class="fa-solid fa-xmark text-lg group-hover:rotate-90 transition-transform"></i>
                 </button>
             </div>
@@ -427,11 +334,11 @@
                 const activeColorMap = { blue: 'bg-moss text-paper', red: 'bg-red-500 text-white', emerald: 'bg-emerald-500 text-white', amber: 'bg-amber-500 text-white' };
 
                 return `
-                    <button onclick="toggleTag('${tag.name}')" 
-                        class="skuomorphic-button !px-6 !py-2.5 text-[10px] uppercase tracking-widest font-bold transition-all ${isActive
-                        ? `active-tag`
+                    <button onclick="toggleTag('${tag.name}')"
+                        class="skuo skuo-pill !px-6 !py-2.5 text-[10px] uppercase tracking-widest font-bold transition-all ${isActive
+                        ? `skuo-accent`
                         : ``
-                    }" style="${isActive ? 'background: var(--accent-olive); color: white;' : ''}">
+                    }">
                         ${tag.name}
                     </button>
                 `;
@@ -475,7 +382,7 @@
                 }).join('');
 
                 return `
-                    <article class="skuomorphic-card p-10 transition-all cursor-pointer group animate-fade-in" 
+                    <article class="card p-10 transition-all cursor-pointer group animate-fade-in"
                         style="animation-delay: ${i * 0.1}s" 
                         onclick="openReader('${blog.id}')">
                         <div class="flex items-center justify-between mb-6">
