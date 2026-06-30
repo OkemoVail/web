@@ -174,31 +174,7 @@
             white-space: nowrap;
         }
 
-        /* header action buttons */
-        .hdr-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.15s, color 0.15s;
-            flex-shrink: 0;
-        }
-
-        .hdr-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .hdr-btn.active {
-            background: var(--accent);
-            color: white;
-        }
+        /* header action buttons — appearance via shared .skuo .skuo-icon */
 
         .hdr-profile {
             width: 28px;
@@ -240,68 +216,7 @@
             display: none;
         }
 
-        .tb-btn {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'Satoshi', 'Inter', sans-serif;
-            transition: background 0.12s, color 0.12s;
-            flex-shrink: 0;
-        }
-
-        .tb-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .tb-btn.active {
-            background: rgba(201, 100, 120, 0.12);
-            color: var(--accent);
-        }
-
-        .dark .tb-btn.active,
-        .dark .hdr-btn.active {
-            --skuo-surface: var(--skuo-accent);
-        }
-
-        /* Glossy skeuomorphic upgrade for icon buttons */
-        .hdr-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .hdr-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
-        .hdr-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
-        .dark .hdr-btn { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
-        .dark .hdr-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
-
-        .tb-btn {
-            --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
-        .tb-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
-        .tb-btn:active { transform: translateY(1px); box-shadow: var(--chrome-shadow-active); }
-        .dark .tb-btn { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
-        .dark .tb-btn:hover { background-image: var(--chrome-fill-hover); box-shadow: var(--chrome-shadow-hover); }
-        .hdr-btn.active,
-        .tb-btn.active {
-            --skuo-surface: var(--skuo-accent);
-            color: var(--accent-contrast, #fff);
-            border: 1px solid var(--chrome-border);
-            background-image: var(--chrome-fill);
-            box-shadow: var(--chrome-shadow);
-        }
+        /* toolbar buttons — appearance via shared .skuo .skuo-icon */
 
         .tb-sep {
             width: 1px;
@@ -314,21 +229,8 @@
         .tb-select {
             height: 28px;
             padding: 0 8px;
-            border-radius: 6px;
-            border: 1px solid var(--border-strong);
-            background: var(--bg);
-            color: var(--text-secondary);
             font-size: 12px;
-            font-family: 'Satoshi', 'Inter', sans-serif;
-            cursor: pointer;
-            outline: none;
             flex-shrink: 0;
-            transition: border-color 0.15s;
-        }
-
-        .tb-select:hover {
-            border-color: var(--accent);
-            color: var(--text-primary);
         }
 
         /* ── Main area ───────────────────────────────────────────── */
@@ -569,24 +471,7 @@
             gap: 6px;
         }
 
-        .ai-clear-btn {
-            width: 26px;
-            height: 26px;
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            border-radius: 7px;
-            color: white;
-            cursor: pointer;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
-        }
-
-        .ai-clear-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
+        /* .ai-clear-btn removed — uses shared .skuo .skuo-accent */
 
         /* messages */
         #ai-messages {
@@ -700,24 +585,7 @@
             flex-shrink: 0;
         }
 
-        .qa-chip {
-            padding: 4px 10px;
-            border-radius: 20px;
-            border: 1px solid var(--border-strong);
-            background: var(--bg);
-            color: var(--text-secondary);
-            font-size: 11.5px;
-            font-family: 'Satoshi', 'Inter', sans-serif;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: border-color 0.15s, color 0.15s, background 0.15s;
-        }
-
-        .qa-chip:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(201, 100, 120, 0.06);
-        }
+        /* .qa-chip removed — uses shared .skuo .skuo-soft .skuo-pill */
 
         /* input area */
         .ai-input-area {
@@ -863,31 +731,7 @@
             min-width: 170px;
         }
 
-        .export-item {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            width: 100%;
-            padding: 7px 10px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 13px;
-            border-radius: 6px;
-            text-align: left;
-            transition: background 0.12s;
-        }
-
-        .export-item:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .export-item:hover {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
+        /* .export-item removed — uses shared .skuo .skuo-soft */
         .export-item i {
             color: var(--accent);
             width: 14px;
@@ -913,24 +757,8 @@
         }
 
         /* ── Mobile FAB & close ─────────────────────────────────── */
-        .ai-mobile-close {
-            display: none;
-            width: 26px;
-            height: 26px;
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            border-radius: 7px;
-            color: white;
-            cursor: pointer;
-            font-size: 13px;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
-        }
-
-        .ai-mobile-close:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
+        /* .ai-mobile-close uses shared .skuo .skuo-icon .skuo-accent; hidden until mobile */
+        .ai-mobile-close { display: none; }
 
         #ai-fab {
             display: none;
@@ -1046,16 +874,16 @@
             <div style="flex:1;"></div>
             <span id="hdr-word-count" class="hdr-word-pill">0 words</span>
             <div class="vr"></div>
-            <button class="hdr-btn" onclick="newDoc()" title="New document"><i class="fa-regular fa-file"></i></button>
-            <button class="hdr-btn" id="save-btn" onclick="saveDoc()" title="Save  Ctrl+S"><i
+            <button class="skuo skuo-icon" onclick="newDoc()" title="New document"><i class="fa-regular fa-file"></i></button>
+            <button class="skuo skuo-icon" id="save-btn" onclick="saveDoc()" title="Save  Ctrl+S"><i
                     class="fa-regular fa-floppy-disk"></i></button>
-            <button class="hdr-btn" onclick="showExportMenu(event)" title="Export"><i
+            <button class="skuo skuo-icon" onclick="showExportMenu(event)" title="Export"><i
                     class="fa-solid fa-arrow-up-from-bracket"></i></button>
-            <button class="hdr-btn" onclick="printDoc()" title="Print"><i class="fa-solid fa-print"></i></button>
+            <button class="skuo skuo-icon" onclick="printDoc()" title="Print"><i class="fa-solid fa-print"></i></button>
             <div class="vr"></div>
-            <button class="hdr-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"><i
+            <button class="skuo skuo-icon" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"><i
                     class="fa-solid fa-moon"></i></button>
-            <button class="hdr-btn" id="ai-toggle-btn" onclick="toggleAIPanel()" title="Oaky AI  —  writing assistant">
+            <button class="skuo skuo-icon" id="ai-toggle-btn" onclick="toggleAIPanel()" title="Oaky AI  —  writing assistant">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
             </button>
             <div id="hdr-profile" class="hdr-profile"></div>
@@ -1073,51 +901,51 @@
                 <option value="pre">Code Block</option>
             </select>
             <div class="tb-sep"></div>
-            <button class="tb-btn" id="tb-bold" onclick="fmt('bold')" title="Bold  Ctrl+B"><b>B</b></button>
-            <button class="tb-btn" id="tb-italic" onclick="fmt('italic')" title="Italic  Ctrl+I"><em
+            <button class="skuo skuo-icon" id="tb-bold" onclick="fmt('bold')" title="Bold  Ctrl+B"><b>B</b></button>
+            <button class="skuo skuo-icon" id="tb-italic" onclick="fmt('italic')" title="Italic  Ctrl+I"><em
                     style="font-style:italic;">I</em></button>
-            <button class="tb-btn" id="tb-underline" onclick="fmt('underline')" title="Underline  Ctrl+U"
+            <button class="skuo skuo-icon" id="tb-underline" onclick="fmt('underline')" title="Underline  Ctrl+U"
                 style="text-decoration:underline;">U</button>
-            <button class="tb-btn" id="tb-strike" onclick="fmt('strikeThrough')" title="Strikethrough"
+            <button class="skuo skuo-icon" id="tb-strike" onclick="fmt('strikeThrough')" title="Strikethrough"
                 style="text-decoration:line-through;">S</button>
             <div class="tb-sep"></div>
-            <button class="tb-btn" id="tb-al" onclick="fmt('justifyLeft')" title="Align left"><i
+            <button class="skuo skuo-icon" id="tb-al" onclick="fmt('justifyLeft')" title="Align left"><i
                     class="fa-solid fa-align-left" style="font-size:12px;"></i></button>
-            <button class="tb-btn" id="tb-ac" onclick="fmt('justifyCenter')" title="Align center"><i
+            <button class="skuo skuo-icon" id="tb-ac" onclick="fmt('justifyCenter')" title="Align center"><i
                     class="fa-solid fa-align-center" style="font-size:12px;"></i></button>
-            <button class="tb-btn" id="tb-ar" onclick="fmt('justifyRight')" title="Align right"><i
+            <button class="skuo skuo-icon" id="tb-ar" onclick="fmt('justifyRight')" title="Align right"><i
                     class="fa-solid fa-align-right" style="font-size:12px;"></i></button>
-            <button class="tb-btn" id="tb-aj" onclick="fmt('justifyFull')" title="Justify"><i
+            <button class="skuo skuo-icon" id="tb-aj" onclick="fmt('justifyFull')" title="Justify"><i
                     class="fa-solid fa-align-justify" style="font-size:12px;"></i></button>
             <div class="tb-sep"></div>
-            <button class="tb-btn" id="tb-ul" onclick="fmt('insertUnorderedList')" title="Bullet list"><i
+            <button class="skuo skuo-icon" id="tb-ul" onclick="fmt('insertUnorderedList')" title="Bullet list"><i
                     class="fa-solid fa-list-ul" style="font-size:12px;"></i></button>
-            <button class="tb-btn" id="tb-ol" onclick="fmt('insertOrderedList')" title="Numbered list"><i
+            <button class="skuo skuo-icon" id="tb-ol" onclick="fmt('insertOrderedList')" title="Numbered list"><i
                     class="fa-solid fa-list-ol" style="font-size:12px;"></i></button>
-            <button class="tb-btn" onclick="fmt('outdent')" title="Decrease indent"><i class="fa-solid fa-outdent"
+            <button class="skuo skuo-icon" onclick="fmt('outdent')" title="Decrease indent"><i class="fa-solid fa-outdent"
                     style="font-size:12px;"></i></button>
-            <button class="tb-btn" onclick="fmt('indent')" title="Increase indent"><i class="fa-solid fa-indent"
-                    style="font-size:12px;"></i></button>
-            <div class="tb-sep"></div>
-            <button class="tb-btn" onclick="insertLink()" title="Insert link"><i class="fa-solid fa-link"
-                    style="font-size:12px;"></i></button>
-            <button class="tb-btn" onclick="insertTable()" title="Insert table"><i class="fa-solid fa-table"
-                    style="font-size:12px;"></i></button>
-            <button class="tb-btn" onclick="insertHR()" title="Insert divider"><i class="fa-solid fa-minus"
+            <button class="skuo skuo-icon" onclick="fmt('indent')" title="Increase indent"><i class="fa-solid fa-indent"
                     style="font-size:12px;"></i></button>
             <div class="tb-sep"></div>
-            <button class="tb-btn" onclick="fmt('removeFormat')" title="Clear formatting"><i
+            <button class="skuo skuo-icon" onclick="insertLink()" title="Insert link"><i class="fa-solid fa-link"
+                    style="font-size:12px;"></i></button>
+            <button class="skuo skuo-icon" onclick="insertTable()" title="Insert table"><i class="fa-solid fa-table"
+                    style="font-size:12px;"></i></button>
+            <button class="skuo skuo-icon" onclick="insertHR()" title="Insert divider"><i class="fa-solid fa-minus"
+                    style="font-size:12px;"></i></button>
+            <div class="tb-sep"></div>
+            <button class="skuo skuo-icon" onclick="fmt('removeFormat')" title="Clear formatting"><i
                     class="fa-solid fa-text-slash" style="font-size:12px;"></i></button>
         </div>
 
         <!-- ── Export menu ─────────────────────────────────────────── -->
         <div id="export-menu">
-            <button class="export-item" onclick="exportHTML()"><i class="fa-brands fa-html5"></i> Export as
+            <button class="skuo skuo-soft" onclick="exportHTML()"><i class="fa-brands fa-html5"></i> Export as
                 HTML</button>
-            <button class="export-item" onclick="exportText()"><i class="fa-regular fa-file-lines"></i> Export as
+            <button class="skuo skuo-soft" onclick="exportText()"><i class="fa-regular fa-file-lines"></i> Export as
                 Text</button>
-            <button class="export-item" onclick="copyAsHTML()"><i class="fa-regular fa-copy"></i> Copy HTML</button>
-            <button class="export-item" onclick="copyAsText()"><i class="fa-solid fa-clipboard"></i> Copy Text</button>
+            <button class="skuo skuo-soft" onclick="copyAsHTML()"><i class="fa-regular fa-copy"></i> Copy HTML</button>
+            <button class="skuo skuo-soft" onclick="copyAsText()"><i class="fa-solid fa-clipboard"></i> Copy Text</button>
         </div>
 
         <!-- ── Main ────────────────────────────────────────────────── -->
@@ -1142,10 +970,10 @@
                         <span class="ai-title">Oaky AI</span>
                     </div>
                     <div class="ai-header-right">
-                        <button class="ai-clear-btn" onclick="clearAIChat()" title="Clear conversation">
+                        <button class="skuo skuo-accent" onclick="clearAIChat()" title="Clear conversation">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
-                        <button class="ai-mobile-close" onclick="toggleAIPanel()" title="Close AI panel">
+                        <button class="skuo skuo-icon skuo-accent" onclick="toggleAIPanel()" title="Close AI panel">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -1163,15 +991,15 @@
 
                 <!-- Quick actions -->
                 <div class="ai-quick-actions">
-                    <button class="qa-chip" onclick="quickPrompt('improve')">✨ Improve</button>
-                    <button class="qa-chip" onclick="quickPrompt('continue')">➡️ Continue</button>
-                    <button class="qa-chip" onclick="quickPrompt('summarize')">📝 Summarize</button>
-                    <button class="qa-chip" onclick="quickPrompt('grammar')">✔️ Fix Grammar</button>
-                    <button class="qa-chip" onclick="quickPrompt('shorter')">📏 Shorter</button>
-                    <button class="qa-chip" onclick="quickPrompt('expand')">📖 Expand</button>
-                    <button class="qa-chip" onclick="quickPrompt('suggest')">💡 Suggest Edits</button>
-                    <button class="qa-chip" onclick="quickPrompt('professional')">👔 Professional</button>
-                    <button class="qa-chip" onclick="quickPrompt('casual')">😊 Casual</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('improve')">✨ Improve</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('continue')">➡️ Continue</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('summarize')">📝 Summarize</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('grammar')">✔️ Fix Grammar</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('shorter')">📏 Shorter</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('expand')">📖 Expand</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('suggest')">💡 Suggest Edits</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('professional')">👔 Professional</button>
+                    <button class="skuo skuo-soft skuo-pill" onclick="quickPrompt('casual')">😊 Casual</button>
                 </div>
 
                 <!-- Input -->
@@ -1249,7 +1077,7 @@
                 document.getElementById('ai-panel').classList.add('collapsed');
                 document.getElementById('ai-fab').classList.remove('hidden');
             } else {
-                document.getElementById('ai-toggle-btn').classList.add('active');
+                document.getElementById('ai-toggle-btn').classList.add('skuo-accent');
             }
 
             // Global keyboard shortcuts
@@ -1280,7 +1108,7 @@
 
             // Prevent toolbar buttons from stealing focus/selection from editor
             document.querySelector('.ow-toolbar').addEventListener('mousedown', e => {
-                if (e.target.closest('.tb-btn')) e.preventDefault();
+                if (e.target.closest('button')) e.preventDefault();
             });
 
             // Close export menu on outside click
@@ -1332,7 +1160,7 @@
         function toggleAIPanel() {
             aiPanelOpen = !aiPanelOpen;
             document.getElementById('ai-panel').classList.toggle('collapsed', !aiPanelOpen);
-            document.getElementById('ai-toggle-btn').classList.toggle('active', aiPanelOpen);
+            document.getElementById('ai-toggle-btn').classList.toggle('skuo-accent', aiPanelOpen);
             const fab = document.getElementById('ai-fab');
             if (fab) fab.classList.toggle('hidden', aiPanelOpen);
         }
@@ -1410,7 +1238,7 @@
         function syncToolbar() {
             for (const [id, cmd] of Object.entries(TB_CMDS)) {
                 const el = document.getElementById(id);
-                if (el) el.classList.toggle('active', document.queryCommandState(cmd));
+                if (el) el.classList.toggle('skuo-accent', document.queryCommandState(cmd));
             }
             const blk = document.queryCommandValue('formatBlock').toLowerCase().replace(/[<>]/g, '');
             const sel = document.getElementById('fmt-select');
