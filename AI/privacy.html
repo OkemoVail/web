@@ -158,19 +158,6 @@
         }
         .skuomorphic-button:active { transform: translateY(1px); }
 
-        .skuomorphic-card {
-            background: var(--bg-elevated);
-            border-radius: 24px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .dark .skuomorphic-card {
-            background: var(--bg-elevated);
-            border-color: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        }
     </style>
 </head>
 
@@ -219,7 +206,7 @@
 
         <div class="space-y-8">
             <!-- TL;DR -->
-            <div class="skuomorphic-card p-10 !bg-rosewood/10 !border-rosewood/20">
+            <div class="card p-10 !bg-rosewood/10 !border-rosewood/20">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="text-2xl">⚡</span>
                     <h2 class="text-sm font-black uppercase tracking-widest text-rosewood">TL;DR — The Quick Version
@@ -236,7 +223,7 @@
 
             <!-- Sections -->
             <div class="grid grid-cols-1 gap-6">
-                <div class="skuomorphic-card p-10">
+                <div class="card p-10">
                     <h3 class="text-xl font-bold mb-4">Storage: Your data lives at home</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                         Everything you type into Labs21 — your chat history, display name, profile picture, settings — is
@@ -246,7 +233,7 @@
                     </p>
                 </div>
 
-                <div class="skuomorphic-card p-10">
+                <div class="card p-10">
                     <h3 class="text-xl font-bold mb-4">AI Messages: Fresh requests only</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                         When you hit send, your message travels to our backend server. We do <strong>not</strong> log,
@@ -255,7 +242,7 @@
                     </p>
                 </div>
 
-                <div class="skuomorphic-card p-10">
+                <div class="card p-10">
                     <h3 class="text-xl font-bold mb-4">Cookies & Tracking</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                         No analytics trackers. No third-party ad network pixels. Labs21 doesn't use cookies at all —
@@ -263,7 +250,7 @@
                     </p>
                 </div>
 
-                <div class="skuomorphic-card p-10">
+                <div class="card p-10">
                     <h3 class="text-xl font-bold mb-4">Optional Google Sign-In</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                         If you sign in with Google, we use your public profile info only to display your avatar and name
