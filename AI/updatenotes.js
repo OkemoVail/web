@@ -58,7 +58,7 @@ window.closeChangelog = () => {
 function createChangelogModal() {
     const html = `
     <div id="changelog-modal" style="position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:1rem;">
-        <div class="changelog-card skuomorphic-card" style="width:100%; max-width:480px; overflow:hidden;">
+        <div class="changelog-card card" style="width:100%; max-width:480px; overflow:hidden;">
             <div style="padding:2rem; position:relative; z-index:10;">
                 <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
                     <div style="width:2.5rem; height:2.5rem; border-radius:9999px; background:rgba(59,130,246,0.1); display:flex; align-items:center; justify-content:center; color:#3b82f6;">

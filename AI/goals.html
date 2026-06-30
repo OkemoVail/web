@@ -102,69 +102,7 @@
         }
 
         /* --- Global Flat Styles --- */
-        .skuomorphic-button {
-            position: relative;
-            padding: 10px 24px;
-            background: var(--accent);
-            border-radius: 9999px;
-            color: white;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .skuomorphic-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            background: var(--accent-light);
-        }
-
-        .skuomorphic-button:active {
-            transform: translateY(0);
-        }
-
-        .dark .skuomorphic-button {
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .skuomorphic-button.discord {
-            background: #5865F2;
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .skuomorphic-button.discord:hover {
-            background: #6a76f5;
-        }
-
-        .skuomorphic-button.discord:active {
-            background: #4d59d6;
-        }
-
-        /* Glossy skeuomorphic upgrade (translucent overlay — works over any base color) */
-        .skuomorphic-button,
-        .skuomorphic-button.discord {
-            background-image: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.12) 48%, rgba(0,0,0,.05) 52%, rgba(0,0,0,.3));
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,.7),
-                inset 0 -2px 2px rgba(0,0,0,.2),
-                0 1px 2px rgba(0,0,0,.18),
-                0 4px 10px -3px rgba(0,0,0,.26);
-        }
-        .dark .skuomorphic-button,
-        .dark .skuomorphic-button.discord {
-            background-image: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.05) 48%, rgba(0,0,0,.12) 52%, rgba(0,0,0,.45));
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,.22),
-                inset 0 -2px 2px rgba(0,0,0,.4),
-                0 1px 2px rgba(0,0,0,.4),
-                0 4px 12px -3px rgba(0,0,0,.5);
-        }
-        .skuomorphic-button:active { transform: translateY(1px); }
+        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
 
     </style>
 </head>
@@ -196,7 +134,7 @@
             <a href="tos.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">TOS</a>
         </div>
         <a href="https://discord.gg/BxjTsjvR8Z" target="_blank"
-            class="skuomorphic-button discord !px-4 !py-1.5 text-xs md:text-sm">
+            class="skuo discord !px-4 !py-1.5 text-xs md:text-sm">
             <i class="fa-brands fa-discord mr-2"></i> Join Discord
         </a>
     </nav>

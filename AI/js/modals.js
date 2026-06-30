@@ -36,8 +36,8 @@ window.showCustomConfirm = (title, message, onConfirm, isDanger = false) => {
             <div class="custom-modal-title">${title}</div>
             <div class="custom-modal-message">${message}</div>
             <div class="custom-modal-actions">
-                <button class="modal-btn modal-btn-cancel">Cancel</button>
-                <button class="modal-btn modal-btn-primary ${isDanger ? 'modal-btn-danger' : 'modal-btn-confirm'}">Confirm</button>
+                <button class="modal-btn modal-btn-cancel skuo skuo-neutral">Cancel</button>
+                <button class="modal-btn modal-btn-primary ${isDanger ? 'modal-btn-danger skuo' : 'modal-btn-confirm skuo skuo-accent'}">Confirm</button>
             </div>
         </div>
     `;
@@ -66,8 +66,8 @@ window.showCustomPrompt = (title, placeholder, defaultValue, onConfirm) => {
             <div class="custom-modal-title">${title}</div>
             <input type="text" class="custom-modal-input" placeholder="${placeholder}" value="${defaultValue}">
             <div class="custom-modal-actions">
-                <button class="modal-btn modal-btn-cancel">Cancel</button>
-                <button class="modal-btn modal-btn-primary modal-btn-confirm">Save</button>
+                <button class="modal-btn modal-btn-cancel skuo skuo-neutral">Cancel</button>
+                <button class="modal-btn modal-btn-primary modal-btn-confirm skuo skuo-accent">Save</button>
             </div>
         </div>
     `;
