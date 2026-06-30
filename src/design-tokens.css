@@ -344,6 +344,21 @@ input[type="reset"]:active:not(:disabled) {
   );
 }
 
+/* ── Brand button modifier (layered over .skuo) ─────────────────
+   Discord brand fill. Use as `.skuo.discord`. Authored once here so
+   the brand button is controlled from this single file like every
+   other control. Brand color is intentionally fixed (not accent). */
+.discord {
+  --skuo-surface: #5865f2;
+  background-image: none;
+  background-color: #5865f2;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+.discord:hover { background-image: none; background-color: #6a76f5; }
+.discord:active { background-image: none; background-color: #4d59d6; }
+.dark .discord { background-image: none; background-color: #5865f2; }
+
 /* ── Unified text inputs (site-wide, low specificity) ───────────
    Element-attribute selectors only, so any page rule that uses a
    class or id (chat input bar, word #doc-title/#ai-input, editor)

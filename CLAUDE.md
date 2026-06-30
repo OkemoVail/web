@@ -171,3 +171,40 @@ Reusable components beyond buttons/inputs/cards live in `src/design-tokens.css` 
 `design.html` (repo root) is the public showcase — buttons, inputs, cards, and color-token swatches rendered live from `design-tokens.css`, with its own `.dark`/`vail_theme` toggle. It's linked from `index.html` (desktop nav, mobile menu, footer). Keep it in sync when adding new shared components.
 
 Design/plan docs: `docs/superpowers/specs/2026-06-30-unified-design-system-showcase-design.md` and `docs/superpowers/plans/2026-06-30-unified-design-system-showcase.md`.
+
+## Universal adoption — one file controls every control
+
+As of 2026-07-01 every page consumes the shared classes **directly**; page-local
+button/card/input *appearance* classes were removed. Inline `<style>` blocks now
+hold only **layout** for controls (size, position, flex/grid, responsive
+show/hide, child-element rules). To restyle any button/card/input/badge
+site-wide, edit `src/design-tokens.css` alone.
+
+What changed:
+- Page-local button classes deleted in favor of `.skuo` (+ `.skuo-accent` /
+  `.skuo-neutral` / `.skuo-icon` / `.skuo-pill` / `.skuo-soft`): landing
+  `.g-cta`/`.btn-ink`/`.btn-line`/`.g-icon`, editor `.toolbar-btn`/`.control-btn`,
+  word `.hdr-btn`/`.tb-btn`/`.qa-chip`/`.export-item`/`.ai-clear-btn`/`.ai-mobile-close`,
+  version `.btn-primary`, AI-landing/info `.skuomorphic-button`. The per-page
+  `--chrome-*` "glossy override" blocks were all removed.
+- `.skuomorphic-card` (per-page) replaced everywhere by shared `.card`.
+- Active/pressed states (editor & word toolbars, chat settings tabs, word AI
+  toggle) now toggle the **`skuo-accent`** class via JS instead of a page-local
+  active rule (editor's old active rule was dead and was not resurrected).
+- **`.discord`** brand button is now a shared modifier in `design-tokens.css`
+  (use `class="skuo discord"`); the per-page copies were deleted.
+- Chat modal buttons use `.skuo`: confirm = `skuo skuo-accent`, cancel =
+  `skuo skuo-neutral`, danger = `skuo` + the kept red `.modal-btn-danger` fill.
+
+Intentional exceptions (deliberately NOT `.skuo`, kept page-local):
+- `.modal-btn-danger` (semantic red) and `manage.html`'s red delete icon button.
+- Chat bespoke surfaces: `.input-box-wrap` (animated conic-gradient input bar),
+  `.sb-search-input`, `.Cadance-card` (blurred panel), `.mem-consent-card`
+  (accent-tinted notice).
+- `word/#doc-title` (deliberately borderless inline title field).
+
+When adding a control to any page, use the shared class — do not author new
+button/card appearance in a page's `<style>`.
+
+Spec/plan: `docs/superpowers/specs/2026-06-30-universal-design-system-adoption-design.md`,
+`docs/superpowers/plans/2026-06-30-universal-design-system-adoption.md`.
