@@ -18,37 +18,22 @@
   --surface-dark:    #30302e;
   --deep-dark:       #141413;
   --skuo-accent: var(--accent-color, var(--accent, #c96478));
-  /* ── Soft gradient button recipe — consumed via --skuo-surface ──
-     A gentle top→bottom fade: lighter at the top, darker at the bottom
-     (inverted under .dark). No metallic reflection band — just a clean,
-     soft skeuomorphic dome with a subtle top edge highlight and lift. */
-  --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 78%);
-  --chrome-border: color-mix(in srgb, var(--skuo-surface, #eceae2), black 16%);
-  --chrome-fill: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 24%),
-    var(--skuo-surface, #eceae2) 50%,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), black 13%)
-  );
-  --chrome-fill-hover: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 32%),
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 3%) 50%,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), black 9%)
-  );
-  --chrome-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 1px 1px rgba(0, 0, 0, 0.10),
-    0 4px 12px -4px rgba(0, 0, 0, 0.22),
-    0 4px 16px -6px var(--skuo-glow);
-  --chrome-shadow-hover:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 2px 4px rgba(0, 0, 0, 0.14),
-    0 8px 20px -6px rgba(0, 0, 0, 0.26),
-    0 6px 22px -6px var(--skuo-glow);
-  --chrome-shadow-active:
-    inset 0 2px 4px rgba(0, 0, 0, 0.18),
-    0 1px 1px rgba(0, 0, 0, 0.12);
+  /* ── Refined button recipe — consumed via --skuo-surface ──
+     "Flat + a whisper of skeuomorphism": a very gentle top→bottom fade
+     (lighter top, darker bottom; inverted under .dark), a hairline top
+     edge highlight, a soft lift shadow and — on ACCENT surfaces only — a
+     faint accent glow (neutral surfaces set --skuo-glow: transparent, so
+     "important" controls tint accent and everything else stays grey). No
+     wet-glass sheen, no hard top-shine — the glassy dome was retired
+     2026-07-01 in favor of this calmer, more modern surface.
+     Neutral grey surface = --skuo-neutral (dark-aware). */
+  --skuo-neutral: var(--bg-elevated);
+  --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 82%);
+  /* NOTE: the --chrome-* recipe (fill/shadow/border) is NOT defined here.
+     It embeds var(--skuo-surface)/var(--skuo-glow), which are only set on the
+     button elements — defining it at :root would freeze it to the fallback
+     surface and inherit grey to every control. It's defined on the consumer
+     elements instead (see "Refined recipe — resolved per element" below). */
 }
 
 /* ── Dark tokens ────────────────────────────────────────────── */
@@ -67,36 +52,10 @@
   --border-strong:   #3d3d3a;
   --shadow-ring:     #3d3d3a;
   --skuo-accent: var(--accent-color, var(--accent, #d97790));
-  /* ── Soft gradient recipe — dark mode (inverted: darker top → lighter bottom) ── */
-  --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 72%);
-  --chrome-border: rgba(0, 0, 0, 0.5);
-  --chrome-fill: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 18%),
-    var(--skuo-surface, #3a3a37) 52%,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 16%)
-  );
-  --chrome-fill-hover: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 12%),
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 4%) 52%,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 24%)
-  );
-  --chrome-shadow:
-    inset 0 -1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 1px 2px rgba(0, 0, 0, 0.4),
-    0 4px 12px -4px rgba(0, 0, 0, 0.5),
-    0 4px 16px -6px var(--skuo-glow);
-  --chrome-shadow-hover:
-    inset 0 -1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 2px 4px rgba(0, 0, 0, 0.45),
-    0 8px 20px -6px rgba(0, 0, 0, 0.55),
-    0 6px 22px -6px var(--skuo-glow);
-  --chrome-shadow-active:
-    inset 0 2px 4px rgba(0, 0, 0, 0.45),
-    0 1px 2px rgba(0, 0, 0, 0.35);
+  /* ── Refined recipe — dark mode. Only the neutral surface + glow live here;
+     the --chrome-* recipe is defined per element (see .dark consumer rule). ── */
+  --skuo-neutral: color-mix(in srgb, var(--bg-elevated), white 6%);
+  --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 76%);
 }
 
 /* ── Global resets ──────────────────────────────────────────── */
@@ -119,36 +78,83 @@ code, pre, .font-mono, [class*="code"] {
   border-radius: 10px;
 }
 
-/* ── Global active-press accent (site-wide) ─────────────────────
-   Every button shows an adaptive accent gradient while pressed (:active only).
-   Applied as a translucent background-image overlay so it tints any base color
-   without replacing it. Lightened accent at top, darkened at bottom — adaptive,
-   so a light accent darkens toward the bottom and a dark accent lightens toward
-   the top, and neither stop blows out. Resolves --accent-color (chat app) →
-   --accent (token pages) → rosewood fallback. */
-button:active:not(:disabled),
-[role="button"]:active,
-.btn:active,
-input[type="button"]:active:not(:disabled),
-input[type="submit"]:active:not(:disabled),
-input[type="reset"]:active:not(:disabled) {
-  background-image: linear-gradient(
+/* The global accent-on-press overlay was removed 2026-07-01 — buttons no
+   longer recolor to accent while pressed. Accent is carried at rest by
+   .skuo-accent; press just deepens/insets via --chrome-shadow-active. */
+
+/* ── Refined recipe — resolved PER ELEMENT ──────────────────────
+   These --chrome-* custom properties embed var(--skuo-surface) and
+   var(--skuo-glow). They are declared on the consumer elements (not
+   :root) so each control resolves them against ITS OWN surface/glow —
+   accent controls get an accent fill/border, neutral controls grey.
+   (Declaring them at :root froze them to the fallback surface and made
+   every button grey — the bug fixed 2026-07-01.) Add new consumers of
+   var(--chrome-*) to this selector list. */
+.skuo, .skuomorphic-btn, .skuomorphic-button,
+.ui-badge, .ui-badge--tiny, .ui-opt input, .ui-seg button.on {
+  --chrome-border: color-mix(in srgb, var(--skuo-surface, #eceae2), black 14%);
+  --chrome-fill: linear-gradient(
     180deg,
-    color-mix(in srgb, color-mix(in srgb, var(--accent-color, var(--accent, #c96478)), white 22%) 20%, transparent),
-    color-mix(in srgb, color-mix(in srgb, var(--accent-color, var(--accent, #c96478)), black 22%) 20%, transparent)
-  ) !important;
+    color-mix(in srgb, var(--skuo-surface, #eceae2), white 7%),
+    color-mix(in srgb, var(--skuo-surface, #eceae2), black 7%)
+  );
+  --chrome-fill-hover: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--skuo-surface, #eceae2), white 12%),
+    color-mix(in srgb, var(--skuo-surface, #eceae2), black 2%)
+  );
+  --chrome-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 1px 2px -1px rgba(0, 0, 0, 0.12),
+    0 2px 6px -2px rgba(0, 0, 0, 0.14),
+    0 2px 10px -4px var(--skuo-glow);
+  --chrome-shadow-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 4px -1px rgba(0, 0, 0, 0.14),
+    0 4px 12px -3px rgba(0, 0, 0, 0.16),
+    0 4px 14px -4px var(--skuo-glow);
+  --chrome-shadow-active:
+    inset 0 1px 3px rgba(0, 0, 0, 0.16),
+    0 1px 1px rgba(0, 0, 0, 0.08);
 }
 
-/* ── Skeuomorphic glossy button system (site-wide) ──────────────
-   Bold/glossy buttons: inner vertical gradient + wet-glass top
-   highlight + bevel + lift shadow. Accent-aware via --skuo-accent.
-   Opt in with .skuo (neutral) / .skuo.skuo-accent (primary).
-   Authored once here; all 14 pages link this file. */
+.dark .skuo, .dark .skuomorphic-btn, .dark .skuomorphic-button,
+.dark .ui-badge, .dark .ui-badge--tiny, .dark .ui-opt input, .dark .ui-seg button.on {
+  --chrome-border: rgba(0, 0, 0, 0.5);
+  --chrome-fill: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 8%),
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 8%)
+  );
+  --chrome-fill-hover: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 14%),
+    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 3%)
+  );
+  --chrome-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 2px 8px -3px rgba(0, 0, 0, 0.45),
+    0 2px 10px -4px var(--skuo-glow);
+  --chrome-shadow-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 3px 10px -2px rgba(0, 0, 0, 0.5),
+    0 4px 14px -4px var(--skuo-glow);
+  --chrome-shadow-active:
+    inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Refined button system (site-wide) ─────────────────────────
+   Neutral controls are plain grey (--skuo-neutral, no accent glow);
+   .skuo-accent carries the accent surface + glow. Soft top→bottom
+   gradient + hairline highlight + lift shadow. Accent-aware via
+   --skuo-accent. Authored once here; all 14 pages link this file. */
 
 .skuo,
 .skuomorphic-btn,
 .skuomorphic-button {
-  --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+  --skuo-surface: var(--skuo-neutral);
+  --skuo-glow: transparent;
   position: relative;
   isolation: isolate;
   border: 1px solid var(--chrome-border);
@@ -164,7 +170,9 @@ input[type="reset"]:active:not(:disabled) {
     background-image 0.2s ease;
 }
 
-/* Wet-glass reflection over the top half (light play) */
+/* Vestigial sheen layer — the refined surface has NO wet-glass reflection
+   (retired 2026-07-01, along with the .skuo-soft variant that once used it).
+   Left as an empty pseudo-element; no rule paints it. */
 .skuo::before,
 .skuomorphic-btn::before,
 .skuomorphic-button::before {
@@ -173,11 +181,7 @@ input[type="reset"]:active:not(:disabled) {
   inset: 1px 1px auto 1px;
   height: 46%;
   border-radius: inherit;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.55),
-    rgba(255, 255, 255, 0.05)
-  );
+  background: none;
   pointer-events: none;
   z-index: -1;
 }
@@ -204,7 +208,7 @@ input[type="reset"]:active:not(:disabled) {
 .skuomorphic-button:focus-visible {
   outline: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
     0 0 0 3px color-mix(in srgb, var(--skuo-accent), transparent 55%),
     0 4px 14px -4px var(--skuo-glow);
 }
@@ -226,65 +230,31 @@ input[type="reset"]:active:not(:disabled) {
    more-saturated ring. */
 .skuo-accent {
   --skuo-surface: var(--skuo-accent);
+  --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 82%);
   color: var(--accent-contrast, #ffffff);
   border-color: var(--chrome-border);
 }
 
-/* Explicit neutral pale-accent (overrides accent if both present) */
+/* Explicit neutral — plain grey surface, no accent glow. */
 .skuo-neutral {
-  --skuo-surface: color-mix(in srgb, var(--skuo-accent), white 82%);
+  --skuo-surface: var(--skuo-neutral);
+  --skuo-glow: transparent;
   color: var(--text-primary);
 }
 
-/* Soft / satin surface — thin top highlight + smooth even gradient.
-   Composes over any --skuo-surface (neutral, accent, dark). Matte, not glossy. */
-.skuo-soft {
-  background-image: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 12%),
-    var(--skuo-surface, #eceae2) 55%,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), black 7%)
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 1px 2px rgba(0, 0, 0, 0.12),
-    0 3px 14px -8px var(--skuo-glow);
-}
-
-.skuo-soft::before {
-  inset: 1px 1px auto 1px;
-  height: 38%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.32),
-    rgba(255, 255, 255, 0)
-  );
-}
-
-.skuo-soft:hover {
-  background-image: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 18%),
-    color-mix(in srgb, var(--skuo-surface, #eceae2), white 2%) 55%,
-    color-mix(in srgb, var(--skuo-surface, #eceae2), black 4%)
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 2px 4px rgba(0, 0, 0, 0.13),
-    0 5px 18px -8px var(--skuo-glow);
-}
-
-.skuo-soft:active {
-  box-shadow: var(--chrome-shadow-active);
-}
-
-/* Compact icon buttons — smaller radius + gentler glow */
+/* Compact icon buttons — square, centered, smaller radius + gentler glow.
+   Self-sizes around the icon so a bare `.skuo-icon` doesn't fall back to
+   uneven default button padding (pages may still set an explicit w/h). */
 .skuo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  line-height: 0;
   border-radius: 9px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 1px 2px rgba(0, 0, 0, 0.16),
-    0 3px 12px -4px var(--skuo-glow);
+    0 1px 2px -1px rgba(0, 0, 0, 0.14),
+    0 2px 10px -4px var(--skuo-glow);
 }
 .skuo-icon::before { height: 50%; opacity: 0.85; }
 .skuo-icon:hover { transform: none; filter: brightness(1.05); }
@@ -294,21 +264,17 @@ input[type="reset"]:active:not(:disabled) {
 .skuo-pill { border-radius: 9999px; }
 .skuo-pill::before { border-radius: 9999px; }
 
-/* ── Dark mode neutral surface ──────────────────────────────── */
+/* ── Dark mode neutral surface (grey; --skuo-neutral is dark-aware) ── */
 .dark .skuo,
 .dark .skuomorphic-btn,
 .dark .skuomorphic-button {
-  --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%);
+  --skuo-surface: var(--skuo-neutral);
 }
 
 .dark .skuo::before,
 .dark .skuomorphic-btn::before,
 .dark .skuomorphic-button::before {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.02)
-  );
+  background: none;
 }
 
 .dark .skuo-accent {
@@ -316,33 +282,7 @@ input[type="reset"]:active:not(:disabled) {
   border-color: var(--chrome-border);
 }
 
-.dark .skuo-neutral { --skuo-surface: color-mix(in srgb, var(--skuo-accent), #2a2a28 80%); }
-
-.dark .skuo-soft {
-  background-image: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 10%),
-    var(--skuo-surface, #3a3a37) 55%,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 12%)
-  );
-}
-
-.dark .skuo-soft::before {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.12),
-    rgba(255, 255, 255, 0)
-  );
-}
-
-.dark .skuo-soft:hover {
-  background-image: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), black 4%),
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 3%) 55%,
-    color-mix(in srgb, var(--skuo-surface, #3a3a37), white 18%)
-  );
-}
+.dark .skuo-neutral { --skuo-surface: var(--skuo-neutral); }
 
 /* ── Brand button modifier (layered over .skuo) ─────────────────
    Discord brand fill. Use as `.skuo.discord`. Authored once here so
@@ -450,19 +390,35 @@ select:focus {
    Inner element selectors are scoped under their `ui-` parent so the
    plain names (.av, .dot, .sep…) never style anything globally. */
 
-/* Tags & badges */
+/* Tags & badges — refined skuo surface, same language as buttons/checkboxes.
+   Neutral badge = pale-accent chip; --accent = accent chip; --tiny = compact. */
 .ui-badge {
+  --skuo-surface: var(--skuo-neutral);
+  --skuo-glow: transparent;
   display: inline-flex; align-items: center; gap: 0.3rem;
   padding: 0.32rem 0.8rem; border-radius: 999px;
   font-size: 0.78rem; font-weight: 500;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-strong);
+  background-image: var(--chrome-fill);
+  border: 1px solid var(--chrome-border);
+  box-shadow: var(--chrome-shadow);
   color: var(--text-secondary);
 }
-.ui-badge--accent { background: var(--skuo-accent); border-color: transparent; color: #fff; }
+.ui-badge--accent {
+  --skuo-surface: var(--skuo-accent);
+  --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 82%);
+  border-color: var(--chrome-border);
+  color: #fff;
+}
 .ui-badge--tiny {
+  --skuo-surface: var(--skuo-neutral);
+  --skuo-glow: transparent;
+  display: inline-flex; align-items: center; gap: 0.25rem;
   font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 0.22rem 0.5rem; color: var(--text-tertiary);
+  padding: 0.24rem 0.55rem; border-radius: 999px;
+  background-image: var(--chrome-fill);
+  border: 1px solid var(--chrome-border);
+  box-shadow: var(--chrome-shadow);
+  color: var(--text-tertiary);
 }
 
 /* Breadcrumb */
@@ -491,10 +447,61 @@ select:focus {
   display: grid; place-items: center;
 }
 
-/* Checkbox / radio options (native control, accent-tinted) */
+/* Checkbox / radio — custom control in the refined skuo surface language.
+   Same --chrome-fill + --chrome-shadow recipe as the buttons and badges, so
+   an unchecked box reads as a neutral chip and a checked one as accent.
+   Checkbox = rounded square + checkmark; radio = circle + dot. */
 .ui-opt { display: flex; align-items: center; gap: 0.55rem; font-size: 0.86rem; color: var(--text-primary); }
-.ui-opt input { accent-color: var(--skuo-accent); width: 16px; height: 16px; }
+.ui-opt input {
+  --skuo-surface: var(--skuo-neutral);
+  --skuo-glow: transparent;
+  appearance: none; -webkit-appearance: none; margin: 0;
+  flex: none; width: 18px; height: 18px; cursor: pointer;
+  border: 1px solid var(--chrome-border);
+  border-radius: 5px;
+  background-image: var(--chrome-fill);
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: var(--chrome-shadow);
+  transition: background-image 0.15s ease, box-shadow 0.2s ease, border-color 0.15s ease;
+}
+.ui-opt input[type="radio"] { border-radius: 999px; }
+.ui-opt input:hover { background-image: var(--chrome-fill-hover); }
+.ui-opt input:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--skuo-accent), transparent 55%),
+    var(--chrome-shadow);
+}
+.ui-opt input:checked {
+  --skuo-surface: var(--skuo-accent);
+  --skuo-glow: color-mix(in srgb, var(--skuo-accent), transparent 82%);
+  border-color: var(--chrome-border);
+}
+.ui-opt input[type="checkbox"]:checked {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E"),
+    var(--chrome-fill);
+  background-size: 68%, cover;
+}
+.ui-opt input[type="radio"]:checked {
+  background-image:
+    radial-gradient(circle at center, #ffffff 0 33%, transparent 38%),
+    var(--chrome-fill);
+}
 .ui-opt.is-disabled { color: var(--text-tertiary); }
+.ui-opt input:disabled { opacity: 0.5; cursor: default; box-shadow: var(--chrome-shadow-active); }
+
+/* Dark-mode neutral surface for badges + checkbox/radio (grey, mirrors .dark .skuo) */
+.dark .ui-badge,
+.dark .ui-badge--tiny,
+.dark .ui-opt input {
+  --skuo-surface: var(--skuo-neutral);
+}
+.dark .ui-badge--accent,
+.dark .ui-opt input:checked {
+  --skuo-surface: var(--skuo-accent);
+}
 
 /* Input with a leading icon */
 .ui-field { position: relative; }
@@ -510,7 +517,14 @@ select:focus {
 /* Segmented control */
 .ui-seg { display: inline-flex; padding: 0.25rem; gap: 0.2rem; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border-strong); }
 .ui-seg button { border: none; background: transparent; color: var(--text-secondary); padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.82rem; cursor: pointer; }
-.ui-seg button.on { background: var(--text-primary); color: var(--bg-white); }
+.ui-seg button.on {
+  --skuo-surface: var(--skuo-accent);
+  background-image: var(--chrome-fill);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 1px 3px -1px rgba(0, 0, 0, 0.2);
+}
 
 /* List cell */
 .ui-cell { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem; border-radius: 12px; border: 1px solid var(--border); }
@@ -518,4 +532,188 @@ select:focus {
 .ui-cell .nm { font-weight: 600; font-size: 0.88rem; color: var(--text-primary); }
 .ui-cell .mt { font-size: 0.74rem; color: var(--text-tertiary); }
 .ui-cell .price { margin-left: auto; font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
+
+/* ── Universal floating nav (.ov-nav) ─────────────────────────────
+   Shared by every page via src/nav.js. Styling only — no Tailwind
+   utilities so it renders identically on output.css pages. */
+.ov-nav {
+  position: fixed;
+  top: 1.1rem;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  max-width: 64rem;
+  padding: 0 1.5rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none; /* only the bar is interactive; lets page corners through */
+}
+
+.ov-nav__bar {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.34rem;
+  border-radius: 999px;
+  max-width: calc(100vw - 2rem); /* mobile clip fix: never exceed viewport */
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-elevated), white 7%),
+    color-mix(in srgb, var(--bg-elevated), black 7%)
+  );
+  border: 1px solid color-mix(in srgb, var(--bg-elevated), black 14%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 1px 2px -1px rgba(0, 0, 0, 0.12),
+    0 6px 22px -8px rgba(0, 0, 0, 0.18);
+  transition: box-shadow 0.4s ease, background 0.4s ease;
+}
+
+.ov-nav.scrolled .ov-nav__bar {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 2px 4px -1px rgba(0, 0, 0, 0.14),
+    0 10px 30px -8px rgba(0, 0, 0, 0.24);
+}
+
+.dark .ov-nav__bar {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-elevated), white 8%),
+    color-mix(in srgb, var(--bg-elevated), black 8%)
+  );
+  border-color: rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 28px -8px rgba(0, 0, 0, 0.55);
+}
+
+.dark .ov-nav.scrolled .ov-nav__bar {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 4px rgba(0, 0, 0, 0.45),
+    0 12px 34px -8px rgba(0, 0, 0, 0.6);
+}
+
+.ov-nav__chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color 0.25s ease, background-color 0.25s ease, transform 0.12s ease;
+}
+
+.ov-nav__chevron:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+.ov-nav__chevron:active { transform: scale(0.9); }
+
+.ov-nav__chevron svg { transition: transform 0.25s ease; }
+.ov-nav__bar.collapsed .ov-nav__chevron svg { transform: rotate(180deg); }
+
+.ov-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  overflow: hidden;
+  transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* pop animation on expand/collapse */
+@keyframes ov-nav-pop {
+  0%   { transform: scale(var(--pop-from, 0.97)); opacity: 0.7; }
+  60%  { transform: scale(1.015); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.ov-nav__bar.pop { animation: ov-nav-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ov-nav__bar.pop { animation: none; }
+}
+
+.ov-nav__div {
+  flex: none;
+  width: 1px;
+  height: 1.05rem;
+  margin: 0 0.3rem;
+  background: color-mix(in srgb, var(--text-primary) 16%, transparent);
+}
+
+.ov-nav__link {
+  position: relative;
+  z-index: 1;
+  font-family: 'Satoshi', 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.25s ease, background-color 0.25s ease, transform 0.12s ease;
+}
+
+.ov-nav__link:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+.ov-nav__link:active { transform: scale(0.94); }
+
+/* primary accent pill — replaces the old Tailwind px-4 py-2 inline-flex utils */
+.ov-nav__primary {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.ov-nav__logo {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+/* icon buttons inside the bar sit flush with the pill height */
+.ov-nav .skuo-icon {
+  width: 2.3rem;
+  height: 2.3rem;
+  padding: 0;
+  flex: none;
+}
+
+/* theme icon swap */
+.ov-nav__sun { display: none; }
+.dark .ov-nav__sun { display: block; }
+.dark .ov-nav__moon { display: none; }
+
+@media (max-width: 767px) {
+  .ov-nav { top: 0.9rem; padding: 0 1rem; }
+  .ov-nav__bar { gap: 0.1rem; padding: 0.34rem; }
+  .ov-nav__links { gap: 0.05rem; }
+  .ov-nav__link { font-size: 0.82rem; padding: 0.52rem 0.78rem; }
+  .ov-nav__chevron { width: 2.2rem; height: 2.2rem; }
+  .ov-nav .skuo-icon { width: 2.4rem; height: 2.4rem; }
+  .ov-nav__div { margin: 0 0.24rem; }
+  .ov-nav__primary { padding: 0.52rem 1.1rem; font-size: 0.85rem; }
+}
 
