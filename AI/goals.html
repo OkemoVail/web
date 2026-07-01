@@ -109,37 +109,8 @@
 
 <body
     class="bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
-    <nav
-        class="w-full sticky top-0 flex items-center justify-between py-4 px-6 lg:py-6 lg:px-16 border-b border-border-cream dark:border-gray-800/50 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md relative z-30">
-        <a href="/AI/index.html" class="flex items-center gap-3">
-            <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080"
-                class="w-8 h-8 text-rosewood fill-current">
-                <path
-                    d="M4.96,314.21l508.97,180.31v-94.71L28.54,6.09C19.12-5.79,0,.87,0,16.03v286.6c0,4.38,1.79,8.56,4.96,11.58Z" />
-                <polygon points="513.93 561.2 0 684.2 0 395.8 513.93 522.5 513.93 561.2" />
-                <path
-                    d="M4.96,765.79l508.97-180.31v94.71L28.54,1073.91C19.12,1085.79,0,1079.13,0,1063.97v-286.6c0-4.38,1.79-8.56,4.96-11.58Z" />
-                <path
-                    d="M1075.04,314.21l-508.97,180.31v-94.71S1051.46,6.09,1051.46,6.09c9.42-11.88,28.54-5.22,28.54,9.94v286.6c0,4.38-1.79,8.56-4.96,11.58Z" />
-                <polygon points="566.07 561.2 1080 684.2 1080 395.8 566.07 522.5 566.07 561.2" />
-                <path
-                    d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
-            </svg>
-            <div class='text-xl md:text-2xl font-normal text-rosewood'>Labs21</div>
-        </a>
-        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-olive-gray dark:text-stone-gray">
-            <a href="goals.html" class="text-rosewood transition-colors">Goals</a>
-            <a href="research.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Research</a>
-            <a href="privacy.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">Privacy</a>
-            <a href="tos.html" class="hover:text-rosewood dark:hover:text-rosewood transition-colors">TOS</a>
-        </div>
-        <a href="https://discord.gg/BxjTsjvR8Z" target="_blank"
-            class="skuo discord !px-4 !py-1.5 text-xs md:text-sm">
-            <i class="fa-brands fa-discord mr-2"></i> Join Discord
-        </a>
-    </nav>
 
-    <main class="flex-1 flex flex-col items-center p-6 md:p-12 z-10 max-w-[1000px] mx-auto w-full">
+    <main class="flex-1 flex flex-col items-center pt-24 px-6 pb-6 md:pt-28 md:px-12 md:pb-12 z-10 max-w-[1000px] mx-auto w-full">
 
         <div class="w-full animate-fade-in mb-20 mt-12">
             <h1
@@ -248,6 +219,18 @@
 
         document.querySelectorAll('.animate-fade-in').forEach(el => observer.observe(el));
     </script>
+  <script>
+    window.NAV_CONFIG = {
+      links: [
+        { label: 'Goals', href: '/AI/goals.html' },
+        { label: 'Research', href: '/AI/research.html' },
+        { label: 'Privacy', href: '/AI/privacy.html' },
+        { label: 'TOS', href: '/AI/tos.html' }
+      ],
+      primary: { label: 'Labs21', href: '/AI/index.html', icon: 'labs21' }
+    };
+  </script>
+  <script src="../src/nav.js"></script>
 </body>
 
 </html>
