@@ -116,13 +116,13 @@ Starting now, if you learn something new, or I prompt you something new, note it
 
 All 14 pages link `src/design-tokens.css`, which is the single shared stylesheet. It owns:
 - The accent tokens (`--accent` / `--accent-light`, dark-swapped under `.dark`) and a convenience var `--skuo-accent` that resolves `--accent-color (chat) → --accent (token pages) → rosewood`.
-- A global `:active` press gradient (every button tints with accent while pressed).
-- The **skeuomorphic glossy button system**: classes `.skuo` (neutral base), `.skuo-accent` (accent fill, white text), `.skuo-neutral`, `.skuo-icon` (compact), `.skuo-pill` (keeps `rounded-full`). Each glossy button = top-light→bottom-dark gradient + `inset 0 1px 0 white` highlight + bevel + lift shadow; hover lifts, active sinks. Dark mode handled via `.dark`.
+- Buttons do **not** recolor on press (the old global `:active` accent overlay was removed 2026-07-01). Accent is carried at rest by `.skuo-accent`; press just insets via `--chrome-shadow-active`.
+- The **refined button system**: classes `.skuo` (grey neutral base), `.skuo-accent` (accent fill + glow, white text), `.skuo-neutral` (grey), `.skuo-icon` (compact), `.skuo-pill` (keeps `rounded-full`). Each button = whisper top-light→bottom-dark gradient + hairline `inset 0 1px 0 white` highlight + soft lift shadow; accent surfaces add a faint accent glow, neutral surfaces don't; hover lifts, active insets. Dark mode handled via `.dark`. (The earlier glossy/wet-glass look was retired 2026-07-01.)
 
 Notes for future button work:
 - `.skuomorphic-btn` (chat) is treated as **neutral** glossy by the shared file. `.skuomorphic-button` is intentionally NOT aliased to accent in the shared file (info pages use it as a neutral pill); it's made glossy per-page via a translucent overlay so it works over whatever local base color the page sets (accent on `AI/index.html`, neutral on info pages, `#5865F2` for `.discord`).
 - Pages that define their own button classes in an inline `<style>` win over the shared file by source order, so those are upgraded by appending a glossy override at the end of that page's `<style>` (chat `.sb-new-chat-btn`/`.Cadance-tab-btn`/`.mem-consent-*`, landing `.g-cta`/`.btn-ink`/`.btn-line`/`.g-icon`, editor `.toolbar-btn`/`.control-btn`, version `.btn-primary`, word `.hdr-btn`/`.tb-btn`).
-- The shared `.skuo::before` wet-glass sheen sits at `z-index:-1`, so on opaque-filled buttons it's hidden behind the fill; the glossy read comes from the gradient + inset highlight. Only relevant for translucent buttons.
+- The `.skuo::before` layer is now `background: none` and vestigial (the wet-glass sheen was **retired 2026-07-01** — see "Refined surface" below). No rule paints it anymore (its former consumer `.skuo-soft` was also removed); the empty pseudo-element is left in place harmlessly.
 - `whitename.html` has no buttons.
 - Design/plan docs: `docs/superpowers/specs/2026-06-30-skeuomorphic-buttons-design.md` and `docs/superpowers/plans/2026-06-30-skeuomorphic-buttons.md`.
 
@@ -134,17 +134,32 @@ values). The look is defined once in `src/design-tokens.css` as reusable custom
 properties — `--chrome-fill`, `--chrome-fill-hover`, `--chrome-shadow`,
 `--chrome-shadow-hover`, `--chrome-shadow-active`, `--chrome-border`, `--skuo-glow`
 (the `--chrome-*` names were kept so all consumers stay in sync; the values are no
-longer chrome) — which resolve lazily against the consumer's `--skuo-surface`. To
-make any button match: set `--skuo-surface` (+ optional surface for `.dark`) and apply
+longer chrome).
+
+**IMPORTANT — the `--chrome-*` recipe is declared ON THE CONSUMER ELEMENTS, not
+`:root`.** It embeds `var(--skuo-surface)`/`var(--skuo-glow)`; those are only set on
+the button elements. A custom property declared at `:root` substitutes its nested
+`var()`s once, in root scope (where `--skuo-surface` is unset → grey fallback), and
+inherits that *frozen* value down — so a `:root` recipe makes EVERY control grey
+regardless of `.skuo-accent` (this was a real bug fixed 2026-07-01). Instead the
+recipe lives on a selector list of all consumers (`.skuo, .skuomorphic-btn,
+.skuomorphic-button, .ui-badge, .ui-badge--tiny, .ui-opt input, .ui-seg button.on`,
+plus a `.dark` copy), so each element resolves it against its own surface/glow.
+**To add a new control that uses `var(--chrome-*)`, add its selector to that list**
+(or inline the gradient with `var(--skuo-surface)` directly in a real property). To
+make any button match: set `--skuo-surface` (grey via `--skuo-neutral`, or
+`var(--skuo-accent)`) + `--skuo-glow` (`transparent` neutral / accent) and apply
 `background-image: var(--chrome-fill); box-shadow: var(--chrome-shadow);` with
 `:hover` → `*-hover` and `:active` → `--chrome-shadow-active`.
 
 - **Fill** = a gentle top→bottom gradient: **lighter at the top, darker at the
   bottom** in light mode, **inverted** (darker top, lighter bottom) under `.dark`.
-  No metallic mid-band; a subtle edge highlight + soft lift shadow + accent glow.
-- **Neutral** surface = `color-mix(in srgb, var(--skuo-accent), white 82%)` (dark text).
-- **Primary** surface = `color-mix(in srgb, var(--skuo-accent), white 8%)` (white text).
-- **Dark neutral** = `color-mix(in srgb, var(--skuo-accent), #2a2a28 80%)`.
+  No metallic mid-band; a subtle edge highlight + soft lift shadow. The accent
+  glow is **accent-only** — neutral controls set `--skuo-glow: transparent`.
+- **Neutral** surface = `var(--skuo-neutral)` — plain grey (`--bg-elevated` light,
+  `color-mix(--bg-elevated, white 6%)` dark), dark text, **no** accent tint (as of
+  2026-07-01; was pale-accent). "Important things accent, everything else grey."
+- **Primary/accent** surface = `var(--skuo-accent)` (white text) + accent glow.
 
 Hierarchy is by **intensity, not hue** — everything is accent-tinted. The per-page
 override blocks (chat, landing, editor, version, word) consume the recipe instead
@@ -152,13 +167,45 @@ of hand-writing gradients, so editing the recipe updates every page (incl. the
 `design.html` showcase). Spec/plan: `docs/superpowers/specs/2026-06-30-chrome-button-design-language.md`,
 `docs/superpowers/plans/2026-06-30-chrome-button-design-language.md`.
 
-- **`.skuo-soft`** — an accent-tinted *satin* surface modifier in the skuo family
-  (YouTube-style: thin soft top highlight + smooth even gradient, matte rather
-  than glossy). Purely additive; composes with `.skuo-accent` / `.skuo-neutral` /
-  `.skuo-pill` / `.skuo-icon` and tracks `--skuo-surface`, so it inherits accent
-  tint and dark mode. Demoed on `design.html` ("Soft / Satin Buttons"). Spec/plan:
-  `docs/superpowers/specs/2026-06-30-soft-satin-button-variant-design.md`,
-  `docs/superpowers/plans/2026-06-30-soft-satin-button-variant.md`.
+#### Refined surface (current — replaced the glossy look 2026-07-01)
+
+As of 2026-07-01 the buttons dropped the glossy "dome" for a **refined**
+surface — "flat + a whisper of skeuomorphism". Same `--chrome-*` recipe vars
+(so every consumer stayed in sync automatically — only the values in the
+`:root` / `.dark` token blocks changed), plus the base `.skuo::before` sheen
+neutralized to `background: none`. The new read:
+- **Fill** = a *whisper* gradient — light `~7%` top → dark `~7%` bottom (was
+  24%/13%), same lighter-top→darker-bottom direction in `.dark` (`~8%`) to match
+  `design-lab.html` Column C. Almost flat; no visible dome.
+- **Depth** = a hairline top edge highlight (`inset 0 1px 0` at `0.5`, was `0.7`)
+  + a soft lift shadow + a **faint** accent glow (`--skuo-glow` at `transparent 82%`).
+- **No** wet-glass sheen and **no** hard top-shine — the two things that read as
+  "too glassy". Hover still lifts 1px + grows the shadow; active flattens to a
+  subtle inset.
+This came from the `design-lab.html` comparison (Column C = "A + current").
+
+The **`.skuo-soft` (Soft / Satin) variant was removed 2026-07-01** — its CSS
+(light + dark), the `design.html` showcase card, and all `word/index.html`
+usages were deleted; those buttons now use the base refined `.skuo`. The
+`.skuo::before` layer is now vestigial (no rule paints it).
+
+**The refined surface now also drives non-button controls** (2026-07-01) so the
+whole system shares one finish:
+- **`.ui-badge` / `--accent` / `--tiny`** — were flat chips; now raised chips
+  using `--chrome-fill` + `--chrome-shadow` (neutral = grey `--skuo-neutral`, no
+  glow; `--accent` = accent surface + glow).
+- **`.ui-opt input`** (checkbox/radio) — were native `accent-color` controls;
+  now custom `appearance: none` controls in the same recipe: unchecked = neutral
+  chip, checked = accent surface with a white SVG checkmark (checkbox) or a
+  `radial-gradient` dot (radio). Checkbox keeps a `5px` radius, radio is round.
+- Both get a `.dark` neutral-surface override (`var(--skuo-neutral)`) mirroring
+  `.dark .skuo`, since they don't inherit the `.skuo` dark rule. Checked/accent
+  variants set the accent surface + glow.
+- **Selected state = accent tint.** `.ui-seg button.on` (segmented control) now
+  fills with the refined **accent** surface (was near-black `--text-primary`).
+  Toolbar/tab toggles (editor, word, chat settings) already toggle `.skuo-accent`,
+  and the global `button:active` rule tints accent on press — so "selected"
+  reads accent everywhere.
 
 ## Unified inputs, cards, and the showcase page
 
@@ -182,7 +229,7 @@ site-wide, edit `src/design-tokens.css` alone.
 
 What changed:
 - Page-local button classes deleted in favor of `.skuo` (+ `.skuo-accent` /
-  `.skuo-neutral` / `.skuo-icon` / `.skuo-pill` / `.skuo-soft`): landing
+  `.skuo-neutral` / `.skuo-icon` / `.skuo-pill`): landing
   `.g-cta`/`.btn-ink`/`.btn-line`/`.g-icon`, editor `.toolbar-btn`/`.control-btn`,
   word `.hdr-btn`/`.tb-btn`/`.qa-chip`/`.export-item`/`.ai-clear-btn`/`.ai-mobile-close`,
   version `.btn-primary`, AI-landing/info `.skuomorphic-button`. The per-page
@@ -208,3 +255,40 @@ button/card appearance in a page's `<style>`.
 
 Spec/plan: `docs/superpowers/specs/2026-06-30-universal-design-system-adoption-design.md`,
 `docs/superpowers/plans/2026-06-30-universal-design-system-adoption.md`.
+
+## Universal floating nav — one component on every page
+
+As of 2026-07-01 every page shows the same floating "glass" nav capsule
+(originally only on `index.html`). It is a single self-injecting component —
+edit it in **one** place:
+- **`src/nav.js`** — reads an optional `window.NAV_CONFIG` (set BEFORE the
+  script tag), builds the nav DOM, and injects `<nav class="ov-nav">` as the
+  first child of `<body>`. It wires the chevron collapse/expand + pop
+  animation, scroll-morph (`.scrolled`), the theme toggle, mobile re-collapse,
+  and a resize/orientationchange recompute (the **mobile-clipping fix**:
+  `.ov-nav__bar` is capped at `max-width: calc(100vw - 2rem)` and the link
+  group scrolls rather than overflowing). Idempotent via `window.__ovNavInjected`.
+- **`.ov-nav*` block in `src/design-tokens.css`** — all nav styling.
+
+Rules:
+- The injected markup uses **only** `.ov-nav*` + the shared `.skuo*` classes —
+  **no Tailwind utilities** — so it renders identically on the compiled-
+  `output.css` pages (`design.html`, `Themes/Themes.html`, `word/index.html`)
+  as on the Tailwind-CDN pages.
+- Per-page links: set `window.NAV_CONFIG = { links:[{label,href}], primary:{label,href,icon:'labs21'}|null, showThemeToggle }`.
+  Omitted fields use defaults (Home · Design · GitHub · YouTube + Labs21 pill +
+  theme toggle). Link `href`s are **absolute from site root**; a divider is
+  auto-inserted before the first external (`http`) link; external links get
+  `target=_blank rel=noopener`. The `<script src>`/`<link>` paths are the only
+  depth-relative bit (`src/nav.js` at root, `../src/nav.js` one level deep).
+- Theme: the nav's toggle writes `vail_theme` + toggles `.dark`. Each page still
+  keeps its own early inline anti-FOUC theme script in `<head>` — do not remove.
+- App pages keep their app-functional controls; only duplicate nav chrome was
+  removed (editor Back + theme toggle; word `.ow-logo` + `#theme-btn` and the
+  dead `toggleTheme`/`updateThemeBtn`; version Back + theme toggle + `toggleTheme`;
+  manage/Themes/design headers). App-page collision handling: editor header is
+  `justify-end` + `padding-right`, `.ow-header` gets `padding-right`, and chat's
+  `#top-right-actions` cluster is stacked below the nav (`top:4.5rem`).
+
+Spec/plan: `docs/superpowers/specs/2026-07-01-universal-floating-nav-design.md`,
+`docs/superpowers/plans/2026-07-01-universal-floating-nav.md`.
