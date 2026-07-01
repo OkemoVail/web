@@ -93,15 +93,7 @@
 <body class="bg-parchment transition-colors duration-500 overflow-x-hidden">
 
     <header class="fixed top-0 left-0 w-full z-[100] px-6 py-8 pointer-events-none">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="header-island">
-                <a href="research.html"
-                    class="flex items-center gap-2 px-4 py-2 text-xs lg:text-[13px] font-bold tracking-tight text-text-warm hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all">
-                    <i class="fa-solid fa-arrow-left text-[10px]"></i>
-                    <span>Back to Research</span>
-                </a>
-            </div>
-
+        <div class="max-w-7xl mx-auto flex items-center justify-end">
             <div class="header-island pr-2">
                 <button id="connect-btn" onclick="connectStorage()"
                     class="skuo skuo-neutral skuo-pill flex items-center gap-2 px-3 py-1.5 text-olive-gray rounded-full font-bold text-xs active:scale-95 transition-all">
@@ -265,6 +257,17 @@
             if ((localStorage.getItem('vail_theme') || 'system') === 'system') applyTheme();
         });
     </script>
+  <script>
+    window.NAV_CONFIG = {
+      links: [
+        { label: 'Home', href: '/index.html' },
+        { label: 'Chat', href: '/AI/chat.html' },
+        { label: 'Research', href: '/AI/research.html' }
+      ],
+      primary: { label: 'Labs21', href: '/AI/index.html', icon: 'labs21' }
+    };
+  </script>
+  <script src="../src/nav.js"></script>
 </body>
 
 </html>

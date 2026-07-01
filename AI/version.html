@@ -126,20 +126,6 @@
 </head>
 
 <body class="h-full overflow-y-auto">
-    <header class="h-16 flex items-center justify-between px-6 z-50 pointer-events-none fixed top-0 left-0 right-0">
-        <div class="header-island pointer-events-auto">
-            <a href="chat.html" class="px-4 py-1.5 text-xs font-bold tracking-tight text-black dark:text-white">
-                <i class="fa-solid fa-arrow-left mr-2"></i>Back to Chat
-            </a>
-        </div>
-        <div class="header-island pointer-events-auto">
-            <button onclick="toggleTheme()"
-                class="w-8 h-8 flex items-center justify-center rounded-full text-black dark:text-white">
-                <i class="fa-solid fa-circle-half-stroke"></i>
-            </button>
-        </div>
-    </header>
-
     <main class="manage-container">
         <div class="manage-paper">
             <h1 class="text-2xl font-black mb-2 italic">BUILD <span class="text-blue-500">MGR</span></h1>
@@ -218,16 +204,6 @@
             }
         }
 
-        function toggleTheme() {
-            const currentTheme = localStorage.getItem('vail_theme') || 'system';
-            let nextTheme;
-            if (currentTheme === 'light') nextTheme = 'dark';
-            else if (currentTheme === 'dark') nextTheme = 'system';
-            else nextTheme = 'light';
-            localStorage.setItem('vail_theme', nextTheme);
-            applyTheme();
-        }
-
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if ((localStorage.getItem('vail_theme') || 'system') === 'system') applyTheme();
         });
@@ -236,6 +212,17 @@
         loadData();
         setTimeout(window.checkChangelog, 1000);
     </script>
+  <script>
+    window.NAV_CONFIG = {
+      links: [
+        { label: 'Home', href: '/index.html' },
+        { label: 'Chat', href: '/AI/chat.html' },
+        { label: 'Research', href: '/AI/research.html' }
+      ],
+      primary: { label: 'Labs21', href: '/AI/index.html', icon: 'labs21' }
+    };
+  </script>
+  <script src="../src/nav.js"></script>
 </body>
 
 </html>
