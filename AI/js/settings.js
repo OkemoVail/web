@@ -31,7 +31,8 @@ window.toggleSettingsPanel = () => {
         }
 
         const vEn = document.getElementById('settings-voice-enabled');
-        if (vEn) vEn.checked = window.settings.voiceEnabled !== false;
+        // Voice mode not ready — keep the toggle off and disabled (see VOICE_READY in voice.js).
+        if (vEn) { vEn.checked = false; vEn.disabled = true; }
         const vName = document.getElementById('settings-voice-name');
         if (vName) vName.value = window.settings.voiceName || 'af_sarah';
 

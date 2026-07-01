@@ -228,6 +228,10 @@
             -webkit-background-clip: text;
             background-clip: text;
             animation: apple-gradient-slide 5s linear infinite;
+            /* clip-text + tight line-height shaves glyph bottoms; pad to protect descenders */
+            display: inline-block;
+            line-height: 1.1;
+            padding-bottom: 0.12em;
         }
 
         .dark .apple-color-cycle {
@@ -256,7 +260,7 @@
         <!-- LEFT PANE -->
         <div class="flex flex-col justify-center order-1 text-left items-start">
             <h1
-                class="text-7xl md:text-8xl lg:text-[7.5rem] font-serif tracking-tighter leading-[1] mb-6 text-zinc-900 dark:text-white">
+                class="text-8xl md:text-8xl lg:text-[7.5rem] font-serif tracking-tighter leading-[1.05] mb-6 text-zinc-900 dark:text-white">
                 Stay<br><span class="apple-color-cycle">Curious.</span>
             </h1>
             <button id="start-button" class="skuo skuo-accent skuo-pill !px-7 !py-3 mb-4 group flex items-center gap-2">
@@ -372,7 +376,7 @@
         { label: 'Privacy', href: '/AI/privacy.html' },
         { label: 'TOS', href: '/AI/tos.html' }
       ],
-      primary: { label: 'Labs21', href: '/AI/index.html', icon: 'labs21' }
+      primary: { label: 'Home', href: '/AI/index.html' }
     };
   </script>
   <script src="../src/nav.js"></script>

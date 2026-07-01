@@ -116,12 +116,58 @@
       bar.style.transformOrigin = ox + ' ' + oy;
     }
 
+    // Space the links group can occupy inside the viewport-capped bar,
+    // i.e. bar's max width minus its padding, gaps, and fixed siblings.
+    function availWidth() {
+      var cs = window.getComputedStyle(bar);
+      var padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      var gap = parseFloat(cs.columnGap) || parseFloat(cs.gap) || 0;
+      var used = 0, n = 0;
+      Array.prototype.forEach.call(bar.children, function (ch) {
+        n++;
+        if (ch !== linkGroup) used += ch.offsetWidth;
+      });
+      // .ov-nav__bar is capped at calc(100vw - 2rem); 2rem ≈ 32px.
+      var cap = Math.min(document.documentElement.clientWidth, window.innerWidth) - 32;
+      return Math.max(0, cap - padX - used - gap * (n - 1));
+    }
+
+    function applyExpandedWidth() {
+      var full = linkGroup.scrollWidth;
+      var avail = availWidth();
+      linkGroup.style.maxWidth = Math.min(full, avail) + 'px';
+      linkGroup.classList.toggle('is-scroll', full > avail + 1);
+      updateScrollHints();
+    }
+
+    // Edge-fade affordance: fade whichever side has more links to scroll to,
+    // so it's visible the row is scrollable. Removed once fully scrolled that way.
+    function updateScrollHints() {
+      if (!linkGroup.classList.contains('is-scroll')) {
+        linkGroup.style.webkitMaskImage = '';
+        linkGroup.style.maskImage = '';
+        return;
+      }
+      var atStart = linkGroup.scrollLeft <= 1;
+      var atEnd = linkGroup.scrollLeft + linkGroup.clientWidth >= linkGroup.scrollWidth - 1;
+      var left = atStart ? '#000 0' : 'transparent 0, #000 16px';
+      var right = atEnd ? '#000 100%' : '#000 calc(100% - 16px), transparent 100%';
+      var mask = 'linear-gradient(to right, ' + left + ', ' + right + ')';
+      linkGroup.style.webkitMaskImage = mask;
+      linkGroup.style.maskImage = mask;
+    }
+
     function setCollapsed(collapsed, opts) {
       opts = opts || {};
       var animate = opts.animate !== false;
       bar.classList.toggle('collapsed', collapsed);
       chevron.setAttribute('aria-expanded', String(!collapsed));
-      linkGroup.style.maxWidth = collapsed ? '0px' : linkGroup.scrollWidth + 'px';
+      if (collapsed) {
+        linkGroup.classList.remove('is-scroll');
+        linkGroup.style.maxWidth = '0px';
+      } else {
+        applyExpandedWidth();
+      }
       if (animate) {
         popFrom(opts.event || null);
         bar.classList.remove('pop');
@@ -130,6 +176,8 @@
       }
     }
 
+    linkGroup.addEventListener('scroll', updateScrollHints, { passive: true });
+
     setCollapsed(mq.matches, { animate: false });
 
     chevron.addEventListener('click', function (e) {
@@ -137,20 +185,22 @@
       setCollapsed(!bar.classList.contains('collapsed'), { event: e });
     });
 
+    // Auto-collapse (tapping a link, or tapping anywhere outside the bar) closes
+    // silently — only the chevron toggle plays the pop/scale animation.
     linkGroup.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function (e) {
-        if (mq.matches) setCollapsed(true, { event: e });
+      a.addEventListener('click', function () {
+        if (mq.matches) setCollapsed(true, { animate: false });
       });
     });
 
     document.addEventListener('click', function (e) {
-      if (mq.matches && !bar.contains(e.target)) setCollapsed(true, { event: e });
+      if (mq.matches && !bar.contains(e.target)) setCollapsed(true, { animate: false });
     });
 
     // recompute expanded width on resize / orientation change (mobile clip fix)
     function recompute() {
       if (!bar.classList.contains('collapsed')) {
-        linkGroup.style.maxWidth = linkGroup.scrollWidth + 'px';
+        applyExpandedWidth();
       }
     }
     window.addEventListener('resize', recompute, { passive: true });

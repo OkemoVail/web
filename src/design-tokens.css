@@ -629,9 +629,19 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 0.1rem;
+  min-width: 0; /* allow the flex item to shrink below content width */
   overflow: hidden;
   transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* when the expanded links can't fit the viewport-capped bar, scroll instead of clip */
+.ov-nav__links.is-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ov-nav__links.is-scroll::-webkit-scrollbar { display: none; }
 
 /* pop animation on expand/collapse */
 @keyframes ov-nav-pop {

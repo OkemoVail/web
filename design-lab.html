@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Button Design Lab — Okemovail</title>
+  <link rel="stylesheet" href="src/output.css">
+  <link rel="stylesheet" href="src/design-tokens.css">
+  <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
+  <style>
+    /* ── DEMO-ONLY sandbox. Nothing here touches design-tokens.css.
+       Three columns compare button design languages against the
+       current glossy .skuo look so we can pick a direction. ── */
+    body { font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--text-primary); margin: 0; }
+
+    .lab-frame { max-width: 1180px; margin: 2rem auto; padding: 1.25rem; }
+    @media (min-width: 768px) { .lab-frame { padding: 2rem; } }
+
+    .lab-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .lab-title {
+      font-family: Georgia, 'Times New Roman', serif; font-weight: 600;
+      font-size: clamp(1.6rem, 3.5vw, 2.3rem); letter-spacing: -0.01em; margin: 0;
+    }
+    .lab-sub { color: var(--text-secondary); font-size: 0.9rem; margin: 0.25rem 0 1.75rem; }
+
+    .lab-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    @media (min-width: 720px)  { .lab-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1040px) { .lab-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .lab-col {
+      border: 1px solid var(--border); border-radius: 18px; padding: 1.25rem;
+      background: var(--bg-white);
+    }
+    .dark .lab-col { background: var(--bg-elevated); border-color: var(--border-strong); }
+    .lab-col h2 { margin: 0 0 0.2rem; font-size: 1rem; font-weight: 600; }
+    .lab-col .note { margin: 0 0 1.1rem; font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.4; }
+    .lab-col.is-current { outline: 2px dashed color-mix(in srgb, var(--skuo-accent), transparent 55%); outline-offset: 4px; }
+    .lab-col.is-pick { outline: 2px solid var(--skuo-accent); outline-offset: 4px; }
+
+    .stack { display: flex; flex-direction: column; gap: 0.7rem; align-items: flex-start; }
+    .stack .row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+    .icn { width: 15px; height: 15px; }
+
+    /* Shared geometry so only the *language* differs between columns */
+    .b {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1.15rem; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 550; cursor: pointer;
+      border: 1px solid transparent; transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .b.icon { padding: 0; width: 40px; height: 40px; justify-content: center; }
+    .b.pill { border-radius: 9999px; }
+
+    /* ─────────────────────────────────────────────────────────
+       LANGUAGE A — FLAT / REFINED  (Linear / Vercel / Stripe)
+       Solid fill, no gradient, hairline border, whisper shadow.
+       ───────────────────────────────────────────────────────── */
+    .flat.accent {
+      background: var(--skuo-accent); color: #fff;
+      border-color: color-mix(in srgb, var(--skuo-accent), black 12%);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .flat.accent:hover { background: color-mix(in srgb, var(--skuo-accent), black 8%); }
+    .flat.accent:active { background: color-mix(in srgb, var(--skuo-accent), black 16%); box-shadow: none; }
+
+    .flat.neutral {
+      background: var(--bg-white); color: var(--text-primary);
+      border-color: var(--border-strong);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .flat.neutral:hover { background: var(--bg-elevated); border-color: var(--text-tertiary); }
+    .flat.neutral:active { background: color-mix(in srgb, var(--bg-elevated), black 4%); box-shadow: none; }
+    .dark .flat.neutral { background: var(--bg-elevated); }
+    .dark .flat.neutral:hover { background: color-mix(in srgb, var(--bg-elevated), white 6%); }
+
+    /* ─────────────────────────────────────────────────────────
+       LANGUAGE B — SOFT NEUMORPHIC
+       Monochrome extrude: light shadow top-left, dark bottom-right,
+       no shine. Press inverts to an inset.
+       ───────────────────────────────────────────────────────── */
+    .neu-scope-host { --neu-bg: #e8e6de; --neu-light: #ffffff; --neu-dark: #c3c0b4; }
+    .dark .neu-scope-host { --neu-bg: #33322f; --neu-light: #414039; --neu-dark: #232220; }
+    .neu-scope-host.lab-col { background: var(--neu-bg); border-color: transparent; }
+
+    .neu {
+      background: var(--neu-bg); color: var(--text-primary); border: none;
+      box-shadow: -5px -5px 10px var(--neu-light), 5px 5px 12px var(--neu-dark);
+    }
+    .neu:hover { box-shadow: -3px -3px 7px var(--neu-light), 3px 3px 9px var(--neu-dark); }
+    .neu:active { box-shadow: inset -3px -3px 7px var(--neu-light), inset 4px 4px 9px var(--neu-dark); }
+    .neu.accent {
+      background: var(--skuo-accent); color: #fff;
+      box-shadow: -5px -5px 10px var(--neu-light),
+                   5px 5px 12px color-mix(in srgb, var(--skuo-accent), black 30%);
+    }
+    .neu.accent:active {
+      box-shadow: inset -3px -3px 7px color-mix(in srgb, var(--skuo-accent), white 22%),
+                  inset 4px 4px 9px color-mix(in srgb, var(--skuo-accent), black 34%);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       LANGUAGE C — REFINED  (A + Current combined)
+       Flat's hairline border + clean hover/press, but keeps a
+       WHISPER of the current gradient, a soft lift shadow and a
+       faint accent glow. No wet-glass sheen, no hard top-shine.
+       ───────────────────────────────────────────────────────── */
+    .ref.accent {
+      color: #fff;
+      background-image: linear-gradient(to bottom,
+        color-mix(in srgb, var(--skuo-accent), white 7%),
+        color-mix(in srgb, var(--skuo-accent), black 6%));
+      border-color: color-mix(in srgb, var(--skuo-accent), black 14%);
+      box-shadow: 0 1px 0 color-mix(in srgb, var(--skuo-accent), white 20%) inset,
+                  0 2px 6px -2px color-mix(in srgb, var(--skuo-accent), transparent 55%);
+    }
+    .ref.accent:hover {
+      background-image: linear-gradient(to bottom,
+        color-mix(in srgb, var(--skuo-accent), white 12%),
+        color-mix(in srgb, var(--skuo-accent), black 2%));
+      box-shadow: 0 1px 0 color-mix(in srgb, var(--skuo-accent), white 24%) inset,
+                  0 4px 12px -3px color-mix(in srgb, var(--skuo-accent), transparent 45%);
+    }
+    .ref.accent:active {
+      background-image: linear-gradient(to bottom,
+        color-mix(in srgb, var(--skuo-accent), black 4%),
+        color-mix(in srgb, var(--skuo-accent), black 10%));
+      box-shadow: 0 1px 3px rgba(0,0,0,0.14) inset;
+    }
+
+    .ref.neutral {
+      color: var(--text-primary);
+      background-image: linear-gradient(to bottom, var(--bg-white), var(--bg-elevated));
+      border-color: var(--border-strong);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 1px 3px -1px rgba(0,0,0,0.12);
+    }
+    .ref.neutral:hover {
+      background-image: linear-gradient(to bottom, var(--bg-white), color-mix(in srgb, var(--bg-elevated), black 3%));
+      border-color: var(--text-tertiary);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 3px 9px -2px rgba(0,0,0,0.16);
+    }
+    .ref.neutral:active { box-shadow: 0 1px 3px rgba(0,0,0,0.14) inset; }
+    .dark .ref.neutral {
+      background-image: linear-gradient(to bottom, color-mix(in srgb, var(--bg-elevated), white 6%), var(--bg-elevated));
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 2px 6px -2px rgba(0,0,0,0.5);
+    }
+
+    .swatches { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; margin-top: 2rem; }
+    .swatch { height: 46px; border-radius: 10px; border: 1px solid var(--border); display:flex; align-items:flex-end; padding: 0.3rem; font-size: 0.55rem; color:#fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+  </style>
+</head>
+<body>
+  <div class="lab-frame">
+    <div class="lab-top">
+      <div>
+        <h1 class="lab-title">Button Design Lab</h1>
+        <p class="lab-sub">Same buttons, three design languages. Pick one and I'll roll it into <code>design-tokens.css</code> site-wide.</p>
+      </div>
+      <button id="theme-toggle" class="skuo skuo-icon" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+
+    <div class="lab-grid">
+
+      <!-- CURRENT: glossy .skuo (the thing we're moving away from) -->
+      <section class="lab-col is-current">
+        <h2>Current — Glossy</h2>
+        <p class="note">Gradient fill + wet-glass sheen + inset highlight. The look you find too glassy.</p>
+        <div class="stack">
+          <div class="row">
+            <button class="skuo skuo-accent" style="padding:.55rem 1.15rem;border-radius:10px;font-size:.85rem;">Primary</button>
+            <button class="skuo skuo-neutral" style="padding:.55rem 1.15rem;border-radius:10px;font-size:.85rem;">Neutral</button>
+          </div>
+          <div class="row">
+            <button class="skuo skuo-accent skuo-pill" style="padding:.55rem 1.15rem;font-size:.85rem;">Pill</button>
+            <button class="skuo skuo-icon" aria-label="icon" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;">
+              <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LANGUAGE A: FLAT / REFINED -->
+      <section class="lab-col">
+        <h2>A — Flat / Refined</h2>
+        <p class="note">Solid fill, hairline border, whisper shadow. Modern &amp; calm. Hover darkens; press flattens.</p>
+        <div class="stack">
+          <div class="row">
+            <button class="b flat accent">Primary</button>
+            <button class="b flat neutral">Neutral</button>
+          </div>
+          <div class="row">
+            <button class="b flat accent pill">Pill</button>
+            <button class="b flat neutral icon" aria-label="icon">
+              <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LANGUAGE B: SOFT NEUMORPHIC -->
+      <section class="lab-col neu-scope-host">
+        <div class="neu-scope">
+          <h2>B — Soft Neumorphic</h2>
+          <p class="note">Monochrome extrude — soft light/dark shadows, no shine. Press sinks to an inset.</p>
+          <div class="stack">
+            <div class="row">
+              <button class="b neu accent">Primary</button>
+              <button class="b neu neutral">Neutral</button>
+            </div>
+            <div class="row">
+              <button class="b neu accent pill">Pill</button>
+              <button class="b neu neutral icon" aria-label="icon">
+                <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LANGUAGE C: REFINED (A + CURRENT) -->
+      <section class="lab-col is-pick">
+        <h2>C — Refined <span style="font-weight:400;color:var(--text-tertiary);font-size:.8rem;">(A + current)</span></h2>
+        <p class="note">Flat's hairline border &amp; clean press, plus a whisper of gradient, a soft lift shadow and a faint accent glow. No wet-glass sheen.</p>
+        <div class="stack">
+          <div class="row">
+            <button class="b ref accent">Primary</button>
+            <button class="b ref neutral">Neutral</button>
+          </div>
+          <div class="row">
+            <button class="b ref accent pill">Pill</button>
+            <button class="b ref neutral icon" aria-label="icon">
+              <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="swatches">
+      <div class="swatch" style="background:var(--accent);">accent</div>
+      <div class="swatch" style="background:var(--accent-light);">accent-light</div>
+      <div class="swatch" style="background:var(--skuo-accent);">skuo-accent</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var saved = localStorage.getItem('vail_theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (saved !== 'light' && prefersDark)) document.documentElement.classList.add('dark');
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('vail_theme', isDark ? 'dark' : 'light');
+      });
+    })();
+  </script>
+</body>
+</html>

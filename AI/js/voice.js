@@ -19,8 +19,13 @@
     }
     function setTranscript(t) { if (els.transcript) els.transcript.innerText = t || ''; }
 
+    // Voice mode is not ready for release — hard-disabled regardless of stored settings.
+    // Flip VOICE_READY to true (and re-enable the settings toggle) when it ships.
+    var VOICE_READY = false;
+
     function isSupported() {
-        return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia &&
+        return !!(VOICE_READY &&
+                  navigator.mediaDevices && navigator.mediaDevices.getUserMedia &&
                   window.MediaRecorder &&
                   !(window.settings && window.settings.voiceEnabled === false));
     }
