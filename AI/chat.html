@@ -5031,7 +5031,10 @@
         </div>
     </div>
 
-  <style>.ov-nav { z-index: 1100; }</style>
+  <!-- Chat has its own always-visible top-right action cluster (#top-right-actions).
+       The shared floating nav also lives top-right, so drop the cluster below the nav
+       to stack them (they overlap at <~1328px viewports). Nav keeps the default z-50. -->
+  <style>#top-right-actions { top: 4.5rem; }</style>
   <script>
     window.NAV_CONFIG = {
       links: [
