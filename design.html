@@ -76,9 +76,6 @@
 <body>
   <div class="ds-frame">
     <div class="ds-topbar">
-      <button id="theme-toggle" class="skuo skuo-icon" aria-label="Toggle theme" title="Toggle theme">
-        <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
     </div>
 
     <h1 class="ds-title">Design System</h1>
@@ -101,28 +98,6 @@
           <button class="skuo skuo-accent btn">Button</button>
           <button class="skuo skuo-icon" aria-label="Next" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
-        </div>
-      </section>
-
-      <!-- Soft / Satin Buttons -->
-      <section class="dsc">
-        <p class="dsc-label">Soft / Satin Buttons</p>
-        <div class="row" style="margin-bottom:0.55rem;">
-          <button class="skuo skuo-soft skuo-neutral btn skuo-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>Share
-          </button>
-          <button class="skuo skuo-soft skuo-neutral btn skuo-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save
-          </button>
-        </div>
-        <div class="row">
-          <button class="skuo skuo-soft skuo-neutral btn skuo-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Download
-          </button>
-          <button class="skuo skuo-soft skuo-accent btn skuo-pill">Subscribe</button>
-          <button class="skuo skuo-soft skuo-icon" aria-label="More" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
           </button>
         </div>
       </section>
@@ -278,12 +253,18 @@
       if (saved === 'dark' || (saved !== 'light' && prefersDark)) {
         document.documentElement.classList.add('dark');
       }
-      var btn = document.getElementById('theme-toggle');
-      btn.addEventListener('click', function () {
-        var isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('vail_theme', isDark ? 'dark' : 'light');
-      });
     })();
   </script>
+  <script>
+    window.NAV_CONFIG = {
+      links: [
+        { label: 'Home', href: '/index.html' },
+        { label: 'GitHub', href: 'https://github.com/ar12c' },
+        { label: 'YouTube', href: 'https://www.youtube.com/@SochiVail' }
+      ],
+      primary: { label: 'Labs21', href: '/AI/index.html', icon: 'labs21' }
+    };
+  </script>
+  <script src="src/nav.js"></script>
 </body>
 </html>
