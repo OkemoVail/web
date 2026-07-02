@@ -51,19 +51,10 @@
             --sidebar-tint: rgba(0, 0, 0, 0);
             --accent-contrast: #faf9f5;
 
-            /* Sidebar — its own recessed surface, distinct from the chat canvas */
-            --sidebar-surface: #f3f1e8;
-            --sb-edge: rgba(20, 20, 19, 0.07);
-            --sb-edge-highlight: rgba(255, 255, 255, 0.65);
+            /* Sidebar — tokens */
             --sb-divider: rgba(20, 20, 19, 0.06);
             --sb-item-hover: color-mix(in srgb, var(--accent-color) 7%, transparent);
-            --sb-active: color-mix(in srgb, var(--accent-color) 15%, transparent);
             --sb-active-soft: color-mix(in srgb, var(--accent-color) 8%, transparent);
-            /* Active-highlight vertical gradient: lightened accent at top, darkened at bottom.
-               Same 15% alpha as --sb-active; only lightness shifts, so it adapts to any accent. */
-            --sb-active-top: color-mix(in srgb, color-mix(in srgb, var(--accent-color), white 22%) 15%, transparent);
-            --sb-active-bottom: color-mix(in srgb, color-mix(in srgb, var(--accent-color), black 22%) 15%, transparent);
-            --sb-depth: 6px 0 30px -22px rgba(20, 20, 19, 0.32);
 
             /* Background system — chat bg + sidebar locked to rosewood accent (no light/dark variation) */
             --bg-color: #c96478;
@@ -106,17 +97,10 @@
             --accent-contrast: #141413;
             --bg-elevated: #1e1e1c;
 
-            /* Sidebar — sits a touch deeper than the chat canvas for a recessed feel */
-            --sidebar-surface: #191917;
-            --sb-edge: rgba(255, 255, 255, 0.055);
-            --sb-edge-highlight: rgba(255, 255, 255, 0.05);
+            /* Sidebar — tokens */
             --sb-divider: rgba(255, 255, 255, 0.06);
             --sb-item-hover: color-mix(in srgb, var(--accent-color) 14%, transparent);
-            --sb-active: color-mix(in srgb, var(--accent-color) 22%, transparent);
             --sb-active-soft: color-mix(in srgb, var(--accent-color) 12%, transparent);
-            --sb-active-top: color-mix(in srgb, color-mix(in srgb, var(--accent-color), white 22%) 22%, transparent);
-            --sb-active-bottom: color-mix(in srgb, color-mix(in srgb, var(--accent-color), black 22%) 22%, transparent);
-            --sb-depth: 8px 0 36px -24px rgba(0, 0, 0, 0.65);
 
             /* Floating shell — mirrors .dark .ov-nav__bar */
             --sb-float-border: rgba(0, 0, 0, 0.5);
