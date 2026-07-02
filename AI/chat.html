@@ -274,6 +274,19 @@
             backface-visibility: hidden;
         }
 
+        @media (max-width: 1023px) {
+            #sidebar {
+                margin: var(--sb-float-gap);
+                height: calc(100% - 2 * var(--sb-float-gap));
+                border-radius: var(--sb-radius);
+            }
+
+            /* Slide fully off-canvas, clearing the left margin + shadow. */
+            #sidebar.-translate-x-full {
+                transform: translateX(calc(-100% - var(--sb-float-gap) - 6px));
+            }
+        }
+
         #sidebar-full-content {
             contain: layout style;
         }
