@@ -1215,11 +1215,19 @@
         }
 
         .history-item-active {
-            background: linear-gradient(180deg, var(--sb-active-top), var(--sb-active-bottom));
-            color: var(--accent-color);
+            /* Raised accent chip — refined surface (matches design system
+               "selected = accent tint"). Whisper accent fill + faint glow. */
+            background:
+                linear-gradient(
+                    180deg,
+                    color-mix(in srgb, var(--skuo-accent), white 7%),
+                    color-mix(in srgb, var(--skuo-accent), black 7%));
+            color: var(--accent-contrast);
             font-weight: 600;
-            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 18%, transparent);
-            /* Tighter corners than the rounded-xl (12px) row default. */
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                0 1px 2px -1px rgba(0, 0, 0, 0.18),
+                0 2px 10px -4px var(--skuo-glow);
             border-radius: 8px !important;
         }
 
@@ -1241,11 +1249,15 @@
         }
 
         .history-item-active>button {
-            color: var(--accent-color) !important;
+            color: var(--accent-contrast) !important;
         }
 
         .dark .history-item-active {
-            background: linear-gradient(180deg, var(--sb-active-top), var(--sb-active-bottom));
+            background:
+                linear-gradient(
+                    180deg,
+                    color-mix(in srgb, var(--skuo-accent), white 8%),
+                    color-mix(in srgb, var(--skuo-accent), black 8%));
         }
 
         /* Inactive rows: accent-aware hover across the whole row, not just the label */
