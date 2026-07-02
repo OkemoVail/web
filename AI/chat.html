@@ -162,9 +162,10 @@
 
         body {
             line-height: 1.6;
-
             letter-spacing: 0.01em;
-
+            /* Canvas behind the floating sidebar reads as the chat surface,
+               so the panel floats on the same plane as <main>. */
+            background-color: var(--bg-elevated);
         }
 
         @media (max-width: 1023px) {
