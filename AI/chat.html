@@ -622,6 +622,12 @@
             color: var(--accent-color);
         }
 
+        .sb-new-chat-btn.skuo-accent,
+        .sb-new-chat-btn.skuo-accent .sb-nav-icon,
+        .sb-new-chat-btn.skuo-accent .sb-new-chat-chevron {
+            color: var(--accent-contrast);
+        }
+
         /* Indicator bar pinned on — this is the active item.
            Pulled to the sidebar's absolute left edge (button is inset 16px by px-4). */
         .sb-new-chat-btn::before {
@@ -3514,7 +3520,7 @@
 
             <!-- New chat -->
             <div class="shrink-0 pt-1.5 pb-2 px-4">
-                <button onclick="window.resetChat()" class="sb-new-chat-btn skuo sb-tile">
+                <button onclick="window.resetChat()" class="sb-new-chat-btn skuo skuo-accent sb-tile">
                     <span class="sb-nav-icon">
                         <i data-feather="edit-2" class="nc-icon-new w-[17px] h-[17px]"></i>
                         <i data-feather="message-square" class="nc-icon-active w-[17px] h-[17px]"></i>
