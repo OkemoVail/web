@@ -83,6 +83,20 @@
             --sidebar-rail-width: 44px;
             --header-height: 56px;
             --sidebar-section-first-margin-top: 8px;
+
+            /* Floating sidebar shell — matches .ov-nav__bar (design-tokens.css) */
+            --sb-float-gap: 0.9rem;
+            --sb-radius: 20px;
+            --sb-float-surface: linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--bg-elevated), white 7%),
+                color-mix(in srgb, var(--bg-elevated), black 7%)
+            );
+            --sb-float-border: color-mix(in srgb, var(--bg-elevated), black 14%);
+            --sb-float-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                0 1px 2px -1px rgba(0, 0, 0, 0.12),
+                0 6px 22px -8px rgba(0, 0, 0, 0.18);
         }
 
         .dark {
@@ -103,6 +117,13 @@
             --sb-active-top: color-mix(in srgb, color-mix(in srgb, var(--accent-color), white 22%) 22%, transparent);
             --sb-active-bottom: color-mix(in srgb, color-mix(in srgb, var(--accent-color), black 22%) 22%, transparent);
             --sb-depth: 8px 0 36px -24px rgba(0, 0, 0, 0.65);
+
+            /* Floating shell — mirrors .dark .ov-nav__bar */
+            --sb-float-border: rgba(0, 0, 0, 0.5);
+            --sb-float-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.06),
+                0 1px 2px rgba(0, 0, 0, 0.4),
+                0 8px 28px -8px rgba(0, 0, 0, 0.55);
 
             /* dark mode keeps chat bg + sidebar pinned to the same rosewood — no shift */
             --bg-color: #c96478;
@@ -285,7 +306,8 @@
         @media (min-width: 1024px) {
             aside {
                 position: static;
-                width: 240px;
+                width: var(--sidebar-width);
+                margin: var(--sb-float-gap) 0 var(--sb-float-gap) var(--sb-float-gap);
                 transform: none !important;
             }
 
@@ -339,10 +361,10 @@
         /* Recessed surface: crisp inner edges + a soft depth shadow to the
            right so the sidebar reads as a distinct plane under the chat. */
         #sidebar {
-            box-shadow:
-                inset 0 1px 0 var(--sb-edge-highlight),
-                inset -1px 0 0 var(--sb-edge),
-                var(--sb-depth);
+            background: var(--sb-float-surface);
+            border: 1px solid var(--sb-float-border);
+            border-radius: var(--sb-radius);
+            box-shadow: var(--sb-float-shadow);
         }
 
         @media (prefers-reduced-motion: no-preference) {
@@ -3421,7 +3443,7 @@
     </div>
 
     <aside id="sidebar" class="-translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 flex flex-col"
-        style="width: var(--sidebar-width); background: var(--sidebar-surface);">
+        style="width: var(--sidebar-width);">
 
         <!--
             Single content div — fixed width, never shrinks.
