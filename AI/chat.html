@@ -283,7 +283,12 @@
             content: "";
             position: absolute;
             inset: 0;
-            background-color: var(--sidebar-tint);
+            /* Floating panel matches the neutral floating nav (.ov-nav__bar):
+               the sidebar keeps its neutral --sb-float-surface and does NOT
+               overlay the accent --sidebar-tint (which would read as a pink
+               wash on the panel). The canvas keeps its subtle --accent-tint,
+               same as the nav's relationship to the page. */
+            background-color: transparent;
             pointer-events: none;
             z-index: -1;
         }
