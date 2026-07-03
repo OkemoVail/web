@@ -570,7 +570,10 @@ select:focus {
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
     0 1px 2px -1px rgba(0, 0, 0, 0.12),
     0 6px 22px -8px rgba(0, 0, 0, 0.18);
-  transition: box-shadow 0.4s ease, background 0.4s ease;
+  /* background is NOT transitioned: on a light/dark toggle the whole page flips
+     instantly, so a 0.4s background fade here made the bar visibly lag behind.
+     box-shadow still eases for the scroll-morph. */
+  transition: box-shadow 0.4s ease;
 }
 
 .ov-nav.scrolled .ov-nav__bar {

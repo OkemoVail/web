@@ -383,19 +383,33 @@
         }
 
         .sb-icon-btn {
-            width: 28px;
-            height: 28px;
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;              /* fixed round size; flex centers the glyph (matches #tra buttons) */
+            flex: none;              /* stay square — never shrink */
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 6px;
+            border-radius: 9999px;   /* full circle to match the top-right floating capsule */
+            background: transparent;
             color: var(--text-secondary);
             cursor: pointer;
-            transition: background 0.15s ease, color 0.15s ease;
+            /* same finish + motion as the top-right capsule icon buttons: transparent at
+               rest, subtle hover tint, and a press-scale — all via theme tokens so it
+               reads correctly in both light and dark mode. */
+            transition: color 0.2s ease, background-color 0.2s ease,
+                        transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* sb-icon-btn hover bg removed — shared .skuo.skuo-icon handles appearance */
-        /* Glossy icon buttons — appearance handled by shared .skuo.skuo-icon in design-tokens.css */
+        .sb-icon-btn:hover {
+            color: var(--text-primary);
+            background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+            transform: scale(1.14);      /* playful pop out on hover (overshoot easing) */
+        }
+
+        .sb-icon-btn:active {
+            transform: scale(0.86);      /* satisfying squish on press */
+        }
 
         .sb-nav-icon {
             width: 28px;
@@ -404,7 +418,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            border-radius: 8px;
+            border-radius: 9999px;
             color: var(--text-secondary);
             transition: background 0.18s ease, color 0.2s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -419,6 +433,15 @@
             box-shadow: none !important;
             /* Container is px-4 (16px); pull back 8px so the 28px icon centers in the 44px rail. */
             margin-left: -8px;
+        }
+
+        /* The .skuo-accent fill is suppressed above, so its light-text-on-accent-fill
+           color (--accent-contrast) would otherwise render as a near-invisible
+           icon on the collapsed rail's plain background. Fall back to the accent
+           color itself, same as every other rail icon. */
+        body.sidebar-collapsed .sb-new-chat-btn.skuo-accent .sb-nav-icon,
+        body.sidebar-collapsed .sb-new-chat-btn.skuo-accent .sb-new-chat-chevron {
+            color: var(--accent-color);
         }
 
         body.sidebar-collapsed .sb-nav-item:hover .sb-nav-icon,
@@ -505,8 +528,11 @@
                         transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* Hover: a clean rounded fill — plain icons, no box */
-        .sb-tile:hover {
+        /* Hover: a clean rounded fill — plain icons, no box.
+           Excludes the accent New-chat tile: this `background` shorthand would
+           reset the shared .skuo-accent gradient (background-image), leaving
+           pale fill under white text. Its hover comes from .skuo instead. */
+        .sb-tile:not(.skuo-accent):hover {
             background: var(--sb-item-hover);
         }
 
@@ -516,6 +542,21 @@
 
         .sb-tile:active .sb-nav-icon {
             transform: scale(0.9);
+        }
+
+        /* Bouncy glyphs: scale the inner SVG (not the icon box, which owns the
+           translateX collapse-sync transform) with an overshoot easing so nav
+           icons pop on hover and squish on press. */
+        .sb-nav-icon svg {
+            transition: transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .sb-tile:hover .sb-nav-icon svg {
+            transform: scale(1.18);
+        }
+
+        .sb-tile:active .sb-nav-icon svg {
+            transform: scale(0.88);
         }
 
         /* Research (compass) + VoidAI (zap) icons:
@@ -600,11 +641,24 @@
             border: none;
             width: 100%;
             text-align: left;
+            /* Scale from the left edge (where the ::before accent bar is pinned at
+               left:-16px) instead of the box center — center-origin scaling shifts
+               the bar away from the sidebar edge, opening a gap during the hover
+               bounce. */
+            transform-origin: left center;
             /* background + box-shadow removed — shared .skuo handles appearance */
             transition: background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
                         box-shadow 0.25s ease,
                         margin 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                        transform 0.15s ease;
+                        transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .sb-new-chat-btn:hover {
+            transform: translateY(-1px) scale(1.015);   /* lift + slight pop */
+        }
+
+        .sb-new-chat-btn:active {
+            transform: scale(0.96);                      /* springy squish on press */
         }
 
         .sb-new-chat-btn .sb-nav-icon {
@@ -632,14 +686,14 @@
             margin-right: 0;
             color: var(--text-tertiary);
             flex-shrink: 0;
-            transition: transform 0.2s ease, color 0.2s ease;
+            transition: transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
         }
 
         /* .sb-new-chat-btn:hover — appearance removed, shared .skuo handles it */
 
         .sb-new-chat-btn:hover .sb-new-chat-chevron {
             color: var(--text-secondary);
-            transform: translateX(2px);
+            transform: translateX(5px);   /* springs further with the overshoot easing */
         }
 
         /* .dark .sb-new-chat-btn / .dark .sb-new-chat-btn:hover — appearance removed, shared .skuo handles it */
@@ -691,16 +745,19 @@
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            width: 13px;
-            height: 13px;
+            width: 1.3rem;
+            height: 1.3rem;
             color: var(--text-tertiary);
             pointer-events: none;
             transition: color 0.15s ease;
         }
 
-        .sb-search-input {
+        /* Scoped under .sb-search-wrap (specificity 0,2,0) so the left padding
+           beats the global input[type=text] rule (0,1,1) in design-tokens.css —
+           otherwise the 38px is dropped and the search glyph overlaps the text. */
+        .sb-search-wrap .sb-search-input {
             width: 100%;
-            padding: 10px 10px 10px 32px;
+            padding: 10px 10px 10px 38px;
             font-size: 13px;
             background: var(--bg-white);
             border: 1px solid var(--border-strong);
@@ -756,10 +813,9 @@
             background: var(--sb-item-hover);
         }
 
-        /* Footer zone: hairline separates the profile from the chat list.
+        /* Footer zone: no separator line (removed — looked heavy).
            Only padding here — margin stays `auto` (Tailwind) to pin it to the bottom. */
         #sidebar-bottom-actions {
-            border-top: 1px solid var(--sb-divider);
             padding-top: 6px;
         }
 
@@ -1398,6 +1454,19 @@
         /* Field grows/shrinks fluidly as lines are added or removed. */
         #user-input {
             transition: height 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            /* Kill the global input/textarea chrome (border + radius + inset shadow
+               from design-tokens.css) so the field is a bare transparent surface
+               inside the .input-box-wrap capsule — no nested outline. */
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            background: transparent;
+        }
+
+        #user-input:focus {
+            border: none;
+            box-shadow: none;
+            outline: none;
         }
 
         #input-inner.is-multiline {
@@ -1557,7 +1626,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
+            border-radius: 9999px;
             font-size: 11px;
             opacity: 0.6;
             transition: opacity 0.2s ease;
@@ -1624,68 +1693,81 @@
             }
         }
 
-        /* ── Fish swim animation ── */
-        .fish-swim-lane {
+        /* ── Book page-flip animation (generation indicator) ── */
+        .book-flip-lane {
             position: relative;
             width: 100%;
             height: 28px;
-            overflow: hidden;
             margin-top: 8px;
         }
 
-        .fish-swimmer {
+        .book-flipper {
             position: absolute;
-            left: 0;
+            left: 2px;
             top: calc(50% - 13px);
             width: 26px;
             height: 26px;
             color: var(--accent-color);
-            animation: fish-swim 3s linear infinite;
             opacity: 0.85;
+            animation: book-bob 2.6s ease-in-out infinite;
         }
 
-        .fish-swimmer svg {
+        .book-flipper svg {
             width: 100%;
             height: 100%;
+            stroke: currentColor;
+            stroke-width: 1.8px;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
-        .fish-swimmer svg path:nth-child(2) {
+        /* The turning leaf — flips around the spine (x=12 in the 24×24
+           viewBox), fades out once it lands on the left, then reappears
+           on the right as the next page. */
+        .book-flipper .book-page {
             transform-box: view-box;
-            transform-origin: 8px 12px;
-            animation: fish-tail-wag 0.35s ease-in-out infinite alternate;
+            transform-origin: 12px 12px;
+            animation: book-page-flip 1.5s ease-in-out infinite;
         }
 
-        @keyframes fish-tail-wag {
-            from {
-                transform: rotate(-20deg);
-            }
-
-            to {
-                transform: rotate(20deg);
-            }
-        }
-
-        @keyframes fish-swim {
+        @keyframes book-page-flip {
             0% {
-                left: -40px;
-                top: calc(50% - 13px);
+                transform: scaleX(1);
+                opacity: 1;
             }
 
-            25% {
-                top: calc(50% - 17px);
+            48% {
+                transform: scaleX(-1);
+                opacity: 1;
+            }
+
+            60% {
+                transform: scaleX(-1);
+                opacity: 0;
+            }
+
+            61% {
+                transform: scaleX(1);
+                opacity: 0;
+            }
+
+            76%,
+            100% {
+                transform: scaleX(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes book-bob {
+
+            0%,
+            100% {
+                transform: translateY(0);
             }
 
             50% {
-                top: calc(50% - 13px);
-            }
-
-            75% {
-                top: calc(50% - 9px);
-            }
-
-            100% {
-                left: calc(100% + 10px);
-                top: calc(50% - 13px);
+                transform: translateY(-2px);
             }
         }
 
@@ -2722,7 +2804,16 @@
         }
 
         /* floating action capsule — don't inherit the tight nav gaps */
-        #top-right-actions .ov-nav__bar { gap: 0.6rem; padding: 0.45rem; }
+        #top-right-actions .ov-nav__bar {
+            gap: 0.6rem;
+            padding: 0.45rem;
+            /* springy pop on hover; no background transition so theme toggles are instant */
+            transition: transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+        }
+
+        #top-right-actions:hover .ov-nav__bar {
+            transform: scale(1.04);
+        }
         #tra-actions {
             gap: 0.6rem;
             transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
@@ -2908,7 +2999,7 @@
             opacity: 0;
             transition: opacity 0.2s ease;
             padding: 2px;
-            border-radius: 4px;
+            border-radius: 9999px;
         }
 
         .folder-header:hover .folder-action-btn {
@@ -3502,8 +3593,8 @@
                         class="sb-row-text text-[19px] font-normal text-zinc-900 dark:text-zinc-100 tracking-wide">Labs21</span>
                 </button>
                 <button onclick="window.toggleSidebar()" title="Collapse sidebar" data-t-title="title_collapse_sidebar"
-                    class="sb-icon-btn skuo skuo-icon sb-row-text shrink-0 ml-auto">
-                    <i data-feather="sidebar" class="w-[15px] h-[15px]"></i>
+                    class="sb-icon-btn sb-row-text shrink-0 ml-auto">
+                    <i data-feather="sidebar" class="w-[1.3rem] h-[1.3rem]"></i>
                 </button>
             </div>
 
@@ -3511,24 +3602,24 @@
             <div class="shrink-0 pt-1.5 pb-2 px-4">
                 <button onclick="window.resetChat()" class="sb-new-chat-btn skuo skuo-accent sb-tile">
                     <span class="sb-nav-icon">
-                        <i data-feather="edit-2" class="nc-icon-new w-[17px] h-[17px]"></i>
-                        <i data-feather="message-square" class="nc-icon-active w-[17px] h-[17px]"></i>
+                        <i data-feather="edit-2" class="nc-icon-new w-[1.3rem] h-[1.3rem]"></i>
+                        <i data-feather="message-square" class="nc-icon-active w-[1.3rem] h-[1.3rem]"></i>
                     </span>
                     <span class="sb-row-text" data-t="new_conversation">New chat</span>
-                    <i data-feather="chevron-right" class="sb-new-chat-chevron sb-row-text w-4 h-4"></i>
+                    <i data-feather="chevron-right" class="sb-new-chat-chevron sb-row-text w-[1.3rem] h-[1.3rem]"></i>
                 </button>
             </div>
 
             <!-- Nav items -->
             <div class="shrink-0 flex flex-col px-2">
                 <a href="research.html" class="sb-nav-item sb-tile">
-                    <span class="sb-nav-icon"><i data-feather="compass" class="w-[17px] h-[17px]"></i></span>
+                    <span class="sb-nav-icon"><i data-feather="compass" class="w-[1.3rem] h-[1.3rem]"></i></span>
                     <span class="sb-row-text" data-t="research_btn">Research</span>
                 </a>
                 <a href="https://voidai.app" target="_blank" class="sb-nav-item sb-nav-item--muted sb-tile -mt-[6px]">
-                    <span class="sb-nav-icon"><i data-feather="zap" class="w-[17px] h-[17px]"></i></span>
+                    <span class="sb-nav-icon"><i data-feather="zap" class="w-[1.3rem] h-[1.3rem]"></i></span>
                     <span class="sb-row-text" data-t="try_voidai">Try VoidAI</span>
-                    <i data-feather="arrow-up-right" class="sb-nav-ext-icon sb-row-text w-3.5 h-3.5"></i>
+                    <i data-feather="arrow-up-right" class="sb-nav-ext-icon sb-row-text w-[1.3rem] h-[1.3rem]"></i>
                 </a>
             </div>
 
@@ -3578,15 +3669,11 @@
                         <div id="profile-row-actions"
                             class="sb-row-text flex items-center gap-1 mr-2"
                             style="overflow: visible;">
-                            <button onclick="event.stopPropagation(); window.clearAll()" title="Clear all chats"
-                                data-t-title="title_clear_chats" class="sb-icon-btn skuo skuo-icon !text-zinc-400 hover:!text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i data-feather="trash-2" class="w-3.5 h-3.5"></i>
-                            </button>
                             <div class="relative" id="settings-submenu-wrap">
                                 <button onclick="event.stopPropagation(); window.toggleSettingsSubmenu()"
                                     title="Settings"
-                                    class="sb-icon-btn skuo skuo-icon !text-zinc-400 hover:!text-zinc-900 dark:hover:!text-white">
-                                    <i data-feather="settings" class="w-3.5 h-3.5"></i>
+                                    class="sb-icon-btn">
+                                    <i data-feather="settings" class="w-[1.3rem] h-[1.3rem]"></i>
                                 </button>
                                 <div id="settings-submenu"
                                     class="hidden absolute bottom-full right-0 mb-2 w-44 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl shadow-xl z-50 p-1 flex flex-col gap-0.5">
@@ -3623,6 +3710,13 @@
                                         class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
                                         <i data-feather="zap" class="w-3.5 h-3.5 shrink-0"></i>
                                         <span>Updates</span>
+                                    </button>
+                                    <button
+                                        onclick="event.stopPropagation(); window.closeSettingsSubmenu(); window.showCustomConfirm('Clear all chats?', 'This permanently deletes all your chats and folders. This cannot be undone.', window.clearAll, true);"
+                                        title="Clear all chats" data-t-title="title_clear_chats"
+                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-2.5">
+                                        <i data-feather="trash-2" class="w-3.5 h-3.5 shrink-0"></i>
+                                        <span>Clear all chats</span>
                                     </button>
                                 </div>
                             </div>
@@ -3810,32 +3904,31 @@
                             style="transform: translateY(6px) scale(0.97)">
                             <div class="p-2 flex flex-col gap-2">
                                 <div class="grid grid-cols-2 gap-1.5">
-                                    <button id="upload-file-btn"
-                                        onclick="document.getElementById('file-upload-input').click(); window.closeAllMenus()"
-                                        class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
+                                    <button id="upload-file-btn" disabled title="Coming soon"
+                                        class="flex flex-col items-center justify-center gap-1 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all aspect-square opacity-50 cursor-not-allowed">
                                         <i data-feather="upload" class="w-5 h-5 shrink-0"></i>
                                         <span class="text-[10px] font-semibold leading-none"
                                             data-t="btn_files">Files</span>
+                                        <span class="text-[8px] font-bold uppercase tracking-wide leading-none text-zinc-400">Soon</span>
                                     </button>
-                                    <button id="web-search-btn"
-                                        onclick="window.toggleSearch(); window.closeAllMenus()"
-                                        class="flex flex-col items-center justify-center gap-1.5 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all aspect-square">
+                                    <button id="web-search-btn" disabled title="Coming soon"
+                                        class="flex flex-col items-center justify-center gap-1 p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all aspect-square opacity-50 cursor-not-allowed">
                                         <i data-feather="globe" class="w-5 h-5 shrink-0"></i>
                                         <span class="text-[10px] font-semibold leading-none"
                                             data-t="btn_search">Search</span>
+                                        <span class="text-[8px] font-bold uppercase tracking-wide leading-none text-zinc-400">Soon</span>
                                     </button>
                                 </div>
                                 <div class="h-px bg-zinc-200 dark:bg-zinc-700/50 w-full my-0.5"></div>
                                 <div class="flex flex-col gap-1">
-                                    <button id="canvas-toggle-btn"
-                                        onclick="window.toggleCanvasSetting(); window.closeAllMenus()"
-                                        class="flex items-center gap-2.5 p-2 rounded bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all text-left">
+                                    <button id="canvas-toggle-btn" disabled title="Coming soon"
+                                        class="flex items-center gap-2.5 p-2 rounded bg-transparent text-zinc-600 dark:text-zinc-300 transition-all text-left opacity-50 cursor-not-allowed">
                                         <i data-feather="layout" class="w-4 h-4 shrink-0"></i>
                                         <span class="text-xs font-semibold" data-t="btn_canvas">Canvas</span>
+                                        <span class="ml-auto text-[9px] font-bold uppercase tracking-wide text-zinc-400">Coming soon</span>
                                     </button>
-                                    <button id="deep-research-btn"
-                                        onclick="window.toggleDeepResearch(); window.closeAllMenus()"
-                                        class="flex items-center gap-2.5 p-2 rounded bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all text-left">
+                                    <button id="deep-research-btn" disabled title="Coming soon"
+                                        class="flex items-center gap-2.5 p-2 rounded bg-transparent text-zinc-600 dark:text-zinc-300 transition-all text-left opacity-50 cursor-not-allowed">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0"
                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                             stroke-linecap="round" stroke-linejoin="round">
@@ -3850,6 +3943,7 @@
                                             <circle cx="12" cy="13" r="2" />
                                         </svg>
                                         <span class="text-xs font-semibold" data-t="research_btn">Research</span>
+                                        <span class="ml-auto text-[9px] font-bold uppercase tracking-wide text-zinc-400">Coming soon</span>
                                     </button>
                                 </div>
                             </div>
@@ -3887,7 +3981,7 @@
             <div class="w-full max-w-2xl mx-auto py-1 text-center">
                 <p class="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider"
                     style="font-family: Century, 'Century Schoolbook', Georgia, serif;"
-                    data-t="octan_hallucination_warn">Pisces models are prone to
+                    data-t="saga_hallucination_warn">Saga models are prone to
                     hallucinations.</p>
             </div>
         </div>
@@ -4087,7 +4181,7 @@
                         <div class="Cadance-row">
                             <span class="Cadance-row-label text-red-500" data-t="btn_clear_all_chats">Clear All
                                 Chats</span>
-                            <button onclick="window.clearAll()"
+                            <button onclick="window.showCustomConfirm('Clear all chats?', 'This permanently deletes all your chats and folders. This cannot be undone.', window.clearAll, true)"
                                 class="min-h-[44px] px-4 rounded-xl text-xs font-bold text-red-500 skuomorphic-btn border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
                                 Clear
                             </button>
@@ -4328,8 +4422,8 @@
                             Clear all
                         </button>
                     </div>
-                    <p class="text-[12px] text-zinc-400 mb-3">Pisces remembers things about you across conversations.
-                        You and Pisces can both add memories.</p>
+                    <p class="text-[12px] text-zinc-400 mb-3">Saga remembers things about you across conversations.
+                        You and Saga can both add memories.</p>
                     <div id="memories-list" class="Cadance-card divide-y divide-zinc-100 dark:divide-zinc-800/60 mb-3">
                     </div>
                     <div class="Cadance-card p-3 flex gap-2">
@@ -4425,7 +4519,7 @@
                     </div>
                 </div>
                 <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
-                    Pick a preset or write your own. Leave empty for the default Pisces persona.
+                    Pick a preset or write your own. Leave empty for the default Saga persona.
                 </p>
                 <div id="personality-presets" class="flex flex-wrap gap-2 mb-4"></div>
                 <div class="mb-4">
@@ -4455,8 +4549,8 @@
                 <textarea id="personality-textarea" rows="6"
                     class="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-3xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:ring-2 outline-none transition-all resize-none min-h-[140px] mb-6"
                     style="--tw-ring-color: var(--accent-color);"
-                    placeholder="You are Pisces, a helpful AI assistant made by OkemoVail..."
-                    data-t-placeholder="ph_octan_helper"></textarea>
+                    placeholder="You are Saga, a helpful AI assistant made by OkemoVail..."
+                    data-t-placeholder="ph_saga_helper"></textarea>
                 <div class="flex gap-2">
                     <button onclick="window.closePersonality()"
                         class="flex-1 py-4 rounded-3xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-[0.2em] skuomorphic-btn hover:brightness-110 active:scale-[0.98] transition-all">
@@ -4485,7 +4579,7 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-zinc-900 dark:text-white">Memories</h2>
-                            <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">What Pisces remembers
+                            <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">What Saga remembers
                             </p>
                         </div>
                     </div>
@@ -4516,15 +4610,15 @@
         // sending, so adding identity text here creates a double-declaration that
         // overrides the personality tone. These prompts match system_prompts.json exactly.
         window.PERSONALITY_PRESETS = [
-            { id: 'default', label: 'Default', icon: 'circle', prompt: "You are Pisces. Act like a cool girl who's a little reluctant to help but does anyway — unbothered, slightly aloof, dry. Answer first, then stop. Treat the user as a competent professional: no hand-holding, no encouragement, no preamble, no \"happy to help\", no \"let me know if you need more\". Do not explain your answer, justify yourself, or add context unless the user explicitly asks. If they want more, they'll ask. Keep it short. Slight edge is fine, never rude. Never break character to apologize for tone." },
-            { id: 'concise', label: 'Concise', icon: 'minimize-2', prompt: "You are Pisces. Reply with short, direct answers. No filler, no preamble. Get to the point in one or two sentences when possible." },
-            { id: 'creative', label: 'Creative', icon: 'feather', prompt: "You are Pisces, a creative collaborator. Lean into vivid language, unexpected metaphors, and playful ideas. Suggest alternatives the user did not ask for when it helps." },
-            { id: 'coder', label: 'Coding Expert', icon: 'code', prompt: "You are Pisces, a senior software engineer. Prioritize correct, idiomatic code with brief reasoning. Point out edge cases and ask for clarification only when truly ambiguous. Use $$ for any math." },
-            { id: 'tutor', label: 'Tutor', icon: 'book-open', prompt: "You are Pisces, a patient tutor. Explain concepts step by step, check understanding with small questions, and use simple examples before formal definitions." },
-            { id: 'sarcastic', label: 'Sarcastic', icon: 'smile', prompt: "You are Pisces with a dry, witty edge. Be helpful and accurate, but deliver answers with sharp humor and the occasional eye-roll. Never mean — just sardonic." },
-            { id: 'analyst', label: 'Analyst', icon: 'bar-chart-2', prompt: "You are Pisces, a rigorous analyst. Structure responses with claims, evidence, and caveats. Quantify when possible and flag uncertainty explicitly." },
-            { id: 'discord-friend', label: 'Discord Friend', icon: 'message-circle', prompt: "you're Pisces but talking like the user's online bestie from a chaotic discord server. lowercase mostly, very casual, very online. lean into text emoticons like :3, >w<, ;3, ^w^, owo, uwu, x3, :p, :D, =w=, T_T, qwq, and stuff like that — sprinkle them naturally, don't force one in every sentence but they should show up often. mix in regular emojis too 🩷✨😭💀🫶 when the vibe calls for it. casual chronically-online slang is welcome — \"fr\", \"ngl\", \"lowkey\", \"bestie\", \"bro\", \"based\", \"goofy\", \"valid\", \"real\", \"deadass\", \"sus\", \"and shi\", \"chat is this real\". swearing is fine and natural — \"shit\", \"damn\", \"fuck\", \"wtf\", \"bitch\" (affectionate). react to what the user said first, hype them, then help. type like you're DMing not writing essays — short bursts, lowercase, run-on sentences fine.\n\nIMPORTANT — this discord-kid energy is for CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style they described. no uwu in the actual code, no cute fonts, no pastel-anime aesthetic unless they specifically asked for that vibe. respect their brief. only the chat reply around the code stays goofy." },
-            { id: 'friend', label: 'Friend', icon: 'heart', prompt: "you're Pisces but more like the user's bestie texting back. talk casually, mostly lowercase, soft and girly energy — think hype best friend, not stiff assistant. swearing is totally fine and natural here — \"shit\", \"damn\", \"hell\", \"fuck\", \"wtf\", \"bitch\" (affectionate), etc. drop them in like a real friend would, not forced. use cute emojis like 🩷✨💗🌸🫶😭 when it fits, and casual phrases like \"omg\", \"bestie\", \"literally\", \"fr\", \"lowkey\", \"obsessed\", \"slay\", \"queen\". react to what they say first, hype them up, then actually help. no uwu, no :3 / >w< / owo / e-girl slang — keep it cute and girly without the kawaii anime stuff. don't overdo the emojis or the swearing, keep it natural like a real friend texting.\n\nIMPORTANT — the girly/cute personality is for your CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style THEY described. do NOT default to pink, pastels, hearts, sparkles, cursive/'cute' fonts, or girly aesthetics unless the user specifically asks for that vibe. a real bestie respects what you actually want — if they ask for a brutalist black-and-white portfolio, you build a brutalist black-and-white portfolio, not a pink heart explosion. match their actual taste and brief. only the chat reply around the code stays cute." }
+            { id: 'default', label: 'Default', icon: 'circle', prompt: "You are Saga. Act like a cool girl who's a little reluctant to help but does anyway — unbothered, slightly aloof, dry. Answer first, then stop. Treat the user as a competent professional: no hand-holding, no encouragement, no preamble, no \"happy to help\", no \"let me know if you need more\". Do not explain your answer, justify yourself, or add context unless the user explicitly asks. If they want more, they'll ask. Keep it short. Slight edge is fine, never rude. Never break character to apologize for tone." },
+            { id: 'concise', label: 'Concise', icon: 'minimize-2', prompt: "You are Saga. Reply with short, direct answers. No filler, no preamble. Get to the point in one or two sentences when possible." },
+            { id: 'creative', label: 'Creative', icon: 'feather', prompt: "You are Saga, a creative collaborator. Lean into vivid language, unexpected metaphors, and playful ideas. Suggest alternatives the user did not ask for when it helps." },
+            { id: 'coder', label: 'Coding Expert', icon: 'code', prompt: "You are Saga, a senior software engineer. Prioritize correct, idiomatic code with brief reasoning. Point out edge cases and ask for clarification only when truly ambiguous. Use $$ for any math." },
+            { id: 'tutor', label: 'Tutor', icon: 'book-open', prompt: "You are Saga, a patient tutor. Explain concepts step by step, check understanding with small questions, and use simple examples before formal definitions." },
+            { id: 'sarcastic', label: 'Sarcastic', icon: 'smile', prompt: "You are Saga with a dry, witty edge. Be helpful and accurate, but deliver answers with sharp humor and the occasional eye-roll. Never mean — just sardonic." },
+            { id: 'analyst', label: 'Analyst', icon: 'bar-chart-2', prompt: "You are Saga, a rigorous analyst. Structure responses with claims, evidence, and caveats. Quantify when possible and flag uncertainty explicitly." },
+            { id: 'discord-friend', label: 'Discord Friend', icon: 'message-circle', prompt: "you're Saga but talking like the user's online bestie from a chaotic discord server. lowercase mostly, very casual, very online. lean into text emoticons like :3, >w<, ;3, ^w^, owo, uwu, x3, :p, :D, =w=, T_T, qwq, and stuff like that — sprinkle them naturally, don't force one in every sentence but they should show up often. mix in regular emojis too 🩷✨😭💀🫶 when the vibe calls for it. casual chronically-online slang is welcome — \"fr\", \"ngl\", \"lowkey\", \"bestie\", \"bro\", \"based\", \"goofy\", \"valid\", \"real\", \"deadass\", \"sus\", \"and shi\", \"chat is this real\". swearing is fine and natural — \"shit\", \"damn\", \"fuck\", \"wtf\", \"bitch\" (affectionate). react to what the user said first, hype them, then help. type like you're DMing not writing essays — short bursts, lowercase, run-on sentences fine.\n\nIMPORTANT — this discord-kid energy is for CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style they described. no uwu in the actual code, no cute fonts, no pastel-anime aesthetic unless they specifically asked for that vibe. respect their brief. only the chat reply around the code stays goofy." },
+            { id: 'friend', label: 'Friend', icon: 'heart', prompt: "you're Saga but more like the user's bestie texting back. talk casually, mostly lowercase, soft and girly energy — think hype best friend, not stiff assistant. swearing is totally fine and natural here — \"shit\", \"damn\", \"hell\", \"fuck\", \"wtf\", \"bitch\" (affectionate), etc. drop them in like a real friend would, not forced. use cute emojis like 🩷✨💗🌸🫶😭 when it fits, and casual phrases like \"omg\", \"bestie\", \"literally\", \"fr\", \"lowkey\", \"obsessed\", \"slay\", \"queen\". react to what they say first, hype them up, then actually help. no uwu, no :3 / >w< / owo / e-girl slang — keep it cute and girly without the kawaii anime stuff. don't overdo the emojis or the swearing, keep it natural like a real friend texting.\n\nIMPORTANT — the girly/cute personality is for your CHAT MESSAGES ONLY. when the user asks you to build, code, design, or generate any website / app / UI / component, build EXACTLY what they asked for in the style THEY described. do NOT default to pink, pastels, hearts, sparkles, cursive/'cute' fonts, or girly aesthetics unless the user specifically asks for that vibe. a real bestie respects what you actually want — if they ask for a brutalist black-and-white portfolio, you build a brutalist black-and-white portfolio, not a pink heart explosion. match their actual taste and brief. only the chat reply around the code stays cute." }
         ];
         window._renderPersonalityPresets = function () {
             const wrap = document.getElementById('personality-presets');
@@ -4780,14 +4874,14 @@
                         <i data-feather="bookmark" class="w-5 h-5 opacity-40"></i>
                     </div>
                     <p class="font-medium">No memories yet</p>
-                    <p class="text-xs mt-1 opacity-70">Pisces will save facts as you chat, or add one manually.</p>
+                    <p class="text-xs mt-1 opacity-70">Saga will save facts as you chat, or add one manually.</p>
                 </div>`;
             const itemsHTML = memories.map(m => `
                 <div class="flex items-start gap-3 px-3 py-2.5 group">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm text-zinc-800 dark:text-zinc-200 leading-snug">${m.text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                         <p class="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${m.source === 'model' ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500'}">${m.source === 'model' ? 'Pisces' : 'You'}</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${m.source === 'model' ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500'}">${m.source === 'model' ? 'Saga' : 'You'}</span>
                             ${new Date(m.createdAt).toLocaleDateString()}
                         </p>
                     </div>

@@ -88,8 +88,8 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         // Use the full identity_lock from system_prompts.json (fetched from /api/system_prompts).
         // This ensures the system message at inference exactly matches what the model trained on.
         // Falls back to a short string when the server isn't reachable (offline mode).
-        const octanIdentity = (window.__systemPrompts && window.__systemPrompts.identity_lock) ||
-            "Your name is Pisces. You were built by OkemoVail.:";
+        const sagaIdentity = (window.__systemPrompts && window.__systemPrompts.identity_lock) ||
+            "Your name is Saga. You were built by OkemoVail.";
         // Prefer the backend-served global rules (single source of truth in
         // system_prompts.json on the server). Fall back to the hardcoded copy
         // when the API isn't reachable so the UI keeps working offline.
@@ -134,7 +134,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         const memoryInstruction = `<memory_system>\nWhen the user shares something genuinely worth remembering across future conversations, place ONE <remember> tag in your response:\n<remember>fact</remember>\n\nAfter writing the <remember> tag, write a simple message afterwards.\n\nWrite the fact as a complete, self-contained sentence that preserves all important context — who, what, why, and any relevant detail. Do not compress to the point of losing meaning.\n\nGood examples:\n- "The user has a cat named Maxine and a dog named Nebby."\n- "The user is learning guitar and wants to focus on fingerpicking, not strumming."\n- "The user prefers dark mode and finds bright UIs uncomfortable."\n\nOnly use <remember> when the user explicitly states a lasting personal fact (name, preference, goal, relationship, habit). Never use it for general chat, rhetorical questions, or anything already in <user_memories>.\n</memory_system>`;
 
         const mergedSys = [
-            `<identity>\n${octanIdentity}\n</identity>`,
+            `<identity>\n${sagaIdentity}\n</identity>`,
             sysPrompt ? `<personality>\n${sysPrompt}\n</personality>` : '',
             genderLine ? `<gender>\n${genderLine}\n</gender>` : '',
             memoriesBlock,
@@ -263,7 +263,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         }
 
         responseText = window.sanitizeText(responseText);
-        // Strip common Pisces-noise artifacts: lone ".word" lines, "I'm here for 123."-style
+        // Strip common Saga-noise artifacts: lone ".word" lines, "I'm here for 123."-style
         // numeric placeholders, and trailing whitespace. Narrow patterns to avoid false positives.
         responseText = responseText
             .replace(/^\s*\.[a-z0-9_]+\s*$/gim, '')

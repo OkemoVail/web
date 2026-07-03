@@ -1,11 +1,11 @@
 // ─── Changelog ─────────────────────────────────────────────────
 
-window.BUILD_NUMBER = 1012;
+window.BUILD_NUMBER = 1013;
 window.CHANGELOG = {
-    version: "1.7.0",
+    version: "1.8.0",
     build: window.BUILD_NUMBER,
     changes: [
-        { type: "sunset", text: "Stuart has been sunset. Pisces is now the only model." },
+        { type: "sunset", text: "Pisces has been renamed. Meet Saga — the new flagship model, a fresh start." },
         "Storage system upgraded to IndexedDB (async, non-blocking)",
         "Fun theme names: Sage Whisper, Midnight in Paris, Electric Lemonade, Vitamin C, Lush Green"
     ]

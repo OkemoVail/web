@@ -5,14 +5,14 @@
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 const UNIQUE_SVG_NORTH = `<svg class="w-full h-full stroke-[2px] stroke-current fill-none" viewBox="0 0 24 24"><path d="M12 2V22M2 12H22M19.07 4.93L4.93 19.07M19.07 19.07L4.93 4.93" /><circle cx="12" cy="12" r="3" class="fill-current stroke-none" /></svg>`;
-const UNIQUE_SVG_PISCES = `<svg class="w-full h-full stroke-[1.8px] stroke-current fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12 C8 6,20 6,20 12 C20 18,8 18,8 12 Z"/><path d="M8 12 L3 8 M8 12 L3 16"/></svg>`;
+const UNIQUE_SVG_SAGA = `<svg class="w-full h-full stroke-[1.8px] stroke-current fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6 C10 4.5,6.5 4.5,4.5 6 L4.5 18.5 C6.5 17,10 17,12 18.5 C14 17,17.5 17,19.5 18.5 L19.5 6 C17.5 4.5,14 4.5,12 6 Z"/><path d="M12 6 L12 18.5"/></svg>`;
 
 window.CF_BACKEND_URL = 'https://api.okemovail.com';
 window.DEFAULT_BACKEND_URL = window.CF_BACKEND_URL;
 window.CUSTOM_BACKEND_URL = localStorage.getItem('vail_custom_backend_url') || window.DEFAULT_BACKEND_URL;
 
 window.MODELS = {
-    PISCES: { id: "Pisces", name: "Pisces", icon: UNIQUE_SVG_PISCES }
+    SAGA: { id: "saga-0.7b", name: "Saga", icon: UNIQUE_SVG_SAGA }
 };
 
 window.translations = {
@@ -103,9 +103,9 @@ window.translations = {
         model_stuart: "Stuart",
         model_stuart_1_2b: "Stuart",
         model_local_pretraining: "Local Pretraining",
-        model_octan_1_2b: "Pisces",
+        model_saga_0_7b: "Saga",
         model_exp_moe: "Okemi model",
-        octan_hallucination_warn: "Pisces models are prone to hallucinations.",
+        saga_hallucination_warn: "Saga models are prone to hallucinations.",
         live_preview: "Live Preview",
         code_editor: "Code Editor",
         settings_user: "User",
@@ -138,7 +138,7 @@ window.translations = {
         danger_zone: "Danger Zone",
         deep_research_title: "Deep Research",
         deep_research_desc: "Synthesize information from across the web with unparalleled depth and reasoning.",
-        system_prompt_desc: "Pick a preset or write your own. Leave empty for the default Pisces persona.",
+        system_prompt_desc: "Pick a preset or write your own. Leave empty for the default Saga persona.",
         settings_gender: "Gender",
         gender_female: "Female",
         gender_male: "Male",
@@ -160,11 +160,11 @@ window.translations = {
         title_download_code: "Download Code",
         title_close_canvas: "Close Canvas",
         ph_your_name: "Your Name",
-        ph_default_prompt: "Default: You are Pisces, a helper. Use $$ for math notation...",
+        ph_default_prompt: "Default: You are Saga, a helper. Use $$ for math notation...",
         ph_url_default: "https://... (leave empty for default)",
         ph_api_key: "OKMO-...",
         ph_research: "What do you want to research...",
-        ph_octan_helper: "You are Pisces, a helpful AI assistant made by OkemoVail...",
+        ph_saga_helper: "You are Saga, a helpful AI assistant made by OkemoVail...",
 },
     zh: {
         welcome_header: "今天我能幫你什麼？",
@@ -253,9 +253,9 @@ window.translations = {
         model_stuart: "Stuart",
         model_stuart_1_2b: "Stuart 1.2B",
         model_local_pretraining: "本機預先訓練 · 1.2B",
-        model_octan_1_2b: "Pisces",
+        model_saga_0_7b: "Saga",
         model_exp_moe: "Okemi 模型",
-        octan_hallucination_warn: "Pisces 模型容易產生幻覺。",
+        saga_hallucination_warn: "Saga 模型容易產生幻覺。",
         live_preview: "即時預覽",
         code_editor: "程式碼編輯器",
         settings_user: "使用者",
@@ -288,7 +288,7 @@ window.translations = {
         danger_zone: "危險區域",
         deep_research_title: "深入研究",
         deep_research_desc: "以無與倫比的深度與推理能力，綜合網路上的資訊。",
-        system_prompt_desc: "選擇預設值或自行編寫。留空則使用預設的 Pisces 角色。",
+        system_prompt_desc: "選擇預設值或自行編寫。留空則使用預設的 Saga 角色。",
         settings_gender: "性別",
         gender_female: "女性",
         gender_male: "男性",
@@ -310,11 +310,11 @@ window.translations = {
         title_download_code: "下載程式碼",
         title_close_canvas: "關閉畫布",
         ph_your_name: "你的名字",
-        ph_default_prompt: "預設：你是 Pisces，一個助手。使用 $$ 標示數學符號...",
+        ph_default_prompt: "預設：你是 Saga，一個助手。使用 $$ 標示數學符號...",
         ph_url_default: "https://... (留空以使用預設值)",
         ph_api_key: "OKMO-...",
         ph_research: "你想研究什麼...",
-        ph_octan_helper: "你是 Pisces，由 OkemoVail 製作的實用 AI 助手...",
+        ph_saga_helper: "你是 Saga，由 OkemoVail 製作的實用 AI 助手...",
 }
 };
 
@@ -359,7 +359,7 @@ window.chatHistory = [];
 window.isGenerating = false;
 window.currentJob = null;
 window.abortController = null;
-window.currentModel = window.MODELS.PISCES;
+window.currentModel = window.MODELS.SAGA;
 window.allChats = {};
 window.currentChatId = crypto.randomUUID();
 

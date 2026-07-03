@@ -126,8 +126,8 @@ window.updateProfileUI = () => {
                 targetEl.style.height = size + 'px';
             }
             targetEl.style.padding = '5px';
-            targetEl.innerHTML = typeof UNIQUE_SVG_PISCES !== 'undefined'
-                ? UNIQUE_SVG_PISCES
+            targetEl.innerHTML = typeof UNIQUE_SVG_SAGA !== 'undefined'
+                ? UNIQUE_SVG_SAGA
                 : currentName[0].toUpperCase();
         }
     };

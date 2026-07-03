@@ -1,9 +1,9 @@
-const BUILD_NUMBER = 1011;
+const BUILD_NUMBER = 1013;
 const CHANGELOG = {
-    version: "1.7.0",
+    version: "1.8.0",
     build: BUILD_NUMBER,
     changes: [
-        { type: "sunset", text: "Stuart has been sunset. Pisces is now the only model." },
+        { type: "sunset", text: "Pisces has been renamed. Meet Saga — the new flagship model, a fresh start." },
         "Polaris has been updated to 1.6 (1B Parameters)",
         "OLM North Star has been updated to 1.1"
     ]

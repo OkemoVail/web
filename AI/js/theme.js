@@ -17,7 +17,8 @@ window.updateAccent = (color) => {
     const root = document.documentElement;
     root.style.setProperty('--accent-color', finalColor);
     root.style.setProperty('--accent-glow', window.hexToRgba(finalColor, 0.4));
-    root.style.setProperty('--accent-tint', window.hexToRgba(finalColor, isAuto ? 0.02 : 0.10));
+    // Canvas behind the sidebar/chat stays neutral — no accent wash (removed 2026-07-02).
+    root.style.setProperty('--accent-tint', 'transparent');
     root.style.setProperty('--sidebar-tint', window.hexToRgba(finalColor, isAuto ? 0.01 : 0.07));
     // Compute contrast color based on accent luminance so buttons are always readable
     const lum = (0.299 * accRgb[0] + 0.587 * accRgb[1] + 0.114 * accRgb[2]) / 255;

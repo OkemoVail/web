@@ -61,8 +61,8 @@ window.renderHistory = (query = "") => {
         foldersHtml += `
         <div class="section-header-row">
             <span class="section-header-text">Your Folders</span>
-            <button onclick="window.createFolder()" class="text-zinc-400 hover:text-[var(--accent-color)] transition-colors p-1" title="New Folder">
-                <i data-feather="folder-plus" class="w-3.5 h-3.5"></i>
+            <button onclick="window.createFolder()" class="sb-icon-btn" title="New Folder">
+                <i data-feather="folder-plus" class="w-[1.3rem] h-[1.3rem]"></i>
             </button>
         </div>`;
 
@@ -77,13 +77,13 @@ window.renderHistory = (query = "") => {
                      ondragleave="window.onFolderDragLeave(event)"
                      ondrop="window.onFolderDrop(event, '${folder.id}')">
                     <div class="flex items-center gap-2 overflow-hidden">
-                        <i data-feather="chevron-right" class="folder-icon w-3.5 h-3.5 flex-shrink-0"></i>
-                        <i data-feather="folder" class="w-3.5 h-3.5 flex-shrink-0 fill-current opacity-60"></i>
+                        <i data-feather="chevron-right" class="folder-icon w-[1.1rem] h-[1.1rem] flex-shrink-0"></i>
+                        <i data-feather="folder" class="w-[1.1rem] h-[1.1rem] flex-shrink-0 fill-current opacity-60"></i>
                         <span class="text-xs font-bold truncate">${folder.name}</span>
                     </div>
                     <div class="flex items-center gap-1">
                         <button onclick="event.stopPropagation(); window.showFolderMenu('${folder.id}', this, event)" class="folder-action-btn" title="More actions">
-                            <i data-feather="more-vertical" class="w-3.5 h-3.5"></i>
+                            <i data-feather="more-vertical" class="w-[1.1rem] h-[1.1rem]"></i>
                         </button>
                     </div>
                 </div>
@@ -145,12 +145,12 @@ window.renderHistory = (query = "") => {
     // --- 3. Update DOM ---
     if (window.els.foldersList) {
         window.els.foldersList.innerHTML = foldersHtml;
-        feather.replace({ 'stroke-width': 2, 'width': 14, 'height': 14 }, window.els.foldersList);
+        feather.replace({ 'stroke-width': 2, 'width': 18, 'height': 18 }, window.els.foldersList);
     }
 
     if (window.els.hist) {
         window.els.hist.innerHTML = recentsHtml || (query ? `<div class="p-8 text-center text-[10px] font-bold opacity-20 uppercase tracking-widest mt-10">No results found</div>` : `<div class="p-8 text-center text-[10px] font-bold opacity-20 uppercase tracking-widest mt-10">${dict.no_history}</div>`);
-        feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, window.els.hist);
+        feather.replace({ 'stroke-width': 2, 'width': 18, 'height': 18 }, window.els.hist);
     }
 };
 
@@ -164,7 +164,7 @@ window.renderChatItem = (c, dict) => {
         <button onclick="window.loadChat('${c.id}')" class="flex-1 text-left px-3 py-2.5 rounded-lg text-xs font-medium truncate ${c.id === window.currentChatId ? '' : 'text-zinc-500'}">${window.truncateTitle(c.title)}</button>
         <div class="flex items-center gap-1 pr-1">
             <button onclick="window.showChatMenu('${c.id}', this, event)" class="history-action-btn" title="More actions">
-                <i data-feather="more-vertical" class="w-3 h-3"></i>
+                <i data-feather="more-vertical" class="w-[1.1rem] h-[1.1rem]"></i>
             </button>
         </div>
     </div>`;

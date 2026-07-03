@@ -192,7 +192,7 @@ window.initChatUI = () => {
     window.applyTranslations();
     window.updateStorageUsage();
 
-    window.selectModel('PISCES');
+    window.selectModel('SAGA');
     window.render();
     window.updateUI();
     window.checkChangelog();

@@ -73,14 +73,13 @@ window.render = () => {
             aiRow.className = 'ai-row animate-fade-in';
             
             let contentHtml = "";
-            const _modelIcon = window.currentModel ? window.currentModel.icon : '';
             const _modelName = window.currentModel ? window.currentModel.name : '';
 
             // New unified thinking indicator — shimmer-gradient text reading
-            // "Pisces is thinking". Shown before any tokens arrive (replaces
+            // "Saga is thinking". Shown before any tokens arrive (replaces
             // the old "Thinking…" placeholder + duplicate generating header).
             if (responseText === null && isLast && window.isGenerating) {
-                contentHtml = `<div class="thinking-container"><span class="thinking-text-gradient">Pisces is thinking</span></div>`;
+                contentHtml = `<div class="thinking-container"><span class="thinking-text-gradient">Saga is thinking</span></div>`;
             } else if (responseText) {
                 const { thought, content } = window.parseThought(responseText);
                 if (thought) {
@@ -114,7 +113,7 @@ window.render = () => {
                             <span class="msg-timestamp ai-timestamp">${window.formatDate(timestamp)}</span>
                         </div>
                     </div>` : ''}
-                    ${(isLast && window.isGenerating) ? `<div class="fish-swim-lane"><div class="fish-swimmer">${_modelIcon}</div></div>` : ''}
+                    ${(isLast && window.isGenerating) ? `<div class="book-flip-lane"><div class="book-flipper"><svg viewBox="0 0 24 24"><path d="M12 6 C10 4.5,6.5 4.5,4.5 6 L4.5 18.5 C6.5 17,10 17,12 18.5 C14 17,17.5 17,19.5 18.5 L19.5 6 C17.5 4.5,14 4.5,12 6 Z"/><path d="M12 6 L12 18.5"/><path class="book-page" d="M12 6 C14 4.5,17.5 4.5,19.5 6 L19.5 18.5 C17.5 17,14 17,12 18.5 Z"/></svg></div></div>` : ''}
                 </div>
             `;
             window.els.chatMsgs.appendChild(aiRow);

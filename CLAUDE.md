@@ -53,7 +53,7 @@ Note: `AI/updatenotes.js` (not inside `AI/js/`) is loaded separately. It defines
 | `window.settings` | User preferences persisted to `localStorage` as `vail_settings_v4` (JSON) |
 | `window.els` | Cached DOM element references (populated in `main.js:initChatUI`) |
 | `window.isGenerating` | Boolean flag guarding send/stop logic |
-| `window.currentModel` | Active model object `{ id, name, icon }` — one of `window.MODELS.STUART` or `window.MODELS.OCTAN` |
+| `window.currentModel` | Active model object `{ id, name, icon }` — currently only `window.MODELS.SAGA` |
 | `window.StorageController` | IndexedDB abstraction for chat persistence |
 | `window.streamQueue` | Buffered token string consumed by the typewriter interval |
 | `window.typedResponseText` | Accumulated text rendered so far during streaming |
@@ -66,10 +66,9 @@ Note: `AI/updatenotes.js` (not inside `AI/js/`) is loaded separately. It defines
 ### Models
 
 Defined in `state.js` as `window.MODELS`:
-- `OCTAN` — id `"Octan-1.2B"`, default model
-- `STUART` — id `"Stuart-1.2B"`
+- `SAGA` — id `"saga-0.7b"`, name "Saga", the flagship and only model (renamed from Pisces/Octan 2026-07-03; Stuart was sunset earlier)
 
-Switch with `window.selectModel('OCTAN')` or `window.selectModel('STUART')`.
+Switch with `window.selectModel('SAGA')`. The id is sent as the `model` field to the okemollm backend, matching `train.py`'s `ChatRequest` default and the `Saga_0.7B` checkpoint prefix.
 
 ### localStorage keys
 
@@ -90,6 +89,10 @@ Switch with `window.selectModel('OCTAN')` or `window.selectModel('STUART')`.
 2. `sendMessage` pushes `[msg, null, null]` to `chatHistory`, calls `render()`, then streams from the OpenAI-compatible endpoint via SSE (`streaming.js`)
 3. Tokens arrive → `window.streamQueue` → typewriter drainer (`setInterval` at 50ms) appends chars using `charAccu += speed / 20` where `TYPE_SPEED_MAIN = 80` (4 chars/tick) or `TYPE_SPEED_THOUGHT = 200` (10 chars/tick) inside `<think>` blocks
 4. On completion → `render()` + `updateUI()` + `save()`
+
+### Generation indicator (book page-flip)
+
+While a response streams, `render.js` appends a `.book-flip-lane` under the last AI bubble: a stationary open-book SVG (same geometry as the Saga model icon, plus a third `.book-page` path — the right leaf) whose page flips over the spine via `scaleX(1 → -1)` around `transform-origin: 12px`, fades, and reappears; the whole book gently bobs. CSS lives in `chat.html` (`.book-flip-lane` / `.book-flipper` / `@keyframes book-page-flip`, `book-bob`). This replaced the old fish-swim animation 2026-07-03 (the decorative fish tank on `AI/index.html` is separate and still exists).
 
 ### Streaming & thought blocks
 
