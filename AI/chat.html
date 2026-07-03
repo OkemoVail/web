@@ -48,7 +48,6 @@
             --accent-color: #c96478;
             --accent-glow: rgba(201, 100, 120, 0.4);
             --accent-tint: rgba(0, 0, 0, 0);
-            --sidebar-tint: rgba(0, 0, 0, 0);
             --accent-contrast: #faf9f5;
 
             /* Sidebar — tokens */
@@ -284,10 +283,9 @@
             position: absolute;
             inset: 0;
             /* Floating panel matches the neutral floating nav (.ov-nav__bar):
-               the sidebar keeps its neutral --sb-float-surface and does NOT
-               overlay the accent --sidebar-tint (which would read as a pink
-               wash on the panel). The canvas keeps its subtle --accent-tint,
-               same as the nav's relationship to the page. */
+               the sidebar keeps its neutral --sb-float-surface, and the canvas
+               behind it stays neutral too — no accent wash anywhere
+               (--sidebar-tint was removed; --accent-tint is transparent). */
             background-color: transparent;
             pointer-events: none;
             z-index: -1;

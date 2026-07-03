@@ -9,17 +9,13 @@ window.updateAccent = (color) => {
         document.getElementById('custom-accent-picker').value = color;
     }
 
-    const bgBase = isDark ? [12, 13, 11] : [249, 249, 247];
     const accRgb = [parseInt(finalColor.slice(1, 3), 16), parseInt(finalColor.slice(3, 5), 16), parseInt(finalColor.slice(5, 7), 16)];
-    const alphaVal = isAuto ? 0.02 : 0.10;
-    const blended = accRgb.map((c, i) => Math.round(c * alphaVal + bgBase[i] * (1 - alphaVal)));
 
     const root = document.documentElement;
     root.style.setProperty('--accent-color', finalColor);
     root.style.setProperty('--accent-glow', window.hexToRgba(finalColor, 0.4));
     // Canvas behind the sidebar/chat stays neutral — no accent wash (removed 2026-07-02).
     root.style.setProperty('--accent-tint', 'transparent');
-    root.style.setProperty('--sidebar-tint', window.hexToRgba(finalColor, isAuto ? 0.01 : 0.07));
     // Compute contrast color based on accent luminance so buttons are always readable
     const lum = (0.299 * accRgb[0] + 0.587 * accRgb[1] + 0.114 * accRgb[2]) / 255;
     root.style.setProperty('--accent-contrast', lum > 0.55 ? '#1a1a1a' : '#f5f5f5');
