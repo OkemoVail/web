@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="../src/design-tokens.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script>
         (function () {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -110,96 +109,264 @@
 
         /* .discord rules removed — shared .discord in design-tokens.css */
 
-        /* --- Water Tank & Fish --- */
-        .water-tank {
-            background: color-mix(in srgb, var(--accent) 15%, transparent);
-            border: 4px solid color-mix(in srgb, var(--accent) 30%, transparent);
-            box-shadow: inset 0 0 40px color-mix(in srgb, var(--accent) 20%, transparent);
-            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        /* --- Flipping Storybook --- */
+        /* Open book with a leather cover, stacked page edges and a bookmark
+           ribbon. The right leaf turns over the spine in 3D via the Web
+           Animations API (script at the bottom): JS owns the whole cycle so
+           the word swap and the leaf reset land in the same paint — no
+           event-timing flashes. The leaf also rests slightly ABOVE the page
+           plane (translateZ) so coplanar z-fighting can never flicker. */
+        .book-scene {
             position: relative;
-            overflow: hidden;
+            width: 100%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            animation: water-blob 8s ease-in-out infinite alternate;
+            pointer-events: none;
         }
 
-        @keyframes water-blob {
-            0% {
-                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-            }
-
-            50% {
-                border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
-            }
-
-            100% {
-                border-radius: 40% 60% 40% 60% / 40% 50% 60% 50%;
-            }
+        .book-wrap {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            perspective: 1300px;
+            animation: book-bob 4.5s ease-in-out infinite;
         }
 
-        .fish-swim-lane {
+        .book {
+            position: relative;
+            width: min(82%, 440px);
+            aspect-ratio: 5 / 3.2;
+            transform: rotateX(7deg);
+            transform-style: preserve-3d;
+            --paper: color-mix(in srgb, var(--bg-elevated), white 55%);
+            --paper-2: color-mix(in srgb, var(--bg-elevated), black 5%);
+            --paper-edge: color-mix(in srgb, var(--accent) 22%, var(--bg-elevated));
+            --rule: color-mix(in srgb, var(--accent) 11%, transparent);
+            --rule-lines: repeating-linear-gradient(to bottom,
+                    transparent 0 1.15em,
+                    var(--rule) 1.15em calc(1.15em + 1px));
+        }
+
+        .dark .book {
+            --paper: color-mix(in srgb, var(--bg-elevated), white 8%);
+            --paper-2: color-mix(in srgb, var(--bg-elevated), white 3%);
+            --paper-edge: color-mix(in srgb, var(--accent) 20%, var(--bg-elevated));
+            --rule: color-mix(in srgb, var(--accent) 16%, transparent);
+        }
+
+        /* Leather cover peeking out around the page block, with a spine
+           crease down the middle and a darker board edge at the bottom */
+        .book-cover {
+            position: absolute;
+            inset: -3.5% -2.8% -8.5% -2.8%;
+            border-radius: 12px;
+            background:
+                linear-gradient(90deg, transparent 45%, rgba(0, 0, 0, 0.28) 50%, transparent 55%),
+                linear-gradient(180deg,
+                    color-mix(in srgb, var(--accent), black 10%),
+                    color-mix(in srgb, var(--accent), black 38%));
+            box-shadow: 0 26px 36px -22px rgba(0, 0, 0, 0.55),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -6px 0 -3px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Bookmark ribbon hanging out of the gutter, over the bottom cover */
+        .book-ribbon {
+            position: absolute;
+            left: 50%;
+            bottom: -10.5%;
+            width: 4.5%;
+            height: 17%;
+            transform: translateX(-50%) rotate(2.5deg);
+            background: linear-gradient(180deg,
+                    color-mix(in srgb, var(--accent), black 48%),
+                    color-mix(in srgb, var(--accent), black 22%));
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+            filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35));
+        }
+
+        .book-page,
+        .leaf-face {
+            background-color: var(--paper);
+            /* layer 1: paper curving down into the gutter (overridden per
+               side below); layer 2: faint ruled lines so the pages read as
+               written-in */
+            background-image:
+                linear-gradient(to right, transparent, transparent),
+                var(--rule-lines);
+            background-repeat: no-repeat, no-repeat;
+            background-size: 100% 100%, 74% 78%;
+            background-position: 0 0, center 65%;
+            border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3em;
+            padding: 7% 5%;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .book-page {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50%;
+        }
+
+        /* Stacked paper edges below the spread give the block thickness */
+        .book-page--left {
+            left: 0;
+            border-radius: 8px 2px 2px 8px;
+            box-shadow: inset -16px 0 18px -14px rgba(0, 0, 0, 0.28),
+                0 2px 0 0 var(--paper-2),
+                0 4px 0 0 var(--paper-edge),
+                0 6px 0 -1px var(--paper-2),
+                0 8px 0 -1px var(--paper-edge);
+        }
+
+        .book-page--right {
+            right: 0;
+            border-radius: 2px 8px 8px 2px;
+            box-shadow: inset 16px 0 18px -14px rgba(0, 0, 0, 0.28),
+                0 2px 0 0 var(--paper-2),
+                0 4px 0 0 var(--paper-edge),
+                0 6px 0 -1px var(--paper-2),
+                0 8px 0 -1px var(--paper-edge);
+        }
+
+        .book-leaf {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            /* rest a hair above the page plane — never coplanar, never
+               z-fights with the page it covers */
+            transform: translateZ(0.8px);
+            z-index: 2;
+        }
+
+        .leaf-face {
             position: absolute;
             inset: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
-        .fish-swimmer {
-            position: absolute;
-            left: 0;
-            top: calc(50% - 15%);
-            width: 30%;
-            height: 30%;
-            min-width: 64px;
-            min-height: 64px;
+        .leaf-face--front {
+            border-radius: 2px 8px 8px 2px;
+            box-shadow: inset 16px 0 18px -14px rgba(0, 0, 0, 0.28);
+        }
+
+        .leaf-face--back {
+            transform: rotateY(180deg);
+            border-radius: 8px 2px 2px 8px;
+            box-shadow: inset -16px 0 18px -14px rgba(0, 0, 0, 0.28);
+        }
+
+        /* Paper curves down into the gutter on the spine side of each page.
+           Right-hand surfaces (base right page + leaf front) shade left;
+           left-hand surfaces (base left page + leaf back) shade right. */
+        .book-page--left,
+        .leaf-face--back {
+            background-image:
+                linear-gradient(to right, transparent 72%, rgba(0, 0, 0, 0.05) 90%, rgba(0, 0, 0, 0.14) 100%),
+                var(--rule-lines);
+        }
+
+        .book-page--right,
+        .leaf-face--front {
+            background-image:
+                linear-gradient(to left, transparent 72%, rgba(0, 0, 0, 0.05) 90%, rgba(0, 0, 0, 0.14) 100%),
+                var(--rule-lines);
+        }
+
+        /* Soft floor shadow so the floating book sits on something */
+        .book-floor-shadow {
+            width: 46%;
+            max-width: 250px;
+            height: 20px;
+            margin-top: 9%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3), transparent 68%);
+            animation: book-floor 4.5s ease-in-out infinite;
+        }
+
+        /* Page typography — the fun part */
+        .page-word {
+            font-family: 'Century', Georgia, serif;
+            font-style: italic;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 3.4vw, 1.55rem);
             color: var(--accent);
-            animation: fish-swim 4.5s linear infinite;
+            transform: rotate(-4deg);
+            text-decoration: underline;
+            text-decoration-style: wavy;
+            text-decoration-color: color-mix(in srgb, var(--accent) 50%, transparent);
+            text-decoration-thickness: 1.5px;
+            text-underline-offset: 0.22em;
+            white-space: nowrap;
         }
 
-        .fish-swimmer svg {
-            width: 100%;
-            height: 100%;
+        .page-line {
+            font-size: clamp(0.58rem, 1.6vw, 0.76rem);
+            font-style: italic;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            white-space: nowrap;
         }
 
-        .fish-swimmer svg path:nth-child(2) {
-            transform-box: view-box;
-            transform-origin: 8px 12px;
-            animation: fish-tail-wag 0.4s ease-in-out infinite alternate;
+        .page-caption {
+            font-size: clamp(0.52rem, 1.4vw, 0.66rem);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
         }
 
-        @keyframes fish-tail-wag {
-            from {
-                transform: rotate(-20deg);
-            }
-
-            to {
-                transform: rotate(20deg);
-            }
+        .page-doodle {
+            font-size: clamp(0.56rem, 1.5vw, 0.72rem);
+            letter-spacing: 0.4em;
+            color: color-mix(in srgb, var(--accent) 65%, transparent);
+            margin-top: 0.4em;
         }
 
-        @keyframes fish-swim {
-            0% {
-                left: -50%;
-                top: calc(50% - 15%);
-            }
+        @keyframes book-bob {
 
-            25% {
-                top: calc(50% - 20%);
+            0%,
+            100% {
+                transform: translateY(0);
             }
 
             50% {
-                top: calc(50% - 15%);
+                transform: translateY(-3.5%);
             }
+        }
 
-            75% {
-                top: calc(50% - 10%);
-            }
+        @keyframes book-floor {
 
+            0%,
             100% {
-                left: 120%;
-                top: calc(50% - 15%);
+                transform: scaleX(1);
+                opacity: 0.85;
+            }
+
+            50% {
+                transform: scaleX(0.92);
+                opacity: 0.6;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .book-wrap,
+            .book-floor-shadow {
+                animation: none;
             }
         }
 
@@ -274,20 +441,43 @@
             </button>
         </div>
 
-        <!-- RIGHT PANE: ANIMATED FISH -->
+        <!-- RIGHT PANE: FLIPPING STORYBOOK -->
         <div
             class="relative w-full h-auto py-10 md:py-0 md:h-[450px] lg:h-full flex items-center justify-center order-2">
-            <div
-                class="water-tank w-full aspect-square max-w-full md:max-w-none md:w-80 md:h-80 md:aspect-auto lg:w-96 lg:h-96">
-                <div class="fish-swim-lane">
-                    <div class="fish-swimmer">
-                        <svg class="w-full h-full stroke-[2px] stroke-current fill-none" viewBox="0 0 24 24"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M8 12 C8 6,20 6,20 12 C20 18,8 18,8 12 Z" />
-                            <path d="M8 12 L3 8 M8 12 L3 16" />
-                        </svg>
+            <div class="book-scene">
+                <div class="book-wrap">
+                    <div class="book">
+                        <div class="book-cover"></div>
+                        <div class="book-ribbon"></div>
+                        <div class="book-page book-page--left">
+                            <span class="page-caption">chapter 42</span>
+                            <span class="page-line">once upon a time,</span>
+                            <span class="page-line">a very curious human</span>
+                            <span class="page-line">clicked &ldquo;Start here&rdquo;&hellip;</span>
+                            <span class="page-doodle">&#10022; &#10023; &#10022;</span>
+                        </div>
+                        <div class="book-page book-page--right">
+                            <span class="page-caption">and found</span>
+                            <span class="page-word" id="page-word-under">ideas!</span>
+                            <span class="page-doodle">&#10023; &#10022; &#10023;</span>
+                        </div>
+                        <div class="book-leaf" id="book-leaf">
+                            <div class="leaf-face leaf-face--front">
+                                <span class="page-caption">and found</span>
+                                <span class="page-word" id="page-word-leaf">wonder</span>
+                                <span class="page-doodle">&#10023; &#10022; &#10023;</span>
+                            </div>
+                            <div class="leaf-face leaf-face--back">
+                                <span class="page-caption">chapter 42</span>
+                                <span class="page-line">once upon a time,</span>
+                                <span class="page-line">a very curious human</span>
+                                <span class="page-line">clicked &ldquo;Start here&rdquo;&hellip;</span>
+                                <span class="page-doodle">&#10022; &#10023; &#10022;</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <div class="book-floor-shadow"></div>
             </div>
         </div>
     </main>
@@ -354,18 +544,56 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Gentle breathing loop on the water tank
-            anime({
-                targets: '.water-tank',
-                scale: [1, 1.02, 1],
-                easing: 'easeInOutSine',
-                duration: 4000,
-                loop: true
-            });
-
             document.getElementById('start-button').addEventListener('click', () => {
                 window.location.href = 'chat.html';
             });
+
+            // Page turn driven by the Web Animations API instead of a CSS
+            // animation: JS owns the whole cycle, so the word swap and the
+            // leaf reset happen in ONE synchronous task — a single paint,
+            // no chance of a stale-word or half-reset frame.
+            const FUN_WORDS = ['wonder', 'ideas!', 'aha!', 'magic', 'plot twist!', 'eureka!', 'daydreams', 'why not?'];
+            const leaf = document.getElementById('book-leaf');
+            const leafWord = document.getElementById('page-word-leaf');
+            const underWord = document.getElementById('page-word-under');
+            const faces = leaf.querySelectorAll('.leaf-face');
+            // Matches the .book-leaf base transform: the leaf always floats a
+            // hair above the page plane so it can never z-fight with it.
+            const LIFT = 'translateZ(0.8px)';
+            const TURN_MS = 1500;
+            const REST_MS = 1500;
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+            let wordIdx = 1; // leaf shows [0], the page under it shows [1]
+
+            async function pageTurnLoop() {
+                for (; ;) {
+                    await sleep(REST_MS); // rest, open on the right page
+                    // Slow lift off the page, gravity takes it after the apex
+                    const turn = leaf.animate([
+                        { transform: LIFT + ' rotateY(0deg)', easing: 'cubic-bezier(0.55, 0, 0.84, 0.5)' },
+                        { transform: LIFT + ' rotateY(-92deg)', easing: 'cubic-bezier(0.16, 0.5, 0.42, 1)' },
+                        { transform: LIFT + ' rotateY(-180deg)' }
+                    ], { duration: TURN_MS, fill: 'forwards' });
+                    // Travelling shadow lives on the faces — a filter on the
+                    // leaf itself would flatten its 3D
+                    faces.forEach((f) => f.animate([
+                        { filter: 'drop-shadow(0 0 0 rgba(0,0,0,0))' },
+                        { filter: 'drop-shadow(-14px 10px 10px rgba(0,0,0,0.25))', offset: 0.45 },
+                        { filter: 'drop-shadow(0 0 0 rgba(0,0,0,0))' }
+                    ], { duration: TURN_MS }));
+                    await turn.finished.catch(() => { });
+                    await sleep(REST_MS); // rest, landed on the left page
+                    // Atomic reset: retexture both faces to match the pages
+                    // they cover, then cancel back to 0deg in the same task.
+                    leafWord.textContent = FUN_WORDS[wordIdx % FUN_WORDS.length];
+                    wordIdx++;
+                    underWord.textContent = FUN_WORDS[wordIdx % FUN_WORDS.length];
+                    turn.cancel();
+                }
+            }
+
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!reduceMotion && typeof leaf.animate === 'function') pageTurnLoop();
         });
     </script>
   <script>
