@@ -45,6 +45,13 @@ window.renderHistory = (query = "") => {
     };
 
     const allChatArray = Object.values(window.allChats).sort(byManual);
+
+    // New-chat bounce: ids never rendered before get the pop-in animation.
+    // The first render seeds silently so the whole list doesn't bounce at boot.
+    if (!window.__seenChatIds) {
+        window.__seenChatIds = new Set(allChatArray.map(c => c.id));
+        window.__lastActiveChatId = window.currentChatId;
+    }
     const currentLang = window.settings.lang || 'en';
     const dict = window.translations[currentLang];
 
@@ -152,11 +159,18 @@ window.renderHistory = (query = "") => {
         window.els.hist.innerHTML = recentsHtml || (query ? `<div class="p-8 text-center text-[10px] font-bold opacity-20 uppercase tracking-widest mt-10">No results found</div>` : `<div class="p-8 text-center text-[10px] font-bold opacity-20 uppercase tracking-widest mt-10">${dict.no_history}</div>`);
         feather.replace({ 'stroke-width': 2, 'width': 18, 'height': 18 }, window.els.hist);
     }
+
+    allChatArray.forEach(c => window.__seenChatIds.add(c.id));
+    window.__lastActiveChatId = window.currentChatId;
 };
 
 window.renderChatItem = (c, dict) => {
+    const isNew = window.__seenChatIds && !window.__seenChatIds.has(c.id);
+    // Pop the row that just became active (chat switch), unless it's already
+    // playing the new-chat bounce.
+    const justSelected = !isNew && c.id === window.currentChatId && window.__lastActiveChatId !== c.id;
     return `
-    <div class="history-btn-container ${c.id === window.currentChatId ? 'history-item-active' : ''} rounded-xl group relative"
+    <div class="history-btn-container ${isNew ? 'chat-item-in ' : ''}${justSelected ? 'chat-item-selected ' : ''}${c.id === window.currentChatId ? 'history-item-active' : ''} rounded-xl group relative"
          data-chat-id="${c.id}"
          draggable="true"
          ondragstart="window.onChatDragStart(event, '${c.id}')"

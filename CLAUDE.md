@@ -295,3 +295,33 @@ Rules:
 
 Spec/plan: `docs/superpowers/specs/2026-07-01-universal-floating-nav-design.md`,
 `docs/superpowers/plans/2026-07-01-universal-floating-nav.md`.
+
+Chat's floating chrome was remade 2026-07-04 in the capsule language:
+- **`.chat-capsule`** (chat.html) = the `.ov-nav__bar` surface recipe as a
+  reusable class (light + dark). It **replaced chat's `.header-island`**, whose
+  CSS was deleted from chat.html (editor/manage/version still have their own
+  `.header-island` copies — untouched).
+- **`#top-left-chat-title`** (chat title + rename/regen + title feedback) =
+  `.chat-capsule` + a compact id-scoped block: 2.1rem round buttons, 1rem
+  glyphs, 0.1rem gaps, 0.3rem padding (≈2.7rem tall), divider via shared
+  `.ov-nav__div`, no whole-bar hover pop (it's a reading surface). The
+  transition owns opacity (JS show/hide toggles `opacity-0`/`opacity-100`);
+  the title-regen shimmer is re-layered over the capsule fill via
+  `#top-left-chat-title.shimmer-active` (light + dark). The old
+  `header-island skuomorphic-btn` classes were dropped from it.
+- **`#menu-toggle-btn`** (mobile sidebar-open) = standalone 2.7rem round
+  `.chat-capsule`, height-matched to the title bar beside it.
+- **`#top-right-actions`** now uses the same compact metrics as the title bar
+  (2.1rem controls, 1.05rem glyphs, 0.1rem gaps, 0.3rem padding — the
+  collapsed-state `#tra-actions` margin pull is `-0.1rem` to cancel one gap),
+  so all three floating capsules read ~2.7rem tall. `.sb-icon-btn` (sidebar
+  header) deliberately stays 2.5rem — bigger tap targets, not part of the bars.
+
+Sidebar history rows (`.history-btn-container`) share the New-chat button's
+springy motion (2026-07-04): hover = `translateY(-1px) scale(1.015)`, held
+press = `scale(0.96)`, both on the overshoot easing
+`cubic-bezier(0.34, 1.56, 0.64, 1)` — release springs back. Gotcha: the row
+pop-in/select animations (`chat-item-in` / `chat-item-selected`, tagged by
+`renderHistory()` in `history.js`) must use `animation-fill-mode: backwards`,
+NOT `both` — a forwards fill keeps overriding `transform` after the animation
+ends and silently kills the row's hover/press transforms.

@@ -5,6 +5,18 @@ window.sendFeedback = async (idx, type, btnEl) => {
     const content = window.chatHistory[idx][1] || '';
     if (!content) return;
 
+    // Full conversation up to and including the rated reply — the backend
+    // trains on it as a preference sample, so it needs the prompt context.
+    const messages = [];
+    for (let i = 0; i <= idx; i++) {
+        const row = window.chatHistory[i];
+        if (!row) continue;
+        const userMsg = typeof row[0] === 'string' ? row[0] : (row[0] && (row[0].text || row[0].content)) || '';
+        if (userMsg) messages.push({ role: 'user', content: userMsg });
+        const aiMsg = i === idx ? content : row[1];
+        if (aiMsg) messages.push({ role: 'assistant', content: aiMsg });
+    }
+
     try {
         const baseUrl = await window.getOpenAIClient();
         const response = await fetch(baseUrl + "/feedback", {
@@ -18,6 +30,7 @@ window.sendFeedback = async (idx, type, btnEl) => {
                 chat_id: window.currentChatId,
                 message_index: idx,
                 content: content,
+                messages: messages,
                 feedback_type: type,
                 user_name: (window.settings && window.settings.userName) || ""
             })
