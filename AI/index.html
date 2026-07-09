@@ -405,6 +405,62 @@
             --base-color: #ffffff;
         }
 
+        .bdh-neural-card {
+            position: relative;
+            overflow: hidden;
+            width: min(100%, 440px);
+            margin-inline: auto;
+        }
+
+        .bdh-neuron-map {
+            width: min(100%, 340px);
+            margin: 0 auto;
+            display: block;
+        }
+
+        .bdh-map-ring,
+        .bdh-map-link {
+            fill: none;
+            stroke: color-mix(in srgb, var(--accent) 28%, var(--border-strong));
+        }
+
+        .bdh-map-ring {
+            stroke-dasharray: 5 8;
+            opacity: 0.7;
+        }
+
+        .bdh-map-link {
+            stroke-width: 1.5;
+            opacity: 0.72;
+        }
+
+        .bdh-map-neuron {
+            fill: color-mix(in srgb, var(--bg-elevated), white 26%);
+            stroke: color-mix(in srgb, var(--accent) 34%, var(--border));
+            stroke-width: 1.5;
+        }
+
+        .dark .bdh-map-neuron {
+            fill: color-mix(in srgb, var(--bg-elevated), white 8%);
+        }
+
+        .bdh-map-neuron--core {
+            fill: var(--accent);
+            stroke: color-mix(in srgb, var(--accent), white 24%);
+        }
+
+        .bdh-map-label {
+            fill: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-anchor: middle;
+        }
+
+        .bdh-map-label--core {
+            fill: white;
+        }
+
         @keyframes apple-gradient-slide {
             0% {
                 background-position: 0% center;
@@ -524,6 +580,7 @@
                     </p>
                 </div>
             </div>
+
             <!-- Pillar 3: Sustainable AI -->
             <div class="flex flex-col md:flex-row gap-8 items-start">
                 <div
@@ -537,6 +594,97 @@
                         that respects both your hardware budget and our planet's energy. Intelligence should
                         be accessible without environmental compromise.
                     </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 max-w-7xl mx-auto border-t border-border-warm">
+        <div class="grid lg:grid-cols-[0.78fr_1.22fr] gap-10 lg:gap-14 items-center">
+            <div>
+                <p class="text-xs uppercase tracking-[0.32em] text-stone-gray mb-4">New Core</p>
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 italic tracking-tight dark:text-text-warm">
+                    BDH Neural Architecture
+                </h2>
+                <p class="text-lg text-rosewood/70 dark:text-text-warm/60 leading-relaxed mb-8">
+                    Saga is moving to a from-scratch Bounded Dynamic Highway core: a looped neural network that
+                    replaces attention, RoPE, and large KV caches with causal bounded hidden dynamics. Instead of
+                    keeping every past token, each BDH block keeps a tiny recurrent state and routes signal through
+                    gated neural highways.
+                </p>
+
+                <div class="grid sm:grid-cols-2 gap-3">
+                    <div class="rounded-2xl border border-border-cream bg-ivory/55 dark:bg-surf-dark/30 p-4">
+                        <p class="font-semibold dark:text-text-warm">Bounded state</p>
+                        <p class="text-sm text-rosewood/65 dark:text-text-warm/55 mt-2">Kernel size 5 means only the last 4 hidden states are cached per layer.</p>
+                    </div>
+                    <div class="rounded-2xl border border-border-cream bg-ivory/55 dark:bg-surf-dark/30 p-4">
+                        <p class="font-semibold dark:text-text-warm">Grouped branches</p>
+                        <p class="text-sm text-rosewood/65 dark:text-text-warm/55 mt-2">12 temporal branches mix nearby history without attention heads.</p>
+                    </div>
+                    <div class="rounded-2xl border border-border-cream bg-ivory/55 dark:bg-surf-dark/30 p-4">
+                        <p class="font-semibold dark:text-text-warm">Looped depth</p>
+                        <p class="text-sm text-rosewood/65 dark:text-text-warm/55 mt-2">28 physical blocks run twice for 56 effective neural passes.</p>
+                    </div>
+                    <div class="rounded-2xl border border-border-cream bg-ivory/55 dark:bg-surf-dark/30 p-4">
+                        <p class="font-semibold dark:text-text-warm">Local training</p>
+                        <p class="text-sm text-rosewood/65 dark:text-text-warm/55 mt-2">FP8 block math and regional compile keep the run inside RTX 5080 VRAM.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bdh-neural-card card card-pad rounded-[2rem]">
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.28em] text-stone-gray mb-2">How BDH reads</p>
+                        <h3 class="text-2xl font-serif italic dark:text-text-warm">Small memory, repeated thought.</h3>
+                    </div>
+                </div>
+
+                <svg class="bdh-neuron-map" viewBox="0 0 340 340" role="img" aria-labelledby="bdh-map-title bdh-map-desc">
+                    <title id="bdh-map-title">Compact circular BDH neuron map</title>
+                    <desc id="bdh-map-desc">A central state neuron connected to six surrounding neurons, with related outer neurons also connected around a circle.</desc>
+
+                    <circle class="bdh-map-ring" cx="170" cy="170" r="112"></circle>
+
+                    <path class="bdh-map-link" d="M170 170 L170 58"></path>
+                    <path class="bdh-map-link" d="M170 170 L267 114"></path>
+                    <path class="bdh-map-link" d="M170 170 L267 226"></path>
+                    <path class="bdh-map-link" d="M170 170 L170 282"></path>
+                    <path class="bdh-map-link" d="M170 170 L73 226"></path>
+                    <path class="bdh-map-link" d="M170 170 L73 114"></path>
+
+                    <path class="bdh-map-link" d="M170 58 L267 114 L267 226 L170 282 L73 226 L73 114 Z"></path>
+                    <path class="bdh-map-link" d="M170 58 C214 105 214 235 170 282"></path>
+                    <path class="bdh-map-link" d="M73 114 C146 134 194 206 267 226"></path>
+                    <path class="bdh-map-link" d="M267 114 C194 134 146 206 73 226"></path>
+
+                    <circle class="bdh-map-neuron bdh-map-neuron--core" cx="170" cy="170" r="34"></circle>
+                    <circle class="bdh-map-neuron" cx="170" cy="58" r="25"></circle>
+                    <circle class="bdh-map-neuron" cx="267" cy="114" r="25"></circle>
+                    <circle class="bdh-map-neuron" cx="267" cy="226" r="25"></circle>
+                    <circle class="bdh-map-neuron" cx="170" cy="282" r="25"></circle>
+                    <circle class="bdh-map-neuron" cx="73" cy="226" r="25"></circle>
+                    <circle class="bdh-map-neuron" cx="73" cy="114" r="25"></circle>
+
+                    <text class="bdh-map-label bdh-map-label--core" x="170" y="166">state</text>
+                    <text class="bdh-map-label bdh-map-label--core" x="170" y="181">loop</text>
+                    <text class="bdh-map-label" x="170" y="63">input</text>
+                    <text class="bdh-map-label" x="267" y="119">gate</text>
+                    <text class="bdh-map-label" x="267" y="231">route</text>
+                    <text class="bdh-map-label" x="170" y="287">depth</text>
+                    <text class="bdh-map-label" x="73" y="231">cache</text>
+                    <text class="bdh-map-label" x="73" y="119">mix</text>
+                </svg>
+
+                <p class="text-sm text-rosewood/65 dark:text-text-warm/55 leading-relaxed mt-5 text-center">
+                    Related neurons share a tiny recurrent state, then loop through gated paths for another pass.
+                </p>
+
+                <div class="mt-5 flex flex-wrap justify-center gap-2">
+                    <span class="ui-badge">4 states cached</span>
+                    <span class="ui-badge">28 x 2 passes</span>
+                    <span class="ui-badge">RTX 5080 local</span>
                 </div>
             </div>
         </div>

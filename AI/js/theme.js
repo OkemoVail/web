@@ -49,7 +49,8 @@ window.setTheme = (mode) => {
 };
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (localStorage.getItem('vail_theme') === 'system') {
+    const mode = localStorage.getItem('vail_theme') || 'system';
+    if (mode === 'system') {
         document.documentElement.classList.toggle('dark', e.matches);
         window.updateAccent(window.settings.accent);
     }
