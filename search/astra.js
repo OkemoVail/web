@@ -84,7 +84,7 @@
     const u = new URL(location.href);
     if (q) u.searchParams.set('q', q); else u.searchParams.delete('q');
     if (ai) u.searchParams.set('ai', '1'); else u.searchParams.delete('ai');
-    history.pushState({}, '', u);
+    if (u.href !== location.href) history.pushState({}, '', u);
     renderRoute();
   }
 
