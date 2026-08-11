@@ -347,16 +347,23 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         // Hand the SANITIZED remainder to the typewriter so it converges to
         // exactly responseText (no slam). If sanitization removed chars that
         // were already typed (e.g. a completed <remember> tag), prefix
-        // alignment is impossible — hard-sync instead (rare path).
+        // alignment is impossible — hard-sync instead (rare path). The
+        // hard-sync branch also covers typedResponseText === "" (the whole
+        // reply arrived before the first tick).
         if (window.typedResponseText && responseText.startsWith(window.typedResponseText)) {
             window.streamQueue = responseText.slice(window.typedResponseText.length);
         } else {
             window.typedResponseText = responseText;
             window.streamQueue = "";
         }
-        // If the typewriter never started (zero-token reply) or already
-        // drained, finalize right now — nobody else will.
-        if (!window.typeInterval) {
+        // Finalize immediately when there is nothing left to drain — regardless
+        // of whether the interval is still alive (it would be killed by the
+        // finally guard microseconds later, before its finalizing tick).
+        // Mutual exclusion with the typewriter's own finalize is preserved:
+        // non-empty queue → interval owns finalize; empty queue → we do it now
+        // and clear the interval ourselves so it can't double-fire.
+        if (window.streamQueue.length === 0) {
+            if (window.typeInterval) { clearInterval(window.typeInterval); window.typeInterval = null; }
             window.updateAssistantDisplay(window.typedResponseText, true);
             window.finalizeLastAIMessage();
         }

@@ -80,7 +80,15 @@ window.updateAssistantDisplay = (text, isFinal = false) => {
 
 window.startTypewriter = () => {
     if (window.typeInterval) return;
+    const historyRef = window.chatHistory;
     window.typeInterval = setInterval(() => {
+        // Self-clear if the user switched/edited chats mid-drain — this
+        // interval belongs to the chat that started it.
+        if (window.chatHistory !== historyRef) {
+            clearInterval(window.typeInterval);
+            window.typeInterval = null;
+            return;
+        }
         if (window.streamQueue.length === 0) {
             if (!window.isGenerating) {
                 clearInterval(window.typeInterval);
