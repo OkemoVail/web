@@ -3,7 +3,7 @@
 // Per-chat tracking of last sent system prompt — only re-send on first turn or change.
 const _sentSysPromptPerChat = {};
 
-window.handleAction = () => {
+window.handleAction = async () => {
     console.log("handleAction: isGenerating?", window.isGenerating);
     if (window.isGenerating) {
         console.log("🛑 Stop button clicked. Terminating job:", window.currentJobId);
@@ -17,7 +17,7 @@ window.handleAction = () => {
 
         if (window.currentJobId) {
             try {
-                const baseUrl = window.currentModel.id.split('/gradio')[0];
+                const baseUrl = await window.getOpenAIClient();
                 console.log("Sending kill signal to:", baseUrl + "/cancel_job");
                 fetch(baseUrl + '/cancel_job', {
                     method: 'POST',

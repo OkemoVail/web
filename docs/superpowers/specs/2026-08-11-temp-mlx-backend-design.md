@@ -110,10 +110,18 @@ backend/
 - One global `threading.Lock` serializes generation — a single MLX model
   cannot generate concurrently. Second request waits; acceptable for a
   single-user temp backend.
+- The lock is owned by a **daemon worker thread** per stream request, never by
+  the SSE response generator: the worker pushes formatted SSE frames into a
+  `queue.Queue` (sentinel-terminated) and always terminates (bounded by
+  `max_tokens`), so a mid-stream client disconnect can never wedge the lock.
+  (The original design held the lock inside the suspended sync generator —
+  Starlette does not deterministically close abandoned generators, which
+  deadlocked the server on disconnect; fixed in commit `9c27549`, guarded by
+  `test_abandoned_stream_does_not_block_next_request`.)
 - `POST /cancel_job {job_id}` records the id in a `set`; the token loop checks
-  membership each iteration and stops early (finish_reason `"stop"`).
-- Client disconnect (frontend `abortController.abort()`) is detected via
-  `StreamingResponse`/`Request.is_disconnected()` and also stops the loop.
+  membership each iteration and stops early (finish_reason `"stop"`). This is
+  the prompt-stop path — a disconnected client's generation otherwise runs to
+  completion in the background, which is bounded and harmless.
 - Cancelled/completed job ids are cleared from the set.
 
 ### 4. Stubs
