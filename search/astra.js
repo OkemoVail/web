@@ -1,4 +1,4 @@
-// ─── Okemo Astra — all logic lives here (window.*, no modules) ───
+// ─── Okemo Astra — all logic lives here (single IIFE, no modules) ───
 (function () {
   'use strict';
 
@@ -72,8 +72,9 @@
   }
 
   // ── router: URL is the state. ?q= results · &ai=1 results+AI ──
-  let aiAbort = null;            // AbortController for the AI stream (Task 7)
+  let aiAbort = null;            // AbortController for the AI stream
   let searchToken = 0;           // stale-response guard
+  let wantResultsFocus = false;  // set by bar actions, consumed by showResults
 
   function readRoute() {
     const p = new URLSearchParams(location.search);
@@ -84,6 +85,7 @@
     const u = new URL(location.href);
     if (q) u.searchParams.set('q', q); else u.searchParams.delete('q');
     if (ai) u.searchParams.set('ai', '1'); else u.searchParams.delete('ai');
+    u.hash = '';
     if (u.href !== location.href) history.pushState({}, '', u);
     renderRoute();
   }
@@ -101,8 +103,9 @@
     $('hero').hidden = true;
     $('results').hidden = false;
     $('results-input').value = q;
+    if (wantResultsFocus) { wantResultsFocus = false; $('results-input').focus({ preventScroll: true }); }
     document.title = q + ' — Okemo Astra';
-    runSearch(q, ai);            // defined in Task 5
+    runSearch(q, ai);
   }
 
   function renderRoute() {
@@ -114,13 +117,14 @@
   function wireBar(inputId, searchId, aiId, suggestId) {
     const input = $(inputId);
     initSuggest(input, $(suggestId)); // FIRST: suggest's keydown must run before ours (see defaultPrevented guard)
-    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, false); });
-    $(aiId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, true); });
+    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q, false); } });
+    $(aiId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q, true); } });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (e.defaultPrevented) return;  // initSuggest accepted a suggestion — don't double-navigate
         const q = input.value.trim();
         if (!q) return;
+        wantResultsFocus = true;
         go(q, e.metaKey || e.ctrlKey);
       }
     });
@@ -133,9 +137,18 @@
   initKeyFlows();
   wireBar('hero-input', 'hero-search', 'hero-ai', 'hero-suggest');
   wireBar('results-input', 'results-search', 'results-ai', 'results-suggest');
-  $('logo-home').addEventListener('click', (e) => { e.preventDefault(); go('', false); });
+  $('logo-home').addEventListener('click', (e) => { e.preventDefault(); $('hero-input').value = $('results-input').value; go('', false); });
   window.addEventListener('popstate', renderRoute);
   renderRoute();
+
+  // citation jump links: smooth-scroll, no history entry
+  $('ai-body').addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#result-"]');
+    if (!a) return;
+    e.preventDefault();
+    const el = document.getElementById(a.getAttribute('href').slice(1));
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 
   // ── Brave API key ──
   function getKey() { try { return (localStorage.getItem('astra_brave_key') || '').trim(); } catch (_) { return ''; } }
@@ -168,6 +181,8 @@
       }
     });
     $('key-modal-cancel').addEventListener('click', () => { $('key-modal').hidden = true; });
+    $('key-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('key-save').click(); });
+    $('key-modal-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('key-modal-save').click(); });
   }
 
   // ── autocomplete (Brave suggest; silently disabled on any failure) ──
@@ -264,7 +279,7 @@
   function statusCard(emoji, msg, retry) {
     const list = $('result-list');
     list.innerHTML = '';
-    const div = document.createElement('div');
+    const div = document.createElement('li');
     div.className = 'status-card card';
     div.innerHTML = '<span class="big"></span><span></span>';
     div.querySelector('.big').textContent = emoji;
@@ -329,6 +344,7 @@
     let results = [];
     try {
       results = await braveSearch(q);
+      results = results.filter((r) => /^https?:\/\//i.test(r.url || ''));
     } catch (e) {
       if (token !== searchToken) return;   // a newer search superseded this one
       $('r-meta').textContent = '';
@@ -347,7 +363,7 @@
     if (results.length) renderResults(results);
     else statusCard('🌌', COPY.emptyResults);
 
-    if (ai) askAstra(q, results);          // defined in Task 7
+    if (ai) askAstra(q, results);
   }
 
   // ── AI mode: Brave-grounded Saga answer, streamed over SSE ──
@@ -430,7 +446,7 @@
             if (delta) {
               if (!firstToken) { firstToken = true; clearInterval(quipTimer); $('ai-wave-label').textContent = '✦ streaming from the stars…'; }
               text += delta;
-              $('ai-body').innerHTML = linkifyCitations(marked.parse(text), results.length);
+              $('ai-body').innerHTML = linkifyCitations(marked.parse(text.replace(/&/g, '&amp;').replace(/</g, '&lt;')), results.length);
             }
           } catch { /* partial JSON chunk — ignore */ }
         }

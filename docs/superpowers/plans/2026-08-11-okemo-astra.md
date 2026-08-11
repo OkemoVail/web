@@ -339,6 +339,7 @@ Insert this block immediately before `// ── boot ──`:
   // ── router: URL is the state. ?q= results · &ai=1 results+AI ──
   let aiAbort = null;            // AbortController for the AI stream (Task 7)
   let searchToken = 0;           // stale-response guard
+  let wantResultsFocus = false;  // set by bar actions, consumed by showResults
 
   function readRoute() {
     const p = new URLSearchParams(location.search);
@@ -349,6 +350,7 @@ Insert this block immediately before `// ── boot ──`:
     const u = new URL(location.href);
     if (q) u.searchParams.set('q', q); else u.searchParams.delete('q');
     if (ai) u.searchParams.set('ai', '1'); else u.searchParams.delete('ai');
+    u.hash = '';
     if (u.href !== location.href) history.pushState({}, '', u);
     renderRoute();
   }
@@ -366,6 +368,7 @@ Insert this block immediately before `// ── boot ──`:
     $('hero').hidden = true;
     $('results').hidden = false;
     $('results-input').value = q;
+    if (wantResultsFocus) { wantResultsFocus = false; $('results-input').focus({ preventScroll: true }); }
     document.title = q + ' — Okemo Astra';
     runSearch(q, ai);            // defined in Task 5
   }
@@ -379,13 +382,14 @@ Insert this block immediately before `// ── boot ──`:
   function wireBar(inputId, searchId, aiId, suggestId) {
     const input = $(inputId);
     initSuggest(input, $(suggestId)); // FIRST: suggest's keydown must run before ours (see defaultPrevented guard)
-    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, false); });
-    $(aiId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, true); });
+    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q, false); } });
+    $(aiId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q, true); } });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (e.defaultPrevented) return;  // initSuggest accepted a suggestion — don't double-navigate
         const q = input.value.trim();
         if (!q) return;
+        wantResultsFocus = true;
         go(q, e.metaKey || e.ctrlKey);
       }
     });
@@ -401,9 +405,18 @@ And replace the boot block with:
   rotatePlaceholders();
   wireBar('hero-input', 'hero-search', 'hero-ai', 'hero-suggest');
   wireBar('results-input', 'results-search', 'results-ai', 'results-suggest');
-  $('logo-home').addEventListener('click', (e) => { e.preventDefault(); go('', false); });
+  $('logo-home').addEventListener('click', (e) => { e.preventDefault(); $('hero-input').value = $('results-input').value; go('', false); });
   window.addEventListener('popstate', renderRoute);
   renderRoute();
+
+  // citation jump links: smooth-scroll, no history entry
+  $('ai-body').addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#result-"]');
+    if (!a) return;
+    e.preventDefault();
+    const el = document.getElementById(a.getAttribute('href').slice(1));
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 ```
 
 - [ ] **Step 2: Stub the forward references (temporary, replaced by later tasks)**
@@ -472,6 +485,8 @@ Replace the `function updateKeyCard() {}` stub line with:
       }
     });
     $('key-modal-cancel').addEventListener('click', () => { $('key-modal').hidden = true; });
+    $('key-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('key-save').click(); });
+    $('key-modal-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('key-modal-save').click(); });
   }
 ```
 
@@ -527,7 +542,7 @@ Replace the `function runSearch(q) {...}` stub line with:
   function statusCard(emoji, msg, retry) {
     const list = $('result-list');
     list.innerHTML = '';
-    const div = document.createElement('div');
+    const div = document.createElement('li');
     div.className = 'status-card card';
     div.innerHTML = '<span class="big"></span><span></span>';
     div.querySelector('.big').textContent = emoji;
@@ -592,6 +607,7 @@ Replace the `function runSearch(q) {...}` stub line with:
     let results = [];
     try {
       results = await braveSearch(q);
+      results = results.filter((r) => /^https?:\/\//i.test(r.url || ''));
     } catch (e) {
       if (token !== searchToken) return;   // a newer search superseded this one
       $('r-meta').textContent = '';
@@ -825,7 +841,7 @@ Insert this block immediately before `// ── boot ──`:
             if (delta) {
               if (!firstToken) { firstToken = true; clearInterval(quipTimer); $('ai-wave-label').textContent = '✦ streaming from the stars…'; }
               text += delta;
-              $('ai-body').innerHTML = linkifyCitations(marked.parse(text), results.length);
+              $('ai-body').innerHTML = linkifyCitations(marked.parse(text.replace(/&/g, '&amp;').replace(/</g, '&lt;')), results.length);
             }
           } catch { /* partial JSON chunk — ignore */ }
         }
@@ -899,6 +915,7 @@ Serve `python3 -m http.server 8080`, verify each:
 7. 429 / offline / empty states show playful copy ✓
 8. OS reduced-motion on → no twinkle/spin/wave ✓
 9. 375px viewport: bar fits (button labels collapse), results readable, no horizontal scroll ✓
+10. Clicking a [n] citation smooth-scrolls to the result card WITHOUT adding a history entry (Back still returns to hero in one press)
 
 - [ ] **Step 3: Commit**
 
