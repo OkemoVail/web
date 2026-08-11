@@ -103,6 +103,8 @@ While a response streams, `render.js` appends a `.book-flip-lane` under the last
 
 The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemovail.com`. At boot, `main.js` fetches `/tunnel_url` to auto-detect a dynamic tunnel URL and stores it in `vail_custom_backend_url`. Override via `localStorage.setItem('vail_custom_backend_url', ...)` or the Settings panel.
 
+**Temp local backend (2026-08-11):** `backend/server.py` is a single-file FastAPI + mlx-lm server (Gemma 3 4B QAT 4-bit by default, `MODEL_ID` env to swap) that implements `/v1/chat/completions` (SSE + non-stream) plus stubs for `/tunnel_url`, `/api/system_prompts`, `/feedback`, `/api/tokens`, `/cancel_job`. Run `./backend/run.sh` → `127.0.0.1:8001`; the existing cloudflared named tunnel exposes it as `api.okemovail.com`. Tests: `cd backend && .venv/bin/python -m pytest tests/ -v` (fake model — no download). Spec: `docs/superpowers/specs/2026-08-11-temp-mlx-backend-design.md`. No accounts/cloud storage/voice — the real backend remains the separate `OkemoLLM` repo.
+
 ### Other pages
 
 - `AI/manage.html` — chat/folder management UI
