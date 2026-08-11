@@ -129,6 +129,7 @@
   initTheme();
   makeStars();
   rotatePlaceholders();
+  initKeyFlows();
   wireBar('hero-input', 'hero-search', 'hero-ai', 'hero-suggest');
   wireBar('results-input', 'results-search', 'results-ai', 'results-suggest');
   $('logo-home').addEventListener('click', (e) => { e.preventDefault(); go('', false); });
@@ -136,7 +137,38 @@
   renderRoute();
 
   // ── TEMP STUBS (replaced in Tasks 4–7) ──
-  function updateKeyCard() {}
+  // ── Brave API key ──
+  function getKey() { return (localStorage.getItem('astra_brave_key') || '').trim(); }
+
+  function saveKey(raw) {
+    const k = (raw || '').trim();
+    if (!k) return false;
+    localStorage.setItem('astra_brave_key', k);
+    return true;
+  }
+
+  function updateKeyCard() {
+    $('key-card').hidden = !!getKey();     // hero: show setup card only when keyless
+  }
+
+  function initKeyFlows() {
+    $('key-save').addEventListener('click', () => {
+      if (saveKey($('key-input').value)) { $('key-card').hidden = true; $('hero-input').focus(); }
+    });
+    $('key-edit').addEventListener('click', () => {
+      $('key-modal-input').value = getKey();
+      $('key-modal').hidden = false;
+      $('key-modal-input').focus();
+    });
+    $('key-modal-save').addEventListener('click', () => {
+      if (saveKey($('key-modal-input').value)) {
+        $('key-modal').hidden = true;
+        const { q, ai } = readRoute();     // re-run with the new key
+        if (q) showResults(q, ai);
+      }
+    });
+    $('key-modal-cancel').addEventListener('click', () => { $('key-modal').hidden = true; });
+  }
   function initSuggest() {}
   function runSearch(q) { $('r-meta').textContent = 'search lands in task 5 — you asked for: ' + q; }
 })();
