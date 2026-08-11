@@ -43,3 +43,31 @@ function loadModule(overrides = {}) {
     assert(dl.includes('q8'), 'latest turn survives trim');
     console.log('✓ buildTitleDigest');
 }
+
+// ── buildTitleDigest pins (review follow-up) ──
+{
+    const w = loadModule();
+    const t = w.buildTitleDigest([['q', '<thought>hidden</thought> visible answer', null]]);
+    assert(t.includes('visible answer') && !t.includes('hidden'), 'strips thought tags');
+    const five = w.buildTitleDigest(Array.from({ length: 5 }, (_, i) => [`u${i}`, `a${i}`, null]));
+    assert(!five.includes('First message:'), 'no anchor for ≤5 pairs');
+    const six = w.buildTitleDigest(Array.from({ length: 6 }, (_, i) => [`uniq-user-${i}`, `a${i}`, null]));
+    assert(six.includes('First message: "uniq-user-0"'), 'anchor for 6 pairs');
+    assert.strictEqual(six.split('uniq-user-0').length - 1, 1, 'turn 1 appears exactly once');
+    console.log('✓ buildTitleDigest pins');
+}
+
+// ── chatTitleDue ──
+{
+    const w = loadModule();
+    const hist = [['my flask route keeps 404ing', 'add the leading slash', null]];
+    const fallback = 'my flask route keeps 404ing'.substring(0, 30);
+    assert.strictEqual(w.chatTitleDue(undefined, 1), true, 'brand-new unpersisted chat → due');
+    assert.strictEqual(w.chatTitleDue({ titleManual: true, title: 'x', history: hist }, 9), false, 'renamed → locked');
+    assert.strictEqual(w.chatTitleDue({ titleFeedback: 'good', title: 'x', titleGenAt: 1, history: hist }, 9), false, 'thumbs-up → locked');
+    assert.strictEqual(w.chatTitleDue({ title: fallback, history: hist }, 1), true, 'fallback title → due');
+    assert.strictEqual(w.chatTitleDue({ title: 'real title', titleGenAt: 1, history: hist }, 4), false, 'inside cadence window');
+    assert.strictEqual(w.chatTitleDue({ title: 'real title', titleGenAt: 1, history: hist }, 5), true, 'cadence boundary');
+    assert.strictEqual(w.chatTitleDue({ title: 'real title', history: hist }, 5), true, 'legacy chat (no titleGenAt)');
+    console.log('✓ chatTitleDue');
+}

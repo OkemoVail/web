@@ -370,12 +370,9 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         window.currentJob = null;
         console.log("Streaming complete");
 
-        if (window.chatHistory.length > 0 && window.chatHistory[0][1] && !window[`_generatingTitle_${window.currentChatId}`]) {
-            const existingTitle = window.allChats[window.currentChatId]?.title;
-            const fallback = window.chatHistory[0][0].substring(0, 30);
-            if (!existingTitle || existingTitle === fallback) {
-                window.generateChatTitle(window.currentChatId, window.chatHistory[0][0], window.chatHistory[0][1]);
-            }
+        if (window.chatHistory.length > 0 && window.chatHistory[0][1] && !window[`_generatingTitle_${window.currentChatId}`]
+            && window.chatTitleDue(window.allChats[window.currentChatId], window.chatHistory.length)) {
+            window.generateChatTitle(window.currentChatId);
         }
 
         window.updateUI();

@@ -58,6 +58,23 @@ window.buildTitleDigest = (history) => {
     return lines.join('\n');
 };
 
+const TITLE_REFRESH_EVERY = 4;
+
+// Auto-title gate. Due when: the chat is brand new (not yet persisted), the
+// title is still the first-30-chars fallback, or TITLE_REFRESH_EVERY replies
+// have landed since the last successful title. Locked by: manual rename
+// (titleManual) or a thumbs-up on the title (titleFeedback === 'good').
+// Manual Regenerate bypasses this gate entirely (it calls generateChatTitle
+// with force=true without consulting chatTitleDue).
+window.chatTitleDue = (chat, historyLength) => {
+    if (!chat) return true;
+    if (chat.titleManual) return false;
+    if (chat.titleFeedback === 'good') return false;
+    const fallback = (chat.history?.[0]?.[0] || '').substring(0, 30);
+    if (!chat.title || chat.title === fallback) return true;
+    return historyLength - (chat.titleGenAt || 0) >= TITLE_REFRESH_EVERY;
+};
+
 window._requestChatTitle = async (baseUrl, messages) => {
     const response = await fetch(baseUrl + "/v1/chat/completions", {
         method: "POST",
@@ -167,6 +184,7 @@ window.renameChat = async (id) => {
     if (rawNewTitle !== null && rawNewTitle.trim() !== "" && rawNewTitle !== oldTitle) {
         const newTitle = rawNewTitle.replace(/[\r\n]+/g, ' ').trim();
         window.allChats[id].title = newTitle;
+        window.allChats[id].titleManual = true;
         await window.StorageController.saveChat(window.allChats[id]);
         if (id === window.currentChatId) {
             window.updateChatTitleDisplay(newTitle);
