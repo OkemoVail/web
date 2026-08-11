@@ -587,7 +587,7 @@ Replace the `function runSearch(q) {...}` stub line with:
     $('r-meta').textContent = 'searching the universe for “' + q + '”…';
     $('result-list').innerHTML = '';
 
-    if (!getKey()) { $('key-modal').hidden = false; $('r-meta').textContent = ''; return; }
+    if (!getKey()) { $('key-modal').hidden = false; $('ai-panel').hidden = true; $('r-meta').textContent = ''; return; }
 
     let results = [];
     try {
@@ -751,10 +751,10 @@ Insert this block immediately before `// ── boot ──`:
     return (localStorage.getItem('vail_custom_backend_url') || 'https://api.okemovail.com').replace(/\/$/, '');
   }
 
-  function linkifyCitations(html) {
+  function linkifyCitations(html, count) {
     // [n] → jump link to the matching result card (must run on marked output)
     return html.replace(/\[(\d{1,2})\]/g, (m, n) =>
-      '<a href="#result-' + n + '">[' + n + ']</a>');
+      (+n >= 1 && +n <= count) ? '<a href="#result-' + n + '">[' + n + ']</a>' : m);
   }
 
   function startWaveQuips() {
@@ -806,7 +806,7 @@ Insert this block immediately before `// ── boot ──`:
       // SSE consumption — same line protocol as AI/js/chat-actions.js
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let buf = '', text = '', firstToken = false;
+      let buf = '', text = '', firstToken = false, sawDone = false;
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -817,7 +817,7 @@ Insert this block immediately before `// ── boot ──`:
           const clean = line.trim();
           if (!clean.startsWith('data: ')) continue;
           const dataStr = clean.substring(6).trim();
-          if (dataStr === '[DONE]') break;
+          if (dataStr === '[DONE]') { sawDone = true; break; }
           try {
             const data = JSON.parse(dataStr);
             const delta = data.choices && data.choices[0] && data.choices[0].delta
@@ -825,12 +825,14 @@ Insert this block immediately before `// ── boot ──`:
             if (delta) {
               if (!firstToken) { firstToken = true; clearInterval(quipTimer); $('ai-wave-label').textContent = '✦ streaming from the stars…'; }
               text += delta;
-              $('ai-body').innerHTML = linkifyCitations(marked.parse(text));
+              $('ai-body').innerHTML = linkifyCitations(marked.parse(text), results.length);
             }
           } catch { /* partial JSON chunk — ignore */ }
         }
+        if (sawDone) break;
       }
       clearInterval(quipTimer);
+      if (!text.trim()) $('ai-body').textContent = '✦ the cosmos answered with silence — try rephrasing?';
       panel.classList.add('done');         // wave collapses to shimmer line
     } catch (e) {
       clearInterval(quipTimer);
