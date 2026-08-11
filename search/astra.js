@@ -138,7 +138,7 @@
 
   // ── TEMP STUBS (replaced in Tasks 4–7) ──
   // ── Brave API key ──
-  function getKey() { return (localStorage.getItem('astra_brave_key') || '').trim(); }
+  function getKey() { try { return (localStorage.getItem('astra_brave_key') || '').trim(); } catch (_) { return ''; } }
 
   function saveKey(raw) {
     const k = (raw || '').trim();
@@ -263,6 +263,7 @@
     } catch (e) {
       if (token !== searchToken) return;   // a newer search superseded this one
       $('r-meta').textContent = '';
+      $('ai-panel').hidden = true;         // no grounding results → no wave
       const retry = () => runSearch(q, ai);
       if (e.status === 401 || e.status === 403) statusCard('🔑', COPY.badKey, () => { $('key-modal').hidden = false; });
       else if (e.status === 429) statusCard('🌙', COPY.rateLimited, retry);
