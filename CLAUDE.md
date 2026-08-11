@@ -82,6 +82,7 @@ Switch with `window.selectModel('SAGA')`. The id is sent as the `model` field to
 | `vail_last_seen_build` | Last build number the user dismissed in the changelog modal |
 | `vail_remote_build` | Build number fetched from server (overrides local `BUILD_NUMBER` in `updatenotes.js`) |
 | `vail_remote_changelog` | JSON array of changelog strings fetched from server (overrides local `CHANGELOG.changes`) |
+| `astra_brave_key` | Brave Search API key for Okemo Astra |
 
 ### Data flow for a message
 
@@ -112,6 +113,7 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 - `index.html` / `whitename.html` — root landing pages using Tailwind (`src/output.css`)
 - `AI/index.html` — Oaky entry/landing page for the AI section (uses Tailwind CDN, not `src/output.css`)
 - `Themes/Themes.html` — theme browser
+- `search/index.html` — Okemo Astra: Google-style web search (Brave Search API, key in `localStorage.astra_brave_key`) with an optional streaming Saga "✦ Ask Astra" answer (`?q=` results, `&ai=1` adds AI). Intentional exceptions: no `src/nav.js` (chromeless by design), no Tailwind. Spec: `docs/superpowers/specs/2026-08-11-okemo-astra-design.md`.
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
