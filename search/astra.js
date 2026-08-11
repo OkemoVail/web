@@ -71,8 +71,72 @@
     setInterval(apply, 4000);
   }
 
+  // ── router: URL is the state. ?q= results · &ai=1 results+AI ──
+  let aiAbort = null;            // AbortController for the AI stream (Task 7)
+  let searchToken = 0;           // stale-response guard
+
+  function readRoute() {
+    const p = new URLSearchParams(location.search);
+    return { q: (p.get('q') || '').trim(), ai: p.get('ai') === '1' };
+  }
+
+  function go(q, ai) {
+    const u = new URL(location.href);
+    if (q) u.searchParams.set('q', q); else u.searchParams.delete('q');
+    if (ai) u.searchParams.set('ai', '1'); else u.searchParams.delete('ai');
+    history.pushState({}, '', u);
+    renderRoute();
+  }
+
+  function showHero() {
+    if (aiAbort) aiAbort.abort();
+    searchToken++;
+    $('results').hidden = true;
+    $('hero').hidden = false;
+    document.title = 'Okemo Astra ✦';
+    updateKeyCard();
+  }
+
+  function showResults(q, ai) {
+    $('hero').hidden = true;
+    $('results').hidden = false;
+    $('results-input').value = q;
+    document.title = q + ' — Okemo Astra';
+    runSearch(q, ai);            // defined in Task 5
+  }
+
+  function renderRoute() {
+    const { q, ai } = readRoute();
+    if (!q) showHero(); else showResults(q, ai);
+  }
+
+  // ── bar wiring (hero + results bars behave identically) ──
+  function wireBar(inputId, searchId, aiId, suggestId) {
+    const input = $(inputId);
+    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, false); });
+    $(aiId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, true); });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const q = input.value.trim();
+        if (!q) return;
+        go(q, e.metaKey || e.ctrlKey);
+      }
+    });
+    initSuggest(input, $(suggestId)); // defined in Task 6
+  }
+
   // ── boot ──
   initTheme();
   makeStars();
   rotatePlaceholders();
+  wireBar('hero-input', 'hero-search', 'hero-ai', 'hero-suggest');
+  wireBar('results-input', 'results-search', 'results-ai', 'results-suggest');
+  $('logo-home').addEventListener('click', (e) => { e.preventDefault(); go('', false); });
+  window.addEventListener('popstate', renderRoute);
+  renderRoute();
+
+  // ── TEMP STUBS (replaced in Tasks 4–7) ──
+  function updateKeyCard() {}
+  function initSuggest() {}
+  function runSearch(q) { $('r-meta').textContent = 'search lands in task 5 — you asked for: ' + q; }
 })();
