@@ -7,6 +7,7 @@ docs/superpowers/specs/2026-08-11-temp-mlx-backend-design.md
 
 import json
 import os
+import queue
 import threading
 import time
 import uuid
@@ -170,24 +171,32 @@ def chat_completions(body: dict):
     cid = "chatcmpl-" + uuid.uuid4().hex[:24]
 
     if body.get("stream"):
-        def sse():
+        q = queue.Queue()
+
+        def worker():
             ptok, gtok, finish = 0, 0, "stop"
             with gen_lock:
                 try:
                     for text, p, g, fr in generate_pieces(body):
                         ptok, gtok = p or ptok, g or gtok
                         if text:
-                            yield f"data: {json.dumps(_chunk(cid, created, model_id, {'content': text}, None), ensure_ascii=False)}\n\n"
+                            q.put(f"data: {json.dumps(_chunk(cid, created, model_id, {'content': text}, None), ensure_ascii=False)}\n\n")
                         if fr:
                             finish = fr
                 except Exception as e:
-                    yield f"data: {json.dumps(_chunk(cid, created, model_id, {'content': f'⚠️ Backend error: {e}'}, None), ensure_ascii=False)}\n\n"
+                    q.put(f"data: {json.dumps(_chunk(cid, created, model_id, {'content': f'⚠️ Backend error: {e}'}, None), ensure_ascii=False)}\n\n")
                 finally:
                     cancelled_jobs.discard(body.get("job_id"))
                     _record_tokens(body, ptok, gtok)
-            yield f"data: {json.dumps(_chunk(cid, created, model_id, {}, finish))}\n\n"
-            yield "data: [DONE]\n\n"
+                    q.put(f"data: {json.dumps(_chunk(cid, created, model_id, {}, finish))}\n\n")
+                    q.put("data: [DONE]\n\n")
+                    q.put(None)  # sentinel
 
+        def sse():
+            for item in iter(q.get, None):
+                yield item
+
+        threading.Thread(target=worker, daemon=True).start()
         return StreamingResponse(sse(), media_type="text/event-stream",
                                  headers={"Cache-Control": "no-cache",
                                           "X-Accel-Buffering": "no"})

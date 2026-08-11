@@ -1,3 +1,8 @@
+import asyncio
+import json
+import threading
+
+import pytest
 from fastapi.testclient import TestClient
 
 import server
@@ -50,11 +55,6 @@ def test_cancel_job_ok():
     assert r.json() == {"ok": True}
     assert "abc123" in server.cancelled_jobs
     server.cancelled_jobs.discard("abc123")
-
-
-import json
-
-import pytest
 
 
 class FakeResp:
@@ -164,3 +164,35 @@ def test_tokens_accumulate_per_chat(fake_model):
     })
     r = client.get("/api/tokens", params={"chat_id": "chat-1"})
     assert r.json() == {"total_tokens": 9}
+
+
+def test_abandoned_stream_does_not_block_next_request(fake_model):
+    # Simulate a client that disconnects mid-stream: one chunk is consumed and
+    # the generator is then kept alive but never resumed/closed (Starlette's
+    # threadpool behavior on disconnect). The next request must still complete.
+    resp = server.chat_completions({
+        "model": "saga-0.7b",
+        "messages": [{"role": "user", "content": "hi"}],
+        "stream": True,
+    })
+    # StreamingResponse wraps the sync generator with iterate_in_threadpool,
+    # so body_iterator is an async generator; consume exactly one chunk and
+    # then abandon it (never resumed, never closed) to mimic the disconnect.
+    it = resp.body_iterator
+    assert asyncio.run(it.__anext__()).startswith("data: ")
+
+    result = {}
+
+    def second_request():
+        r = client.post("/v1/chat/completions", json={
+            "model": "saga-0.7b",
+            "messages": [{"role": "user", "content": "hi"}],
+            "stream": False,
+        })
+        result["status"] = r.status_code
+
+    t = threading.Thread(target=second_request, daemon=True)
+    t.start()
+    t.join(timeout=10)
+    del it  # now allow cleanup of the abandoned stream
+    assert result.get("status") == 200
