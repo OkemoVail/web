@@ -33,7 +33,7 @@
   function initTheme() {
     $('theme-toggle').addEventListener('click', () => {
       const dark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('vail_theme', dark ? 'dark' : 'light');
+      try { localStorage.setItem('vail_theme', dark ? 'dark' : 'light'); } catch (_) {}
     });
   }
 
