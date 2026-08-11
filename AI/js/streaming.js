@@ -86,11 +86,17 @@ window.startTypewriter = () => {
                 clearInterval(window.typeInterval);
                 window.typeInterval = null;
                 window.updateAssistantDisplay(window.typedResponseText, true);
+                if (typeof window.finalizeLastAIMessage === 'function') {
+                    try { window.finalizeLastAIMessage(); } catch (e) { console.error('finalizeLastAIMessage failed:', e); }
+                }
             }
             return;
         }
-        const speed = window.isInsideThought(window.typedResponseText) ? window.TYPE_SPEED_THOUGHT : window.TYPE_SPEED_MAIN;
-        window.charAccu += speed / 20;
+        // Adaptive drain: floor = the classic typewriter speed; when the queue
+        // outruns the floor, accelerate proportionally (backlog drains in ~6
+        // ticks), capped at 50 chars/tick (1000 chars/s) so it never "dumps".
+        const speedFloor = window.isInsideThought(window.typedResponseText) ? window.TYPE_SPEED_THOUGHT : window.TYPE_SPEED_MAIN;
+        window.charAccu += Math.min(Math.max(speedFloor / 20, window.streamQueue.length / 6), 50);
         let charsAdded = 0;
         while (window.charAccu >= 1 && window.streamQueue.length > 0) {
             window.typedResponseText += window.streamQueue[0];
