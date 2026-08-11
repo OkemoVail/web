@@ -100,13 +100,19 @@ window._requestChatTitle = async (baseUrl, messages) => {
     return window.cleanChatTitle(data.choices[0].message.content);
 };
 
-window.generateChatTitle = async (chatId, userMsg, aiMsg, force = false) => {
+window.generateChatTitle = async (chatId, force = false) => {
     if (!force && window[`_generatingTitle_${chatId}`]) return;
+    window[`_generatingTitle_${chatId}`] = true;
     try {
+        const history = chatId === window.currentChatId
+            ? window.chatHistory
+            : window.allChats[chatId]?.history;
+        const digest = window.buildTitleDigest(history);
+        if (!digest) return;
         const baseUrl = await window.getOpenAIClient();
         const messages = [
             { "role": "system", "content": TITLE_SYSTEM_PROMPT },
-            { "role": "user", "content": `User: "${userMsg}"\nAssistant: "${(aiMsg || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim().substring(0, 300).replace(/[\r\n]+/g, ' ')}"` }
+            { "role": "user", "content": digest }
         ];
 
         let newTitle = await window._requestChatTitle(baseUrl, messages);
@@ -123,17 +129,16 @@ window.generateChatTitle = async (chatId, userMsg, aiMsg, force = false) => {
             else newTitle = null;
         }
 
-        if (newTitle) {
-            if (window.allChats[chatId]) {
-                window.allChats[chatId].title = newTitle;
-                await window.StorageController.saveChat(window.allChats[chatId]);
-                if (window.currentChatId === chatId) {
-                    window.updateChatTitleDisplay(newTitle);
-                    window.allChats[chatId].titleFeedback = null;
-                    window.updateTitleFeedbackUI(chatId);
-                }
-                window.renderHistory();
+        if (newTitle && window.allChats[chatId]) {
+            window.allChats[chatId].title = newTitle;
+            window.allChats[chatId].titleGenAt = (history || []).length;
+            await window.StorageController.saveChat(window.allChats[chatId]);
+            if (window.currentChatId === chatId) {
+                window.updateChatTitleDisplay(newTitle);
+                window.allChats[chatId].titleFeedback = null;
+                window.updateTitleFeedbackUI(chatId);
             }
+            window.renderHistory();
         }
     } catch (e) {
         console.error("Failed to generate title", e);
@@ -159,14 +164,12 @@ window.updateChatTitleDisplay = (title) => {
 
 window.regenerateCurrentTitle = () => {
     if (!window.currentChatId || window.chatHistory.length === 0) return;
-    const userMsg = window.chatHistory[0][0];
-    const aiMsg = window.chatHistory[0][1];
 
     const titleEl = document.getElementById('top-left-chat-title');
     if (titleEl) titleEl.classList.add('shimmer-active');
 
     const btn = document.querySelector('#top-left-chat-title button[onclick*="regenerateCurrentTitle"] i');
-    window.generateChatTitle(window.currentChatId, userMsg, aiMsg, true).finally(() => {
+    window.generateChatTitle(window.currentChatId, true).finally(() => {
         if (titleEl) titleEl.classList.remove('shimmer-active');
     });
 

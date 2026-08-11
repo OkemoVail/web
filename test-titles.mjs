@@ -71,3 +71,50 @@ function loadModule(overrides = {}) {
     assert.strictEqual(w.chatTitleDue({ title: 'real title', history: hist }, 5), true, 'legacy chat (no titleGenAt)');
     console.log('✓ chatTitleDue');
 }
+
+// ── generateChatTitle (digest payload + meta retry + apply) ──
+{
+    const calls = [];
+    const w = loadModule({
+        fetch: async (url, opts) => {
+            calls.push(JSON.parse(opts.body));
+            const content = calls.length === 1 ? 'The user is asking about css' : 'css grief, then docker (classic)';
+            return { ok: true, json: async () => ({ choices: [{ message: { content } }] }) };
+        }
+    });
+    w.settings = {};
+    w.currentModel = { id: 'saga-0.7b' };
+    w.getOpenAIClient = async () => 'http://fake';
+    w.StorageController = { saveChat: async () => {} };
+    w.renderHistory = () => {};
+    w.updateChatTitleDisplay = () => {};
+    w.updateTitleFeedbackUI = () => {};
+    w.currentChatId = 'c1';
+    const hist = [
+        ['how do I center a div', '<think>t</think> use flexbox, justify-center', null],
+        ['that worked, now my docker container wont start', 'check the logs first', null],
+    ];
+    w.chatHistory = hist;
+    w.allChats = { c1: { id: 'c1', title: hist[0][0].substring(0, 30), history: hist } };
+
+    await w.generateChatTitle('c1');
+    assert.strictEqual(calls.length, 2, 'meta title triggers exactly one retry');
+    const sent = calls[0].messages.map(m => m.content).join('\n');
+    assert(sent.includes('how do I center a div'), 'payload has first turn');
+    assert(sent.includes('docker container'), 'payload has latest turn');
+    assert(sent.includes('flexbox'), 'payload has assistant content');
+    assert(!/<think>/.test(sent), 'think tags stripped from payload');
+    assert.strictEqual(w.allChats.c1.title, 'css grief, then docker (classic)', 'retry title applied');
+    assert.strictEqual(w.allChats.c1.titleGenAt, 2, 'titleGenAt recorded');
+    console.log('✓ generateChatTitle');
+}
+
+// ── chatTitleDue extra pins (review follow-up) ──
+{
+    const w = loadModule();
+    const hist = [['my flask route keeps 404ing', 'add the leading slash', null]];
+    assert.strictEqual(w.chatTitleDue({ titleFeedback: 'bad', title: 'real title', titleGenAt: 1, history: hist }, 5), true, 'thumbs-down keeps evolving');
+    assert.strictEqual(w.chatTitleDue({ title: '', history: hist }, 1), true, 'empty title → due');
+    assert.strictEqual(w.chatTitleDue({ title: 'real title', titleGenAt: 9, history: hist }, 5), false, 'negative diff (regen truncated) → not due');
+    console.log('✓ chatTitleDue extra pins');
+}
