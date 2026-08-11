@@ -118,3 +118,93 @@ function loadModule(overrides = {}) {
     assert.strictEqual(w.chatTitleDue({ title: 'real title', titleGenAt: 9, history: hist }, 5), false, 'negative diff (regen truncated) → not due');
     console.log('✓ chatTitleDue extra pins');
 }
+
+// ── generateChatTitle guards (review follow-up) ──
+{
+    // (a) in-flight suppression + force bypass
+    const calls = [];
+    let release;
+    const gate = new Promise(r => { release = r; });
+    const w = loadModule({
+        fetch: async (url, opts) => {
+            calls.push(JSON.parse(opts.body));
+            await gate;
+            return { ok: true, json: async () => ({ choices: [{ message: { content: 'a title' } }] }) };
+        }
+    });
+    w.settings = {};
+    w.currentModel = { id: 'saga-0.7b' };   // stand-in for MODELS.SAGA from state.js
+    w.getOpenAIClient = async () => 'http://fake';
+    w.StorageController = { saveChat: async () => {} };
+    w.renderHistory = () => {};
+    w.updateChatTitleDisplay = () => {};
+    w.updateTitleFeedbackUI = () => {};
+    w.currentChatId = 'c1';
+    const hist = [['q1', 'a1', null]];
+    w.chatHistory = hist;
+    w.allChats = { c1: { id: 'c1', title: 'q1', history: hist } };
+
+    const p1 = w.generateChatTitle('c1');
+    await w.generateChatTitle('c1');                // suppressed by in-flight flag
+    await new Promise(r => setTimeout(r, 0));       // let p1 reach fetch
+    assert.strictEqual(calls.length, 1, 'concurrent non-force call suppressed');
+    const p2 = w.generateChatTitle('c1', true);     // force bypasses the guard
+    await new Promise(r => setTimeout(r, 0));
+    release();
+    await Promise.all([p1, p2]);
+    assert.strictEqual(calls.length, 2, 'force call bypasses in-flight guard');
+
+    // (b) request failure keeps title + titleGenAt, releases the flag
+    const w2 = loadModule({
+        fetch: async () => ({ ok: false, status: 500 })
+    });
+    w2.settings = {};
+    w2.currentModel = { id: 'saga-0.7b' };   // stand-in for MODELS.SAGA from state.js
+    w2.getOpenAIClient = async () => 'http://fake';
+    w2.StorageController = { saveChat: async () => {} };
+    w2.renderHistory = () => {};
+    w2.updateChatTitleDisplay = () => {};
+    w2.updateTitleFeedbackUI = () => {};
+    w2.currentChatId = 'c1';
+    const hist2 = [['q1', 'a1', null]];
+    w2.chatHistory = hist2;
+    w2.allChats = { c1: { id: 'c1', title: 'existing title', titleGenAt: 1, history: hist2 } };
+    await w2.generateChatTitle('c1');
+    assert.strictEqual(w2.allChats.c1.title, 'existing title', 'failure keeps title');
+    assert.strictEqual(w2.allChats.c1.titleGenAt, 1, 'failure keeps titleGenAt');
+    assert.strictEqual(w2._generatingTitle_c1, undefined, 'flag released after failure');
+    console.log('✓ generateChatTitle guards');
+}
+
+// ── --live [baseUrl]: fire real title requests and print the titles ──
+if (process.argv[2] === '--live') {
+    const base = process.argv[3] || 'http://127.0.0.1:8001';
+    const system = code.match(/const TITLE_SYSTEM_PROMPT = `([\s\S]*?)`;/)[1];
+    const w = loadModule();
+    const metaRe = /^(the user|user is|this (chat|conversation|is)|in this (chat|conversation))/i;
+    const samples = [
+        ['greeting', 'User: "hi"'],
+        ['flask 404', 'User: "my flask route keeps 404ing"\nAssistant: "your route decorator is missing the leading slash"'],
+        ['mars story', 'User: "write a sci-fi story about mars"'],
+        ['drifted chat', 'First message: "how do I center a div"\nUser: "that worked, now my docker container wont start"\nAssistant: "check the docker logs first"'],
+    ];
+    let failed = false;
+    for (const [label, digest] of samples) {
+        const res = await fetch(base + '/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'saga-0.7b',
+                messages: [{ role: 'system', content: system }, { role: 'user', content: digest }],
+                temperature: 0.3, max_tokens: 60, stream: false
+            }),
+        });
+        if (!res.ok) { console.error(`✗ ${label}: HTTP ${res.status}`); failed = true; continue; }
+        const data = await res.json();
+        const title = w.cleanChatTitle(data.choices[0].message.content);
+        const meta = metaRe.test(title);
+        if (meta) failed = true;
+        console.log(`${meta ? '✗ META' : '✓'} ${label}: "${title}"`);
+    }
+    process.exit(failed ? 1 : 0);
+}
