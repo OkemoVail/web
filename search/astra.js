@@ -350,6 +350,105 @@
     if (ai) askAstra(q, results);          // defined in Task 7
   }
 
-  // ── TEMP STUB (replaced in Task 7) ──
-  function askAstra() { $('ai-body').textContent = 'AI mode lands in task 7 ✦'; }
+  // ── AI mode: Brave-grounded Saga answer, streamed over SSE ──
+  function backendBase() {
+    try { return (localStorage.getItem('vail_custom_backend_url') || 'https://api.okemovail.com').replace(/\/$/, ''); }
+    catch (_) { return 'https://api.okemovail.com'; }
+  }
+
+  function linkifyCitations(html) {
+    // [n] → jump link to the matching result card (must run on marked output)
+    return html.replace(/\[(\d{1,2})\]/g, (m, n) =>
+      '<a href="#result-' + n + '">[' + n + ']</a>');
+  }
+
+  function startWaveQuips() {
+    const label = $('ai-wave-label');
+    let i = 0;
+    label.textContent = '✦ ' + COPY.loadingQuips[0];
+    return setInterval(() => {
+      i = (i + 1) % COPY.loadingQuips.length;
+      label.textContent = '✦ ' + COPY.loadingQuips[i];
+    }, 2200);
+  }
+
+  async function askAstra(q, results) {
+    if (aiAbort) aiAbort.abort();
+    aiAbort = new AbortController();
+    const panel = $('ai-panel');
+    panel.classList.remove('done');
+    $('ai-body').innerHTML = '';
+    $('ai-error').hidden = true;
+    const quipTimer = startWaveQuips();
+
+    const snippets = results.slice(0, 5)
+      .map((r, i) => '[' + (i + 1) + '] ' + (r.title || '') + ' — ' + (r.description || '') + ' (' + r.url + ')')
+      .join('\n');
+
+    try {
+      const res = await fetch(backendBase() + '/v1/chat/completions', {
+        method: 'POST',
+        signal: aiAbort.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          'bypass-tunnel-reminder': 'true',
+        },
+        body: JSON.stringify({
+          model: 'saga-0.7b',
+          stream: true,
+          web_search: false,
+          use_thought: false,
+          max_tokens: 1024,
+          messages: [
+            { role: 'system', content: COPY.aiSystem },
+            { role: 'user', content: q + '\n\nSources:\n' + (snippets || '(no sources — answer from knowledge)') },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error('backend ' + res.status);
+
+      // SSE consumption — same line protocol as AI/js/chat-actions.js
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '', text = '', firstToken = false;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
+        for (const line of lines) {
+          const clean = line.trim();
+          if (!clean.startsWith('data: ')) continue;
+          const dataStr = clean.substring(6).trim();
+          if (dataStr === '[DONE]') break;
+          try {
+            const data = JSON.parse(dataStr);
+            const delta = data.choices && data.choices[0] && data.choices[0].delta
+              ? (data.choices[0].delta.content || '') : '';
+            if (delta) {
+              if (!firstToken) { firstToken = true; clearInterval(quipTimer); $('ai-wave-label').textContent = '✦ streaming from the stars…'; }
+              text += delta;
+              $('ai-body').innerHTML = linkifyCitations(marked.parse(text));
+            }
+          } catch { /* partial JSON chunk — ignore */ }
+        }
+      }
+      clearInterval(quipTimer);
+      panel.classList.add('done');         // wave collapses to shimmer line
+    } catch (e) {
+      clearInterval(quipTimer);
+      if (e.name === 'AbortError') return; // superseded by a newer search
+      panel.classList.add('done');
+      const err = $('ai-error');
+      err.hidden = false;
+      err.textContent = '✦ ' + COPY.aiDown + ' ';
+      const btn = document.createElement('button');
+      btn.className = 'skuo skuo-neutral';
+      btn.textContent = 'retry';
+      btn.addEventListener('click', () => askAstra(q, results));
+      err.appendChild(btn);
+    }
+  }
 })();
