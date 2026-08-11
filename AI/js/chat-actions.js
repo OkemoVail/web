@@ -40,6 +40,49 @@ window.handleAction = async () => {
     }
 };
 
+// Called by the typewriter (streaming.js) when the queue has fully drained
+// after generation ends. Finalizes the last AI bubble in place — no
+// whole-chat render(), so nothing re-animates or slams.
+window.finalizeLastAIMessage = () => {
+    const chatMsgs = window.els.chatMsgs;
+    if (!chatMsgs) return;
+    const aiRow = chatMsgs.querySelector('.ai-row:last-child');
+    if (!aiRow) return;
+
+    // 1. Fade out the book-flip generation indicator, then remove it.
+    const lane = aiRow.querySelector('.book-flip-lane');
+    if (lane) {
+        lane.classList.add('done');
+        setTimeout(() => lane.remove(), 340);
+    }
+
+    // 2. Append the actions row (copy / regen / sources / feedback / timestamp).
+    const prose = aiRow.querySelector('.prose-target');
+    if (prose && !aiRow.querySelector('.ai-msg-actions')) {
+        const pairIdx = window.chatHistory.length - 1;
+        const sources = (window.chatHistory[pairIdx] && window.chatHistory[pairIdx][5]) || [];
+        const actionRow = document.createElement('div');
+        actionRow.className = 'ai-msg-actions animate-fade-in';
+        actionRow.innerHTML = `
+            <div class="ai-actions-left">
+                <button onclick="window.copyMsg(${pairIdx}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>
+                <button onclick="window.regenMsg(${pairIdx})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
+                ${sources.length ? `<button onclick="window.showSources(${pairIdx})" class="ai-action-btn sources-btn" title="View ${sources.length} sources"><i data-feather="link" class="w-4 h-4"></i><span class="sources-count">${sources.length}</span></button>` : ''}
+            </div>
+            <div class="ai-actions-right">
+                <button onclick="window.sendFeedback(${pairIdx}, 'good', this)" class="ai-action-btn feedback-btn" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
+                <button onclick="window.sendFeedback(${pairIdx}, 'bad', this)" class="ai-action-btn feedback-btn" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
+                <span class="msg-timestamp ai-timestamp">${window.formatDate(window.chatHistory[pairIdx][3])}</span>
+            </div>
+        `;
+        prose.parentNode.appendChild(actionRow);
+        feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, actionRow);
+    }
+
+    // 3. Settle scroll at the bottom.
+    if (window.els.chatCont) window.els.chatCont.scrollTop = window.els.chatCont.scrollHeight;
+};
+
 window.sendMessage = async (txt = null, forceSearch = false) => {
     console.log("sendMessage called, isGenerating:", window.isGenerating);
     if (window.isGenerating) {
@@ -301,61 +344,21 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         window.updateUI();
         window.toggleSendIcon('send');
 
-        const lastProseEl = window.els.chatMsgs.querySelector('.ai-row:last-child .prose-target');
-        if (lastProseEl && responseText) {
-            const { thought, content } = window.parseThought(responseText);
-
-            let thoughtContainer = lastProseEl.querySelector('.thought-container');
-            if (thought) {
-                if (!thoughtContainer) {
-                    const thoughtHtml = `
-                        <div class="thought-container">
-                            <div class="thought-header" onclick="window.toggleThought(this)">
-                                <span>Thinking Process</span>
-                                <i data-feather="chevron-down" class="w-3 h-3 transition-transform duration-200 chevron-icon" style="transform: rotate(180deg)"></i>
-                            </div>
-                            <div class="thought-content expanded">
-                                <div class="thought-body whitespace-pre-wrap"></div>
-                            </div>
-                        </div>`;
-                    lastProseEl.insertAdjacentHTML('afterbegin', thoughtHtml);
-                    thoughtContainer = lastProseEl.querySelector('.thought-container');
-                }
-                const body = thoughtContainer.querySelector('.thought-body');
-                if (body) body.innerText = thought;
-            }
-
-            let mainContentDiv = lastProseEl.querySelector('.main-response-content');
-            if (!mainContentDiv) {
-                mainContentDiv = document.createElement('div');
-                mainContentDiv.className = 'main-response-content';
-                lastProseEl.appendChild(mainContentDiv);
-            }
-            mainContentDiv.innerHTML = marked.parse(window.sanitizeText(content));
-            window.applyContentFeatures(mainContentDiv);
+        // Hand the SANITIZED remainder to the typewriter so it converges to
+        // exactly responseText (no slam). If sanitization removed chars that
+        // were already typed (e.g. a completed <remember> tag), prefix
+        // alignment is impossible — hard-sync instead (rare path).
+        if (window.typedResponseText && responseText.startsWith(window.typedResponseText)) {
+            window.streamQueue = responseText.slice(window.typedResponseText.length);
+        } else {
+            window.typedResponseText = responseText;
+            window.streamQueue = "";
         }
-
-        if (lastProseEl) {
-            if (!lastProseEl.parentNode.querySelector('.ai-msg-actions')) {
-                const actionRow = document.createElement('div');
-                actionRow.className = 'ai-msg-actions animate-fade-in';
-                const _pairIdx = window.chatHistory.length - 1;
-                const _srcCount = (window.chatHistory[_pairIdx] && window.chatHistory[_pairIdx][5] && window.chatHistory[_pairIdx][5].length) || 0;
-                actionRow.innerHTML = `
-                    <div class="ai-actions-left">
-                        <button onclick="window.copyMsg(${_pairIdx}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>
-                        <button onclick="window.regenMsg(${_pairIdx})" class="ai-action-btn" title="Regenerate"><i data-feather="rotate-cw" class="w-4 h-4"></i></button>
-                        ${_srcCount ? `<button onclick="window.showSources(${_pairIdx})" class="ai-action-btn sources-btn" title="View ${_srcCount} sources"><i data-feather="link" class="w-4 h-4"></i><span class="sources-count">${_srcCount}</span></button>` : ''}
-                    </div>
-                    <div class="ai-actions-right">
-                        <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'good', this)" class="ai-action-btn feedback-btn" title="Good response"><i data-feather="thumbs-up" class="w-4 h-4"></i></button>
-                        <button onclick="window.sendFeedback(${window.chatHistory.length - 1}, 'bad', this)" class="ai-action-btn feedback-btn" title="Bad response"><i data-feather="thumbs-down" class="w-4 h-4"></i></button>
-                        <span class="msg-timestamp ai-timestamp">${window.formatDate(window.chatHistory[window.chatHistory.length - 1][3])}</span>
-                    </div>
-                `;
-                lastProseEl.parentNode.appendChild(actionRow);
-                feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, actionRow);
-            }
+        // If the typewriter never started (zero-token reply) or already
+        // drained, finalize right now — nobody else will.
+        if (!window.typeInterval) {
+            window.updateAssistantDisplay(window.typedResponseText, true);
+            window.finalizeLastAIMessage();
         }
         window.currentJob = null;
         console.log("Streaming complete");
@@ -368,9 +371,9 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
             }
         }
 
-        window.render();
         window.updateUI();
     } catch (e) {
+        window.streamQueue = "";
         if (e.name === 'AbortError') {
             console.log("Stream aborted by user.");
         } else {
@@ -384,7 +387,10 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         window.isGenerating = false;
         window.updateUI();
         window.toggleSendIcon('send');
-        if (window.typeInterval) {
+        // Don't kill the typewriter mid-backlog on the success path — it
+        // drains the remainder in a few hundred ms and finalizes itself.
+        // (Error/abort paths cleared the queue first, so it stops instantly.)
+        if (window.typeInterval && window.streamQueue.length === 0) {
             clearInterval(window.typeInterval);
             window.typeInterval = null;
         }
