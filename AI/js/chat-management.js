@@ -1,48 +1,82 @@
 // ─── Chat Management (title, save, load, delete, history) ──────
 
+const TITLE_META_RE = /^(the user|user is|this (chat|conversation|is)|in this (chat|conversation))/i;
+
+const TITLE_SYSTEM_PROMPT = `You are Saga naming this conversation for a sidebar list. Write one short line (4-10 words) that captures the main topic or vibe of the chat — someone scanning the list should instantly know what this conversation is.
+
+Style: your voice — dry, lowercase, plain, slight edge is fine. No quotes, no trailing period, no emoji, no explanation. NEVER describe the user or the conversation itself: no "the user", no "this conversation", no "someone asked".
+
+Examples:
+User: "hi" → oh, just saying hi
+User: "my flask route keeps 404ing" → a flask 404 on the api route
+User: "write a sci-fi story about mars" → sci-fi story, mars edition
+User: "what causes iron deficiency anemia" → iron deficiency anemia, causes and fixes
+User: "how do I center a div" → centering a div, finally`;
+
+window.cleanChatTitle = (raw) => {
+    let t = (raw || '')
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+        .replace(/<\|im_start\|>[\s\S]*?<\|im_end\|>/g, '')
+        .replace(/<\|im_start\|>|<\|im_end\|>/g, '')
+        .replace(/<\/?[a-zA-Z][^>]*>/g, '')   // any remaining HTML/XML-ish tags
+        .replace(/[\r\n]+/g, ' ')
+        .trim();
+    // If multiple lines/sentences slipped through, keep the first clause
+    t = t.split(/(?<=[.!?])\s+/)[0] || t;
+    t = t.replace(/^["'`*\s]+|["'`*\s.]+$/g, '').trim();
+    return t;
+};
+
+window._requestChatTitle = async (baseUrl, messages) => {
+    const response = await fetch(baseUrl + "/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+            "bypass-tunnel-reminder": "true",
+            ...(window.settings.apiKey ? { "Authorization": `Bearer ${window.settings.apiKey.trim()}` } : {})
+        },
+        body: JSON.stringify({
+            model: window.currentModel.id,
+            messages: messages,
+            temperature: 0.3,
+            max_tokens: 60,
+            stream: false,
+            use_thought: false,
+            think: false,
+            thinking: false
+        })
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return window.cleanChatTitle(data.choices[0].message.content);
+};
+
 window.generateChatTitle = async (chatId, userMsg, aiMsg, force = false) => {
     if (!force && window[`_generatingTitle_${chatId}`]) return;
     try {
         const baseUrl = await window.getOpenAIClient();
-        const response = await fetch(baseUrl + "/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "ngrok-skip-browser-warning": "true",
-                "bypass-tunnel-reminder": "true",
-                ...(window.settings.apiKey ? { "Authorization": `Bearer ${window.settings.apiKey.trim()}` } : {})
-            },
-            body: JSON.stringify({
-                model: window.currentModel.id,
-                messages: [
-                    { "role": "system", "content": "Write a single short sentence summarising what the user asked or needed. Output only that sentence — no thinking, no tags, no quotes, no explanation.\n\n10–15 words max. Plain sentence case. No trailing period.\n\nFocus on the user's intent, not the assistant's response.\n\nExamples:\nHow to reverse a linked list in Python using recursion\nWhat causes iron deficiency anemia and how to treat it\nWhy black holes form from the collapse of massive stars\nFixing a 404 error on a Flask API route" },
-                    { "role": "user", "content": `User: "${userMsg}"\nAssistant: "${(aiMsg || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim().substring(0, 300).replace(/[\r\n]+/g, ' ')}"` }
-                ],
-                temperature: 0.3,
-                max_tokens: 60,
-                stream: false,
-                use_thought: false,
-                think: false,
-                thinking: false
-            })
-        });
+        const messages = [
+            { "role": "system", "content": TITLE_SYSTEM_PROMPT },
+            { "role": "user", "content": `User: "${userMsg}"\nAssistant: "${(aiMsg || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim().substring(0, 300).replace(/[\r\n]+/g, ' ')}"` }
+        ];
 
-        if (response.ok) {
-            const data = await response.json();
-            let newTitle = data.choices[0].message.content || '';
-            // Strip reasoning blocks, ChatML markers, and any stray tags before the title
-            newTitle = newTitle
-                .replace(/<think>[\s\S]*?<\/think>/gi, '')
-                .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
-                .replace(/<\|im_start\|>[\s\S]*?<\|im_end\|>/g, '')
-                .replace(/<\|im_start\|>|<\|im_end\|>/g, '')
-                .replace(/<\/?[a-zA-Z][^>]*>/g, '')   // any remaining HTML/XML-ish tags
-                .replace(/[\r\n]+/g, ' ')
-                .trim();
-            // If multiple lines/sentences slipped through, keep the first clause
-            newTitle = newTitle.split(/(?<=[.!?])\s+/)[0] || newTitle;
-            newTitle = newTitle.replace(/^["'`*\s]+|["'`*\s.]+$/g, '').trim();
+        let newTitle = await window._requestChatTitle(baseUrl, messages);
 
+        // Meta guard: "The user is..."-style titles describe the chatter, not
+        // the chat. Retry once with a corrective nudge; if still meta (or the
+        // retry failed), keep the existing fallback title — never ship meta.
+        if (newTitle && TITLE_META_RE.test(newTitle)) {
+            const retry = await window._requestChatTitle(baseUrl, [...messages,
+                { "role": "assistant", "content": newTitle },
+                { "role": "user", "content": "no — name the topic, not the user. one short line, your voice, title only." }
+            ]);
+            if (retry && !TITLE_META_RE.test(retry)) newTitle = retry;
+            else newTitle = null;
+        }
+
+        if (newTitle) {
             if (window.allChats[chatId]) {
                 window.allChats[chatId].title = newTitle;
                 await window.StorageController.saveChat(window.allChats[chatId]);
