@@ -664,9 +664,9 @@ Replace the `function initSuggest() {}` stub line with:
 
   function initSuggest(input, box) {
     if (!input || !box) return;
-    let items = [], active = -1, timer = null, dead = false;
+    let items = [], active = -1, timer = null, dead = false, typed = '';
 
-    function close() { box.hidden = true; items = []; active = -1; }
+    function close() { clearTimeout(timer); box.hidden = true; items = []; active = -1; }
     function render() {
       box.innerHTML = '';
       if (!items.length) return close();
@@ -679,7 +679,7 @@ Replace the `function initSuggest() {}` stub line with:
           e.preventDefault();
           input.value = s;
           close();
-          go(s, false);
+          go(s, e.metaKey || e.ctrlKey);
         });
         box.appendChild(b);
       });
@@ -694,6 +694,8 @@ Replace the `function initSuggest() {}` stub line with:
         try {
           const got = await braveSuggest(q);
           if (input.value.trim() !== q) return;    // stale
+          if (document.activeElement !== input) return; // blurred mid-flight
+          typed = q;
           items = got; active = -1; render();
         } catch { dead = true; close(); }          // never surface suggest errors
       }, 150);
@@ -704,6 +706,7 @@ Replace the `function initSuggest() {}` stub line with:
         e.preventDefault();
         active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length + 2) % (items.length + 1) - 1;
         if (active >= 0) input.value = items[active];
+        else input.value = typed;
         render();
       } else if (e.key === 'Enter' && active >= 0) {
         e.preventDefault(); e.stopPropagation();
