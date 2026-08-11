@@ -1,0 +1,5 @@
+mlx-lm
+fastapi
+uvicorn[standard]
+pytest
+httpx
