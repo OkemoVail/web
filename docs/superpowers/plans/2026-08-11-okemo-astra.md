@@ -43,6 +43,7 @@ Complete file:
 </script>
 <link rel="stylesheet" href="../src/design-tokens.css">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="icon" href="../images/blehfile.png">
 <style>
   /* ── Astra layout & identity (appearance tokens come from design-tokens.css) ── */
   body { margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; }
@@ -69,6 +70,7 @@ Complete file:
   .bar-icon { opacity: .55; font-size: .95rem; }
   .bar input { flex: 1; min-width: 0; background: transparent; border: none; box-shadow: none; outline: none; padding: 0; height: 100%; font-size: .95rem; color: var(--text-primary); }
   .bar input:focus { outline: none; box-shadow: none; border: none; }
+  .dark .bar input { box-shadow: none; }
   .bar .skuo { height: 36px; padding: 0 14px; border-radius: 999px; font-size: .82rem; white-space: nowrap; }
   /* rainbow ring around Ask Astra */
   .ai-ring { border-radius: 999px; padding: 1.5px; background: conic-gradient(from var(--rb, 0deg), #ff5f6d, #ffc371, #f0e05a, #5fdc7d, #5aa7ff, #b06bff, #ff5f6d); animation: rb-spin 3.2s linear infinite; }
@@ -152,8 +154,8 @@ Complete file:
   </div>
   <div class="bar" id="hero-bar">
     <span class="bar-icon">🔭</span>
-    <input id="hero-input" type="text" autocomplete="off" spellcheck="false" aria-label="Search the web">
-    <button class="skuo skuo-neutral" id="hero-search"><span class="lbl">Search</span></button>
+    <input id="hero-input" type="text" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web">
+    <button class="skuo skuo-neutral" id="hero-search">🔍 <span class="lbl">Search</span></button>
     <span class="ai-ring"><button class="skuo" id="hero-ai">✦ <span class="lbl">Ask Astra</span></button></span>
     <div class="suggest" id="hero-suggest" hidden></div>
   </div>
@@ -173,8 +175,8 @@ Complete file:
     <a class="r-logo" href="./" id="logo-home">✦ Astra</a>
     <div class="bar" id="results-bar">
       <span class="bar-icon">🔭</span>
-      <input id="results-input" type="text" autocomplete="off" spellcheck="false" aria-label="Search the web">
-      <button class="skuo skuo-neutral" id="results-search"><span class="lbl">Search</span></button>
+      <input id="results-input" type="text" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web">
+      <button class="skuo skuo-neutral" id="results-search">🔍 <span class="lbl">Search</span></button>
       <span class="ai-ring"><button class="skuo" id="results-ai">✦ <span class="lbl">Ask Astra</span></button></span>
       <div class="suggest" id="results-suggest" hidden></div>
     </div>
