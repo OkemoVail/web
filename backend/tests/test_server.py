@@ -32,6 +32,19 @@ def test_system_prompts_shape():
     assert "global_rules" in data
 
 
+def test_system_prompts_all_nine_personalities():
+    r = client.get("/api/system_prompts")
+    assert r.status_code == 200
+    ps = r.json()["personalities"]
+    assert [p["id"] for p in ps] == [
+        "default", "concise", "creative", "coder", "tutor",
+        "sarcastic", "analyst", "discord-friend", "friend",
+    ]
+    for p in ps:
+        assert p["label"].strip(), f"{p['id']} has empty label"
+        assert p["prompt"].strip(), f"{p['id']} has empty prompt"
+
+
 def test_feedback_appends_jsonl(tmp_path, monkeypatch):
     log = tmp_path / "feedback.jsonl"
     monkeypatch.setattr(server, "FEEDBACK_LOG", str(log))
