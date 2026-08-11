@@ -30,6 +30,34 @@ window.cleanChatTitle = (raw) => {
     return t;
 };
 
+const TITLE_DIGEST_BUDGET = 900;
+
+// Builds the user-message payload for title generation from the WHOLE chat:
+// the first user message (anchored) + the last 5 exchanges, think-tags
+// stripped, capped at TITLE_DIGEST_BUDGET chars (oldest middle lines dropped
+// first — the anchor and the newest turns are never removed).
+window.buildTitleDigest = (history) => {
+    const clean = (s) => (typeof s === 'string' ? s : '')
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+        .replace(/[\r\n]+/g, ' ')
+        .trim();
+    const clip = (s, n) => (s.length > n ? s.slice(0, n).trimEnd() + '…' : s);
+    const pairs = (history || []).filter(p => p && (clean(p[0]) || clean(p[1])));
+    if (!pairs.length) return '';
+
+    const recent = pairs.slice(-5);
+    const lines = [];
+    if (pairs.length > recent.length) lines.push(`First message: "${clip(clean(pairs[0][0]), 200)}"`);
+    for (const [u, a] of recent) {
+        lines.push(`User: "${clip(clean(u), 120)}"`);
+        const ac = clean(a);
+        if (ac) lines.push(`Assistant: "${clip(ac, 120)}"`);
+    }
+    while (lines.join('\n').length > TITLE_DIGEST_BUDGET && lines.length > 3) lines.splice(1, 1);
+    return lines.join('\n');
+};
+
 window._requestChatTitle = async (baseUrl, messages) => {
     const response = await fetch(baseUrl + "/v1/chat/completions", {
         method: "POST",
