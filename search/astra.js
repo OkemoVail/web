@@ -225,7 +225,7 @@
       if (box.hidden) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
-        active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length + 1) % (items.length + 1) - 1;
+        active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length + 2) % (items.length + 1) - 1;
         if (active >= 0) input.value = items[active];
         render();
       } else if (e.key === 'Enter' && active >= 0) {
