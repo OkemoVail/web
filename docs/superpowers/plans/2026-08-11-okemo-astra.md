@@ -446,7 +446,7 @@ Replace the `function updateKeyCard() {}` stub line with:
   function saveKey(raw) {
     const k = (raw || '').trim();
     if (!k) return false;
-    localStorage.setItem('astra_brave_key', k);
+    try { localStorage.setItem('astra_brave_key', k); } catch (_) { return false; }
     return true;
   }
 
@@ -610,6 +610,9 @@ Replace the `function runSearch(q) {...}` stub line with:
 
     if (ai) askAstra(q, results);          // defined in Task 7
   }
+
+  // ── TEMP STUB (replaced in Task 7) ──
+  function askAstra() { $('ai-body').textContent = 'AI mode lands in task 7 ✦'; }
 ```
 
 Note: `showResults` (Task 3) already calls `runSearch(q, ai)` — signatures match.
