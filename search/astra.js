@@ -113,16 +113,17 @@
   // ── bar wiring (hero + results bars behave identically) ──
   function wireBar(inputId, searchId, aiId, suggestId) {
     const input = $(inputId);
+    initSuggest(input, $(suggestId)); // FIRST: suggest's keydown must run before ours (see defaultPrevented guard)
     $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, false); });
     $(aiId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, true); });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
+        if (e.defaultPrevented) return;  // initSuggest accepted a suggestion — don't double-navigate
         const q = input.value.trim();
         if (!q) return;
         go(q, e.metaKey || e.ctrlKey);
       }
     });
-    initSuggest(input, $(suggestId)); // defined in Task 6
   }
 
   // ── boot ──
@@ -136,7 +137,6 @@
   window.addEventListener('popstate', renderRoute);
   renderRoute();
 
-  // ── TEMP STUBS (replaced in Tasks 4–7) ──
   // ── Brave API key ──
   function getKey() { try { return (localStorage.getItem('astra_brave_key') || '').trim(); } catch (_) { return ''; } }
 
@@ -169,7 +169,73 @@
     });
     $('key-modal-cancel').addEventListener('click', () => { $('key-modal').hidden = true; });
   }
-  function initSuggest() {}
+
+  // ── autocomplete (Brave suggest; silently disabled on any failure) ──
+  async function braveSuggest(q) {
+    const res = await fetch(
+      'https://api.search.brave.com/res/v1/suggest/search?q=' + encodeURIComponent(q),
+      { headers: { 'Accept': 'application/json', 'X-Subscription-Token': getKey() } }
+    );
+    if (!res.ok) throw new Error('suggest ' + res.status);
+    const data = await res.json();
+    // tolerant: plans/shapes differ — accept {results:[{query}]} or {suggestions:[…]}
+    return ((data.results || data.suggestions || [])
+      .map((r) => (typeof r === 'string' ? r : r.query))
+      .filter(Boolean)
+      .slice(0, 6));
+  }
+
+  function initSuggest(input, box) {
+    if (!input || !box) return;
+    let items = [], active = -1, timer = null, dead = false;
+
+    function close() { box.hidden = true; items = []; active = -1; }
+    function render() {
+      box.innerHTML = '';
+      if (!items.length) return close();
+      items.forEach((s, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = s;
+        b.className = i === active ? 'active' : '';
+        b.addEventListener('mousedown', (e) => {   // mousedown beats input blur
+          e.preventDefault();
+          input.value = s;
+          close();
+          go(s, false);
+        });
+        box.appendChild(b);
+      });
+      box.hidden = false;
+    }
+
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (dead || !q || !getKey()) return close();
+      timer = setTimeout(async () => {
+        try {
+          const got = await braveSuggest(q);
+          if (input.value.trim() !== q) return;    // stale
+          items = got; active = -1; render();
+        } catch { dead = true; close(); }          // never surface suggest errors
+      }, 150);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (box.hidden) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length + 1) % (items.length + 1) - 1;
+        if (active >= 0) input.value = items[active];
+        render();
+      } else if (e.key === 'Enter' && active >= 0) {
+        e.preventDefault(); e.stopPropagation();
+        close();
+        go(input.value.trim(), e.metaKey || e.ctrlKey);
+      } else if (e.key === 'Escape') close();
+    });
+    input.addEventListener('blur', close);
+  }
 
   // ── Brave web search ──
   async function braveSearch(q) {

@@ -378,16 +378,17 @@ Insert this block immediately before `// ── boot ──`:
   // ── bar wiring (hero + results bars behave identically) ──
   function wireBar(inputId, searchId, aiId, suggestId) {
     const input = $(inputId);
+    initSuggest(input, $(suggestId)); // FIRST: suggest's keydown must run before ours (see defaultPrevented guard)
     $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, false); });
     $(aiId).addEventListener('click', () => { const q = input.value.trim(); if (q) go(q, true); });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
+        if (e.defaultPrevented) return;  // initSuggest accepted a suggestion — don't double-navigate
         const q = input.value.trim();
         if (!q) return;
         go(q, e.metaKey || e.ctrlKey);
       }
     });
-    initSuggest(input, $(suggestId)); // defined in Task 6
   }
 ```
 
@@ -715,6 +716,8 @@ Replace the `function initSuggest() {}` stub line with:
 ```
 
 Keyboard math note: `active` ranges `-1..items.length-1`; `-1` means "what the user typed". ArrowDown from the last item wraps back to `-1`. This is intentional — mirrors Google's behavior.
+
+Enter-ordering fix (as implemented): `stopPropagation` does NOT stop other listeners on the same element, and wireBar's own keydown handler would otherwise fire on the same Enter press. So `wireBar` calls `initSuggest` FIRST (see the Task 3 wireBar block), making suggest's keydown handler run before wireBar's; its `preventDefault()` is then visible to wireBar's Enter branch, which guards with `if (e.defaultPrevented) return;` — no double navigation when a suggestion is accepted. Box closed or `active === -1` → suggest's handler never preventDefaults → wireBar's Enter behaves exactly as in Task 3.
 
 - [ ] **Step 2: Syntax check + verify**
 
