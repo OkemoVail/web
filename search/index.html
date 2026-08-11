@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Okemo Astra ✦</title>
+<meta name="description" content="Okemo Astra — your tiny telescope for the internet.">
+<script>
+  // Anti-FOUC theme (same pattern as Themes/Themes.html) — do not remove.
+  (function () {
+    const stored = localStorage.getItem('vail_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (stored !== 'light' && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+<link rel="stylesheet" href="../src/design-tokens.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  /* ── Astra layout & identity (appearance tokens come from design-tokens.css) ── */
+  body { margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; }
+  [hidden] { display: none !important; }
+
+  /* stars */
+  #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .star { position: absolute; border-radius: 50%; opacity: .15; }
+  @keyframes twinkle { 0%,100% { opacity: .12; } 50% { opacity: .85; } }
+
+  /* hero */
+  .hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 1rem; box-sizing: border-box; }
+  .wordmark { margin: 0; font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; }
+  .tagline { margin: -6px 0 4px; font-size: .85rem; font-style: italic; color: var(--text-tertiary); }
+  .constellation { position: absolute; top: 16%; right: 14%; width: 76px; height: 50px; color: var(--accent); opacity: .55; pointer-events: none; }
+  .hint { margin: 2px 0 0; font-size: .72rem; color: var(--text-tertiary); }
+  .foot { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-size: .72rem; color: var(--text-tertiary); }
+  .foot a { color: inherit; }
+  .theme-toggle { position: absolute; top: 14px; right: 14px; width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; font-size: .9rem; }
+
+  /* search bar (hero + results share .bar) */
+  .bar { display: flex; align-items: center; gap: 6px; width: min(560px, 92vw); height: 46px; box-sizing: border-box; padding: 4px 5px 4px 14px; border-radius: 999px; background: var(--bg-white); border: 1px solid var(--border-strong); box-shadow: 0 1px 6px rgba(0,0,0,.06); position: relative; }
+  .bar:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 80%); }
+  .bar-icon { opacity: .55; font-size: .95rem; }
+  .bar input { flex: 1; min-width: 0; background: transparent; border: none; box-shadow: none; outline: none; padding: 0; height: 100%; font-size: .95rem; color: var(--text-primary); }
+  .bar input:focus { outline: none; box-shadow: none; border: none; }
+  .bar .skuo { height: 36px; padding: 0 14px; border-radius: 999px; font-size: .82rem; white-space: nowrap; }
+  /* rainbow ring around Ask Astra */
+  .ai-ring { border-radius: 999px; padding: 1.5px; background: conic-gradient(from var(--rb, 0deg), #ff5f6d, #ffc371, #f0e05a, #5fdc7d, #5aa7ff, #b06bff, #ff5f6d); animation: rb-spin 3.2s linear infinite; }
+  .ai-ring .skuo { height: 33px; background: var(--bg-white); color: var(--text-primary); font-weight: 600; box-shadow: none; }
+  @property --rb { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  @keyframes rb-spin { to { --rb: 360deg; } }
+  @supports not (background: conic-gradient(from var(--rb), red, blue)) { .ai-ring { animation: none; } }
+
+  /* suggestions dropdown */
+  .suggest { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg-white); border: 1px solid var(--border-strong); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.12); overflow: hidden; z-index: 20; }
+  .suggest button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 9px 16px; font-size: .85rem; color: var(--text-primary); cursor: pointer; }
+  .suggest button.active, .suggest button:hover { background: var(--bg-elevated); }
+  .suggest button.active::before { content: '✦ '; color: var(--accent); }
+
+  /* results view */
+  .results { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 1rem 1rem 4rem; }
+  .r-top { display: flex; align-items: center; gap: 14px; padding: 6px 0 18px; }
+  .r-logo { font-weight: 700; font-size: 1.05rem; text-decoration: none; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
+  .results .bar { width: 100%; height: 42px; }
+  .results .bar .skuo { height: 32px; }
+  .results .ai-ring .skuo { height: 29px; }
+  .r-meta { font-size: .75rem; color: var(--text-tertiary); margin: 0 4px 14px; }
+  #result-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
+  .result { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
+  .result img { width: 18px; height: 18px; border-radius: 4px; margin-top: 3px; }
+  .result .r-url { font-size: .72rem; color: var(--text-tertiary); word-break: break-all; }
+  .result .r-title { font-size: 1.02rem; color: var(--accent); text-decoration: none; line-height: 1.35; }
+  .result .r-title:hover { text-decoration: underline; }
+  .result .r-snippet { margin: 2px 0 0; font-size: .84rem; color: var(--text-secondary); line-height: 1.5; }
+
+  /* AI answer panel */
+  .ai-panel { margin: 0 0 22px; border: 1px solid var(--border-strong); border-radius: 18px; background: var(--bg-white); overflow: hidden; }
+  .ai-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; font-weight: 700; font-size: .92rem; color: var(--accent); }
+  .ai-wave { height: 46px; margin: 10px 12px 0; border-radius: 12px; position: relative; overflow: hidden; transition: height .6s ease, margin .6s ease, opacity .6s ease; }
+  .ai-wave .blob { position: absolute; inset: -60%; filter: blur(18px); background:
+      radial-gradient(38% 55% at 25% 45%, rgba(255,95,109,.9), transparent 70%),
+      radial-gradient(38% 55% at 50% 55%, rgba(90,167,255,.85), transparent 70%),
+      radial-gradient(38% 55% at 72% 45%, rgba(95,220,125,.8), transparent 70%),
+      radial-gradient(40% 60% at 60% 60%, rgba(240,194,123,.85), transparent 70%);
+    animation: wave-flow 4.5s ease-in-out infinite alternate; }
+  .ai-wave .wave-label { position: relative; z-index: 2; height: 100%; display: flex; align-items: center; padding: 0 14px; font-size: .8rem; font-weight: 700; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+  .ai-panel.done .ai-wave { height: 2px; margin: 8px 16px 0; opacity: .9; }
+  .ai-panel.done .ai-wave .wave-label { display: none; }
+  .ai-body { padding: 12px 16px 16px; font-size: .88rem; line-height: 1.6; color: var(--text-primary); }
+  .ai-body a { color: var(--accent); }
+  .ai-error { padding: 0 16px 14px; font-size: .84rem; color: var(--text-secondary); }
+  @keyframes wave-flow { 0% { transform: translateX(-6%) scale(1.05); } 100% { transform: translateX(6%) scale(1.12); } }
+
+  /* key card + modal + status card share .card from design-tokens */
+  .key-card { max-width: 420px; text-align: center; font-size: .88rem; line-height: 1.55; }
+  .key-card input { width: 100%; box-sizing: border-box; margin: 10px 0; text-align: center; }
+  .key-link { background: none; border: none; color: var(--text-tertiary); font-size: .72rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .status-card { text-align: center; padding: 2rem 1rem; font-size: .9rem; color: var(--text-secondary); }
+  .status-card .big { font-size: 1.6rem; display: block; margin-bottom: 8px; }
+
+  @media (max-width: 560px) {
+    .bar .skuo .lbl { display: none; }        /* icon-first buttons on tiny screens */
+    .constellation { right: 6%; top: 12%; }
+    .r-top { flex-wrap: wrap; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .star, .ai-ring, .ai-wave .blob { animation: none !important; }
+    .ai-wave, .ai-panel.done .ai-wave { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div id="stars" aria-hidden="true"></div>
+
+<!-- ═══ HERO ═══ -->
+<main id="hero" class="hero">
+  <svg class="constellation" viewBox="0 0 52 34" fill="none" aria-hidden="true">
+    <path d="M4 26 L18 14 L30 20 L46 6" stroke="currentColor" stroke-width=".6" opacity=".5"/>
+    <circle cx="4" cy="26" r="2" fill="currentColor"/><circle cx="18" cy="14" r="2.4" fill="currentColor"/>
+    <circle cx="30" cy="20" r="1.8" fill="currentColor"/><circle cx="46" cy="6" r="2.4" fill="currentColor"/>
+  </svg>
+  <button id="theme-toggle" class="theme-toggle" title="toggle theme" aria-label="toggle theme">◐</button>
+  <div>
+    <h1 class="wordmark">✦ Okemo Astra</h1>
+    <p class="tagline">your tiny telescope for the internet</p>
+  </div>
+  <div class="bar" id="hero-bar">
+    <span class="bar-icon">🔭</span>
+    <input id="hero-input" type="text" autocomplete="off" spellcheck="false" aria-label="Search the web">
+    <button class="skuo skuo-neutral" id="hero-search"><span class="lbl">Search</span></button>
+    <span class="ai-ring"><button class="skuo" id="hero-ai">✦ <span class="lbl">Ask Astra</span></button></span>
+    <div class="suggest" id="hero-suggest" hidden></div>
+  </div>
+  <p class="hint">enter = search · ⌘↵ = ask astra · no wrong questions</p>
+  <div id="key-card" class="key-card card card-pad" hidden>
+    <strong>✦ Astra needs a key to the cosmos</strong><br>
+    Results come from the <a href="https://brave.com/search/api/" target="_blank" rel="noopener">Brave Search API</a> — free tier, 2,000 queries a month. Grab a key and paste it here:
+    <input id="key-input" type="password" placeholder="BSA…" aria-label="Brave API key">
+    <button class="skuo skuo-accent" id="key-save">save my key</button>
+  </div>
+  <footer class="foot">made of stardust · <a href="../index.html">okemo</a> ✦</footer>
+</main>
+
+<!-- ═══ RESULTS ═══ -->
+<main id="results" class="results" hidden>
+  <header class="r-top">
+    <a class="r-logo" href="./" id="logo-home">✦ Astra</a>
+    <div class="bar" id="results-bar">
+      <span class="bar-icon">🔭</span>
+      <input id="results-input" type="text" autocomplete="off" spellcheck="false" aria-label="Search the web">
+      <button class="skuo skuo-neutral" id="results-search"><span class="lbl">Search</span></button>
+      <span class="ai-ring"><button class="skuo" id="results-ai">✦ <span class="lbl">Ask Astra</span></button></span>
+      <div class="suggest" id="results-suggest" hidden></div>
+    </div>
+  </header>
+  <section id="ai-panel" class="ai-panel" hidden>
+    <div class="ai-head">✦ Astra Answer</div>
+    <div class="ai-wave" id="ai-wave"><div class="blob"></div><div class="wave-label" id="ai-wave-label">✦ consulting the cosmos…</div></div>
+    <div class="ai-body" id="ai-body"></div>
+    <div class="ai-error" id="ai-error" hidden></div>
+  </section>
+  <p class="r-meta" id="r-meta"></p>
+  <ol id="result-list"></ol>
+  <div style="text-align:center; margin-top:26px;"><button class="key-link" id="key-edit">✦ change api key</button></div>
+</main>
+
+<!-- key edit modal (results view) -->
+<div id="key-modal" class="key-card card card-pad" hidden style="position:fixed; inset:auto 0 40vh 0; margin:auto; z-index:50;">
+  <strong>✦ new key, who dis</strong>
+  <input id="key-modal-input" type="password" placeholder="BSA…" aria-label="Brave API key">
+  <button class="skuo skuo-accent" id="key-modal-save">save</button>
+  <button class="skuo skuo-neutral" id="key-modal-cancel">nevermind</button>
+</div>
+
+<script src="astra.js"></script>
+</body>
+</html>
