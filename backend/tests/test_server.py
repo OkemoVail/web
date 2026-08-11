@@ -167,9 +167,12 @@ def test_tokens_accumulate_per_chat(fake_model):
 
 
 def test_abandoned_stream_does_not_block_next_request(fake_model):
-    # Simulate a client that disconnects mid-stream: one chunk is consumed and
-    # the generator is then kept alive but never resumed/closed (Starlette's
-    # threadpool behavior on disconnect). The next request must still complete.
+    # Simulates a mid-stream client disconnect: one chunk is consumed, then the
+    # generator is abandoned without being closed — on the old code gen_lock
+    # stayed held (deadlock); now the lock lives in the worker thread, not the
+    # generator, so the next request must still complete.
+    # (Note: `client` is used from a worker thread below; safe here because the
+    # join serializes the two requests.)
     resp = server.chat_completions({
         "model": "saga-0.7b",
         "messages": [{"role": "user", "content": "hi"}],
@@ -195,4 +198,5 @@ def test_abandoned_stream_does_not_block_next_request(fake_model):
     t.start()
     t.join(timeout=10)
     del it  # now allow cleanup of the abandoned stream
+    assert not t.is_alive(), "second request blocked (lock not released)"
     assert result.get("status") == 200
