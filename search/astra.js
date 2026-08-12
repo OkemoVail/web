@@ -161,7 +161,7 @@
     if (!a) return;
     e.preventDefault();
     const el = document.getElementById(a.getAttribute('href').slice(1));
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (el) el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
   });
 
   // ── backend base (same resolution as chat's api.js, minus the tunnel fetch) ──
@@ -304,7 +304,6 @@
       const c = crumbFor(r.url);
       const wrap = document.createElement('div');
       const head = document.createElement('div');
-      head.className = 'r-head';
       const site = document.createElement('div');
       site.className = 'r-site';
       site.textContent = c.site;

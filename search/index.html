@@ -38,7 +38,7 @@
   .hint { margin: 2px 0 0; font-size: .72rem; color: var(--text-tertiary); }
   .foot { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-size: .72rem; color: var(--text-tertiary); }
   .foot a { color: inherit; }
-  .theme-toggle { position: absolute; top: 14px; right: 14px; width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; font-size: .9rem; }
+  .theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 30; width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; font-size: .9rem; }
 
   /* search bar (hero + results share .bar) */
   .bar { display: flex; align-items: center; gap: 6px; width: min(560px, 92vw); height: 46px; box-sizing: border-box; padding: 4px 5px 4px 14px; border-radius: 999px; background: var(--bg-white); border: 1px solid var(--border-strong); box-shadow: 0 1px 6px rgba(0,0,0,.06); position: relative; }
@@ -59,14 +59,14 @@
   }
 
   /* hero buttons below the bar (google homage) */
-  .hero-btns { display: flex; gap: 10px; }
+  .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
   .hero-btns .skuo { height: 38px; padding: 0 18px; border-radius: 999px; font-size: .85rem; }
   .hero-btns .ai-ring .skuo { height: 35px; }
 
   /* suggestions dropdown */
   .suggest { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg-white); border: 1px solid var(--border-strong); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.12); overflow: hidden; z-index: 20; }
   .suggest button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 9px 16px; font-size: .85rem; color: var(--text-primary); cursor: pointer; }
-  .suggest button.active, .suggest button:hover { background: var(--bg-elevated); }
+  .suggest button.active, .suggest button:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
   .suggest button.active::before { content: '✦ '; color: var(--accent); }
 
   /* results view */
@@ -124,6 +124,7 @@
 </head>
 <body>
 <div id="stars" aria-hidden="true"></div>
+<button id="theme-toggle" class="theme-toggle" title="toggle theme" aria-label="toggle theme">◐</button>
 
 <!-- ═══ HERO ═══ -->
 <main id="hero" class="hero">
@@ -132,7 +133,6 @@
     <circle cx="4" cy="26" r="2" fill="currentColor"/><circle cx="18" cy="14" r="2.4" fill="currentColor"/>
     <circle cx="30" cy="20" r="1.8" fill="currentColor"/><circle cx="46" cy="6" r="2.4" fill="currentColor"/>
   </svg>
-  <button id="theme-toggle" class="theme-toggle" title="toggle theme" aria-label="toggle theme">◐</button>
   <div>
     <h1 class="wordmark">✦ Okemo Astra</h1>
     <p class="tagline">your tiny telescope for the internet</p>
