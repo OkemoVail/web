@@ -227,9 +227,35 @@ def api_search(q: str = ""):
         if resp.status_code in (202, 403, 429):
             return JSONResponse({"error": "rate_limited"}, status_code=429)
         return JSONResponse({"error": "upstream"}, status_code=502)
-    results = parse_ddg_lite(resp.text)[:15]
+    results = [r for r in parse_ddg_lite(resp.text)
+               if r["url"].startswith(("http://", "https://"))][:15]
     _cache_set(_search_cache, key, results)
     return {"results": results}
+
+
+@app.get("/api/suggest")
+def api_suggest(q: str = ""):
+    q = (q or "").strip()
+    if not q:
+        return []
+    key = q.lower()
+    cached = _cache_get(_suggest_cache, key)
+    if cached is not None:
+        return cached
+    try:
+        resp = _http_get(DDG_AC_URL, params={"q": q, "type": "list"})
+    except httpx.HTTPError:
+        return JSONResponse({"error": "upstream"}, status_code=502)
+    if resp.status_code != 200:
+        return JSONResponse({"error": "rate_limited"}, status_code=429)
+    try:
+        phrases = [i["phrase"] for i in resp.json()
+                   if isinstance(i, dict) and i.get("phrase")]
+    except ValueError:
+        phrases = []
+    out = phrases[:6]
+    _cache_set(_suggest_cache, key, out)
+    return out
 
 
 model = None

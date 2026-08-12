@@ -157,3 +157,45 @@ def test_api_search_empty_query_never_calls_upstream(monkeypatch):
     assert r.status_code == 200
     assert r.json() == {"results": []}
     assert calls["n"] == 0
+
+
+def test_api_search_errors_do_not_poison_cache(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(202), FakeHTTPResp(200, LITE_HTML)])
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    assert client.get("/api/search", params={"q": "sky"}).status_code == 429
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 200          # not served a cached error
+    assert len(r.json()["results"]) == 2
+    assert calls["n"] == 3               # went upstream again
+
+
+def test_api_suggest_happy_path(monkeypatch):
+    payload = [{"phrase": "sky blue"}, {"phrase": "skyrim"}]
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(200, payload=payload)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/suggest", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json() == ["sky blue", "skyrim"]
+    assert calls["n"] == 1
+
+
+def test_api_suggest_caps_at_six(monkeypatch):
+    payload = [{"phrase": f"s{i}"} for i in range(8)]
+    _fake_http(monkeypatch, [FakeHTTPResp(200, payload=payload)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/suggest", params={"q": "s"})
+    assert r.json() == [f"s{i}" for i in range(6)]
+
+
+def test_api_suggest_cache_hit_skips_upstream(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(200, payload=[{"phrase": "sky"}])])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    client.get("/api/suggest", params={"q": "sky"})
+    r = client.get("/api/suggest", params={"q": "sky"})
+    assert r.json() == ["sky"]
+    assert calls["n"] == 1
