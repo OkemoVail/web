@@ -219,6 +219,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
                 use_canvas: window.canvasEnabled,
                 deep_research: window.isDeepResearch,
                 temperature: window.settings.temp,
+                seed: window.randomSeed(),
                 top_p: window.settings.top_p || 0.9,
                 repetition_penalty: window.settings.rep_pen || 1.3,
                 chat_id: window.currentChatId,

@@ -15,6 +15,7 @@ from html.parser import HTMLParser
 from urllib.parse import parse_qs, unquote, urlparse
 
 import httpx
+import mlx.core as mx
 import mlx_lm
 from mlx_lm.sample_utils import make_sampler, make_logits_processors
 from fastapi import FastAPI
@@ -38,6 +39,13 @@ FEEDBACK_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "feedbac
 cancelled_jobs = set()
 chat_tokens = {}
 gen_lock = threading.Lock()
+
+
+# NOTE: generation must never run inside fastapi's anyio worker threads —
+# MLX's GPU/RNG state is thread/stream-anchored there (eager GPU ops raise
+# "no Stream in current thread"; the compiled sampler freezes RNG state), so
+# mx.random.seed() can't steer sampling. The stream path already generates on
+# a plain threading.Thread; the non-stream path below does the same.
 
 IDENTITY_LOCK = "Your name is Saga. You were built by OkemoVail."
 GLOBAL_RULES = "\n".join([
@@ -307,6 +315,11 @@ def generate_pieces(body):
     ensure_model()
     prompt = build_prompt(body.get("messages") or [], body.get("attachment"))
     job_id = body.get("job_id")
+    # Per-request seed: the frontend sends a fresh random one each call so
+    # sampling never replays the same stream.
+    seed = body.get("seed")
+    if isinstance(seed, int):
+        mx.random.seed(seed)
     sampler = make_sampler(temp=body.get("temperature", 1.0),
                            top_p=body.get("top_p", 1.0))
     rep_pen = body.get("repetition_penalty", 1.0)
@@ -374,24 +387,34 @@ def chat_completions(body: dict):
                                  headers={"Cache-Control": "no-cache",
                                           "X-Accel-Buffering": "no"})
 
-    full, ptok, gtok, finish = [], 0, 0, "stop"
-    with gen_lock:
-        try:
-            for text, p, g, fr in generate_pieces(body):
-                ptok, gtok = p or ptok, g or gtok
-                if text:
-                    full.append(text)
-                if fr:
-                    finish = fr
-        finally:
-            cancelled_jobs.discard(body.get("job_id"))
-            _record_tokens(body, ptok, gtok)
+    # Non-stream: consume generate_pieces on a plain thread — anyio worker
+    # threads break MLX's RNG/stream state (see note at module top).
+    box = {}
+
+    def run_blocking():
+        full, ptok, gtok, finish = [], 0, 0, "stop"
+        with gen_lock:
+            try:
+                for text, p, g, fr in generate_pieces(body):
+                    ptok, gtok = p or ptok, g or gtok
+                    if text:
+                        full.append(text)
+                    if fr:
+                        finish = fr
+            finally:
+                cancelled_jobs.discard(body.get("job_id"))
+                _record_tokens(body, ptok, gtok)
+        box.update(full=full, ptok=ptok, gtok=gtok, finish=finish)
+
+    t = threading.Thread(target=run_blocking, daemon=True)
+    t.start()
+    t.join()
     return {
         "id": cid, "object": "chat.completion", "created": created,
         "model": model_id,
         "choices": [{"index": 0,
-                     "message": {"role": "assistant", "content": "".join(full)},
-                     "finish_reason": finish}],
-        "usage": {"prompt_tokens": ptok, "completion_tokens": gtok,
-                  "total_tokens": ptok + gtok},
+                     "message": {"role": "assistant", "content": "".join(box["full"])},
+                     "finish_reason": box["finish"]}],
+        "usage": {"prompt_tokens": box["ptok"], "completion_tokens": box["gtok"],
+                  "total_tokens": box["ptok"] + box["gtok"]},
     }

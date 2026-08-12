@@ -14,8 +14,12 @@ function loadModule(overrides = {}) {
         window,
         console,
         fetch: overrides.fetch || (async () => { throw new Error('fetch not stubbed'); }),
+        // generateChatTitle shimmers the title capsule via document.getElementById
+        document: overrides.document || { getElementById: () => null },
     });
     vm.runInContext(code, ctx);
+    // utils.js isn't loaded in the harness — stub the seed helper deterministically
+    window.randomSeed = () => 42;
     return window;
 }
 
@@ -75,12 +79,15 @@ function loadModule(overrides = {}) {
 // ── generateChatTitle (digest payload + meta retry + apply) ──
 {
     const calls = [];
+    const added = [], removed = [];
+    const fakeTitleEl = { classList: { add: c => added.push(c), remove: c => removed.push(c) } };
     const w = loadModule({
         fetch: async (url, opts) => {
             calls.push(JSON.parse(opts.body));
             const content = calls.length === 1 ? 'The user is asking about css' : 'css grief, then docker (classic)';
             return { ok: true, json: async () => ({ choices: [{ message: { content } }] }) };
-        }
+        },
+        document: { getElementById: () => fakeTitleEl },
     });
     w.settings = {};
     w.currentModel = { id: 'saga-0.7b' };
@@ -106,6 +113,11 @@ function loadModule(overrides = {}) {
     assert(!/<think>/.test(sent), 'think tags stripped from payload');
     assert.strictEqual(w.allChats.c1.title, 'css grief, then docker (classic)', 'retry title applied');
     assert.strictEqual(w.allChats.c1.titleGenAt, 2, 'titleGenAt recorded');
+    assert.deepStrictEqual(added, ['shimmer-active'], 'capsule shimmer added at start');
+    assert.deepStrictEqual(removed, ['shimmer-active'], 'capsule shimmer removed at end');
+    assert.strictEqual(w.__titleShimmerChatId, 'c1', 'sidebar row shimmer flagged for next render');
+    assert.strictEqual(calls[0].seed, 42, 'request carries a seed');
+    assert.strictEqual(calls[0].temperature, 0.6, 'title temperature is 0.6');
     console.log('✓ generateChatTitle');
 }
 
@@ -196,7 +208,8 @@ if (process.argv[2] === '--live') {
             body: JSON.stringify({
                 model: 'saga-0.7b',
                 messages: [{ role: 'system', content: system }, { role: 'user', content: digest }],
-                temperature: 0.3, max_tokens: 60, stream: false
+                temperature: 0.6, seed: Math.floor(Math.random() * 2 ** 31),
+                max_tokens: 60, stream: false
             }),
         });
         if (!res.ok) { console.error(`✗ ${label}: HTTP ${res.status}`); failed = true; continue; }

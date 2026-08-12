@@ -61,3 +61,8 @@ window.formatDate = (ts) => {
     if (!ts) return "";
     return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
+
+// Fresh random 16-digit seed per request so the sampler never replays the
+// same stream. Capped at Number.MAX_SAFE_INTEGER (9007199254740991) so every
+// value stays an exact integer (full 16-digit space 10^15..10^16-1 exceeds it).
+window.randomSeed = () => 1e15 + Math.floor(Math.random() * (Number.MAX_SAFE_INTEGER - 1e15));

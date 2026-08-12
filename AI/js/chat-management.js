@@ -89,7 +89,8 @@ window._requestChatTitle = async (baseUrl, messages) => {
         body: JSON.stringify({
             model: window.currentModel.id,
             messages: messages,
-            temperature: 0.3,
+            temperature: 0.6,
+            seed: window.randomSeed(),
             max_tokens: 60,
             stream: false,
             use_thought: false,
@@ -105,6 +106,11 @@ window._requestChatTitle = async (baseUrl, messages) => {
 window.generateChatTitle = async (chatId, force = false) => {
     if (!force && window[`_generatingTitle_${chatId}`]) return;
     window[`_generatingTitle_${chatId}`] = true;
+    // Shimmer the title capsule while a title generates for the chat on screen
+    // (covers auto cadence re-titles; manual regenerate adds the class itself —
+    // the add is idempotent and both finallys remove it).
+    const titleEl = chatId === window.currentChatId ? document.getElementById('top-left-chat-title') : null;
+    if (titleEl) titleEl.classList.add('shimmer-active');
     try {
         const history = chatId === window.currentChatId
             ? window.chatHistory
@@ -140,11 +146,13 @@ window.generateChatTitle = async (chatId, force = false) => {
                 window.allChats[chatId].titleFeedback = null;
                 window.updateTitleFeedbackUI(chatId);
             }
+            window.__titleShimmerChatId = chatId;   // sidebar row text-shimmer on next render
             window.renderHistory();
         }
     } catch (e) {
         console.error("Failed to generate title", e);
     } finally {
+        if (titleEl) titleEl.classList.remove('shimmer-active');
         delete window[`_generatingTitle_${chatId}`];
     }
 };

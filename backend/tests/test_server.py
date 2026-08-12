@@ -153,6 +153,53 @@ def test_completion_attachment_prepended(fake_model):
     assert "summarize this" in fake_model["prompt"]
 
 
+def test_completion_seed_forwarded_to_mlx(fake_model, monkeypatch):
+    calls = []
+    monkeypatch.setattr(server.mx.random, "seed", calls.append)
+    r = client.post("/v1/chat/completions", json={
+        "model": "saga-0.7b",
+        "messages": [{"role": "user", "content": "hi"}],
+        "stream": False,
+        "seed": 1234,
+    })
+    assert r.status_code == 200
+    assert calls == [1234]
+
+
+def test_completion_no_seed_no_reseed(fake_model, monkeypatch):
+    calls = []
+    monkeypatch.setattr(server.mx.random, "seed", calls.append)
+    r = client.post("/v1/chat/completions", json={
+        "model": "saga-0.7b",
+        "messages": [{"role": "user", "content": "hi"}],
+        "stream": False,
+    })
+    assert r.status_code == 200
+    assert calls == []
+
+
+def test_nonstream_generation_runs_on_plain_thread(fake_model, monkeypatch):
+    """Regression: MLX's RNG/GPU state is broken inside fastapi's anyio worker
+    threads (frozen seeds / missing GPU stream), so the non-stream path must
+    consume generate_pieces on a plain thread. Pin that."""
+    names = []
+    orig = server.generate_pieces
+
+    def spy(body):
+        names.append(threading.current_thread().name)
+        yield from orig(body)
+
+    monkeypatch.setattr(server, "generate_pieces", spy)
+    r = client.post("/v1/chat/completions", json={
+        "model": "saga-0.7b",
+        "messages": [{"role": "user", "content": "hi"}],
+        "stream": False,
+    })
+    assert r.status_code == 200
+    assert names, "generate_pieces was never consumed"
+    assert "AnyIO" not in names[0], f"generation ran on {names[0]!r} (anyio worker)"
+
+
 def test_completion_cancel_job_stops_stream(fake_model):
     client.post("/cancel_job", json={"job_id": "job-x"})
     r = client.post("/v1/chat/completions", json={

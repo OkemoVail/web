@@ -22,7 +22,10 @@
       "Bash(git commit -m 'docs\\(ui\\): plan universal design-system adoption across all pages *)",
       "Bash(git check-ignore *)",
       "Bash(git commit -m 'refactor\\(ui\\): finalize soft-gradient rename, drop old chrome-button docs *)",
-      "Bash(git -C \"C:/Users/okemo/Desktop/Projects/web projects/web\" status --short)"
+      "Bash(git -C \"C:/Users/okemo/Desktop/Projects/web projects/web\" status --short)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"AI chat SaaS assistant\" --domain product)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"skeuomorphism soft ui claymorphism\" --domain style)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"animation micro-interaction motion\" --domain ux)"
     ]
   }
 }
