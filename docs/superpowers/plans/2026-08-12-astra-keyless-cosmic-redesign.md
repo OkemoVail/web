@@ -1189,8 +1189,10 @@ Replace the entire `search/index.html` bullet:
 with:
 
 ```
-- `search/index.html` — Okemo Astra: keyless Google-style web search. Results + autocomplete come from the backend (`/api/search` scrapes DuckDuckGo lite, `/api/suggest` proxies DDG autocomplete — no API key anywhere); every search also streams a dry-humor Saga answer grounded in the top 5 results, cited `[n]`. UI: "Google bones, cosmic playground skin" — breadcrumb URLs above accent titles, tilted favicon chips, rainbow-conic AI panel border, warm parchment canvas (`#fdf9f4` / `#1e1a18`, page-local), hero buttons below the bar incl. `✦ i'm feeling cosmic` (random quip query). Intentional exceptions: no `src/nav.js` (chromeless by design), no Tailwind. Specs: `docs/superpowers/specs/2026-08-11-okemo-astra-design.md` (v1), `docs/superpowers/specs/2026-08-12-astra-keyless-cosmic-redesign-design.md` (v2).
+- `search/index.html` — Okemo Astra: keyless Google-style web search. Results + autocomplete come from the temp backend (`/api/search` scrapes DuckDuckGo lite, `/api/suggest` proxies DDG autocomplete — no API key anywhere); every search also streams a dry-humor Saga answer grounded in the top 5 results, cited `[n]`. UI: "Google bones, cosmic playground skin" — breadcrumb URLs above accent titles, tilted favicon chips, rainbow-conic AI panel border, warm parchment canvas (`#fdf9f4` / `#1e1a18`, page-local), hero buttons below the bar incl. `✦ i'm feeling cosmic` (random quip query). Deployment coupling: the search endpoints exist ONLY on the temp backend — pointing `api.okemovail.com` back at the real OkemoLLM backend turns Astra into a permanent 📡 card until that backend gains the same routes. Intentional exceptions: no `src/nav.js` (chromeless by design), no Tailwind. Specs: `docs/superpowers/specs/2026-08-11-okemo-astra-design.md` (v1), `docs/superpowers/specs/2026-08-12-astra-keyless-cosmic-redesign-design.md` (v2).
 ```
+
+(As committed in `f917a59` — text refined during execution to add the deployment-coupling note from the Task 4 review; the commit also ride-alongs the already-accurate `### Chat titles` CLAUDE.md section from the earlier title-generation work, accepted as a harmless docs ride-along at review.)
 
 - [ ] **Step 4: Commit**
 
