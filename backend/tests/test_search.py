@@ -226,3 +226,15 @@ def test_api_suggest_upstream_500_gives_502(monkeypatch):
     r = client.get("/api/suggest", params={"q": "sky"})
     assert r.status_code == 502
     assert r.json() == {"error": "upstream"}
+
+
+def test_api_suggest_ddg_tuple_format(monkeypatch):
+    # DDG /ac/?type=list actually answers ["query", ["s1", "s2", …]]
+    payload = ["sky", ["sky blue", "skyrim", "sky news"]]
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(200, payload=payload)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/suggest", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json() == ["sky blue", "skyrim", "sky news"]
+    assert calls["n"] == 1

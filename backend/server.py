@@ -252,10 +252,16 @@ def api_suggest(q: str = ""):
         return JSONResponse({"error": "upstream"}, status_code=502)
     try:
         data = resp.json()
-        phrases = [i["phrase"] for i in data
-                   if isinstance(i, dict) and isinstance(i.get("phrase"), str)] if isinstance(data, list) else []
     except (ValueError, TypeError):
-        phrases = []
+        data = []
+    phrases = []
+    if isinstance(data, list):
+        # DDG /ac/ answers either ["query", ["s1", …]] or [{"phrase": "s1"}, …]
+        if len(data) == 2 and isinstance(data[1], list):
+            phrases = [s for s in data[1] if isinstance(s, str)]
+        else:
+            phrases = [i["phrase"] for i in data
+                       if isinstance(i, dict) and isinstance(i.get("phrase"), str)]
     out = phrases[:6]
     _cache_set(_suggest_cache, key, out)
     return out
