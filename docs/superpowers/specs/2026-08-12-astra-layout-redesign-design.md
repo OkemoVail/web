@@ -2,6 +2,7 @@
 
 **Date:** 2026-08-12
 **Status:** Approved (brainstorming complete, pending implementation plan)
+**Amendment (post-review):** mobile hero pills hide labels entirely via the existing `.lbl` pattern (with `aria-label` on the buttons), and the hint line is kept unshortened — the plan is the implementation authority for these two details.
 **Builds on:** `2026-08-12-astra-keyless-cosmic-redesign-design.md` (v2)
 
 ## What

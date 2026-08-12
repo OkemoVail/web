@@ -88,7 +88,7 @@
   /* google grammar: site + breadcrumb above the title */
   .r-site { font-size: .78rem; color: var(--text-primary); }
   .r-crumb { font-size: .72rem; color: var(--text-tertiary); word-break: break-all; }
-  .result .r-title { font-size: 1.05rem; color: var(--accent); text-decoration: none; line-height: 1.35; display: inline-block; margin-top: 2px; }
+  .result .r-title { font-size: 1.05rem; color: var(--accent); text-decoration: none; line-height: 1.35; display: inline-block; margin-top: 2px; overflow-wrap: anywhere; }
   .result .r-title:hover { text-decoration: underline wavy var(--accent-light); text-underline-offset: 3px; }
   .result .r-snippet { margin: 2px 0 0; font-size: .84rem; color: var(--text-secondary); line-height: 1.5; }
 
@@ -120,7 +120,7 @@
     .hero .wordmark { font-size: 1.5rem; }
     .constellation { right: 6%; top: 12%; }
     .results { padding: .75rem 0 3rem; }      /* full-bleed: rows go edge to edge */
-    .r-top { flex-wrap: nowrap; gap: 8px; padding: 6px 2.8rem 12px 12px; }
+    .r-top { flex-wrap: nowrap; gap: 8px; padding: 6px calc(2.2rem + 18px) 12px 12px; }
     .r-logo { font-size: .95rem; }
     .results .bar { max-width: none; height: 40px; }
     .r-meta, .ai-panel, #result-list { max-width: none; }
@@ -129,6 +129,7 @@
     #result-list { gap: 0; }
     .result { padding: 12px 16px; gap: 8px; border-top: 1px solid var(--border-strong); }
     .result:last-child { border-bottom: 1px solid var(--border-strong); }
+    .status-card { margin: 0 12px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .star, .ai-ring, .ai-panel, .ai-wave .blob { animation: none !important; }
@@ -157,8 +158,8 @@
     <div class="suggest" id="hero-suggest" hidden></div>
   </div>
   <div class="hero-btns">
-    <button class="skuo skuo-neutral" id="hero-search">🔍 <span class="lbl">search the cosmos</span></button>
-    <span class="ai-ring"><button class="skuo" id="hero-cosmic">✦ <span class="lbl">i'm feeling cosmic</span></button></span>
+    <button class="skuo skuo-neutral" id="hero-search" aria-label="search">🔍 <span class="lbl">search the cosmos</span></button>
+    <span class="ai-ring"><button class="skuo" id="hero-cosmic" aria-label="i'm feeling cosmic">✦ <span class="lbl">i'm feeling cosmic</span></button></span>
   </div>
   <p class="hint">enter = search · no wrong questions</p>
   <footer class="foot">made of stardust · <a href="../index.html">okemo</a> ✦</footer>
@@ -171,7 +172,7 @@
     <div class="bar" id="results-bar">
       <span class="bar-icon">🔭</span>
       <input id="results-input" type="text" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web">
-      <button class="skuo skuo-neutral" id="results-search">🔍 <span class="lbl">Search</span></button>
+      <button class="skuo skuo-neutral" id="results-search" aria-label="search">🔍 <span class="lbl">Search</span></button>
       <div class="suggest" id="results-suggest" hidden></div>
     </div>
   </header>
