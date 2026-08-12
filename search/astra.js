@@ -18,12 +18,18 @@
       'asking the moon…',
       'warming up the stardust…',
     ],
+    aiHeaders: [
+      '✦ Astra Answer',
+      '✦ asked the universe, it answered',
+      '✦ the oracle has opinions',
+      '✦ straight from the cosmos',
+    ],
     emptyResults: 'nothing in this corner of the universe ✦',
     offline: 'lost contact with the cosmos — check your connection',
     rateLimited: 'slow down, stargazer — the cosmos is rate-limiting us',
-    badKey: "that key didn't open the cosmos — double-check it?",
     aiDown: 'the cosmos is quiet right now — try again',
-    aiSystem: 'You are Astra, a playful search oracle by Okemo. Answer the query concisely and helpfully, grounded in the provided sources. Cite sources inline as [1], [2]… matching their numbers. If no sources are provided, answer from your own knowledge. Keep it warm, a little cosmic, never corporate.',
+    metaLine: (n, secs) => 'found ' + n + ' little stars in ' + secs + 's — you’re welcome',
+    aiSystem: "You are Astra, Saga's search-oracle alter ego built by Okemo. Answer first, then stop — dry humor welcome, never rude, never corporate. Ground answers in the provided sources and cite inline as [1], [2]… matching the numbered results. If no sources are provided, answer from your own knowledge. Keep it tight: a few sentences, not an essay.",
   };
 
   // ── tiny DOM helper ──
@@ -71,20 +77,20 @@
     setInterval(apply, 4000);
   }
 
-  // ── router: URL is the state. ?q= results · &ai=1 results+AI ──
+  // ── router: URL is the state. ?q= results (AI answer always included) ──
   let aiAbort = null;            // AbortController for the AI stream
   let searchToken = 0;           // stale-response guard
   let wantResultsFocus = false;  // set by bar actions, consumed by showResults
 
   function readRoute() {
     const p = new URLSearchParams(location.search);
-    return { q: (p.get('q') || '').trim(), ai: p.get('ai') === '1' };
+    return { q: (p.get('q') || '').trim() };
   }
 
-  function go(q, ai) {
+  function go(q) {
     const u = new URL(location.href);
     if (q) u.searchParams.set('q', q); else u.searchParams.delete('q');
-    if (ai) u.searchParams.set('ai', '1'); else u.searchParams.delete('ai');
+    u.searchParams.delete('ai');   // legacy param — the AI answer is always on now
     u.hash = '';
     if (u.href !== location.href) history.pushState({}, '', u);
     renderRoute();
@@ -96,48 +102,56 @@
     $('results').hidden = true;
     $('hero').hidden = false;
     document.title = 'Okemo Astra ✦';
-    updateKeyCard();
   }
 
-  function showResults(q, ai) {
+  function showResults(q) {
     $('hero').hidden = true;
     $('results').hidden = false;
     $('results-input').value = q;
     if (wantResultsFocus) { wantResultsFocus = false; $('results-input').focus({ preventScroll: true }); }
     document.title = q + ' — Okemo Astra';
-    runSearch(q, ai);
+    runSearch(q);
   }
 
   function renderRoute() {
-    const { q, ai } = readRoute();
-    if (!q) showHero(); else showResults(q, ai);
+    const { q } = readRoute();
+    if (!q) showHero(); else showResults(q);
   }
 
   // ── bar wiring (hero + results bars behave identically) ──
-  function wireBar(inputId, searchId, aiId, suggestId) {
+  function wireBar(inputId, searchId, suggestId) {
     const input = $(inputId);
     initSuggest(input, $(suggestId)); // FIRST: suggest's keydown must run before ours (see defaultPrevented guard)
-    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q, false); } });
-    $(aiId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q, true); } });
+    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q); } });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (e.defaultPrevented) return;  // initSuggest accepted a suggestion — don't double-navigate
         const q = input.value.trim();
         if (!q) return;
         wantResultsFocus = true;
-        go(q, e.metaKey || e.ctrlKey);
+        go(q);
       }
     });
+  }
+
+  // ── i'm feeling cosmic: random quip query ──
+  function cosmicQuery(current) {
+    const pool = COPY.placeholders.filter((p) => p !== current);
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
   // ── boot ──
   initTheme();
   makeStars();
   rotatePlaceholders();
-  initKeyFlows();
-  wireBar('hero-input', 'hero-search', 'hero-ai', 'hero-suggest');
-  wireBar('results-input', 'results-search', 'results-ai', 'results-suggest');
-  $('logo-home').addEventListener('click', (e) => { e.preventDefault(); $('hero-input').value = $('results-input').value; go('', false); });
+  wireBar('hero-input', 'hero-search', 'hero-suggest');
+  wireBar('results-input', 'results-search', 'results-suggest');
+  $('hero-cosmic').addEventListener('click', () => {
+    const q = cosmicQuery($('hero-input').value.trim());
+    $('hero-input').value = q;
+    go(q);
+  });
+  $('logo-home').addEventListener('click', (e) => { e.preventDefault(); $('hero-input').value = $('results-input').value; go(''); });
   window.addEventListener('popstate', renderRoute);
   renderRoute();
 
@@ -150,54 +164,21 @@
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
-  // ── Brave API key ──
-  function getKey() { try { return (localStorage.getItem('astra_brave_key') || '').trim(); } catch (_) { return ''; } }
-
-  function saveKey(raw) {
-    const k = (raw || '').trim();
-    if (!k) return false;
-    try { localStorage.setItem('astra_brave_key', k); } catch (_) { return false; }
-    return true;
+  // ── backend base (same resolution as chat's api.js, minus the tunnel fetch) ──
+  function backendBase() {
+    try { return (localStorage.getItem('vail_custom_backend_url') || 'https://api.okemovail.com').replace(/\/$/, ''); }
+    catch (_) { return 'https://api.okemovail.com'; }
   }
 
-  function updateKeyCard() {
-    $('key-card').hidden = !!getKey();     // hero: show setup card only when keyless
-  }
-
-  function initKeyFlows() {
-    $('key-save').addEventListener('click', () => {
-      if (saveKey($('key-input').value)) { $('key-card').hidden = true; $('hero-input').focus(); }
-    });
-    $('key-edit').addEventListener('click', () => {
-      $('key-modal-input').value = getKey();
-      $('key-modal').hidden = false;
-      $('key-modal-input').focus();
-    });
-    $('key-modal-save').addEventListener('click', () => {
-      if (saveKey($('key-modal-input').value)) {
-        $('key-modal').hidden = true;
-        const { q, ai } = readRoute();     // re-run with the new key
-        if (q) showResults(q, ai);
-      }
-    });
-    $('key-modal-cancel').addEventListener('click', () => { $('key-modal').hidden = true; });
-    $('key-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('key-save').click(); });
-    $('key-modal-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('key-modal-save').click(); });
-  }
-
-  // ── autocomplete (Brave suggest; silently disabled on any failure) ──
-  async function braveSuggest(q) {
+  // ── autocomplete (backend DDG proxy; silently disabled on any failure) ──
+  async function astraSuggest(q) {
     const res = await fetch(
-      'https://api.search.brave.com/res/v1/suggest/search?q=' + encodeURIComponent(q),
-      { headers: { 'Accept': 'application/json', 'X-Subscription-Token': getKey() } }
+      backendBase() + '/api/suggest?q=' + encodeURIComponent(q),
+      { headers: { 'ngrok-skip-browser-warning': 'true', 'bypass-tunnel-reminder': 'true' } }
     );
     if (!res.ok) throw new Error('suggest ' + res.status);
     const data = await res.json();
-    // tolerant: plans/shapes differ — accept {results:[{query}]} or {suggestions:[…]}
-    return ((data.results || data.suggestions || [])
-      .map((r) => (typeof r === 'string' ? r : r.query))
-      .filter(Boolean)
-      .slice(0, 6));
+    return (Array.isArray(data) ? data : []).filter((s) => typeof s === 'string').slice(0, 6);
   }
 
   function initSuggest(input, box) {
@@ -217,7 +198,7 @@
           e.preventDefault();
           input.value = s;
           close();
-          go(s, e.metaKey || e.ctrlKey);
+          go(s);
         });
         box.appendChild(b);
       });
@@ -227,10 +208,10 @@
     input.addEventListener('input', () => {
       clearTimeout(timer);
       const q = input.value.trim();
-      if (dead || !q || !getKey()) return close();
+      if (dead || !q) return close();
       timer = setTimeout(async () => {
         try {
-          const got = await braveSuggest(q);
+          const got = await astraSuggest(q);
           if (input.value.trim() !== q) return;    // stale
           if (document.activeElement !== input) return; // blurred mid-flight
           typed = q;
@@ -249,21 +230,21 @@
       } else if (e.key === 'Enter' && active >= 0) {
         e.preventDefault(); e.stopPropagation();
         close();
-        go(input.value.trim(), e.metaKey || e.ctrlKey);
+        go(input.value.trim());
       } else if (e.key === 'Escape') close();
     });
     input.addEventListener('blur', close);
   }
 
-  // ── Brave web search ──
-  async function braveSearch(q) {
+  // ── web search (backend DDG scrape) ──
+  async function astraSearch(q) {
     const res = await fetch(
-      'https://api.search.brave.com/res/v1/web/search?count=20&q=' + encodeURIComponent(q),
-      { headers: { 'Accept': 'application/json', 'X-Subscription-Token': getKey() } }
+      backendBase() + '/api/search?q=' + encodeURIComponent(q),
+      { headers: { 'ngrok-skip-browser-warning': 'true', 'bypass-tunnel-reminder': 'true' } }
     );
-    if (!res.ok) { const e = new Error('Brave ' + res.status); e.status = res.status; throw e; }
+    if (!res.ok) { const e = new Error('search ' + res.status); e.status = res.status; throw e; }
     const data = await res.json();
-    return (data.web && data.web.results) || [];
+    return (data && Array.isArray(data.results)) ? data.results : [];
   }
 
   function faviconFor(url) {
@@ -271,9 +252,18 @@
     catch { return ''; }
   }
 
-  function displayUrl(url) {
-    try { const u = new URL(url); return u.hostname + (u.pathname === '/' ? '' : u.pathname); }
-    catch { return url; }
+  // google-style breadcrumb: host + up to 2 path segments, chevron-separated
+  function crumbFor(url) {
+    try {
+      const u = new URL(url);
+      const host = u.hostname.replace(/^www\./, '');
+      const segs = u.pathname.split('/').filter(Boolean).slice(0, 2).map((s) => {
+        try { return decodeURIComponent(s); } catch { return s; }
+      });
+      return { site: host, crumb: host + (segs.length ? ' › ' + segs.join(' › ') : '') };
+    } catch {
+      return { site: url, crumb: url };
+    }
   }
 
   function statusCard(emoji, msg, retry) {
@@ -305,15 +295,23 @@
       li.id = 'result-' + (i + 1);
 
       const img = document.createElement('img');
+      img.className = 'r-favi';
       img.src = faviconFor(r.url);
       img.alt = '';
       img.loading = 'lazy';
-      img.onerror = () => { img.replaceWith(Object.assign(document.createElement('span'), { textContent: '✦', className: 'bar-icon' })); };
+      img.onerror = () => { img.replaceWith(Object.assign(document.createElement('span'), { textContent: '✦', className: 'r-favi r-favi-fallback' })); };
 
+      const c = crumbFor(r.url);
       const wrap = document.createElement('div');
-      const urlEl = document.createElement('div');
-      urlEl.className = 'r-url';
-      urlEl.textContent = displayUrl(r.url);
+      const head = document.createElement('div');
+      head.className = 'r-head';
+      const site = document.createElement('div');
+      site.className = 'r-site';
+      site.textContent = c.site;
+      const crumb = document.createElement('div');
+      crumb.className = 'r-crumb';
+      crumb.textContent = c.crumb;
+      head.append(site, crumb);
       const a = document.createElement('a');
       a.className = 'r-title';
       a.href = r.url;
@@ -324,54 +322,50 @@
       snip.className = 'r-snippet';
       snip.textContent = r.description || '';
 
-      wrap.append(urlEl, a, snip);
+      wrap.append(head, a, snip);
       li.append(img, wrap);
       list.appendChild(li);
     });
   }
 
-  async function runSearch(q, ai) {
+  async function runSearch(q) {
     if (aiAbort) aiAbort.abort();
     const token = ++searchToken;
-    $('ai-panel').hidden = !ai;
+    const panel = $('ai-panel');
+    panel.hidden = false;                       // panel shows immediately — always-on AI
+    panel.classList.remove('done');
+    $('ai-head').textContent = COPY.aiHeaders[0];
     $('ai-body').innerHTML = '';
     $('ai-error').hidden = true;
+    $('ai-wave-label').textContent = '✦ ' + COPY.loadingQuips[0];
     $('r-meta').textContent = 'searching the universe for “' + q + '”…';
     $('result-list').innerHTML = '';
 
-    if (!getKey()) { $('key-modal').hidden = false; $('ai-panel').hidden = true; $('r-meta').textContent = ''; return; }
-
+    const t0 = performance.now();
     let results = [];
     try {
-      results = await braveSearch(q);
+      results = await astraSearch(q);
       results = results.filter((r) => /^https?:\/\//i.test(r.url || ''));
     } catch (e) {
       if (token !== searchToken) return;   // a newer search superseded this one
+      panel.hidden = true;                 // no grounding → no AI call (back off)
       $('r-meta').textContent = '';
-      $('ai-panel').hidden = true;         // no grounding results → no wave
-      const retry = () => runSearch(q, ai);
-      if (e.status === 401 || e.status === 403) statusCard('🔑', COPY.badKey, () => { $('key-modal').hidden = false; });
-      else if (e.status === 429) statusCard('🌙', COPY.rateLimited, retry);
+      const retry = () => runSearch(q);
+      if (e.status === 429) statusCard('🌙', COPY.rateLimited, retry);
       else statusCard('📡', COPY.offline, retry);
-      return;                              // no AI without grounding results
+      return;
     }
     if (token !== searchToken) return;
 
-    $('r-meta').textContent = results.length
-      ? 'about ' + results.length + ' little stars for “' + q + '”'
-      : '';
+    const secs = ((performance.now() - t0) / 1000).toFixed(2);
+    $('r-meta').textContent = results.length ? COPY.metaLine(results.length, secs) : '';
     if (results.length) renderResults(results);
-    else statusCard('🌌', COPY.emptyResults);
+    else statusCard('🌌', COPY.emptyResults);   // AI still answers from knowledge
 
-    if (ai) askAstra(q, results);
+    askAstra(q, results);
   }
 
-  // ── AI mode: Brave-grounded Saga answer, streamed over SSE ──
-  function backendBase() {
-    try { return (localStorage.getItem('vail_custom_backend_url') || 'https://api.okemovail.com').replace(/\/$/, ''); }
-    catch (_) { return 'https://api.okemovail.com'; }
-  }
-
+  // ── AI answer: scraped-results-grounded Saga, streamed over SSE ──
   function linkifyCitations(html, count) {
     // [n] → jump link to the matching result card (must run on marked output)
     return html.replace(/\[(\d{1,2})\]/g, (m, n) =>
@@ -392,7 +386,9 @@
     if (aiAbort) aiAbort.abort();
     aiAbort = new AbortController();
     const panel = $('ai-panel');
+    panel.hidden = false;
     panel.classList.remove('done');
+    $('ai-head').textContent = COPY.aiHeaders[Math.floor(Math.random() * COPY.aiHeaders.length)];
     $('ai-body').innerHTML = '';
     $('ai-error').hidden = true;
     const quipTimer = startWaveQuips();

@@ -20,7 +20,9 @@
 <link rel="icon" href="../images/blehfile.png">
 <style>
   /* ── Astra layout & identity (appearance tokens come from design-tokens.css) ── */
-  body { margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; }
+  /* Cosmic playground canvas: page-local warm parchment (do NOT edit shared tokens). */
+  body { margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; background-color: #fdf9f4; }
+  .dark body { background-color: #1e1a18; }
   [hidden] { display: none !important; }
 
   /* stars */
@@ -46,12 +48,20 @@
   .bar input:focus { outline: none; box-shadow: none; border: none; }
   .dark .bar input { box-shadow: none; }
   .bar .skuo { height: 36px; padding: 0 14px; border-radius: 999px; font-size: .82rem; white-space: nowrap; }
-  /* rainbow ring around Ask Astra */
+  /* rainbow ring (i'm feeling cosmic) */
   .ai-ring { border-radius: 999px; padding: 1.5px; background: conic-gradient(from var(--rb, 0deg), #ff5f6d, #ffc371, #f0e05a, #5fdc7d, #5aa7ff, #b06bff, #ff5f6d); animation: rb-spin 3.2s linear infinite; }
   .ai-ring .skuo { height: 33px; background: var(--bg-white); color: var(--text-primary); font-weight: 600; box-shadow: none; }
   @property --rb { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
   @keyframes rb-spin { to { --rb: 360deg; } }
-  @supports not (background: conic-gradient(from var(--rb), red, blue)) { .ai-ring { animation: none; } }
+  @supports not (background: conic-gradient(from var(--rb), red, blue)) {
+    .ai-ring { animation: none; }
+    .ai-panel { border: 1px solid var(--border-strong); background: var(--bg-white); }
+  }
+
+  /* hero buttons below the bar (google homage) */
+  .hero-btns { display: flex; gap: 10px; }
+  .hero-btns .skuo { height: 38px; padding: 0 18px; border-radius: 999px; font-size: .85rem; }
+  .hero-btns .ai-ring .skuo { height: 35px; }
 
   /* suggestions dropdown */
   .suggest { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg-white); border: 1px solid var(--border-strong); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.12); overflow: hidden; z-index: 20; }
@@ -65,18 +75,23 @@
   .r-logo { font-weight: 700; font-size: 1.05rem; text-decoration: none; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
   .results .bar { width: 100%; height: 42px; }
   .results .bar .skuo { height: 32px; }
-  .results .ai-ring .skuo { height: 29px; }
   .r-meta { font-size: .75rem; color: var(--text-tertiary); margin: 0 4px 14px; }
   #result-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
-  .result { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
-  .result img { width: 18px; height: 18px; border-radius: 4px; margin-top: 3px; }
-  .result .r-url { font-size: .72rem; color: var(--text-tertiary); word-break: break-all; }
-  .result .r-title { font-size: 1.02rem; color: var(--accent); text-decoration: none; line-height: 1.35; }
-  .result .r-title:hover { text-decoration: underline; }
+  .result { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
+  /* favicon chip, slightly tilted (cosmic playground mischief) */
+  .r-favi { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-white); margin-top: 2px; }
+  .result:nth-of-type(odd) .r-favi { transform: rotate(-7deg); }
+  .result:nth-of-type(even) .r-favi { transform: rotate(6deg); }
+  .r-favi-fallback { display: inline-grid; place-items: center; font-size: .7rem; color: var(--accent); }
+  /* google grammar: site + breadcrumb above the title */
+  .r-site { font-size: .78rem; color: var(--text-primary); }
+  .r-crumb { font-size: .72rem; color: var(--text-tertiary); word-break: break-all; }
+  .result .r-title { font-size: 1.05rem; color: var(--accent); text-decoration: none; line-height: 1.35; display: inline-block; margin-top: 2px; }
+  .result .r-title:hover { text-decoration: underline wavy var(--accent-light); text-underline-offset: 3px; }
   .result .r-snippet { margin: 2px 0 0; font-size: .84rem; color: var(--text-secondary); line-height: 1.5; }
 
-  /* AI answer panel */
-  .ai-panel { margin: 0 0 22px; border: 1px solid var(--border-strong); border-radius: 18px; background: var(--bg-white); overflow: hidden; }
+  /* AI answer panel — rainbow conic border, always on */
+  .ai-panel { margin: 0 0 22px; border-radius: 18px; border: 1.5px solid transparent; background: linear-gradient(var(--bg-white), var(--bg-white)) padding-box, conic-gradient(from var(--rb, 0deg), #ff5f6d, #ffc371, #f0e05a, #5fdc7d, #5aa7ff, #b06bff, #ff5f6d) border-box; animation: rb-spin 6s linear infinite; overflow: hidden; }
   .ai-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; font-weight: 700; font-size: .92rem; color: var(--accent); }
   .ai-wave { height: 46px; margin: 10px 12px 0; border-radius: 12px; position: relative; overflow: hidden; transition: height .6s ease, margin .6s ease, opacity .6s ease; }
   .ai-wave .blob { position: absolute; inset: -60%; filter: blur(18px); background:
@@ -93,20 +108,16 @@
   .ai-error { padding: 0 16px 14px; font-size: .84rem; color: var(--text-secondary); }
   @keyframes wave-flow { 0% { transform: translateX(-6%) scale(1.05); } 100% { transform: translateX(6%) scale(1.12); } }
 
-  /* key card + modal + status card share .card from design-tokens */
-  .key-card { max-width: 420px; text-align: center; font-size: .88rem; line-height: 1.55; }
-  .key-card input { width: 100%; box-sizing: border-box; margin: 10px 0; text-align: center; }
-  .key-link { background: none; border: none; color: var(--text-tertiary); font-size: .72rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .status-card { text-align: center; padding: 2rem 1rem; font-size: .9rem; color: var(--text-secondary); }
   .status-card .big { font-size: 1.6rem; display: block; margin-bottom: 8px; }
 
   @media (max-width: 560px) {
-    .bar .skuo .lbl { display: none; }        /* icon-first buttons on tiny screens */
+    .bar .skuo .lbl { display: none; }        /* icon-first button on tiny screens */
     .constellation { right: 6%; top: 12%; }
     .r-top { flex-wrap: wrap; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .star, .ai-ring, .ai-wave .blob { animation: none !important; }
+    .star, .ai-ring, .ai-panel, .ai-wave .blob { animation: none !important; }
     .ai-wave, .ai-panel.done .ai-wave { transition: none; }
   }
 </style>
@@ -129,17 +140,13 @@
   <div class="bar" id="hero-bar">
     <span class="bar-icon">🔭</span>
     <input id="hero-input" type="text" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web">
-    <button class="skuo skuo-neutral" id="hero-search">🔍 <span class="lbl">Search</span></button>
-    <span class="ai-ring"><button class="skuo" id="hero-ai">✦ <span class="lbl">Ask Astra</span></button></span>
     <div class="suggest" id="hero-suggest" hidden></div>
   </div>
-  <p class="hint">enter = search · ⌘↵ = ask astra · no wrong questions</p>
-  <div id="key-card" class="key-card card card-pad" hidden>
-    <strong>✦ Astra needs a key to the cosmos</strong><br>
-    Results come from the <a href="https://brave.com/search/api/" target="_blank" rel="noopener">Brave Search API</a> — free tier, 2,000 queries a month. Grab a key and paste it here:
-    <input id="key-input" type="password" placeholder="BSA…" aria-label="Brave API key">
-    <button class="skuo skuo-accent" id="key-save">save my key</button>
+  <div class="hero-btns">
+    <button class="skuo skuo-neutral" id="hero-search">🔍 search the cosmos</button>
+    <span class="ai-ring"><button class="skuo" id="hero-cosmic">✦ i'm feeling cosmic</button></span>
   </div>
+  <p class="hint">enter = search · no wrong questions</p>
   <footer class="foot">made of stardust · <a href="../index.html">okemo</a> ✦</footer>
 </main>
 
@@ -151,28 +158,18 @@
       <span class="bar-icon">🔭</span>
       <input id="results-input" type="text" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web">
       <button class="skuo skuo-neutral" id="results-search">🔍 <span class="lbl">Search</span></button>
-      <span class="ai-ring"><button class="skuo" id="results-ai">✦ <span class="lbl">Ask Astra</span></button></span>
       <div class="suggest" id="results-suggest" hidden></div>
     </div>
   </header>
   <section id="ai-panel" class="ai-panel" hidden>
-    <div class="ai-head">✦ Astra Answer</div>
+    <div class="ai-head" id="ai-head">✦ Astra Answer</div>
     <div class="ai-wave" id="ai-wave"><div class="blob"></div><div class="wave-label" id="ai-wave-label">✦ consulting the cosmos…</div></div>
     <div class="ai-body" id="ai-body"></div>
     <div class="ai-error" id="ai-error" hidden></div>
   </section>
   <p class="r-meta" id="r-meta"></p>
   <ol id="result-list"></ol>
-  <div style="text-align:center; margin-top:26px;"><button class="key-link" id="key-edit">✦ change api key</button></div>
 </main>
-
-<!-- key edit modal (results view) -->
-<div id="key-modal" class="key-card card card-pad" hidden style="position:fixed; inset:auto 0 40vh 0; margin:auto; z-index:50;">
-  <strong>✦ new key, who dis</strong>
-  <input id="key-modal-input" type="password" placeholder="BSA…" aria-label="Brave API key">
-  <button class="skuo skuo-accent" id="key-modal-save">save</button>
-  <button class="skuo skuo-neutral" id="key-modal-cancel">nevermind</button>
-</div>
 
 <script src="astra.js"></script>
 </body>
