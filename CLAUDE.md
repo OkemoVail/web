@@ -82,7 +82,6 @@ Switch with `window.selectModel('SAGA')`. The id is sent as the `model` field to
 | `vail_last_seen_build` | Last build number the user dismissed in the changelog modal |
 | `vail_remote_build` | Build number fetched from server (overrides local `BUILD_NUMBER` in `updatenotes.js`) |
 | `vail_remote_changelog` | JSON array of changelog strings fetched from server (overrides local `CHANGELOG.changes`) |
-| `astra_brave_key` | Brave Search API key for Okemo Astra |
 
 ### Data flow for a message
 
@@ -90,6 +89,10 @@ Switch with `window.selectModel('SAGA')`. The id is sent as the `model` field to
 2. `sendMessage` pushes `[msg, null, null]` to `chatHistory`, calls `render()`, then streams from the OpenAI-compatible endpoint via SSE (`streaming.js`)
 3. Tokens arrive → `window.streamQueue` → typewriter drainer (`setInterval` at 50ms) appends chars using `charAccu += speed / 20` where `TYPE_SPEED_MAIN = 80` (4 chars/tick) or `TYPE_SPEED_THOUGHT = 200` (10 chars/tick) inside `<think>` blocks
 4. On completion → `render()` + `updateUI()` + `save()`
+
+### Chat titles (auto, evolving — 2026-08-11)
+
+Titles generate in Saga's full-chaotic voice (`TITLE_SYSTEM_PROMPT` in `chat-management.js`: puns/CAPS/dry jokes, topic-first, no emoji) from a whole-chat digest — `window.buildTitleDigest(history)` anchors the first user message + last 5 exchanges, think-stripped, 900-char budget. Title requests run at temperature 0.6 and every model request (titles AND chat) carries a fresh random `seed` from `window.randomSeed()` (`utils.js`) so runs never replay the same sampling stream. Cadence: titled after reply 1, then re-titled every ~4 replies via `window.chatTitleDue(chat, len)` (chat object carries `titleGenAt`). Locks: rename sets `chat.titleManual`; a title thumbs-up (`titleFeedback === 'good'`) also locks; both are bypassed only by manual Regenerate. The `_generatingTitle_<id>` flag suppresses concurrent fetches. Harness: `node test-titles.mjs` (unit suites) / `node test-titles.mjs --live [url]` (real backend). Spec/plan: `docs/superpowers/specs/2026-08-11-chaotic-evolving-titles-design.md`, `docs/superpowers/plans/2026-08-11-chaotic-evolving-titles.md`.
 
 ### Generation indicator (book page-flip)
 
@@ -103,7 +106,7 @@ While a response streams, `render.js` appends a `.book-flip-lane` under the last
 
 The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemovail.com`. At boot, `main.js` fetches `/tunnel_url` to auto-detect a dynamic tunnel URL and stores it in `vail_custom_backend_url`. Override via `localStorage.setItem('vail_custom_backend_url', ...)` or the Settings panel.
 
-**Temp local backend (2026-08-11):** `backend/server.py` is a single-file FastAPI + mlx-lm server (Gemma 3 4B QAT 4-bit by default, `MODEL_ID` env to swap) that implements `/v1/chat/completions` (SSE + non-stream) plus stubs for `/tunnel_url`, `/api/system_prompts`, `/feedback`, `/api/tokens`, `/cancel_job`. Run `./backend/run.sh` → `127.0.0.1:8001`; the existing cloudflared named tunnel exposes it as `api.okemovail.com`. Tests: `cd backend && .venv/bin/python -m pytest tests/ -v` (fake model — no download). Spec: `docs/superpowers/specs/2026-08-11-temp-mlx-backend-design.md`. No accounts/cloud storage/voice — the real backend remains the separate `OkemoLLM` repo.
+**Temp local backend (2026-08-11):** `backend/server.py` is a single-file FastAPI + mlx-lm server (Gemma 3 4B QAT 4-bit by default, `MODEL_ID` env to swap) that implements `/v1/chat/completions` (SSE + non-stream), keyless web search `/api/search` + autocomplete `/api/suggest` (DuckDuckGo scrape/proxy with a 10-min TTL cache), plus stubs for `/tunnel_url`, `/api/system_prompts`, `/feedback`, `/api/tokens`, `/cancel_job`. Run `./backend/run.sh` → `127.0.0.1:8001`; the existing cloudflared named tunnel exposes it as `api.okemovail.com`. Tests: `cd backend && .venv/bin/python -m pytest tests/ -v` (fake model — no download). Spec: `docs/superpowers/specs/2026-08-11-temp-mlx-backend-design.md`. No accounts/cloud storage/voice — the real backend remains the separate `OkemoLLM` repo.
 
 ### Other pages
 
@@ -115,7 +118,7 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 - `index.html` / `whitename.html` — root landing pages using Tailwind (`src/output.css`)
 - `AI/index.html` — Oaky entry/landing page for the AI section (uses Tailwind CDN, not `src/output.css`)
 - `Themes/Themes.html` — theme browser
-- `search/index.html` — Okemo Astra: Google-style web search (Brave Search API, key in `localStorage.astra_brave_key`) with an optional streaming Saga "✦ Ask Astra" answer (`?q=` results, `&ai=1` adds AI). Intentional exceptions: no `src/nav.js` (chromeless by design), no Tailwind. Spec: `docs/superpowers/specs/2026-08-11-okemo-astra-design.md`.
+- `search/index.html` — Okemo Astra: keyless Google-style web search. Results + autocomplete come from the temp backend (`/api/search` scrapes DuckDuckGo lite, `/api/suggest` proxies DDG autocomplete — no API key anywhere); every search also streams a dry-humor Saga answer grounded in the top 5 results, cited `[n]`. UI: "Google bones, cosmic playground skin" — breadcrumb URLs above accent titles, tilted favicon chips, rainbow-conic AI panel border, warm parchment canvas (`#fdf9f4` / `#1e1a18`, page-local), hero buttons below the bar incl. `✦ i'm feeling cosmic` (random quip query). Deployment coupling: the search endpoints exist ONLY on the temp backend — pointing `api.okemovail.com` back at the real OkemoLLM backend turns Astra into a permanent 📡 card until that backend gains the same routes. Intentional exceptions: no `src/nav.js` (chromeless by design), no Tailwind. Specs: `docs/superpowers/specs/2026-08-11-okemo-astra-design.md` (v1), `docs/superpowers/specs/2026-08-12-astra-keyless-cosmic-redesign-design.md` (v2).
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
