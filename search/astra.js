@@ -41,6 +41,7 @@
     try { localStorage.setItem('astra_ai_mode', on ? 'on' : 'off'); } catch (_) {}
     const t = $('ai-toggle');
     t.setAttribute('aria-pressed', on ? 'true' : 'false');
+    t.classList.toggle('skuo-accent', on);
     if (!on && aiAbort) aiAbort.abort();
   }
 
@@ -363,6 +364,7 @@
     $('ai-head').textContent = COPY.aiHeaders[0];
     $('ai-body').innerHTML = '';
     $('ai-error').hidden = true;
+    $('ai-follow').hidden = true;
     $('ai-wave-label').textContent = '✦ ' + COPY.loadingQuips[0];
     $('r-meta').textContent = 'searching the universe for “' + q + '”…';
     $('result-list').innerHTML = '';
@@ -440,7 +442,7 @@
         web_search: false,
         use_thought: false,
         max_tokens: 1024,
-        messages: [{ role: 'system', content: COPY.aiSystem }, ...thread],
+        messages: [{ role: 'system', content: COPY.aiSystem }, thread[0], ...thread.slice(1).slice(-8)],
       }),
     });
     if (!res.ok) throw new Error('backend ' + res.status);
@@ -497,7 +499,6 @@
       if (!text.trim()) $('ai-body').textContent = '✦ the cosmos answered with silence — try rephrasing?';
       panel.classList.add('done');              // wave collapses + shimmer settles
       $('ai-follow').hidden = false;            // click to ask more
-      $('ai-follow-input').focus({ preventScroll: true });
     } catch (e) {
       clearInterval(quipTimer);
       if (e.name === 'AbortError') return;      // superseded by a newer search / toggle off
