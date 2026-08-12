@@ -11,6 +11,8 @@ import queue
 import threading
 import time
 import uuid
+from html.parser import HTMLParser
+from urllib.parse import parse_qs, unquote, urlparse
 
 import mlx_lm
 from mlx_lm.sample_utils import make_sampler, make_logits_processors
@@ -109,6 +111,80 @@ def cancel_job(body: dict):
     if jid:
         cancelled_jobs.add(jid)
     return {"ok": True}
+
+
+# ── Web search (DuckDuckGo, keyless) ─────────────────────────────
+DDG_LITE_URL = "https://lite.duckduckgo.com/lite/"
+DDG_AC_URL = "https://duckduckgo.com/ac/"
+HTTP_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/126.0.0.0 Safari/537.36"
+}
+CACHE_TTL = 600  # seconds
+_search_cache = {}
+_suggest_cache = {}
+
+
+def _unwrap_ddg_url(href):
+    """DDG lite wraps outbound links in //duckduckgo.com/l/?uddg=<urlencoded>.
+    Return the real URL; return "" for ad click-throughs."""
+    if "ad_domain=" in href or "/y.js" in href:
+        return ""
+    if href.startswith("//duckduckgo.com/l/?") or href.startswith("/l/?"):
+        full = "https:" + href if href.startswith("//") else "https://duckduckgo.com" + href
+        return unquote(parse_qs(urlparse(full).query).get("uddg", [""])[0])
+    return href
+
+
+class _DDGLiteParser(HTMLParser):
+    """Pairs each `a.result-link` with the next `td.result-snippet`."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.results = []
+        self._pending = None   # dict being built
+        self._capture = None   # "title" | "snippet" | None
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        cls = a.get("class") or ""
+        if tag == "a" and "result-link" in cls:
+            self._flush()
+            self._pending = {"title": "", "url": _unwrap_ddg_url(a.get("href") or ""),
+                             "description": ""}
+            self._capture = "title"
+        elif tag == "td" and "result-snippet" in cls and self._pending is not None:
+            self._capture = "snippet"
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self._capture == "title":
+            self._capture = None
+        elif tag == "td" and self._capture == "snippet":
+            self._capture = None
+
+    def handle_data(self, data):
+        if self._pending is None:
+            return
+        if self._capture == "title":
+            self._pending["title"] += data
+        elif self._capture == "snippet":
+            self._pending["description"] += data
+
+    def _flush(self):
+        if self._pending is not None:
+            r = {k: " ".join(v.split()) for k, v in self._pending.items()}
+            if r["title"] and r["url"] and r["description"]:
+                self.results.append(r)
+        self._pending = None
+
+
+def parse_ddg_lite(html):
+    p = _DDGLiteParser()
+    p.feed(html or "")
+    p.close()
+    p._flush()
+    return p.results
 
 
 model = None
