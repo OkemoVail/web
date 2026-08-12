@@ -246,12 +246,15 @@ def api_suggest(q: str = ""):
         resp = _http_get(DDG_AC_URL, params={"q": q, "type": "list"})
     except httpx.HTTPError:
         return JSONResponse({"error": "upstream"}, status_code=502)
-    if resp.status_code != 200:
+    if resp.status_code in (202, 403, 429):
         return JSONResponse({"error": "rate_limited"}, status_code=429)
+    if resp.status_code != 200:
+        return JSONResponse({"error": "upstream"}, status_code=502)
     try:
-        phrases = [i["phrase"] for i in resp.json()
-                   if isinstance(i, dict) and i.get("phrase")]
-    except ValueError:
+        data = resp.json()
+        phrases = [i["phrase"] for i in data
+                   if isinstance(i, dict) and isinstance(i.get("phrase"), str)] if isinstance(data, list) else []
+    except (ValueError, TypeError):
         phrases = []
     out = phrases[:6]
     _cache_set(_suggest_cache, key, out)

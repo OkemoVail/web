@@ -199,3 +199,30 @@ def test_api_suggest_cache_hit_skips_upstream(monkeypatch):
     r = client.get("/api/suggest", params={"q": "sky"})
     assert r.json() == ["sky"]
     assert calls["n"] == 1
+
+
+def test_api_suggest_malformed_json_returns_empty(monkeypatch):
+    _fake_http(monkeypatch, [FakeHTTPResp(200, payload=None)])  # .json() raises ValueError
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/suggest", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json() == []
+
+
+def test_api_suggest_scalar_json_root_returns_empty(monkeypatch):
+    _fake_http(monkeypatch, [FakeHTTPResp(200, payload=5)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/suggest", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json() == []
+
+
+def test_api_suggest_upstream_500_gives_502(monkeypatch):
+    _fake_http(monkeypatch, [FakeHTTPResp(500)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/suggest", params={"q": "sky"})
+    assert r.status_code == 502
+    assert r.json() == {"error": "upstream"}
