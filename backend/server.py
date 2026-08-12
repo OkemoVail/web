@@ -14,11 +14,12 @@ import uuid
 from html.parser import HTMLParser
 from urllib.parse import parse_qs, unquote, urlparse
 
+import httpx
 import mlx_lm
 from mlx_lm.sample_utils import make_sampler, make_logits_processors
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 MODEL_ID = os.environ.get("MODEL_ID", "mlx-community/gemma-3-4b-it-qat-4bit")
 
@@ -180,11 +181,55 @@ class _DDGLiteParser(HTMLParser):
 
 
 def parse_ddg_lite(html):
+    """Parse DDG lite HTML into [{title, url, description}]; rows missing any field are dropped."""
     p = _DDGLiteParser()
     p.feed(html or "")
     p.close()
     p._flush()
     return p.results
+
+
+def _http_get(url, **kw):
+    return httpx.get(url, headers=HTTP_HEADERS, timeout=8, **kw)
+
+
+def _cache_get(cache, key):
+    hit = cache.get(key)
+    if hit and time.time() - hit[0] < CACHE_TTL:
+        return hit[1]
+    return None
+
+
+def _cache_set(cache, key, value):
+    cache[key] = (time.time(), value)
+
+
+@app.get("/api/search")
+def api_search(q: str = ""):
+    q = (q or "").strip()
+    if not q:
+        return {"results": []}
+    key = q.lower()
+    cached = _cache_get(_search_cache, key)
+    if cached is not None:
+        return {"results": cached}
+    resp = None
+    for attempt in (1, 2):
+        try:
+            resp = _http_get(DDG_LITE_URL, params={"q": q})
+        except httpx.HTTPError:
+            return JSONResponse({"error": "upstream"}, status_code=502)
+        if resp.status_code == 200:
+            break
+        if resp.status_code in (202, 403) and attempt == 1:
+            time.sleep(2)   # DDG anomaly check — back off once, then give up
+            continue
+        if resp.status_code in (202, 403, 429):
+            return JSONResponse({"error": "rate_limited"}, status_code=429)
+        return JSONResponse({"error": "upstream"}, status_code=502)
+    results = parse_ddg_lite(resp.text)[:15]
+    _cache_set(_search_cache, key, results)
+    return {"results": results}
 
 
 model = None

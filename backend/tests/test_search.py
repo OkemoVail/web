@@ -1,3 +1,4 @@
+import httpx
 import pytest
 
 import server
@@ -50,3 +51,109 @@ def test_parse_ddg_lite_skips_ads_and_garbage():
     assert server.parse_ddg_lite("") == []
     assert server.parse_ddg_lite("<p>hello</p>") == []
     assert server.parse_ddg_lite(None) == []
+
+
+def test_parse_ddg_lite_explicitly_excludes_ad_rows():
+    results = server.parse_ddg_lite(LITE_HTML)
+    assert all("ads.example" not in r["url"] and r["title"] != "Sponsored junk"
+               for r in results)
+
+
+def test_unwrap_ddg_url_relative_redirect():
+    assert server._unwrap_ddg_url("/l/?uddg=https%3A%2F%2Fexample.com%2Fx") == "https://example.com/x"
+
+
+class FakeHTTPResp:
+    def __init__(self, status_code=200, text="", payload=None):
+        self.status_code = status_code
+        self.text = text
+        self._payload = payload
+
+    def json(self):
+        if self._payload is None:
+            raise ValueError("no json")
+        return self._payload
+
+
+@pytest.fixture(autouse=True)
+def clear_caches():
+    server._search_cache.clear()
+    server._suggest_cache.clear()
+    yield
+
+
+def _fake_http(monkeypatch, responses):
+    """Monkeypatch server._http_get with a scripted sequence. Returns call count dict."""
+    calls = {"n": 0}
+
+    def fake(url, **kw):
+        r = responses[min(calls["n"], len(responses) - 1)]
+        calls["n"] += 1
+        if isinstance(r, Exception):
+            raise r
+        return r
+
+    monkeypatch.setattr(server, "_http_get", fake)
+    return calls
+
+
+def test_api_search_happy_path(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(200, LITE_HTML)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "why is the sky blue"})
+    assert r.status_code == 200
+    results = r.json()["results"]
+    assert len(results) == 2
+    assert results[0]["url"] == "https://example.com/blue"
+    assert calls["n"] == 1
+
+
+def test_api_search_cache_hit_skips_upstream(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(200, LITE_HTML)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    client.get("/api/search", params={"q": "sky"})
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 200
+    assert len(r.json()["results"]) == 2
+    assert calls["n"] == 1  # second call served from cache
+
+
+def test_api_search_retries_202_then_succeeds(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(200, LITE_HTML)])
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 200
+    assert calls["n"] == 2
+
+
+def test_api_search_double_202_gives_429(monkeypatch):
+    _fake_http(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(202)])
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 429
+    assert r.json() == {"error": "rate_limited"}
+
+
+def test_api_search_network_error_gives_502(monkeypatch):
+    _fake_http(monkeypatch, [httpx.HTTPError("boom")])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 502
+    assert r.json() == {"error": "upstream"}
+
+
+def test_api_search_empty_query_never_calls_upstream(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(200, LITE_HTML)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "   "})
+    assert r.status_code == 200
+    assert r.json() == {"results": []}
+    assert calls["n"] == 0
