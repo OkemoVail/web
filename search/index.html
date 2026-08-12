@@ -93,7 +93,9 @@
   .result .r-snippet { margin: 2px 0 0; font-size: .84rem; color: var(--text-secondary); line-height: 1.5; }
 
   /* AI answer panel — rainbow conic border, always on */
-  .ai-panel { margin: 0 0 22px; border-radius: 18px; border: 1.5px solid transparent; background: linear-gradient(var(--bg-white), var(--bg-white)) padding-box, conic-gradient(from var(--rb, 0deg), #ff5f6d, #ffc371, #f0e05a, #5fdc7d, #5aa7ff, #b06bff, #ff5f6d) border-box; animation: rb-spin 6s linear infinite; overflow: hidden; }
+  .ai-panel { margin: 0 0 22px; border-radius: 18px; border: 1.5px solid transparent; background: linear-gradient(var(--bg-white), var(--bg-white)) padding-box, conic-gradient(from var(--rb, 0deg), var(--accent), #f0c27b, var(--accent-light), #f0c27b, var(--accent)) border-box; animation: rb-spin 6s linear infinite; overflow: hidden; transition: border-color .6s ease; }
+  /* done: shimmer settles to a plain hairline */
+  .ai-panel.done { border-color: var(--border-strong); background: var(--bg-white); animation: none; }
   .ai-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; font-weight: 700; font-size: .92rem; color: var(--accent); }
   .ai-wave { height: 46px; margin: 10px 12px 0; border-radius: 12px; position: relative; overflow: hidden; transition: height .6s ease, margin .6s ease, opacity .6s ease; }
   .ai-wave .blob { position: absolute; inset: -60%; filter: blur(18px); background:
@@ -133,7 +135,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .star, .ai-ring, .ai-panel, .ai-wave .blob { animation: none !important; }
-    .ai-wave, .ai-panel.done .ai-wave { transition: none; }
+    .ai-wave, .ai-panel, .ai-panel.done .ai-wave { transition: none; }
   }
 </style>
 </head>
