@@ -31,9 +31,9 @@
   @keyframes twinkle { 0%,100% { opacity: .12; } 50% { opacity: .85; } }
 
   /* hero */
-  .hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 1rem; box-sizing: border-box; }
-  .wordmark { margin: 0; font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; }
-  .tagline { margin: -6px 0 4px; font-size: .85rem; font-style: italic; color: var(--text-tertiary); }
+  .hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 1rem; box-sizing: border-box; }
+  .wordmark { margin: 0; font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; }
+  .tagline { margin: -2px 0 2px; font-size: .85rem; font-style: italic; color: var(--text-tertiary); }
   .constellation { position: absolute; top: 16%; right: 14%; width: 76px; height: 50px; color: var(--accent); opacity: .55; pointer-events: none; }
   .hint { margin: 2px 0 0; font-size: .72rem; color: var(--text-tertiary); }
   .foot { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-size: .72rem; color: var(--text-tertiary); }
@@ -70,12 +70,14 @@
   .suggest button.active::before { content: '✦ '; color: var(--accent); }
 
   /* results view */
-  .results { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 1rem 1rem 4rem; }
+  .results { position: relative; z-index: 1; max-width: none; margin: 0; padding: 1rem 1rem 4rem clamp(1rem, 12vw, 180px); }
   .r-top { display: flex; align-items: center; gap: 14px; padding: 6px 2.8rem 18px 0; }
   .r-logo { font-weight: 700; font-size: 1.05rem; text-decoration: none; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
-  .results .bar { width: 100%; height: 42px; }
+  .results .bar { width: 100%; max-width: 560px; height: 42px; }
   .results .bar .skuo { height: 32px; }
   .r-meta { font-size: .75rem; color: var(--text-tertiary); margin: 0 4px 14px; }
+  /* google-classic left rail: bar, panel and results share one left edge */
+  .r-meta, .ai-panel, #result-list { max-width: 640px; }
   #result-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
   .result { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
   /* favicon chip, slightly tilted (cosmic playground mischief) */
@@ -111,10 +113,22 @@
   .status-card { text-align: center; padding: 2rem 1rem; font-size: .9rem; color: var(--text-secondary); }
   .status-card .big { font-size: 1.6rem; display: block; margin-bottom: 8px; }
 
-  @media (max-width: 560px) {
-    .bar .skuo .lbl { display: none; }        /* icon-first button on tiny screens */
+  @media (max-width: 768px) {
+    /* ── mobile mode: a different layout, not a shrunk desktop column ── */
+    .bar .skuo .lbl { display: none; }        /* icon-first bar button */
+    .hero-btns .skuo .lbl { display: none; }  /* icon-first hero pills */
+    .hero .wordmark { font-size: 1.5rem; }
     .constellation { right: 6%; top: 12%; }
-    .r-top { flex-wrap: wrap; }
+    .results { padding: .75rem 0 3rem; }      /* full-bleed: rows go edge to edge */
+    .r-top { flex-wrap: nowrap; gap: 8px; padding: 6px 2.8rem 12px 12px; }
+    .r-logo { font-size: .95rem; }
+    .results .bar { max-width: none; height: 40px; }
+    .r-meta, .ai-panel, #result-list { max-width: none; }
+    .r-meta { margin: 0 16px 12px; }
+    .ai-panel { margin: 0 12px 18px; }
+    #result-list { gap: 0; }
+    .result { padding: 12px 16px; gap: 8px; border-top: 1px solid var(--border-strong); }
+    .result:last-child { border-bottom: 1px solid var(--border-strong); }
   }
   @media (prefers-reduced-motion: reduce) {
     .star, .ai-ring, .ai-panel, .ai-wave .blob { animation: none !important; }
@@ -143,8 +157,8 @@
     <div class="suggest" id="hero-suggest" hidden></div>
   </div>
   <div class="hero-btns">
-    <button class="skuo skuo-neutral" id="hero-search">🔍 search the cosmos</button>
-    <span class="ai-ring"><button class="skuo" id="hero-cosmic">✦ i'm feeling cosmic</button></span>
+    <button class="skuo skuo-neutral" id="hero-search">🔍 <span class="lbl">search the cosmos</span></button>
+    <span class="ai-ring"><button class="skuo" id="hero-cosmic">✦ <span class="lbl">i'm feeling cosmic</span></button></span>
   </div>
   <p class="hint">enter = search · no wrong questions</p>
   <footer class="foot">made of stardust · <a href="../index.html">okemo</a> ✦</footer>
