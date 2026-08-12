@@ -242,13 +242,19 @@ def api_suggest(q: str = ""):
     cached = _cache_get(_suggest_cache, key)
     if cached is not None:
         return cached
-    try:
-        resp = _http_get(DDG_AC_URL, params={"q": q, "type": "list"})
-    except httpx.HTTPError:
-        return JSONResponse({"error": "upstream"}, status_code=502)
-    if resp.status_code in (202, 403, 429):
-        return JSONResponse({"error": "rate_limited"}, status_code=429)
-    if resp.status_code != 200:
+    resp = None
+    for attempt in (1, 2):
+        try:
+            resp = _http_get(DDG_AC_URL, params={"q": q, "type": "list"})
+        except httpx.HTTPError:
+            return JSONResponse({"error": "upstream"}, status_code=502)
+        if resp.status_code == 200:
+            break
+        if resp.status_code in (202, 403) and attempt == 1:
+            time.sleep(2)   # DDG anomaly check — back off once, then give up
+            continue
+        if resp.status_code in (202, 403, 429):
+            return JSONResponse({"error": "rate_limited"}, status_code=429)
         return JSONResponse({"error": "upstream"}, status_code=502)
     try:
         data = resp.json()

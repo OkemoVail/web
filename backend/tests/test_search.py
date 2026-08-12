@@ -238,3 +238,14 @@ def test_api_suggest_ddg_tuple_format(monkeypatch):
     assert r.status_code == 200
     assert r.json() == ["sky blue", "skyrim", "sky news"]
     assert calls["n"] == 1
+
+
+def test_api_suggest_retries_202_then_succeeds(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(200, payload=["sky", ["sky blue"]])])
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/suggest", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json() == ["sky blue"]
+    assert calls["n"] == 2

@@ -183,7 +183,7 @@
 
   function initSuggest(input, box) {
     if (!input || !box) return;
-    let items = [], active = -1, timer = null, dead = false, typed = '';
+    let items = [], active = -1, timer = null, dead = 0, typed = '';
 
     function close() { clearTimeout(timer); box.hidden = true; items = []; active = -1; }
     function render() {
@@ -208,7 +208,8 @@
     input.addEventListener('input', () => {
       clearTimeout(timer);
       const q = input.value.trim();
-      if (dead || !q) return close();
+      if ((dead && Date.now() - dead < 30000) || !q) return close();   // failed suggest endpoints get a 30s cooldown, not a session-long death
+      dead = 0;
       timer = setTimeout(async () => {
         try {
           const got = await astraSuggest(q);
@@ -216,7 +217,7 @@
           if (document.activeElement !== input) return; // blurred mid-flight
           typed = q;
           items = got; active = -1; render();
-        } catch { dead = true; close(); }          // never surface suggest errors
+        } catch { dead = Date.now(); close(); }          // never surface suggest errors
       }, 150);
     });
     input.addEventListener('keydown', (e) => {
