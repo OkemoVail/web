@@ -35,6 +35,15 @@
   // ── tiny DOM helper ──
   const $ = (id) => document.getElementById(id);
 
+  // ── AI mode toggle (persisted; default on) ──
+  function getAiMode() { try { return localStorage.getItem('astra_ai_mode') !== 'off'; } catch (_) { return true; } }
+  function setAiMode(on) {
+    try { localStorage.setItem('astra_ai_mode', on ? 'on' : 'off'); } catch (_) {}
+    const t = $('ai-toggle');
+    t.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (!on && aiAbort) aiAbort.abort();
+  }
+
   // ── theme toggle (writes vail_theme like src/nav.js does) ──
   function initTheme() {
     $('theme-toggle').addEventListener('click', () => {
@@ -146,12 +155,28 @@
   rotatePlaceholders();
   wireBar('hero-input', 'hero-search', 'hero-suggest');
   wireBar('results-input', 'results-search', 'results-suggest');
+  setAiMode(getAiMode());   // paint the persisted state
+  $('ai-toggle').addEventListener('click', () => {
+    const on = !getAiMode();
+    setAiMode(on);
+    const { q } = readRoute();
+    if (on && q) runSearch(q);            // toggling on from results answers immediately
+    if (!on) $('ai-panel').hidden = true; // toggling off hides the panel
+  });
   $('hero-cosmic').addEventListener('click', () => {
     const q = cosmicQuery($('hero-input').value.trim());
     $('hero-input').value = q;
     go(q);
   });
   $('logo-home').addEventListener('click', (e) => { e.preventDefault(); $('hero-input').value = $('results-input').value; go(''); });
+  const followGo = () => {
+    const q = $('ai-follow-input').value.trim();
+    if (!q || !thread.length) return;
+    $('ai-follow-input').value = '';
+    askFollowUp(q);
+  };
+  $('ai-follow-send').addEventListener('click', followGo);
+  $('ai-follow-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') followGo(); });
   window.addEventListener('popstate', renderRoute);
   renderRoute();
 
@@ -332,7 +357,8 @@
     if (aiAbort) aiAbort.abort();
     const token = ++searchToken;
     const panel = $('ai-panel');
-    panel.hidden = false;                       // panel shows immediately — always-on AI
+    const aiOn = getAiMode();
+    panel.hidden = !aiOn;                       // AI mode off → results-only page
     panel.classList.remove('done');
     $('ai-head').textContent = COPY.aiHeaders[0];
     $('ai-body').innerHTML = '';
@@ -362,7 +388,7 @@
     if (results.length) renderResults(results);
     else statusCard('🌌', COPY.emptyResults);   // AI still answers from knowledge
 
-    askAstra(q, results);
+    if (aiOn) askAstra(q, results);
   }
 
   // ── AI answer: scraped-results-grounded Saga, streamed over SSE ──
@@ -382,87 +408,152 @@
     }, 2200);
   }
 
-  async function askAstra(q, results) {
+  // ── follow-up thread state (reset on every new search) ──
+  let thread = [];           // alternating {role, content} pairs after the seed
+  let threadQuery = '';      // the query this thread belongs to
+  let threadResults = [];    // grounding sources for this thread
+
+  function seedThread(q, results) {
+    threadQuery = q;
+    threadResults = results;
+    const snippets = results.slice(0, 5)
+      .map((r, i) => '[' + (i + 1) + '] ' + (r.title || '') + ' — ' + (r.description || '') + ' (' + r.url + ')')
+      .join('\n');
+    thread = [{ role: 'user', content: q + '\n\nSources:\n' + (snippets || '(no sources — answer from knowledge)') }];
+  }
+
+  // streams one assistant turn; onToken(text) renders incrementally, returns full text
+  async function streamTurn(onToken) {
     if (aiAbort) aiAbort.abort();
     aiAbort = new AbortController();
+    const res = await fetch(backendBase() + '/v1/chat/completions', {
+      method: 'POST',
+      signal: aiAbort.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        'bypass-tunnel-reminder': 'true',
+      },
+      body: JSON.stringify({
+        model: 'saga-0.7b',
+        stream: true,
+        web_search: false,
+        use_thought: false,
+        max_tokens: 1024,
+        messages: [{ role: 'system', content: COPY.aiSystem }, ...thread],
+      }),
+    });
+    if (!res.ok) throw new Error('backend ' + res.status);
+
+    // SSE consumption — same line protocol as AI/js/chat-actions.js
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '', text = '', firstToken = false, sawDone = false;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        const clean = line.trim();
+        if (!clean.startsWith('data: ')) continue;
+        const dataStr = clean.substring(6).trim();
+        if (dataStr === '[DONE]') { sawDone = true; break; }
+        try {
+          const data = JSON.parse(dataStr);
+          const delta = data.choices && data.choices[0] && data.choices[0].delta
+            ? (data.choices[0].delta.content || '') : '';
+          if (delta) {
+            if (!firstToken) { firstToken = true; $('ai-wave-label').textContent = '✦ streaming from the stars…'; }
+            text += delta;
+            onToken(text);
+          }
+        } catch { /* partial JSON chunk — ignore */ }
+      }
+      if (sawDone) break;
+    }
+    return text;
+  }
+
+  async function askAstra(q, results) {
+    seedThread(q, results);
     const panel = $('ai-panel');
     panel.hidden = false;
     panel.classList.remove('done');
     $('ai-head').textContent = COPY.aiHeaders[Math.floor(Math.random() * COPY.aiHeaders.length)];
     $('ai-body').innerHTML = '';
     $('ai-error').hidden = true;
+    $('ai-follow').hidden = true;               // appears when the answer lands
     const quipTimer = startWaveQuips();
 
-    const snippets = results.slice(0, 5)
-      .map((r, i) => '[' + (i + 1) + '] ' + (r.title || '') + ' — ' + (r.description || '') + ' (' + r.url + ')')
-      .join('\n');
-
     try {
-      const res = await fetch(backendBase() + '/v1/chat/completions', {
-        method: 'POST',
-        signal: aiAbort.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          'bypass-tunnel-reminder': 'true',
-        },
-        body: JSON.stringify({
-          model: 'saga-0.7b',
-          stream: true,
-          web_search: false,
-          use_thought: false,
-          max_tokens: 1024,
-          messages: [
-            { role: 'system', content: COPY.aiSystem },
-            { role: 'user', content: q + '\n\nSources:\n' + (snippets || '(no sources — answer from knowledge)') },
-          ],
-        }),
+      const text = await streamTurn((t) => {
+        clearInterval(quipTimer);
+        $('ai-body').innerHTML = linkifyCitations(marked.parse(t.replace(/&/g, '&amp;').replace(/</g, '&lt;')), results.length);
       });
-      if (!res.ok) throw new Error('backend ' + res.status);
-
-      // SSE consumption — same line protocol as AI/js/chat-actions.js
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = '', text = '', firstToken = false, sawDone = false;
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split('\n');
-        buf = lines.pop();
-        for (const line of lines) {
-          const clean = line.trim();
-          if (!clean.startsWith('data: ')) continue;
-          const dataStr = clean.substring(6).trim();
-          if (dataStr === '[DONE]') { sawDone = true; break; }
-          try {
-            const data = JSON.parse(dataStr);
-            const delta = data.choices && data.choices[0] && data.choices[0].delta
-              ? (data.choices[0].delta.content || '') : '';
-            if (delta) {
-              if (!firstToken) { firstToken = true; clearInterval(quipTimer); $('ai-wave-label').textContent = '✦ streaming from the stars…'; }
-              text += delta;
-              $('ai-body').innerHTML = linkifyCitations(marked.parse(text.replace(/&/g, '&amp;').replace(/</g, '&lt;')), results.length);
-            }
-          } catch { /* partial JSON chunk — ignore */ }
-        }
-        if (sawDone) break;
-      }
       clearInterval(quipTimer);
+      thread.push({ role: 'assistant', content: text });
       if (!text.trim()) $('ai-body').textContent = '✦ the cosmos answered with silence — try rephrasing?';
-      panel.classList.add('done');         // wave collapses to shimmer line
+      panel.classList.add('done');              // wave collapses + shimmer settles
+      $('ai-follow').hidden = false;            // click to ask more
+      $('ai-follow-input').focus({ preventScroll: true });
     } catch (e) {
       clearInterval(quipTimer);
-      if (e.name === 'AbortError') return; // superseded by a newer search
+      if (e.name === 'AbortError') return;      // superseded by a newer search / toggle off
       panel.classList.add('done');
-      const err = $('ai-error');
-      err.hidden = false;
-      err.textContent = '✦ ' + COPY.aiDown + ' ';
-      const btn = document.createElement('button');
-      btn.className = 'skuo skuo-neutral';
-      btn.textContent = 'retry';
-      btn.addEventListener('click', () => askAstra(q, results));
-      err.appendChild(btn);
+      showAiError(() => askAstra(q, results));
+    }
+  }
+
+  function showAiError(retryFn) {
+    const err = $('ai-error');
+    err.hidden = false;
+    err.textContent = '✦ ' + COPY.aiDown + ' ';
+    const btn = document.createElement('button');
+    btn.className = 'skuo skuo-neutral';
+    btn.textContent = 'retry';
+    btn.addEventListener('click', retryFn);
+    err.appendChild(btn);
+  }
+
+  async function askFollowUp(question) {
+    const panel = $('ai-panel');
+    const input = $('ai-follow-input');
+    const send = $('ai-follow-send');
+    thread.push({ role: 'user', content: question });
+
+    const qEl = document.createElement('p');    // the user's turn, in the thread
+    qEl.className = 'ai-q';
+    qEl.textContent = question;
+    const aEl = document.createElement('div');  // the streaming answer under it
+    aEl.className = 'ai-thread-a';
+    $('ai-body').append(qEl, aEl);
+
+    panel.classList.remove('done');             // shimmer spins again while answering
+    $('ai-error').hidden = true;
+    input.disabled = true; send.disabled = true;
+    const quipTimer = startWaveQuips();
+
+    try {
+      const text = await streamTurn((t) => {
+        clearInterval(quipTimer);
+        aEl.innerHTML = linkifyCitations(marked.parse(t.replace(/&/g, '&amp;').replace(/</g, '&lt;')), threadResults.length);
+      });
+      clearInterval(quipTimer);
+      thread.push({ role: 'assistant', content: text });
+      if (!text.trim()) aEl.textContent = '✦ silence. rude, but on brand.';
+      panel.classList.add('done');
+    } catch (e) {
+      clearInterval(quipTimer);
+      if (e.name === 'AbortError') return;
+      thread.pop();                             // don't keep an unanswered question in context
+      qEl.remove(); aEl.remove();
+      panel.classList.add('done');
+      showAiError(() => askFollowUp(question));
+    } finally {
+      input.disabled = false; send.disabled = false;
+      input.focus({ preventScroll: true });
     }
   }
 })();

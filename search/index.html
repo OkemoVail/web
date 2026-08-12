@@ -77,7 +77,7 @@
   .results .bar .skuo { height: 32px; }
   .r-meta { font-size: .75rem; color: var(--text-tertiary); margin: 0 4px 14px; }
   /* google-classic left rail: bar, panel and results share one left edge */
-  .r-meta, .ai-panel, #result-list { max-width: 640px; }
+  .r-meta-row, .ai-panel, #result-list { max-width: 640px; }
   #result-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
   .result { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
   /* favicon chip, slightly tilted (cosmic playground mischief) */
@@ -112,6 +112,20 @@
   .ai-error { padding: 0 16px 14px; font-size: .84rem; color: var(--text-secondary); }
   @keyframes wave-flow { 0% { transform: translateX(-6%) scale(1.05); } 100% { transform: translateX(6%) scale(1.12); } }
 
+  /* meta row + AI toggle */
+  .r-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 640px; }
+  .r-meta-row .r-meta { margin: 0 4px 14px; }
+  #ai-toggle { height: 26px; padding: 0 12px; border-radius: 999px; font-size: .72rem; margin-bottom: 14px; }
+  #ai-toggle[aria-pressed="false"] { opacity: .55; filter: saturate(0); }
+
+  /* follow-up row + thread */
+  .ai-follow { display: flex; gap: 6px; padding: 0 12px 12px; }
+  .ai-follow input { flex: 1; min-width: 0; height: 32px; border-radius: 999px; padding: 0 12px; font-size: .82rem; }
+  .ai-follow .skuo { height: 32px; width: 32px; padding: 0; border-radius: 50%; flex: none; }
+  .ai-q { margin: 10px 0 2px; font-size: .82rem; font-style: italic; color: var(--text-tertiary); }
+  .ai-q::before { content: 'you ✦ '; color: var(--accent); font-style: normal; }
+  @media (prefers-reduced-motion: reduce) { .ai-follow { transition: none; } }
+
   .status-card { text-align: center; padding: 2rem 1rem; font-size: .9rem; color: var(--text-secondary); }
   .status-card .big { font-size: 1.6rem; display: block; margin-bottom: 8px; }
 
@@ -125,8 +139,9 @@
     .r-top { flex-wrap: nowrap; gap: 8px; padding: 6px calc(2.2rem + 18px) 12px 12px; }
     .r-logo { font-size: .95rem; }
     .results .bar { max-width: none; height: 40px; }
-    .r-meta, .ai-panel, #result-list { max-width: none; }
-    .r-meta { margin: 0 16px 12px; }
+    .r-meta-row, .ai-panel, #result-list { max-width: none; }
+    .r-meta-row { margin: 0 16px 12px; }
+    .r-meta-row .r-meta { margin: 0; }
     .ai-panel { margin: 0 12px 18px; }
     #result-list { gap: 0; }
     .result { padding: 12px 16px; gap: 8px; border-top: 1px solid var(--border-strong); }
@@ -183,8 +198,15 @@
     <div class="ai-wave" id="ai-wave"><div class="blob"></div><div class="wave-label" id="ai-wave-label">✦ consulting the cosmos…</div></div>
     <div class="ai-body" id="ai-body"></div>
     <div class="ai-error" id="ai-error" hidden></div>
+    <div class="ai-follow" id="ai-follow" hidden>
+      <input id="ai-follow-input" type="text" autocomplete="off" spellcheck="false" aria-label="Ask a follow-up" placeholder="ask more…">
+      <button class="skuo skuo-accent" id="ai-follow-send" aria-label="ask follow-up">→</button>
+    </div>
   </section>
-  <p class="r-meta" id="r-meta"></p>
+  <div class="r-meta-row">
+    <p class="r-meta" id="r-meta"></p>
+    <button class="skuo skuo-icon" id="ai-toggle" aria-pressed="true" aria-label="toggle AI answer">✦ AI</button>
+  </div>
   <ol id="result-list"></ol>
 </main>
 
