@@ -43,7 +43,9 @@ Expected: `package.json` gains a `devDependencies` section with these six entrie
 
 - [ ] **Step 2: Write the migration script**
 
-Create `tools/migrate-page.mjs` with exactly this content:
+Create `tools/migrate-page.mjs` with exactly this content.
+
+> **ERRATA (post-review):** the committed script includes hardening added after code review — the listing below is the initial version, **the committed `tools/migrate-page.mjs` is authoritative**. Changes: (1) `<style>` matches inside `<script>` ranges are skipped with a warning (word's `exportHTML()` template); (2) EXACT `:root` → `html:has(> body[data-page="x"])`, EXACT `html` → same, EXACT `html.dark` → `html.dark:has(> body[data-page="x"])` (preserves root-element targeting); (3) keyframes rename uses `(?<![\w-])…(?![\w-])` boundaries; (4) idempotency guard, empty-`<noscript>` cleanup, friendly ENOENT, dead ternary removed.
 
 ```js
 #!/usr/bin/env node
@@ -1179,7 +1181,7 @@ git commit -m "refactor(css): migrate Themes page (incl. styles.css) into src/si
 node tools/migrate-page.mjs word/index.html word --dry
 ```
 
-Expected: `movedBlocks: 2`, `rulesScoped` in the hundreds (852 lines of CSS), `fontFacesDropped: []` (word uses Google-Fonts JetBrains Mono, no inline Satoshi face), `font-awesome link(s) removed: 2` (this page uses the preload+onload FA pattern — both lines go). No warnings.
+Expected: `movedBlocks: 1` (word's second `<style>` is inside the `exportHTML()` template literal in a `<script>` — the script SKIPS it and warns `style-like block inside <script> skipped …`; that is correct, the export template must keep its block), `fontFacesDropped: ["Satoshi","Satoshi"]` (word has two inline Satoshi faces), `font-awesome link(s) removed: 2` (preload+onload pattern — both lines go, and the now-empty `<noscript>` wrapper is removed too). The script-skip warning is expected; any OTHER warning is not.
 
 - [ ] **Step 2: Real run + inspect diff**
 
@@ -1188,12 +1190,12 @@ node tools/migrate-page.mjs word/index.html word
 git diff word/index.html
 ```
 
-Expected: both `<style>` blocks gone; FA preload + stylesheet links gone; `../src/site.css` link at the first block's old position; `data-page="word"` on `<body>`; nothing else.
+Expected: the one real `<style>` block gone; the `<style>` inside `exportHTML()`'s template literal INTACT; FA preload + stylesheet links gone; `../src/site.css` link at the block's old position; `data-page="word"` on `<body>`; nothing else.
 
 - [ ] **Step 3: Verify invariants**
 
 ```bash
-grep -c "<style" word/index.html            # expect 0
+grep -c "<style" word/index.html            # expect 1 (the exportHTML template block)
 grep -c 'data-page="word"' word/index.html  # expect 1
 grep -c "design-tokens\|font-awesome" word/index.html  # expect 0
 ```
@@ -1229,7 +1231,7 @@ git commit -m "refactor(css): migrate word page styles into src/site.css"
 node tools/migrate-page.mjs AI/chat.html chat --dry
 ```
 
-Expected report: `movedBlocks: 3` (the @font-face block and the two big blocks), **`keptBlocks` contains `id="dynamic-accent-styles"`** — if it doesn't, STOP and fix the script's `id` detection before continuing. `fontFacesDropped: ["Satoshi","Satoshi"]`. `links`: design-tokens removed, `feather CDN -> ../src/feather-local.js`. Scan `renamedKeyframes` — any collisions with earlier page sections get `chat-` prefixed (expected for generic names like `fadeIn` if an earlier page defined one).
+Expected report: `movedBlocks: 3` (the @font-face block and the two big blocks), **`keptBlocks` contains `id="dynamic-accent-styles"`** — if it doesn't, STOP and fix the script's `id` detection before continuing. `fontFacesDropped: ["Satoshi","Satoshi"]`. `links`: design-tokens removed, `feather CDN -> ../src/feather-local.js`. `renamedKeyframes` will contain `thinking-shimmer → chat-thinking-shimmer`: chat defines that keyframe 3× (lines ~1881/1989/2000) and CSS last-wins means every `animation: thinking-shimmer` today resolves to the LAST definition; the rename + decl rewrite reproduces exactly that (verified during review — no JS references the keyframe name by string, only the `.thinking-shimmer`/`.shimmer-active` classes, which are untouched). Any other rename gets the same scrutiny.
 
 - [ ] **Step 2: Real run + inspect diff**
 
