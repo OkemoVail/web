@@ -53,6 +53,14 @@ function scopeOne(sel) {
   if (s === ':root')     return rootHook;
   if (s === 'html')      return rootHook;
   if (s === 'html.dark') return `html.dark:has(> body[data-page="${pageName}"])`;
+  // A trailing bare `body` IS the hook element — keeping ` body` after the
+  // scoped hook makes an impossible selector (body can't be its own
+  // descendant), so body-terminal forms map to their root/hook equivalents.
+  if (s === '.dark body')      return `.dark ${hook}`;
+  if (s === 'html body')       return rootHook;
+  if (s === ':root body')      return rootHook;
+  if (s === 'html.dark body')  return `html.dark:has(> body[data-page="${pageName}"])`;
+  if (s === '.dark html body') return `html.dark:has(> body[data-page="${pageName}"])`;
   if (/^:root\b/.test(s))      return s.replace(/^:root\b/, hook);
   if (/^html\.dark\b/.test(s)) return s.replace(/^html\.dark\b/, `html.dark ${hook}`);
   if (/^html\b/.test(s))       return s.replace(/^html\b/, `html ${hook}`);

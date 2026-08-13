@@ -1420,7 +1420,7 @@ select:focus {
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .dark [data-page="research"] body {
+        .dark [data-page="research"] {
             background-color: var(--deep-dark);
         }
 
