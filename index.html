@@ -97,14 +97,6 @@
       font-family: 'Century', 'Century Schoolbook', Georgia, serif;
     }
 
-    /* ── Type: Swiss grotesque display ─────────────────────────── */
-    .display {
-      font-family: 'Satoshi', 'Inter', sans-serif;
-      font-weight: 700;
-      letter-spacing: -0.035em;
-      line-height: 0.92;
-    }
-
     .eyebrow {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.7rem;
@@ -130,15 +122,15 @@
       transform: scale(1.04);
     }
 
-    /* ── Hero search bar (feeds Okemo Astra) ───────────────────── */
+    /* ── Hero search bar (feeds Okemo Astra) — the hero centerpiece ── */
     .hero-search {
       display: flex;
       align-items: center;
       gap: 6px;
-      width: min(560px, 100%);
+      width: min(620px, 100%);
       margin-inline: auto;
-      height: 3rem;
-      padding: 4px 5px 4px 16px;
+      height: 3.75rem;
+      padding: 6px 6px 6px 22px;
       border-radius: 999px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-strong);
@@ -163,7 +155,7 @@
       border-radius: 0;
       box-shadow: none;
       outline: none;
-      font-size: 0.95rem;
+      font-size: 1.1rem;
       color: var(--text-primary);
     }
 
@@ -180,10 +172,10 @@
 
     .hero-search .skuo {
       flex: none;
-      height: 38px;
-      padding: 0 18px;
+      height: 46px;
+      padding: 0 22px;
       border-radius: 999px;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       white-space: nowrap;
     }
 
@@ -327,17 +319,13 @@
   <main class="max-w-5xl mx-auto px-6">
 
     <!-- ── Hero ────────────────────────────────────────────────── -->
-    <section class="pt-40 md:pt-52 pb-24 md:pb-36">
+    <section class="pt-40 md:pt-52 pb-24 md:pb-36 text-center">
       <img
         src="https://avatars.githubusercontent.com/u/179893130?s=400&u=d8a0d805e4137f21f0dd19fcf5163a1c746f02fd&v=4"
         alt="OkemoVail"
         class="hero-pfp load d1">
-      <p class="eyebrow load d1 mt-7">Hey — I'm OkemoVail</p>
-      <h1 class="display text-text-warm mt-7 load d2"
-        style="font-size: clamp(3.25rem, 13vw, 9rem);">
-        I make<br>everything.
-      </h1>
-      <form action="/search/" method="get" class="hero-search mt-11 load d4" role="search">
+      <h1 class="eyebrow load d1 mt-7">Hey — I'm OkemoVail</h1>
+      <form action="/search/" method="get" class="hero-search mt-9 load d2" role="search">
         <input type="text" name="q" aria-label="Search the web" placeholder="Search the web…"
           enterkeyhint="search" autocomplete="off" spellcheck="false">
         <button type="submit" class="skuo skuo-accent">Search</button>
