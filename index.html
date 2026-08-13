@@ -152,7 +152,7 @@
     }
 
     /* local reset of the global unified-input styling (design-tokens.css),
-       same scoping Astra's .bar input uses */
+       same scoping Astra's .bar input uses (incl. the .dark shadow reset) */
     .hero-search input {
       flex: 1;
       min-width: 0;
@@ -175,6 +175,8 @@
       border: none;
       box-shadow: none;
     }
+
+    .dark .hero-search input { box-shadow: none; }
 
     .hero-search .skuo {
       flex: none;
