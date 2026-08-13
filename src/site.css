@@ -1161,3 +1161,26 @@ select:focus {
 .fa-spin { animation: fa-spin 2s infinite linear; }
 @keyframes fa-spin { to { transform: rotate(360deg); } }
 /* §4 ICONS — generated: end */
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: TOS  —  scoped to [data-page="tos"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+        html:has(> body[data-page="tos"]) {
+            --bg-dark: var(--deep-dark);
+            --accent-olive: var(--accent);
+            --accent-mint: var(--accent-light);
+        }
+
+        [data-page="tos"] {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-page="tos"] .serif-text {
+            font-family: 'Century', 'Georgia', serif;
+        }
+
+        /* --- Global Flat Styles --- */
+        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
+
+    
