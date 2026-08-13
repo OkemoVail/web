@@ -2298,3 +2298,382 @@ select:focus {
     }
 
   
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: AI-HOME  —  scoped to [data-page="ai-home"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+        html:has(> body[data-page="ai-home"]) {
+            --accent-olive: var(--accent);
+            --accent-mint: var(--accent-light);
+            --rim-light: rgba(201, 100, 120, 0.2);
+        }
+
+        [data-page="ai-home"] {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* .discord rules removed — shared .discord in design-tokens.css */
+
+        /* --- Flipping Storybook --- */
+        /* Open book with a leather cover, stacked page edges and a bookmark
+           ribbon. The right leaf turns over the spine in 3D via the Web
+           Animations API (script at the bottom): JS owns the whole cycle so
+           the word swap and the leaf reset land in the same paint — no
+           event-timing flashes. The leaf also rests slightly ABOVE the page
+           plane (translateZ) so coplanar z-fighting can never flicker. */
+        [data-page="ai-home"] .book-scene {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        [data-page="ai-home"] .book-wrap {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            perspective: 1300px;
+            animation: book-bob 4.5s ease-in-out infinite;
+        }
+
+        [data-page="ai-home"] .book {
+            position: relative;
+            width: min(82%, 440px);
+            aspect-ratio: 5 / 3.2;
+            transform: rotateX(7deg);
+            transform-style: preserve-3d;
+            --paper: color-mix(in srgb, var(--bg-elevated), white 55%);
+            --paper-2: color-mix(in srgb, var(--bg-elevated), black 5%);
+            --paper-edge: color-mix(in srgb, var(--accent) 22%, var(--bg-elevated));
+            --rule: color-mix(in srgb, var(--accent) 11%, transparent);
+            --rule-lines: repeating-linear-gradient(to bottom,
+                    transparent 0 1.15em,
+                    var(--rule) 1.15em calc(1.15em + 1px));
+        }
+
+        .dark [data-page="ai-home"] .book {
+            --paper: color-mix(in srgb, var(--bg-elevated), white 8%);
+            --paper-2: color-mix(in srgb, var(--bg-elevated), white 3%);
+            --paper-edge: color-mix(in srgb, var(--accent) 20%, var(--bg-elevated));
+            --rule: color-mix(in srgb, var(--accent) 16%, transparent);
+        }
+
+        /* Leather cover peeking out around the page block, with a spine
+           crease down the middle and a darker board edge at the bottom */
+        [data-page="ai-home"] .book-cover {
+            position: absolute;
+            inset: -3.5% -2.8% -8.5% -2.8%;
+            border-radius: 12px;
+            background:
+                linear-gradient(90deg, transparent 45%, rgba(0, 0, 0, 0.28) 50%, transparent 55%),
+                linear-gradient(180deg,
+                    color-mix(in srgb, var(--accent), black 10%),
+                    color-mix(in srgb, var(--accent), black 38%));
+            box-shadow: 0 26px 36px -22px rgba(0, 0, 0, 0.55),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -6px 0 -3px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Bookmark ribbon hanging out of the gutter, over the bottom cover */
+        [data-page="ai-home"] .book-ribbon {
+            position: absolute;
+            left: 50%;
+            bottom: -10.5%;
+            width: 4.5%;
+            height: 17%;
+            transform: translateX(-50%) rotate(2.5deg);
+            background: linear-gradient(180deg,
+                    color-mix(in srgb, var(--accent), black 48%),
+                    color-mix(in srgb, var(--accent), black 22%));
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+            filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35));
+        }
+
+        [data-page="ai-home"] .book-page,
+[data-page="ai-home"] .leaf-face {
+            background-color: var(--paper);
+            /* layer 1: paper curving down into the gutter (overridden per
+               side below); layer 2: faint ruled lines so the pages read as
+               written-in */
+            background-image:
+                linear-gradient(to right, transparent, transparent),
+                var(--rule-lines);
+            background-repeat: no-repeat, no-repeat;
+            background-size: 100% 100%, 74% 78%;
+            background-position: 0 0, center 65%;
+            border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3em;
+            padding: 7% 5%;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        [data-page="ai-home"] .book-page {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50%;
+        }
+
+        /* Stacked paper edges below the spread give the block thickness */
+        [data-page="ai-home"] .book-page--left {
+            left: 0;
+            border-radius: 8px 2px 2px 8px;
+            box-shadow: inset -16px 0 18px -14px rgba(0, 0, 0, 0.28),
+                0 2px 0 0 var(--paper-2),
+                0 4px 0 0 var(--paper-edge),
+                0 6px 0 -1px var(--paper-2),
+                0 8px 0 -1px var(--paper-edge);
+        }
+
+        [data-page="ai-home"] .book-page--right {
+            right: 0;
+            border-radius: 2px 8px 8px 2px;
+            box-shadow: inset 16px 0 18px -14px rgba(0, 0, 0, 0.28),
+                0 2px 0 0 var(--paper-2),
+                0 4px 0 0 var(--paper-edge),
+                0 6px 0 -1px var(--paper-2),
+                0 8px 0 -1px var(--paper-edge);
+        }
+
+        [data-page="ai-home"] .book-leaf {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            /* rest a hair above the page plane — never coplanar, never
+               z-fights with the page it covers */
+            transform: translateZ(0.8px);
+            z-index: 2;
+        }
+
+        [data-page="ai-home"] .leaf-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        [data-page="ai-home"] .leaf-face--front {
+            border-radius: 2px 8px 8px 2px;
+            box-shadow: inset 16px 0 18px -14px rgba(0, 0, 0, 0.28);
+        }
+
+        [data-page="ai-home"] .leaf-face--back {
+            transform: rotateY(180deg);
+            border-radius: 8px 2px 2px 8px;
+            box-shadow: inset -16px 0 18px -14px rgba(0, 0, 0, 0.28);
+        }
+
+        /* Paper curves down into the gutter on the spine side of each page.
+           Right-hand surfaces (base right page + leaf front) shade left;
+           left-hand surfaces (base left page + leaf back) shade right. */
+        [data-page="ai-home"] .book-page--left,
+[data-page="ai-home"] .leaf-face--back {
+            background-image:
+                linear-gradient(to right, transparent 72%, rgba(0, 0, 0, 0.05) 90%, rgba(0, 0, 0, 0.14) 100%),
+                var(--rule-lines);
+        }
+
+        [data-page="ai-home"] .book-page--right,
+[data-page="ai-home"] .leaf-face--front {
+            background-image:
+                linear-gradient(to left, transparent 72%, rgba(0, 0, 0, 0.05) 90%, rgba(0, 0, 0, 0.14) 100%),
+                var(--rule-lines);
+        }
+
+        /* Soft floor shadow so the floating book sits on something */
+        [data-page="ai-home"] .book-floor-shadow {
+            width: 46%;
+            max-width: 250px;
+            height: 20px;
+            margin-top: 9%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3), transparent 68%);
+            animation: book-floor 4.5s ease-in-out infinite;
+        }
+
+        /* Page typography — the fun part */
+        [data-page="ai-home"] .page-word {
+            font-family: 'Century', Georgia, serif;
+            font-style: italic;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 3.4vw, 1.55rem);
+            color: var(--accent);
+            transform: rotate(-4deg);
+            text-decoration: underline;
+            text-decoration-style: wavy;
+            text-decoration-color: color-mix(in srgb, var(--accent) 50%, transparent);
+            text-decoration-thickness: 1.5px;
+            text-underline-offset: 0.22em;
+            white-space: nowrap;
+        }
+
+        [data-page="ai-home"] .page-line {
+            font-size: clamp(0.58rem, 1.6vw, 0.76rem);
+            font-style: italic;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        [data-page="ai-home"] .page-caption {
+            font-size: clamp(0.52rem, 1.4vw, 0.66rem);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        [data-page="ai-home"] .page-doodle {
+            font-size: clamp(0.56rem, 1.5vw, 0.72rem);
+            letter-spacing: 0.4em;
+            color: color-mix(in srgb, var(--accent) 65%, transparent);
+            margin-top: 0.4em;
+        }
+
+        @keyframes book-bob {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3.5%);
+            }
+        }
+
+        @keyframes book-floor {
+
+            0%,
+            100% {
+                transform: scaleX(1);
+                opacity: 0.85;
+            }
+
+            50% {
+                transform: scaleX(0.92);
+                opacity: 0.6;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            [data-page="ai-home"] .book-wrap,
+[data-page="ai-home"] .book-floor-shadow {
+                animation: none;
+            }
+        }
+
+        /* --- Apple Color Gradient Slide --- */
+        [data-page="ai-home"] .apple-color-cycle {
+            --base-color: #111111;
+            background: linear-gradient(to right,
+                    var(--base-color) 0%,
+                    var(--base-color) 35%,
+                    #61bb46 40%,
+                    /* Green */
+                    #fdb827 44%,
+                    /* Yellow */
+                    #f5821f 48%,
+                    /* Orange */
+                    #e03a3e 52%,
+                    /* Red */
+                    #963d97 56%,
+                    /* Purple */
+                    #009ddc 60%,
+                    /* Blue */
+                    var(--base-color) 65%,
+                    var(--base-color) 100%);
+            background-size: 300% 100%;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: apple-gradient-slide 5s linear infinite;
+            /* clip-text + tight line-height shaves glyph bottoms; pad to protect descenders */
+            display: inline-block;
+            line-height: 1.1;
+            padding-bottom: 0.12em;
+        }
+
+        .dark [data-page="ai-home"] .apple-color-cycle {
+            --base-color: #ffffff;
+        }
+
+        [data-page="ai-home"] .bdh-neural-card {
+            position: relative;
+            overflow: hidden;
+            width: min(100%, 440px);
+            margin-inline: auto;
+        }
+
+        [data-page="ai-home"] .bdh-neuron-map {
+            width: min(100%, 340px);
+            margin: 0 auto;
+            display: block;
+        }
+
+        [data-page="ai-home"] .bdh-map-ring,
+[data-page="ai-home"] .bdh-map-link {
+            fill: none;
+            stroke: color-mix(in srgb, var(--accent) 28%, var(--border-strong));
+        }
+
+        [data-page="ai-home"] .bdh-map-ring {
+            stroke-dasharray: 5 8;
+            opacity: 0.7;
+        }
+
+        [data-page="ai-home"] .bdh-map-link {
+            stroke-width: 1.5;
+            opacity: 0.72;
+        }
+
+        [data-page="ai-home"] .bdh-map-neuron {
+            fill: color-mix(in srgb, var(--bg-elevated), white 26%);
+            stroke: color-mix(in srgb, var(--accent) 34%, var(--border));
+            stroke-width: 1.5;
+        }
+
+        .dark [data-page="ai-home"] .bdh-map-neuron {
+            fill: color-mix(in srgb, var(--bg-elevated), white 8%);
+        }
+
+        [data-page="ai-home"] .bdh-map-neuron--core {
+            fill: var(--accent);
+            stroke: color-mix(in srgb, var(--accent), white 24%);
+        }
+
+        [data-page="ai-home"] .bdh-map-label {
+            fill: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-anchor: middle;
+        }
+
+        [data-page="ai-home"] .bdh-map-label--core {
+            fill: white;
+        }
+
+        @keyframes apple-gradient-slide {
+            0% {
+                background-position: 0% center;
+            }
+
+            100% {
+                background-position: 100% center;
+            }
+        }
+    
