@@ -1508,3 +1508,148 @@ select:focus {
 
 
     
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: DESIGN-LAB  —  scoped to [data-page="design-lab"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+    /* ── DEMO-ONLY sandbox. Nothing here touches design-tokens.css.
+       Three columns compare button design languages against the
+       current glossy .skuo look so we can pick a direction. ── */
+    [data-page="design-lab"] { font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--text-primary); margin: 0; }
+
+    [data-page="design-lab"] .lab-frame { max-width: 1180px; margin: 2rem auto; padding: 1.25rem; }
+    @media (min-width: 768px) { [data-page="design-lab"] .lab-frame { padding: 2rem; } }
+
+    [data-page="design-lab"] .lab-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    [data-page="design-lab"] .lab-title {
+      font-family: Georgia, 'Times New Roman', serif; font-weight: 600;
+      font-size: clamp(1.6rem, 3.5vw, 2.3rem); letter-spacing: -0.01em; margin: 0;
+    }
+    [data-page="design-lab"] .lab-sub { color: var(--text-secondary); font-size: 0.9rem; margin: 0.25rem 0 1.75rem; }
+
+    [data-page="design-lab"] .lab-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    @media (min-width: 720px)  { [data-page="design-lab"] .lab-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1040px) { [data-page="design-lab"] .lab-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    [data-page="design-lab"] .lab-col {
+      border: 1px solid var(--border); border-radius: 18px; padding: 1.25rem;
+      background: var(--bg-white);
+    }
+    .dark [data-page="design-lab"] .lab-col { background: var(--bg-elevated); border-color: var(--border-strong); }
+    [data-page="design-lab"] .lab-col h2 { margin: 0 0 0.2rem; font-size: 1rem; font-weight: 600; }
+    [data-page="design-lab"] .lab-col .note { margin: 0 0 1.1rem; font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.4; }
+    [data-page="design-lab"] .lab-col.is-current { outline: 2px dashed color-mix(in srgb, var(--skuo-accent), transparent 55%); outline-offset: 4px; }
+    [data-page="design-lab"] .lab-col.is-pick { outline: 2px solid var(--skuo-accent); outline-offset: 4px; }
+
+    [data-page="design-lab"] .stack { display: flex; flex-direction: column; gap: 0.7rem; align-items: flex-start; }
+    [data-page="design-lab"] .stack .row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+    [data-page="design-lab"] .icn { width: 15px; height: 15px; }
+
+    /* Shared geometry so only the *language* differs between columns */
+    [data-page="design-lab"] .b {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1.15rem; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 550; cursor: pointer;
+      border: 1px solid transparent; transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    [data-page="design-lab"] .b.icon { padding: 0; width: 40px; height: 40px; justify-content: center; }
+    [data-page="design-lab"] .b.pill { border-radius: 9999px; }
+
+    /* ─────────────────────────────────────────────────────────
+       LANGUAGE A — FLAT / REFINED  (Linear / Vercel / Stripe)
+       Solid fill, no gradient, hairline border, whisper shadow.
+       ───────────────────────────────────────────────────────── */
+    [data-page="design-lab"] .flat.accent {
+      background: var(--skuo-accent); color: #fff;
+      border-color: color-mix(in srgb, var(--skuo-accent), black 12%);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    [data-page="design-lab"] .flat.accent:hover { background: color-mix(in srgb, var(--skuo-accent), black 8%); }
+    [data-page="design-lab"] .flat.accent:active { background: color-mix(in srgb, var(--skuo-accent), black 16%); box-shadow: none; }
+
+    [data-page="design-lab"] .flat.neutral {
+      background: var(--bg-white); color: var(--text-primary);
+      border-color: var(--border-strong);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    [data-page="design-lab"] .flat.neutral:hover { background: var(--bg-elevated); border-color: var(--text-tertiary); }
+    [data-page="design-lab"] .flat.neutral:active { background: color-mix(in srgb, var(--bg-elevated), black 4%); box-shadow: none; }
+    .dark [data-page="design-lab"] .flat.neutral { background: var(--bg-elevated); }
+    .dark [data-page="design-lab"] .flat.neutral:hover { background: color-mix(in srgb, var(--bg-elevated), white 6%); }
+
+    /* ─────────────────────────────────────────────────────────
+       LANGUAGE B — SOFT NEUMORPHIC
+       Monochrome extrude: light shadow top-left, dark bottom-right,
+       no shine. Press inverts to an inset.
+       ───────────────────────────────────────────────────────── */
+    [data-page="design-lab"] .neu-scope-host { --neu-bg: #e8e6de; --neu-light: #ffffff; --neu-dark: #c3c0b4; }
+    .dark [data-page="design-lab"] .neu-scope-host { --neu-bg: #33322f; --neu-light: #414039; --neu-dark: #232220; }
+    [data-page="design-lab"] .neu-scope-host.lab-col { background: var(--neu-bg); border-color: transparent; }
+
+    [data-page="design-lab"] .neu {
+      background: var(--neu-bg); color: var(--text-primary); border: none;
+      box-shadow: -5px -5px 10px var(--neu-light), 5px 5px 12px var(--neu-dark);
+    }
+    [data-page="design-lab"] .neu:hover { box-shadow: -3px -3px 7px var(--neu-light), 3px 3px 9px var(--neu-dark); }
+    [data-page="design-lab"] .neu:active { box-shadow: inset -3px -3px 7px var(--neu-light), inset 4px 4px 9px var(--neu-dark); }
+    [data-page="design-lab"] .neu.accent {
+      background: var(--skuo-accent); color: #fff;
+      box-shadow: -5px -5px 10px var(--neu-light),
+                   5px 5px 12px color-mix(in srgb, var(--skuo-accent), black 30%);
+    }
+    [data-page="design-lab"] .neu.accent:active {
+      box-shadow: inset -3px -3px 7px color-mix(in srgb, var(--skuo-accent), white 22%),
+                  inset 4px 4px 9px color-mix(in srgb, var(--skuo-accent), black 34%);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       LANGUAGE C — REFINED  (A + Current combined)
+       Flat's hairline border + clean hover/press, but keeps a
+       WHISPER of the current gradient, a soft lift shadow and a
+       faint accent glow. No wet-glass sheen, no hard top-shine.
+       ───────────────────────────────────────────────────────── */
+    [data-page="design-lab"] .ref.accent {
+      color: #fff;
+      background-image: linear-gradient(to bottom,
+        color-mix(in srgb, var(--skuo-accent), white 7%),
+        color-mix(in srgb, var(--skuo-accent), black 6%));
+      border-color: color-mix(in srgb, var(--skuo-accent), black 14%);
+      box-shadow: 0 1px 0 color-mix(in srgb, var(--skuo-accent), white 20%) inset,
+                  0 2px 6px -2px color-mix(in srgb, var(--skuo-accent), transparent 55%);
+    }
+    [data-page="design-lab"] .ref.accent:hover {
+      background-image: linear-gradient(to bottom,
+        color-mix(in srgb, var(--skuo-accent), white 12%),
+        color-mix(in srgb, var(--skuo-accent), black 2%));
+      box-shadow: 0 1px 0 color-mix(in srgb, var(--skuo-accent), white 24%) inset,
+                  0 4px 12px -3px color-mix(in srgb, var(--skuo-accent), transparent 45%);
+    }
+    [data-page="design-lab"] .ref.accent:active {
+      background-image: linear-gradient(to bottom,
+        color-mix(in srgb, var(--skuo-accent), black 4%),
+        color-mix(in srgb, var(--skuo-accent), black 10%));
+      box-shadow: 0 1px 3px rgba(0,0,0,0.14) inset;
+    }
+
+    [data-page="design-lab"] .ref.neutral {
+      color: var(--text-primary);
+      background-image: linear-gradient(to bottom, var(--bg-white), var(--bg-elevated));
+      border-color: var(--border-strong);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 1px 3px -1px rgba(0,0,0,0.12);
+    }
+    [data-page="design-lab"] .ref.neutral:hover {
+      background-image: linear-gradient(to bottom, var(--bg-white), color-mix(in srgb, var(--bg-elevated), black 3%));
+      border-color: var(--text-tertiary);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 3px 9px -2px rgba(0,0,0,0.16);
+    }
+    [data-page="design-lab"] .ref.neutral:active { box-shadow: 0 1px 3px rgba(0,0,0,0.14) inset; }
+    .dark [data-page="design-lab"] .ref.neutral {
+      background-image: linear-gradient(to bottom, color-mix(in srgb, var(--bg-elevated), white 6%), var(--bg-elevated));
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 2px 6px -2px rgba(0,0,0,0.5);
+    }
+
+    [data-page="design-lab"] .swatches { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; margin-top: 2rem; }
+    [data-page="design-lab"] .swatch { height: 46px; border-radius: 10px; border: 1px solid var(--border); display:flex; align-items:flex-end; padding: 0.3rem; font-size: 0.55rem; color:#fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+  
