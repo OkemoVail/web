@@ -157,6 +157,12 @@
   .igp-actions { display: flex; gap: 8px; }
   .igp-actions .skuo { height: 34px; padding: 0 14px; border-radius: 999px; font-size: .8rem; display: inline-flex; align-items: center; text-decoration: none; }
 
+  /* infinite-scroll sentinel */
+  .r-sentinel { list-style: none; text-align: center; padding: 8px 0 4px; font-size: .8rem; color: var(--text-tertiary); }
+  .r-sentinel-dot { display: inline-block; animation: sentinel-pulse 1.2s ease-in-out infinite; }
+  @keyframes sentinel-pulse { 0%,100% { opacity: .3; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.1); } }
+  .r-sentinel .skuo { font-size: .78rem; margin-top: 4px; }
+
   @media (max-width: 768px) {
     /* ── mobile mode: a different layout, not a shrunk desktop column ── */
     .bar .skuo .lbl { display: none; }        /* icon-first bar button */
@@ -181,7 +187,7 @@
     .igp-panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 82vh; border-radius: 18px 18px 0 0; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .star, .ai-ring, .ai-panel, .ai-wave .blob, .ig-skel { animation: none !important; }
+    .star, .ai-ring, .ai-panel, .ai-wave .blob, .ig-skel, .r-sentinel-dot { animation: none !important; }
     .ai-wave, .ai-panel, .ai-panel.done .ai-wave { transition: none; }
   }
 </style>

@@ -30,6 +30,8 @@
     aiDown: 'the cosmos is quiet right now — try again',
     metaLine: (n, secs) => 'found ' + n + ' little stars in ' + secs + 's — you’re welcome',
     metaLineImages: (n, secs) => 'found ' + n + ' little pictures in ' + secs + 's — you’re welcome',
+    endOfResults: "✦ that's everything in this corner of the universe",
+    loadMoreError: 'the telescope jammed — retry?',
     aiSystem: "You are Astra, Saga's search-oracle alter ego built by Okemo. Answer first, then stop — dry humor welcome, never rude, never corporate. Ground answers in the provided sources and cite inline as [1], [2]… matching the numbered results. If no sources are provided, answer from your own knowledge. Keep it tight: a few sentences, not an essay.",
   };
 
@@ -92,6 +94,15 @@
   let aiAbort = null;            // AbortController for the AI stream
   let searchToken = 0;           // stale-response guard
   let wantResultsFocus = false;  // set by bar actions, consumed by showResults
+  const PAGE_STEP = 30;         // DDG lite paginates in steps of 30
+  const MAX_RESULTS = 120;      // sane cap
+  let nextOffset = 0;
+  let loadingMore = false;
+  let resultsDone = false;
+  let totalResults = 0;
+  let lastSecs = '0.00';
+  let lastResults = [];         // first-page results (citation lookups)
+  let scrollObserver = null;
 
   function readRoute() {
     const p = new URLSearchParams(location.search);
@@ -183,8 +194,8 @@
     const on = !getAiMode();
     setAiMode(on);
     const { q } = readRoute();
-    if (on && q) runSearch(q);            // toggling on from results answers immediately
-    if (!on) $('ai-panel').hidden = true; // toggling off hides the panel
+    if (on && q) { lastAllQuery = q; runSearch(q); }  // toggling on from results answers immediately
+    if (!on) $('ai-panel').hidden = true;             // toggling off hides the panel
   });
   $('tab-all').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'all') go(r.q, 'all'); });
   $('tab-images').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'images') go(r.q, 'images'); });
@@ -291,9 +302,9 @@
   }
 
   // ── web search (backend DDG scrape) ──
-  async function astraSearch(q) {
+  async function astraSearch(q, s) {
     const res = await fetch(
-      backendBase() + '/api/search?q=' + encodeURIComponent(q),
+      backendBase() + '/api/search?q=' + encodeURIComponent(q) + (s ? '&s=' + s : ''),
       { headers: { 'ngrok-skip-browser-warning': 'true', 'bypass-tunnel-reminder': 'true' } }
     );
     if (!res.ok) { const e = new Error('search ' + res.status); e.status = res.status; throw e; }
@@ -340,13 +351,14 @@
     list.appendChild(div);
   }
 
-  function renderResults(results) {
+  function renderResults(results, start, append) {
     const list = $('result-list');
-    list.innerHTML = '';
+    const sentinel = append ? $('result-sentinel') : null;
+    if (!append) list.innerHTML = '';
     results.forEach((r, i) => {
       const li = document.createElement('li');
       li.className = 'result';
-      li.id = 'result-' + (i + 1);
+      li.id = 'result-' + (start + i + 1);
 
       const img = document.createElement('img');
       img.className = 'r-favi';
@@ -377,8 +389,69 @@
 
       wrap.append(head, a, snip);
       li.append(img, wrap);
-      list.appendChild(li);
+      if (sentinel) list.insertBefore(li, sentinel); else list.appendChild(li);
     });
+  }
+
+  function ensureSentinel() {
+    let s = $('result-sentinel');
+    if (!s) {
+      s = document.createElement('li');
+      s.id = 'result-sentinel';
+      s.className = 'r-sentinel';
+      $('result-list').appendChild(s);
+    }
+    s.innerHTML = '<span class="r-sentinel-dot">✦</span>';
+    return s;
+  }
+
+  function watchSentinel(q) {
+    if (scrollObserver) scrollObserver.disconnect();
+    scrollObserver = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) loadMore(q);
+    }, { rootMargin: '400px' });
+    scrollObserver.observe(ensureSentinel());
+  }
+
+  function finishResults() {
+    resultsDone = true;
+    if (scrollObserver) scrollObserver.disconnect();
+    const s = $('result-sentinel');
+    if (s) s.innerHTML = '<span>' + COPY.endOfResults + '</span>';
+  }
+
+  function sentinelLoadError(q) {
+    const s = $('result-sentinel');
+    if (!s) return;
+    s.innerHTML = '';
+    const btn = document.createElement('button');
+    btn.className = 'skuo skuo-neutral';
+    btn.type = 'button';
+    btn.textContent = COPY.loadMoreError;
+    btn.addEventListener('click', () => { s.innerHTML = '<span class="r-sentinel-dot">✦</span>'; loadMore(q); });
+    s.appendChild(btn);
+  }
+
+  async function loadMore(q) {
+    if (loadingMore || resultsDone || $('result-list').hidden) return;
+    const token = searchToken;
+    loadingMore = true;
+    try {
+      let more = await astraSearch(q, nextOffset);
+      more = more.filter((r) => /^https?:\/\//i.test(r.url || ''));
+      if (token !== searchToken) return;
+      nextOffset += PAGE_STEP;
+      if (!more.length) { finishResults(); return; }
+      renderResults(more, totalResults, true);
+      totalResults += more.length;
+      $('r-meta').textContent = COPY.metaLine(totalResults, lastSecs);
+      if (totalResults >= MAX_RESULTS) finishResults();
+    } catch (e) {
+      if (token !== searchToken) return;
+      sentinelLoadError(q);
+    } finally {
+      loadingMore = false;
+    }
   }
 
   // ── images tab (backend DDG i.js proxy) ──
@@ -508,14 +581,15 @@
     $('ai-body').innerHTML = '';
     $('ai-error').hidden = true;
     $('ai-follow').hidden = true;
-    $('ai-wave-label').textContent = '✦ ' + COPY.loadingQuips[0];
     $('r-meta').textContent = 'searching the universe for “' + q + '”…';
     $('result-list').innerHTML = '';
+    nextOffset = 0; loadingMore = false; resultsDone = false; totalResults = 0;
+    if (scrollObserver) scrollObserver.disconnect();
 
     const t0 = performance.now();
     let results = [];
     try {
-      results = await astraSearch(q);
+      results = await astraSearch(q, 0);
       results = results.filter((r) => /^https?:\/\//i.test(r.url || ''));
     } catch (e) {
       if (token !== searchToken) return;   // a newer search superseded this one
@@ -528,9 +602,13 @@
     }
     if (token !== searchToken) return;
 
+    lastResults = results;
+    nextOffset = PAGE_STEP;
+    totalResults = results.length;
     const secs = ((performance.now() - t0) / 1000).toFixed(2);
-    $('r-meta').textContent = results.length ? COPY.metaLine(results.length, secs) : '';
-    if (results.length) renderResults(results);
+    lastSecs = secs;
+    $('r-meta').textContent = results.length ? COPY.metaLine(totalResults, secs) : '';
+    if (results.length) { renderResults(results, 0, false); watchSentinel(q); }
     else statusCard('🌌', COPY.emptyResults);   // AI still answers from knowledge
 
     if (aiOn) askAstra(q, results);
