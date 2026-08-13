@@ -126,6 +126,14 @@
 
   /* images grid (masonry via css columns) */
   #image-grid { max-width: 900px; columns: 200px; column-gap: 10px; }
+  .ig-item { display: block; width: 100%; padding: 0; border: 1px solid var(--border-strong); border-radius: 12px; overflow: hidden; background: var(--bg-elevated); cursor: zoom-in; margin: 0 0 10px; break-inside: avoid; position: relative; }
+  .ig-item img { display: block; width: 100%; height: auto; }
+  .ig-host { position: absolute; left: 6px; bottom: 6px; font-size: .62rem; background: rgba(0,0,0,.55); color: #fff; padding: 1px 7px; border-radius: 999px; backdrop-filter: blur(4px); }
+  .ig-skel { break-inside: avoid; margin-bottom: 10px; border-radius: 12px; background: linear-gradient(100deg, var(--bg-elevated) 40%, var(--border-strong) 50%, var(--bg-elevated) 60%); background-size: 200% 100%; animation: ig-shimmer 1.4s linear infinite; }
+  .ig-skel:nth-child(3n) { height: 130px; }
+  .ig-skel:nth-child(3n+1) { height: 190px; }
+  .ig-skel:nth-child(3n+2) { height: 160px; }
+  @keyframes ig-shimmer { to { background-position: -200% 0; } }
 
   /* follow-up row + thread */
   .ai-follow { display: flex; gap: 6px; padding: 0 12px 12px; }
@@ -160,7 +168,7 @@
     .status-card { margin: 0 12px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .star, .ai-ring, .ai-panel, .ai-wave .blob { animation: none !important; }
+    .star, .ai-ring, .ai-panel, .ai-wave .blob, .ig-skel { animation: none !important; }
     .ai-wave, .ai-panel, .ai-panel.done .ai-wave { transition: none; }
   }
 </style>

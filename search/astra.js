@@ -29,6 +29,7 @@
     rateLimited: 'slow down, stargazer — the cosmos is rate-limiting us',
     aiDown: 'the cosmos is quiet right now — try again',
     metaLine: (n, secs) => 'found ' + n + ' little stars in ' + secs + 's — you’re welcome',
+    metaLineImages: (n, secs) => 'found ' + n + ' little pictures in ' + secs + 's — you’re welcome',
     aiSystem: "You are Astra, Saga's search-oracle alter ego built by Okemo. Answer first, then stop — dry humor welcome, never rude, never corporate. Ground answers in the provided sources and cite inline as [1], [2]… matching the numbered results. If no sources are provided, answer from your own knowledge. Keep it tight: a few sentences, not an essay.",
   };
 
@@ -376,10 +377,103 @@
     });
   }
 
-  // ── images tab (grid rendering lands in the next task) ──
-  async function runImages(q) {
-    $('r-meta').textContent = 'image search lands in the next task…';
+  // ── images tab (backend DDG i.js proxy) ──
+  async function astraImages(q) {
+    const res = await fetch(
+      backendBase() + '/api/images?q=' + encodeURIComponent(q),
+      { headers: { 'ngrok-skip-browser-warning': 'true', 'bypass-tunnel-reminder': 'true' } }
+    );
+    if (!res.ok) { const e = new Error('images ' + res.status); e.status = res.status; throw e; }
+    const data = await res.json();
+    return (data && Array.isArray(data.results)) ? data.results : [];
   }
+
+  function renderImageGrid(results) {
+    const grid = $('image-grid');
+    grid.innerHTML = '';
+    results.forEach((r) => {
+      const b = document.createElement('button');
+      b.className = 'ig-item';
+      b.type = 'button';
+      const img = document.createElement('img');
+      img.src = r.thumbnail || r.image;
+      img.alt = r.title || '';
+      img.loading = 'lazy';
+      if (r.width && r.height) img.style.aspectRatio = r.width + ' / ' + r.height;
+      img.onerror = () => { b.remove(); };
+      const host = document.createElement('span');
+      host.className = 'ig-host';
+      host.textContent = crumbFor(r.url).site;
+      b.append(img, host);
+      b.addEventListener('click', () => openImagePreview(r));
+      grid.appendChild(b);
+    });
+  }
+
+  function imageGridSkeleton() {
+    const grid = $('image-grid');
+    grid.innerHTML = '';
+    for (let i = 0; i < 12; i++) {
+      const s = document.createElement('div');
+      s.className = 'ig-skel';
+      grid.appendChild(s);
+    }
+  }
+
+  function imageGridStatus(emoji, msg, retry) {
+    const grid = $('image-grid');
+    grid.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'status-card card';
+    div.style.columnSpan = 'all';
+    div.innerHTML = '<span class="big"></span><span></span>';
+    div.querySelector('.big').textContent = emoji;
+    div.querySelector('span:last-child').textContent = msg;
+    if (retry) {
+      const btn = document.createElement('button');
+      btn.className = 'skuo skuo-neutral';
+      btn.style.marginTop = '12px';
+      btn.textContent = 'try again';
+      btn.addEventListener('click', retry);
+      div.appendChild(document.createElement('br'));
+      div.appendChild(btn);
+    }
+    grid.appendChild(div);
+  }
+
+  async function runImages(q) {
+    const token = ++searchToken;          // shares the stale-guard counter with runSearch
+    $('r-meta').textContent = 'searching the universe for “' + q + '”…';
+    imageGridSkeleton();
+    const cacheKey = q.toLowerCase();
+    if (imgCache.has(cacheKey)) {
+      gridResults = imgCache.get(cacheKey);
+      renderImageGrid(gridResults);
+      $('r-meta').textContent = COPY.metaLineImages(gridResults.length, '0.00');
+      return;
+    }
+    const t0 = performance.now();
+    let results;
+    try {
+      results = await astraImages(q);
+    } catch (e) {
+      if (token !== searchToken) return;
+      $('r-meta').textContent = '';
+      const retry = () => { lastImgQuery = ''; runImages(q); };
+      if (e.status === 429) imageGridStatus('🌙', COPY.rateLimited, retry);
+      else imageGridStatus('📡', COPY.offline, retry);
+      return;
+    }
+    if (token !== searchToken) return;
+    imgCache.set(cacheKey, results);
+    gridResults = results;
+    const secs = ((performance.now() - t0) / 1000).toFixed(2);
+    $('r-meta').textContent = results.length ? COPY.metaLineImages(results.length, secs) : '';
+    if (results.length) renderImageGrid(results);
+    else imageGridStatus('🌌', COPY.emptyResults);
+  }
+
+  function openImagePreview(r) { window.open(r.url, '_blank', 'noopener'); }  // placeholder; the preview panel replaces this
 
   async function runSearch(q) {
     if (aiAbort) aiAbort.abort();
@@ -441,6 +535,8 @@
   let thread = [];           // alternating {role, content} pairs after the seed
   let threadQuery = '';      // the query this thread belongs to
   let threadResults = [];    // grounding sources for this thread
+  const imgCache = new Map();   // q.toLowerCase() -> results array
+  let gridResults = [];         // currently rendered image results (the preview panel reads these)
 
   function seedThread(q, results) {
     threadQuery = q;
