@@ -110,6 +110,41 @@ def test_parse_bing_skips_ads_and_garbage():
     assert server.parse_bing(None) == []
 
 
+MOJEEK_HTML = """
+<html><body>
+<ul class="results-standard">
+  <li>
+    <h2><a href="https://example.com/sky">Why the Sky Is Blue</a></h2>
+    <p class="s">Rayleigh scattering makes the sky appear blue.</p>
+  </li>
+  <li>
+    <h2><a href="https://wiki.example/Rayleigh">Rayleigh scattering</a></h2>
+    <p class="s">Elastic scattering by small particles.</p>
+  </li>
+  <li>
+    <h2><a href="https://example.com/nodesc">No snippet here</a></h2>
+  </li>
+</ul>
+<ul class="pagination"><li><a href="?s=10">Next</a></li></ul>
+</body></html>
+"""
+
+
+def test_parse_mojeek_extracts_results():
+    results = server.parse_mojeek(MOJEEK_HTML)
+    assert results == [
+        {"title": "Why the Sky Is Blue", "url": "https://example.com/sky",
+         "description": "Rayleigh scattering makes the sky appear blue."},
+        {"title": "Rayleigh scattering", "url": "https://wiki.example/Rayleigh",
+         "description": "Elastic scattering by small particles."},
+    ]   # the no-snippet row and the pagination <ul> are dropped
+
+
+def test_parse_mojeek_garbage():
+    assert server.parse_mojeek("") == []
+    assert server.parse_mojeek(None) == []
+
+
 def test_unwrap_ddg_url_relative_redirect():
     assert server._unwrap_ddg_url("/l/?uddg=https%3A%2F%2Fexample.com%2Fx") == "https://example.com/x"
 

@@ -281,6 +281,76 @@ def parse_bing(html):
     return p.results
 
 
+class _MojeekParser(HTMLParser):
+    """Pairs each `.results-standard > li` h2-link with its <p class="s"> snippet."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.results = []
+        self._in_results = False
+        self._pending = None
+        self._h2 = False
+        self._capture = None   # "title" | "snippet" | None
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        cls = a.get("class") or ""
+        if tag == "ul":
+            if "results-standard" in cls:
+                self._in_results = True
+            return
+        if not self._in_results:
+            return
+        if tag == "li" and self._pending is None:
+            self._pending = {"title": "", "url": "", "description": ""}
+        elif self._pending is not None:
+            if tag == "h2":
+                self._h2 = True
+            elif tag == "a" and self._h2 and not self._pending["url"]:
+                self._pending["url"] = a.get("href") or ""
+                self._capture = "title"
+            elif tag == "p" and "s" in cls.split() and not self._pending["description"]:
+                self._capture = "snippet"
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self._capture == "title":
+            self._capture = None
+        elif tag == "h2":
+            self._h2 = False
+        elif tag == "p" and self._capture == "snippet":
+            self._capture = None
+        elif tag == "li" and self._pending is not None:
+            self._flush()
+        elif tag == "ul" and self._in_results:
+            self._in_results = False
+
+    def handle_data(self, data):
+        if self._pending is None:
+            return
+        if self._capture == "title":
+            self._pending["title"] += data
+        elif self._capture == "snippet":
+            self._pending["description"] += data
+
+    def _flush(self):
+        if self._pending is not None:
+            r = {k: " ".join(v.split()) for k, v in self._pending.items()}
+            if r["title"] and r["url"] and r["description"]:
+                self.results.append(r)
+        self._pending = None
+        self._h2 = False
+        self._capture = None
+
+
+def parse_mojeek(html):
+    """Parse a Mojeek SERP into [{title, url, description}]; rows missing any field are dropped."""
+    p = _MojeekParser()
+    p.feed(html or "")
+    p.close()
+    p._flush()
+    return p.results
+
+
 def _http_get(url, headers=None, **kw):
     h = dict(HTTP_HEADERS)
     if headers:
