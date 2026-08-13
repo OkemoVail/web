@@ -41,3 +41,7 @@ CLAUDE.md
 backend/.venv/
 backend/__pycache__/
 backend/feedback.jsonl
+
+# Visual snapshot artifacts (after/ shots + pixelmatch diffs)
+tools/snapshots/after/
+tools/snapshots/diff-*.png

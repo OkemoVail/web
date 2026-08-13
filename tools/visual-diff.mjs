@@ -9,7 +9,7 @@ import pixelmatch from 'pixelmatch';
 
 const filter = process.argv[2];
 const before = 'tools/snapshots/before', after = 'tools/snapshots/after';
-const files = fs.readdirSync(before).filter(f => f.endsWith('.png') && (!filter || f.startsWith(filter)));
+const files = fs.readdirSync(before).filter(f => f.endsWith('.png') && (!filter || f.replace(/-(light|dark)\.png$/, '') === filter));
 let flagged = 0;
 for (const f of files) {
   const aPath = path.join(after, f);

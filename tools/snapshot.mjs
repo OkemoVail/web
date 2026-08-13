@@ -5,6 +5,7 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const phase = process.argv[2];
 const filter = process.argv[3];
@@ -21,27 +22,45 @@ const PAGES = [
 const pages = filter ? PAGES.filter(([n]) => n === filter) : PAGES;
 if (!pages.length) { console.error('unknown page filter: ' + filter); process.exit(1); }
 
-const outDir = path.resolve('tools/snapshots', phase);
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const outDir = path.join(root, 'tools', 'snapshots', phase);
 fs.mkdirSync(outDir, { recursive: true });
 
-const server = spawn('python3', ['-m', 'http.server', '8901'], { cwd: process.cwd(), stdio: 'ignore' });
+const server = spawn('python3', ['-m', 'http.server', '8901'], { cwd: root, stdio: 'ignore' });
 await new Promise(r => setTimeout(r, 1200));
 
-const browser = await chromium.launch();
+const failures = [];
 try {
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  for (const [name, url] of pages) {
-    for (const theme of ['light', 'dark']) {
-      const page = await ctx.newPage();
-      await page.addInitScript(t => localStorage.setItem('vail_theme', t), theme);
-      await page.goto(`http://127.0.0.1:8901${url}`, { waitUntil: 'load', timeout: 20000 }).catch(e => console.error('NAV WARN', name, e.message));
-      await page.waitForTimeout(1500);
-      await page.screenshot({ path: path.join(outDir, `${name}-${theme}.png`) });
-      await page.close();
-      console.log(`shot ${name}-${theme}`);
+  const browser = await chromium.launch();
+  try {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    for (const [name, url] of pages) {
+      for (const theme of ['light', 'dark']) {
+        const page = await ctx.newPage();
+        await page.addInitScript(t => localStorage.setItem('vail_theme', t), theme);
+        const res = await page.goto(`http://127.0.0.1:8901${url}`, { waitUntil: 'load', timeout: 20000 }).catch(() => null);
+        if (!res || res.status() >= 400) {
+          const status = res ? res.status() : 'nav-failed';
+          console.error(`SKIP ${name} ${theme} ${status}`);
+          failures.push([name, theme, status]);
+          await page.close();
+          continue;
+        }
+        await page.waitForTimeout(1500);
+        await page.screenshot({ path: path.join(outDir, `${name}-${theme}.png`) });
+        await page.close();
+        console.log(`shot ${name}-${theme}`);
+      }
     }
+  } finally {
+    await browser.close();
   }
 } finally {
-  await browser.close();
   server.kill();
+}
+
+if (failures.length) {
+  console.error(`\n!!! ${failures.length} FAILED SHOT(S) — snapshots missing/invalid, do NOT trust a diff against them:`);
+  for (const [name, theme, status] of failures) console.error(`  ${name} ${theme} -> ${status}`);
+  process.exitCode = 1;
 }
