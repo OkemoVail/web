@@ -118,6 +118,15 @@
   #ai-toggle { height: 26px; padding: 0 12px; border-radius: 999px; font-size: .72rem; line-height: 1; margin-bottom: 14px; }
   #ai-toggle[aria-pressed="false"] { opacity: .55; filter: saturate(0); }
 
+  /* tabs (google grammar: text tabs, accent underline) */
+  .r-tabs { display: flex; gap: 18px; max-width: 640px; margin: -6px 0 16px; border-bottom: 1px solid var(--border-strong); }
+  .r-tab { background: none; border: none; padding: 8px 2px 10px; font-family: inherit; font-size: .85rem; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .r-tab:hover { color: var(--text-primary); }
+  .r-tab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  /* images grid (masonry via css columns) */
+  #image-grid { max-width: 900px; columns: 200px; column-gap: 10px; }
+
   /* follow-up row + thread */
   .ai-follow { display: flex; gap: 6px; padding: 0 12px 12px; }
   .ai-follow input { flex: 1; min-width: 0; height: 32px; border-radius: 999px; padding: 0 12px; font-size: .82rem; }
@@ -142,6 +151,8 @@
     .r-meta-row { margin: 0 16px 12px; }
     .r-meta-row .r-meta { margin: 0; }
     #ai-toggle { margin-bottom: 0; }
+    .r-tabs { max-width: none; margin: -4px 16px 14px; }
+    #image-grid { max-width: none; margin: 0 12px; columns: 150px; }
     .ai-panel { margin: 0 12px 18px; }
     #result-list { gap: 0; }
     .result { padding: 12px 16px; gap: 8px; border-top: 1px solid var(--border-strong); }
@@ -193,6 +204,10 @@
       <div class="suggest" id="results-suggest" hidden></div>
     </div>
   </header>
+  <nav class="r-tabs" id="r-tabs">
+    <button class="r-tab on" id="tab-all" type="button">All</button>
+    <button class="r-tab" id="tab-images" type="button">✦ Images</button>
+  </nav>
   <section id="ai-panel" class="ai-panel" hidden>
     <div class="ai-head" id="ai-head">✦ Astra Answer</div>
     <div class="ai-wave" id="ai-wave"><div class="blob"></div><div class="wave-label" id="ai-wave-label">✦ consulting the cosmos…</div></div>
@@ -208,6 +223,7 @@
     <button class="skuo skuo-icon" id="ai-toggle" aria-pressed="true" aria-label="toggle AI answer">✦ AI</button>
   </div>
   <ol id="result-list"></ol>
+  <div id="image-grid" hidden></div>
 </main>
 
 <script src="astra.js"></script>

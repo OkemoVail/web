@@ -94,12 +94,13 @@
 
   function readRoute() {
     const p = new URLSearchParams(location.search);
-    return { q: (p.get('q') || '').trim() };
+    return { q: (p.get('q') || '').trim(), tab: p.get('tab') === 'images' ? 'images' : 'all' };
   }
 
-  function go(q) {
+  function go(q, tab) {
     const u = new URL(location.href);
     if (q) u.searchParams.set('q', q); else u.searchParams.delete('q');
+    if (tab === 'images') u.searchParams.set('tab', 'images'); else u.searchParams.delete('tab');
     u.searchParams.delete('ai');   // legacy param — the AI answer is always on now
     u.hash = '';
     if (u.href !== location.href) history.pushState({}, '', u);
@@ -114,32 +115,51 @@
     document.title = 'Okemo Astra ✦';
   }
 
-  function showResults(q) {
+  let lastAllQuery = '';   // guards against re-running a finished search on tab restore
+  let lastImgQuery = '';
+
+  function paintTabs(tab) {
+    $('tab-all').classList.toggle('on', tab !== 'images');
+    $('tab-images').classList.toggle('on', tab === 'images');
+  }
+
+  function showResults(q, tab) {
     $('hero').hidden = true;
     $('results').hidden = false;
     $('results-input').value = q;
     if (wantResultsFocus) { wantResultsFocus = false; $('results-input').focus({ preventScroll: true }); }
     document.title = q + ' — Okemo Astra';
-    runSearch(q);
+    paintTabs(tab);
+    const allMode = tab !== 'images';
+    $('result-list').hidden = !allMode;
+    $('image-grid').hidden = allMode;
+    $('ai-toggle').hidden = !allMode;
+    if (allMode) {
+      $('ai-panel').hidden = !getAiMode();
+      if (q !== lastAllQuery) { lastAllQuery = q; runSearch(q); }
+    } else {
+      $('ai-panel').hidden = true;               // AI panel lives on All; the thread survives
+      if (q !== lastImgQuery) { lastImgQuery = q; runImages(q); }
+    }
   }
 
   function renderRoute() {
-    const { q } = readRoute();
-    if (!q) showHero(); else showResults(q);
+    const { q, tab } = readRoute();
+    if (!q) showHero(); else showResults(q, tab);
   }
 
   // ── bar wiring (hero + results bars behave identically) ──
   function wireBar(inputId, searchId, suggestId) {
     const input = $(inputId);
     initSuggest(input, $(suggestId)); // FIRST: suggest's keydown must run before ours (see defaultPrevented guard)
-    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q); } });
+    $(searchId).addEventListener('click', () => { const q = input.value.trim(); if (q) { wantResultsFocus = true; go(q, readRoute().tab); } });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (e.defaultPrevented) return;  // initSuggest accepted a suggestion — don't double-navigate
         const q = input.value.trim();
         if (!q) return;
         wantResultsFocus = true;
-        go(q);
+        go(q, readRoute().tab);
       }
     });
   }
@@ -164,6 +184,8 @@
     if (on && q) runSearch(q);            // toggling on from results answers immediately
     if (!on) $('ai-panel').hidden = true; // toggling off hides the panel
   });
+  $('tab-all').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'all') go(r.q, 'all'); });
+  $('tab-images').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'images') go(r.q, 'images'); });
   $('hero-cosmic').addEventListener('click', () => {
     const q = cosmicQuery($('hero-input').value.trim());
     $('hero-input').value = q;
@@ -224,7 +246,7 @@
           e.preventDefault();
           input.value = s;
           close();
-          go(s);
+          go(s, readRoute().tab);
         });
         box.appendChild(b);
       });
@@ -257,7 +279,7 @@
       } else if (e.key === 'Enter' && active >= 0) {
         e.preventDefault(); e.stopPropagation();
         close();
-        go(input.value.trim());
+        go(input.value.trim(), readRoute().tab);
       } else if (e.key === 'Escape') close();
     });
     input.addEventListener('blur', close);
@@ -352,6 +374,11 @@
       li.append(img, wrap);
       list.appendChild(li);
     });
+  }
+
+  // ── images tab (grid rendering lands in the next task) ──
+  async function runImages(q) {
+    $('r-meta').textContent = 'image search lands in the next task…';
   }
 
   async function runSearch(q) {
