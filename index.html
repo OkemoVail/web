@@ -107,9 +107,10 @@
 
     /* ── Hero profile picture ──────────────────────────────────── */
     .hero-pfp {
-      width: 4.5rem;
-      height: 4.5rem;
-      border-radius: 1rem;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.9rem;
+      flex: none;
       object-fit: cover;
       filter: grayscale(1);
       border: 1px solid var(--border-strong);
@@ -320,11 +321,13 @@
 
     <!-- ── Hero ────────────────────────────────────────────────── -->
     <section class="pt-40 md:pt-52 pb-24 md:pb-36 text-center">
-      <img
-        src="https://avatars.githubusercontent.com/u/179893130?s=400&u=d8a0d805e4137f21f0dd19fcf5163a1c746f02fd&v=4"
-        alt="OkemoVail"
-        class="hero-pfp load d1">
-      <h1 class="eyebrow load d1 mt-7">Hey — I'm OkemoVail</h1>
+      <div class="flex items-center justify-center gap-4 load d1">
+        <img
+          src="https://avatars.githubusercontent.com/u/179893130?s=400&u=d8a0d805e4137f21f0dd19fcf5163a1c746f02fd&v=4"
+          alt="OkemoVail"
+          class="hero-pfp">
+        <h1 class="eyebrow">Hey — I'm OkemoVail</h1>
+      </div>
       <form action="/search/" method="get" class="hero-search mt-9 load d2" role="search">
         <input type="text" name="q" aria-label="Search the web" placeholder="Search the web…"
           enterkeyhint="search" autocomplete="off" spellcheck="false">
