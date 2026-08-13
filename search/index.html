@@ -145,6 +145,18 @@
   .status-card { text-align: center; padding: 2rem 1rem; font-size: .9rem; color: var(--text-secondary); }
   .status-card .big { font-size: 1.6rem; display: block; margin-bottom: 8px; }
 
+  /* image preview: right side panel (desktop) / bottom sheet (mobile) */
+  #ig-preview { position: fixed; inset: 0; z-index: 70; }
+  .igp-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.4); }
+  .igp-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(380px, 94vw); padding: 16px; overflow-y: auto; border-radius: 18px 0 0 18px; display: flex; flex-direction: column; gap: 10px; }
+  .igp-close { align-self: flex-end; width: 30px; height: 30px; padding: 0; border-radius: 50%; flex: none; }
+  .igp-imgwrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--border-strong); background: var(--bg-white); }
+  .igp-imgwrap img { display: block; width: 100%; height: auto; }
+  .igp-title { font-size: .9rem; color: var(--text-primary); line-height: 1.4; }
+  .igp-host { font-size: .75rem; color: var(--text-tertiary); }
+  .igp-actions { display: flex; gap: 8px; }
+  .igp-actions .skuo { height: 34px; padding: 0 14px; border-radius: 999px; font-size: .8rem; display: inline-flex; align-items: center; text-decoration: none; }
+
   @media (max-width: 768px) {
     /* ── mobile mode: a different layout, not a shrunk desktop column ── */
     .bar .skuo .lbl { display: none; }        /* icon-first bar button */
@@ -166,6 +178,7 @@
     .result { padding: 12px 16px; gap: 8px; border-top: 1px solid var(--border-strong); }
     .result:last-child { border-bottom: 1px solid var(--border-strong); }
     .status-card { margin: 0 12px; }
+    .igp-panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 82vh; border-radius: 18px 18px 0 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     .star, .ai-ring, .ai-panel, .ai-wave .blob, .ig-skel { animation: none !important; }
@@ -233,6 +246,20 @@
   <ol id="result-list"></ol>
   <div id="image-grid" hidden></div>
 </main>
+
+<aside id="ig-preview" hidden>
+  <div class="igp-scrim" id="igp-scrim"></div>
+  <div class="igp-panel card">
+    <button class="skuo skuo-icon igp-close" id="igp-close" aria-label="close preview">✕</button>
+    <div class="igp-imgwrap"><img id="igp-img" alt=""></div>
+    <div class="igp-title" id="igp-title"></div>
+    <div class="igp-host" id="igp-host"></div>
+    <div class="igp-actions">
+      <a class="skuo skuo-accent" id="igp-visit" target="_blank" rel="noopener">visit source</a>
+      <a class="skuo skuo-neutral" id="igp-open" target="_blank" rel="noopener">open image</a>
+    </div>
+  </div>
+</aside>
 
 <script src="astra.js"></script>
 </body>

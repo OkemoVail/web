@@ -109,6 +109,7 @@
   }
 
   function showHero() {
+    closeImagePreview();
     if (aiAbort) aiAbort.abort();
     searchToken++;
     $('results').hidden = true;
@@ -187,6 +188,9 @@
   });
   $('tab-all').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'all') go(r.q, 'all'); });
   $('tab-images').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'images') go(r.q, 'images'); });
+  $('igp-close').addEventListener('click', closeImagePreview);
+  $('igp-scrim').addEventListener('click', closeImagePreview);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImagePreview(); });
   $('hero-cosmic').addEventListener('click', () => {
     const q = cosmicQuery($('hero-input').value.trim());
     $('hero-input').value = q;
@@ -473,7 +477,25 @@
     else imageGridStatus('🌌', COPY.emptyResults);
   }
 
-  function openImagePreview(r) { window.open(r.url, '_blank', 'noopener'); }  // placeholder; the preview panel replaces this
+  function openImagePreview(r) {
+    $('ig-preview').hidden = false;
+    document.body.style.overflow = 'hidden';
+    const img = $('igp-img');
+    img.src = r.thumbnail || r.image;               // thumbnail paints instantly…
+    $('igp-title').textContent = r.title || '';
+    $('igp-host').textContent = crumbFor(r.url).site;
+    $('igp-visit').href = r.url;
+    $('igp-open').href = r.image;
+    const full = new Image();                       // …full image swaps in when ready
+    full.onload = () => { img.src = r.image; };
+    full.src = r.image;
+  }
+
+  function closeImagePreview() {
+    if ($('ig-preview').hidden) return;
+    $('ig-preview').hidden = true;
+    document.body.style.overflow = '';
+  }
 
   async function runSearch(q) {
     if (aiAbort) aiAbort.abort();
