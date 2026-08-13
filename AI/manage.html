@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Research | OLM North Star</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../src/design-tokens.css">
     <script>
         (function () {
             const stored = localStorage.getItem('vail_theme');
@@ -41,56 +40,15 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 
-    <style>
-        @font-face {
-            font-family: 'Satoshi';
-            src: url('../Fonts/Satoshi-Variable.ttf') format('truetype');
-            font-weight: 300 900;
-            font-display: swap;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Satoshi';
-            src: url('../Fonts/Satoshi-VariableItalic.ttf') format('truetype');
-            font-weight: 300 900;
-            font-display: swap;
-            font-style: italic;
-        }
-
-        body {
-            font-family: 'Satoshi', 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .header-island {
-            background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            pointer-events: auto;
-        }
-
-        .dark .header-island {
-            background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
-            border-color: var(--border);
-        }
-
-        .manage-card:hover {
-            transform: translateY(-2px);
-        }
-    </style>
+    <link rel="stylesheet" href="../src/site.css">
+    
 </head>
 
-<body class="bg-parchment transition-colors duration-500 overflow-x-hidden">
+<body data-page="manage" class="bg-parchment transition-colors duration-500 overflow-x-hidden">
 
     <header class="fixed top-0 left-0 w-full z-[100] px-6 py-8 pointer-events-none">
         <div class="max-w-7xl mx-auto flex items-center justify-start">

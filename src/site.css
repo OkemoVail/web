@@ -1207,3 +1207,33 @@ select:focus {
         /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
 
     
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: MANAGE  —  scoped to [data-page="manage"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+        [data-page="manage"] {
+            font-family: 'Satoshi', 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        [data-page="manage"] .header-island {
+            background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .dark [data-page="manage"] .header-island {
+            background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+            border-color: var(--border);
+        }
+
+        [data-page="manage"] .manage-card:hover {
+            transform: translateY(-2px);
+        }
+    
