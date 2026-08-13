@@ -118,9 +118,9 @@ if (cssMode) {
 
   // --- figure out path prefix from the design-tokens link (keeps '/src/' vs '../src/' style)
   const dtMatch = html.match(/<link[^>]*href="([^"]*\/)?design-tokens\.css"[^>]*>\s*\n?/i);
-  const prefix = dtMatch ? (dtMatch[1] || '') : null; // e.g. 'src/', '../src/', '/src/'
+  const prefix = dtMatch ? (dtMatch[1] || '') : '/src/'; // e.g. 'src/', '../src/', '/src/'
   if (!dtMatch) report.warnings.push('no design-tokens.css link found — inserting site.css link before </head>');
-  const siteLink = `<link rel="stylesheet" href="${prefix || '/src/'}site.css">\n    `;
+  const siteLink = `<link rel="stylesheet" href="${prefix}site.css">\n    `;
 
   let out = html;
   if (dtMatch) { out = out.replace(dtMatch[0], ''); report.links.push('design-tokens.css link removed'); }
@@ -136,7 +136,7 @@ if (cssMode) {
 
   const feRe = /<script[^>]*src="https:\/\/[^"]*feather[^"]*"[^>]*>\s*<\/script>\s*\n?/i;
   if (feRe.test(out)) {
-    out = out.replace(feRe, `<script src="${prefix || '/src/'}feather-local.js"></script>\n`);
+    out = out.replace(feRe, `<script src="${prefix}feather-local.js"></script>\n`);
     report.links.push('feather CDN -> src/feather-local.js');
   }
 
@@ -144,7 +144,7 @@ if (cssMode) {
     out = out.replace(moved[0].full, siteLink);           // link goes where the first block was
     for (let i = 1; i < moved.length; i++) out = out.replace(moved[i].full, '');
   } else {
-    out = dtMatch ? out.replace(/<\/head>/i, `    ${siteLink}</head>`) : out;
+    out = out.replace(/<\/head>/i, `    ${siteLink}</head>`);
   }
 
   if (!/data-page=/.test(out)) {
