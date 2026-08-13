@@ -130,6 +130,61 @@
       transform: scale(1.04);
     }
 
+    /* ── Hero search bar (feeds Okemo Astra) ───────────────────── */
+    .hero-search {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: min(560px, 100%);
+      margin-inline: auto;
+      height: 3rem;
+      padding: 4px 5px 4px 16px;
+      border-radius: 999px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hero-search:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 80%);
+    }
+
+    /* local reset of the global unified-input styling (design-tokens.css),
+       same scoping Astra's .bar input uses */
+    .hero-search input {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      outline: none;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+
+    /* the pill container carries the focus ring, not the input — this also
+       beats the page's global :focus-visible:not(.skuo) outline rule */
+    .hero-search input:focus,
+    .hero-search input:focus-visible {
+      outline: none;
+      border: none;
+      box-shadow: none;
+    }
+
+    .hero-search .skuo {
+      flex: none;
+      height: 38px;
+      padding: 0 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
     /* ── Project catalog rows ──────────────────────────────────── */
     .work-row {
       display: grid;
@@ -280,11 +335,11 @@
         style="font-size: clamp(3.25rem, 13vw, 9rem);">
         I make<br>everything.
       </h1>
-      <div class="flex flex-wrap items-center gap-3 mt-11 load d4">
-        <a href="#work" class="skuo skuo-accent px-7 py-3.5 rounded-full text-sm font-medium">Selected work</a>
-        <a href="https://github.com/ar12c" target="_blank" rel="noopener"
-          class="skuo skuo-neutral px-7 py-3.5 rounded-full text-sm font-medium">GitHub profile</a>
-      </div>
+      <form action="/search/" method="get" class="hero-search mt-11 load d4" role="search">
+        <input type="text" name="q" aria-label="Search the web" placeholder="Search the web…"
+          enterkeyhint="search" autocomplete="off" spellcheck="false">
+        <button type="submit" class="skuo skuo-accent">Search</button>
+      </form>
     </section>
 
 
