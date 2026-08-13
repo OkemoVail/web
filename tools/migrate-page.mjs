@@ -50,23 +50,47 @@ const report = { movedBlocks: 0, keptBlocks: [], rulesScoped: 0, fontFacesDroppe
 function scopeOne(sel) {
   const s = sel.trim();
   const rootHook = `html:has(> body[data-page="${pageName}"])`;
-  if (s === ':root')     return rootHook;
-  if (s === 'html')      return rootHook;
-  if (s === 'html.dark') return `html.dark:has(> body[data-page="${pageName}"])`;
+  // Safety net: a bare `body` tag after the hook can never match (body would
+  // have to be its own descendant) — warn loudly instead of writing a dead rule.
+  const done = out => {
+    const hookIdx = out.indexOf('[data-page=');
+    if (hookIdx !== -1 && /(^|[\s>+~])body\b/.test(out.slice(hookIdx))) {
+      report.warnings.push(`possible dead selector after scoping: ${s} -> ${out}`);
+    }
+    return out;
+  };
+  if (s === ':root')     return done(rootHook);
+  if (s === 'html')      return done(rootHook);
+  if (s === 'html.dark') return done(`html.dark:has(> body[data-page="${pageName}"])`);
   // A trailing bare `body` IS the hook element — keeping ` body` after the
   // scoped hook makes an impossible selector (body can't be its own
   // descendant), so body-terminal forms map to their root/hook equivalents.
-  if (s === '.dark body')      return `.dark ${hook}`;
-  if (s === 'html body')       return rootHook;
-  if (s === ':root body')      return rootHook;
-  if (s === 'html.dark body')  return `html.dark:has(> body[data-page="${pageName}"])`;
-  if (s === '.dark html body') return `html.dark:has(> body[data-page="${pageName}"])`;
-  if (/^:root\b/.test(s))      return s.replace(/^:root\b/, hook);
-  if (/^html\.dark\b/.test(s)) return s.replace(/^html\.dark\b/, `html.dark ${hook}`);
-  if (/^html\b/.test(s))       return s.replace(/^html\b/, `html ${hook}`);
-  if (/^\.dark\b/.test(s))     return s.replace(/^\.dark\b/, `.dark ${hook}`);
-  if (/^body\b/.test(s))       return s.replace(/^body\b/, hook);
-  return `${hook} ${s}`;
+  if (s === '.dark body')      return done(`.dark ${hook}`);
+  if (s === 'html body')       return done(rootHook);
+  if (s === ':root body')      return done(rootHook);
+  if (s === 'html.dark body')  return done(`html.dark:has(> body[data-page="${pageName}"])`);
+  if (s === '.dark html body') return done(`html.dark:has(> body[data-page="${pageName}"])`);
+  // A mid-chain `body` carrying compounds (e.g. `.dark body.sidebar-collapsed .x`):
+  // body IS the hook element, so the compounds attach to the hook. The prefix maps
+  // the same way as the fallthroughs below (descendant form): body is always a
+  // descendant of html and the hook lives on body, so e.g. `html.dark body.x .y`
+  // and `html.dark [data-page="x"].x .y` match exactly the same elements — and,
+  // unlike a `html.dark:has(> body…)` rewrite, the descendant form stays faithful
+  // when the tail starts with a child/sibling combinator (`html.dark body.x > .y`
+  // -> children of the hook, not of html).
+  const mid = s.match(/^(\.dark\s+html|html\.dark|\.dark|html|:root)\s+body((?:(?:[.#][\w-]+|\[[^\]]*\]|::?[\w-]+(?:\([^)]*\))?))*)([\s\S]*)$/);
+  if (mid) {
+    const head = (mid[1] === 'html' || mid[1] === ':root') ? `html ${hook}`
+               : (mid[1] === 'html.dark' || mid[1] === '.dark html') ? `html.dark ${hook}`
+               : `.dark ${hook}`;
+    return done(head + mid[2] + mid[3].replace(/^\s+/, ' '));
+  }
+  if (/^:root\b/.test(s))      return done(s.replace(/^:root\b/, hook));
+  if (/^html\.dark\b/.test(s)) return done(s.replace(/^html\.dark\b/, `html.dark ${hook}`));
+  if (/^html\b/.test(s))       return done(s.replace(/^html\b/, `html ${hook}`));
+  if (/^\.dark\b/.test(s))     return done(s.replace(/^\.dark\b/, `.dark ${hook}`));
+  if (/^body\b/.test(s))       return done(s.replace(/^body\b/, hook));
+  return done(`${hook} ${s}`);
 }
 
 function scopeCss(css, existingCss) {
