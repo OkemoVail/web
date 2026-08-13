@@ -1269,3 +1269,72 @@ select:focus {
         /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
 
     
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: DESIGN  —  scoped to [data-page="design"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+    /* ── Showcase layout scaffolding ONLY.
+       Every component (.ui-*, .skuo*, inputs, .card) lives in
+       src/design-tokens.css so editing it there updates every page. ── */
+    [data-page="design"] { font-family: ui-sans-serif, system-ui, sans-serif; }
+
+    [data-page="design"] .ds-frame {
+      max-width: 1080px;
+      margin: 2.5rem auto;
+      padding: 1.25rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 28px;
+      background: var(--bg);
+    }
+    @media (min-width: 768px) { [data-page="design"] .ds-frame { padding: 2.25rem; } }
+
+    [data-page="design"] .ds-topbar { display: flex; align-items: center; justify-content: flex-end; min-height: 1.5rem; }
+    [data-page="design"] .ds-title {
+      text-align: center;
+      font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+      font-weight: 600;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin: 0.25rem 0 2rem;
+    }
+
+    /* Masonry-style bento grid */
+    [data-page="design"] .ds-masonry { columns: 1; column-gap: 1rem; }
+    @media (min-width: 640px)  { [data-page="design"] .ds-masonry { columns: 2; } }
+    @media (min-width: 1000px) { [data-page="design"] .ds-masonry { columns: 3; } }
+
+    [data-page="design"] .dsc {
+      break-inside: avoid;
+      margin: 0 0 1rem;
+      padding: 1.1rem 1.15rem 1.2rem;
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 26px -16px rgba(0,0,0,0.22);
+    }
+    .dark [data-page="design"] .dsc { background: var(--bg-elevated); border-color: var(--border-strong); }
+
+    [data-page="design"] .dsc-label {
+      font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-tertiary); margin: 0 0 0.85rem;
+    }
+    [data-page="design"] .row { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
+    [data-page="design"] .col { display: flex; flex-direction: column; gap: 0.6rem; }
+    [data-page="design"] .btn { padding: 0.5rem 1.05rem; border-radius: 10px; font-size: 0.85rem; font-weight: 500; }
+
+    /* Swatches (showcase-only) */
+    [data-page="design"] .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    [data-page="design"] .swatch { height: 52px; border-radius: 10px; border: 1px solid var(--border);
+              display: flex; align-items: flex-end; padding: 0.35rem; font-size: 0.55rem;
+              color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    [data-page="design"] .swatch.lt { color: var(--text-primary); text-shadow: none; }
+
+    /* And more pill */
+    [data-page="design"] .more { text-align: center; margin-top: 0.5rem; }
+    [data-page="design"] .more span {
+      display: inline-block; padding: 0.55rem 1.4rem; border-radius: 999px; font-size: 0.85rem;
+      color: var(--text-secondary); background: var(--bg-elevated); border: 1px solid var(--border-strong);
+    }
+  
