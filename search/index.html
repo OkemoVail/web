@@ -96,7 +96,7 @@
   .ai-panel { margin: 0 0 22px; border-radius: 18px; border: 1.5px solid transparent; background: linear-gradient(var(--bg-white), var(--bg-white)) padding-box, conic-gradient(from var(--rb, 0deg), var(--accent), #f0c27b, var(--accent-light), #f0c27b, var(--accent)) border-box; animation: rb-spin 6s linear infinite; overflow: hidden; transition: border-color .6s ease; }
   /* done: shimmer settles to a plain hairline */
   .ai-panel.done { border-color: var(--border-strong); background: var(--bg-white); animation: none; }
-  .ai-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; font-weight: 700; font-size: .92rem; color: var(--accent); }
+  .ai-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 12px 16px 0; font-weight: 700; font-size: .92rem; color: var(--accent); }
   .ai-wave { height: 46px; margin: 10px 12px 0; border-radius: 12px; position: relative; overflow: hidden; transition: height .6s ease, margin .6s ease, opacity .6s ease; }
   .ai-wave .blob { position: absolute; inset: -60%; filter: blur(18px); background:
       radial-gradient(38% 55% at 25% 45%, rgba(255,95,109,.9), transparent 70%),
@@ -139,8 +139,11 @@
   .ai-follow { display: flex; gap: 6px; padding: 0 12px 12px; }
   .ai-follow input { flex: 1; min-width: 0; height: 32px; border-radius: 999px; padding: 0 12px; font-size: .82rem; }
   .ai-follow .skuo { height: 32px; width: 32px; padding: 0; border-radius: 50%; flex: none; }
-  .ai-q { margin: 10px 0 2px; font-size: .82rem; font-style: italic; color: var(--text-tertiary); }
-  .ai-q::before { content: 'you ✦ '; color: var(--accent); font-style: normal; }
+
+  /* chat thread: plain Astra turns, grey right-aligned user bubbles */
+  .ai-turn { margin: 2px 0 8px; }
+  .ai-bubble-user { width: fit-content; max-width: 85%; margin: 12px 0 4px auto; padding: 8px 13px; border-radius: 16px 16px 4px 16px; background: var(--bg-elevated); border: 1px solid var(--border-strong); font-size: .85rem; color: var(--text-primary); }
+  #ai-expand { width: 28px; height: 28px; padding: 0; border-radius: 8px; font-size: .85rem; flex: none; }
 
   .status-card { text-align: center; padding: 2rem 1rem; font-size: .9rem; color: var(--text-secondary); }
   .status-card .big { font-size: 1.6rem; display: block; margin-bottom: 8px; }
@@ -236,13 +239,14 @@
     <button class="r-tab" id="tab-images" type="button">✦ Images</button>
   </nav>
   <section id="ai-panel" class="ai-panel" hidden>
-    <div class="ai-head" id="ai-head">✦ Astra Answer</div>
+    <div class="ai-head"><span id="ai-head-label">✦ Astra Answer</span><button class="skuo skuo-icon" id="ai-expand" aria-label="fullscreen" title="fullscreen">⤢</button></div>
     <div class="ai-wave" id="ai-wave"><div class="blob"></div><div class="wave-label" id="ai-wave-label">✦ consulting the cosmos…</div></div>
     <div class="ai-body" id="ai-body"></div>
     <div class="ai-error" id="ai-error" hidden></div>
     <div class="ai-follow" id="ai-follow" hidden>
       <input id="ai-follow-input" type="text" enterkeyhint="send" autocomplete="off" spellcheck="false" aria-label="Ask a follow-up" placeholder="ask more…">
       <button class="skuo skuo-accent" id="ai-follow-send" aria-label="ask follow-up">→</button>
+      <button class="skuo skuo-neutral" id="ai-stop" aria-label="stop generating" title="stop" hidden>⏹</button>
     </div>
   </section>
   <div class="r-meta-row">

@@ -92,6 +92,7 @@
 
   // ── router: URL is the state. ?q= results (AI answer always included) ──
   let aiAbort = null;            // AbortController for the AI stream
+  let aiStopRequested = false;   // distinguishes user-stop aborts from supersede aborts
   let searchToken = 0;           // stale-response guard
   let wantResultsFocus = false;  // set by bar actions, consumed by showResults
   const PAGE_STEP = 30;         // DDG lite paginates in steps of 30
@@ -216,6 +217,7 @@
   };
   $('ai-follow-send').addEventListener('click', followGo);
   $('ai-follow-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') followGo(); });
+  $('ai-stop').addEventListener('click', () => { aiStopRequested = true; if (aiAbort) aiAbort.abort(); });
   window.addEventListener('popstate', renderRoute);
   renderRoute();
 
@@ -577,7 +579,7 @@
     const aiOn = getAiMode();
     panel.hidden = !aiOn;                       // AI mode off → results-only page
     panel.classList.remove('done');
-    $('ai-head').textContent = COPY.aiHeaders[0];
+    $('ai-head-label').textContent = COPY.aiHeaders[0];
     $('ai-body').innerHTML = '';
     $('ai-error').hidden = true;
     $('ai-follow').hidden = true;
@@ -619,6 +621,15 @@
     // [n] → jump link to the matching result card (must run on marked output)
     return html.replace(/\[(\d{1,2})\]/g, (m, n) =>
       (+n >= 1 && +n <= count) ? '<a href="#result-' + n + '">[' + n + ']</a>' : m);
+  }
+
+  function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+
+  function setStreaming(on) {
+    $('ai-follow-input').disabled = on;
+    $('ai-follow-send').disabled = on;
+    $('ai-follow-send').hidden = on;
+    $('ai-stop').hidden = !on;
   }
 
   function startWaveQuips() {
@@ -690,7 +701,7 @@
           const delta = data.choices && data.choices[0] && data.choices[0].delta
             ? (data.choices[0].delta.content || '') : '';
           if (delta) {
-            if (!firstToken) { firstToken = true; $('ai-wave-label').textContent = '✦ streaming from the stars…'; }
+            if (!firstToken) { firstToken = true; const wl = $('ai-wave-label'); if (wl) wl.textContent = '✦ streaming from the stars…'; }
             text += delta;
             onToken(text);
           }
@@ -706,27 +717,43 @@
     const panel = $('ai-panel');
     panel.hidden = false;
     panel.classList.remove('done');
-    $('ai-head').textContent = COPY.aiHeaders[Math.floor(Math.random() * COPY.aiHeaders.length)];
-    $('ai-body').innerHTML = '';
+    $('ai-head-label').textContent = COPY.aiHeaders[Math.floor(Math.random() * COPY.aiHeaders.length)];
+    const body = $('ai-body');
+    body.innerHTML = '';
+    const aEl = document.createElement('div');      // the seed answer turn
+    aEl.className = 'ai-turn';
+    body.appendChild(aEl);
     $('ai-error').hidden = true;
-    $('ai-follow').hidden = true;               // appears when the answer lands
+    $('ai-follow').hidden = false;                  // composer visible from the start (ChatGPT-style)
+    setStreaming(true);
+    const myToken = searchToken;
     const quipTimer = startWaveQuips();
+    let partial = '';
 
     try {
       const text = await streamTurn((t) => {
         clearInterval(quipTimer);
-        $('ai-body').innerHTML = linkifyCitations(marked.parse(t.replace(/&/g, '&amp;').replace(/</g, '&lt;')), results.length);
+        partial = t;
+        aEl.innerHTML = linkifyCitations(marked.parse(esc(t)), results.length);
       });
       clearInterval(quipTimer);
       thread.push({ role: 'assistant', content: text });
-      if (!text.trim()) $('ai-body').textContent = '✦ the cosmos answered with silence — try rephrasing?';
-      panel.classList.add('done');              // wave collapses + shimmer settles
-      $('ai-follow').hidden = false;            // click to ask more
+      if (!text.trim()) aEl.textContent = '✦ the cosmos answered with silence — try rephrasing?';
+      panel.classList.add('done');                  // shimmer settles
     } catch (e) {
       clearInterval(quipTimer);
-      if (e.name === 'AbortError') return;      // superseded by a newer search / toggle off
+      if (e.name === 'AbortError') {
+        if (aiStopRequested && partial) {           // user hit stop — keep what streamed
+          thread.push({ role: 'assistant', content: partial });
+          panel.classList.add('done');
+        }
+        return;                                     // superseded / toggled off / stopped
+      }
       panel.classList.add('done');
       showAiError(() => askAstra(q, results));
+    } finally {
+      aiStopRequested = false;
+      if (myToken === searchToken) setStreaming(false);
     }
   }
 
@@ -743,26 +770,28 @@
 
   async function askFollowUp(question) {
     const panel = $('ai-panel');
-    const input = $('ai-follow-input');
-    const send = $('ai-follow-send');
     thread.push({ role: 'user', content: question });
 
-    const qEl = document.createElement('p');    // the user's turn, in the thread
-    qEl.className = 'ai-q';
+    const body = $('ai-body');
+    const qEl = document.createElement('div');      // the user's turn: right-aligned bubble
+    qEl.className = 'ai-bubble-user';
     qEl.textContent = question;
-    const aEl = document.createElement('div');  // the streaming answer under it
-    aEl.className = 'ai-thread-a';
-    $('ai-body').append(qEl, aEl);
+    const aEl = document.createElement('div');      // the streaming answer under it
+    aEl.className = 'ai-turn';
+    body.append(qEl, aEl);
 
-    panel.classList.remove('done');             // shimmer spins again while answering
+    panel.classList.remove('done');                 // shimmer spins again while answering
     $('ai-error').hidden = true;
-    input.disabled = true; send.disabled = true;
+    setStreaming(true);
+    const myToken = searchToken;
     const quipTimer = startWaveQuips();
+    let partial = '';
 
     try {
       const text = await streamTurn((t) => {
         clearInterval(quipTimer);
-        aEl.innerHTML = linkifyCitations(marked.parse(t.replace(/&/g, '&amp;').replace(/</g, '&lt;')), threadResults.length);
+        partial = t;
+        aEl.innerHTML = linkifyCitations(marked.parse(esc(t)), threadResults.length);
       });
       clearInterval(quipTimer);
       thread.push({ role: 'assistant', content: text });
@@ -770,14 +799,26 @@
       panel.classList.add('done');
     } catch (e) {
       clearInterval(quipTimer);
-      if (e.name === 'AbortError') return;
-      thread.pop();                             // don't keep an unanswered question in context
+      if (e.name === 'AbortError') {
+        if (aiStopRequested && partial) {
+          thread.push({ role: 'assistant', content: partial });
+          panel.classList.add('done');
+        } else if (aiStopRequested) {
+          thread.pop();                             // stopped before anything streamed
+          qEl.remove(); aEl.remove();
+        }
+        return;
+      }
+      thread.pop();                                 // don't keep an unanswered question in context
       qEl.remove(); aEl.remove();
       panel.classList.add('done');
       showAiError(() => askFollowUp(question));
     } finally {
-      input.disabled = false; send.disabled = false;
-      input.focus({ preventScroll: true });
+      aiStopRequested = false;
+      if (myToken === searchToken) {
+        setStreaming(false);
+        $('ai-follow-input').focus({ preventScroll: true });
+      }
     }
   }
 })();
