@@ -557,12 +557,14 @@ def api_search(q: str = "", s: int = 0):
         return {"results": []}
     s = max(0, s)
     qk = q.lower()
-    last_reason = "upstream"
-    for name, fetch in SEARCH_SOURCES:
-        key = (name, qk, s)
-        cached = _cache_get(_search_cache, key)
+    # cache-first: any source's warm page for this (q, s) wins, in chain order —
+    # repeat requests stay free even if a healthier source is back up
+    for name, _fetch in SEARCH_SOURCES:
+        cached = _cache_get(_search_cache, (name, qk, s))
         if cached is not None:
             return {"results": cached, "source": name}
+    last_reason = "upstream"
+    for name, fetch in SEARCH_SOURCES:
         results, reason = fetch(q, s)
         if results is None:
             last_reason = reason
@@ -576,12 +578,14 @@ def api_search(q: str = "", s: int = 0):
                     seen.update(r["url"] for r in page)
             results = [r for r in results if r["url"] not in seen]
         results = results[:15]
-        _cache_set(_search_cache, key, results)
+        _cache_set(_search_cache, (name, qk, s), results)
         return {"results": results, "source": name}
     if last_reason == "rate_limited":
         return JSONResponse({"error": "rate_limited"}, status_code=429)
     return JSONResponse({"error": "upstream"}, status_code=502)
 ```
+
+> **Executor's amendment (applied during execution):** the cache check was lifted out of the fetch loop into a cache-first pass. With the per-loop check, a healthy DDG would re-fetch and shadow Bing's warm cache entry (caught by `test_chain_fallback_result_is_cached`). Cache-first pass = repeat requests within the TTL never touch the network, regardless of source health.
 
 - [ ] **Step 5: Run the full backend suite**
 

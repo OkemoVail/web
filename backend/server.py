@@ -130,6 +130,8 @@ DDG_AC_URL = "https://duckduckgo.com/ac/"
 DDG_HOME_URL = "https://duckduckgo.com/"
 DDG_IJS_URL = "https://duckduckgo.com/i.js"
 VQD_RE = re.compile(r'vqd="([^"]+)"')
+BING_URL = "https://www.bing.com/search"
+MOJEEK_URL = "https://www.mojeek.com/search"
 HTTP_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                   "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -351,6 +353,36 @@ def parse_mojeek(html):
     return p.results
 
 
+def _fetch_source(url, parser, params):
+    """Fetch+parse one search source. Returns (results, None) on success —
+    including a legit empty page — or (None, "rate_limited" | "upstream")."""
+    resp, err = _http_get_backoff(url, params=params)
+    if err:
+        return None, ("rate_limited" if err.status_code == 429 else "upstream")
+    results = [r for r in parser(resp.text)
+               if r["url"].startswith(("http://", "https://"))]
+    return results, None
+
+
+def _fetch_ddg(q, s):
+    return _fetch_source(DDG_LITE_URL, parse_ddg_lite, {"q": q, "s": s})
+
+
+def _fetch_bing(q, s):
+    return _fetch_source(BING_URL, parse_bing, {"q": q, "first": s + 1})
+
+
+def _fetch_mojeek(q, s):
+    return _fetch_source(MOJEEK_URL, parse_mojeek, {"q": q, "s": s})
+
+
+SEARCH_SOURCES = (
+    ("duckduckgo", _fetch_ddg),
+    ("bing", _fetch_bing),
+    ("mojeek", _fetch_mojeek),
+)
+
+
 def _http_get(url, headers=None, **kw):
     h = dict(HTTP_HEADERS)
     if headers:
@@ -393,26 +425,33 @@ def api_search(q: str = "", s: int = 0):
     if not q:
         return {"results": []}
     s = max(0, s)
-    key = (q.lower(), s)
-    cached = _cache_get(_search_cache, key)
-    if cached is not None:
-        return {"results": cached}
-    resp, err = _http_get_backoff(DDG_LITE_URL, params={"q": q, "s": s})
-    if err:
-        return err
-    results = [r for r in parse_ddg_lite(resp.text)
-               if r["url"].startswith(("http://", "https://"))]
-    if s > 0:
-        # Drop URLs already served on earlier cached pages of this query
-        # (DDG occasionally repeats rows across pages).
-        seen = set()
-        for (kq, ks), (ts, page) in list(_search_cache.items()):
-            if kq == key[0] and ks < s and time.time() - ts < CACHE_TTL:
-                seen.update(r["url"] for r in page)
-        results = [r for r in results if r["url"] not in seen]
-    results = results[:15]
-    _cache_set(_search_cache, key, results)
-    return {"results": results}
+    qk = q.lower()
+    # cache-first: any source's warm page for this (q, s) wins, in chain order —
+    # repeat requests stay free even if a healthier source is back up
+    for name, _fetch in SEARCH_SOURCES:
+        cached = _cache_get(_search_cache, (name, qk, s))
+        if cached is not None:
+            return {"results": cached, "source": name}
+    last_reason = "upstream"
+    for name, fetch in SEARCH_SOURCES:
+        results, reason = fetch(q, s)
+        if results is None:
+            last_reason = reason
+            continue
+        if s > 0:
+            # Drop URLs already served on earlier cached pages of this query
+            # (any source — engines occasionally repeat rows across pages).
+            seen = set()
+            for (kn, kq, ks), (ts, page) in list(_search_cache.items()):
+                if kq == qk and ks < s and time.time() - ts < CACHE_TTL:
+                    seen.update(r["url"] for r in page)
+            results = [r for r in results if r["url"] not in seen]
+        results = results[:15]
+        _cache_set(_search_cache, (name, qk, s), results)
+        return {"results": results, "source": name}
+    if last_reason == "rate_limited":
+        return JSONResponse({"error": "rate_limited"}, status_code=429)
+    return JSONResponse({"error": "upstream"}, status_code=502)
 
 
 @app.get("/api/suggest")

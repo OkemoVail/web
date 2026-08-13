@@ -145,6 +145,22 @@ def test_parse_mojeek_garbage():
     assert server.parse_mojeek(None) == []
 
 
+BING_HTML_PAGE2 = """
+<html><body>
+<ol id="b_results">
+  <li class="b_algo">
+    <h2><a href="https://example.com/blue">Why Is the Sky Blue?</a></h2>
+    <p>Repeated from page one.</p>
+  </li>
+  <li class="b_algo">
+    <h2><a href="https://example.com/ozone">Ozone layer</a></h2>
+    <p>A different page-two result.</p>
+  </li>
+</ol>
+</body></html>
+"""
+
+
 def test_unwrap_ddg_url_relative_redirect():
     assert server._unwrap_ddg_url("/l/?uddg=https%3A%2F%2Fexample.com%2Fx") == "https://example.com/x"
 
@@ -247,10 +263,11 @@ def test_api_search_empty_query_never_calls_upstream(monkeypatch):
 
 
 def _fake_http_capture(monkeypatch, responses):
-    """Like _fake_http but also records the params kwarg of each call."""
-    calls = {"n": 0, "params": []}
+    """Like _fake_http but also records the url and params kwarg of each call."""
+    calls = {"n": 0, "urls": [], "params": []}
 
     def fake(url, **kw):
+        calls["urls"].append(url)
         calls["params"].append(kw.get("params"))
         r = responses[min(calls["n"], len(responses) - 1)]
         calls["n"] += 1
@@ -315,7 +332,8 @@ def test_api_search_dedups_against_earlier_pages(monkeypatch):
 
 
 def test_api_search_errors_do_not_poison_cache(monkeypatch):
-    calls = _fake_http(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(202), FakeHTTPResp(200, LITE_HTML)])
+    # every source must fail before the endpoint errors — 2 attempts each (202 backoff)
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(202)] * 6 + [FakeHTTPResp(200, LITE_HTML)])
     monkeypatch.setattr(server.time, "sleep", lambda *_: None)
     from fastapi.testclient import TestClient
     client = TestClient(server.app)
@@ -323,7 +341,7 @@ def test_api_search_errors_do_not_poison_cache(monkeypatch):
     r = client.get("/api/search", params={"q": "sky"})
     assert r.status_code == 200          # not served a cached error
     assert len(r.json()["results"]) == 2
-    assert calls["n"] == 3               # went upstream again
+    assert calls["n"] == 7               # went upstream again
 
 
 def test_api_suggest_happy_path(monkeypatch):
@@ -481,3 +499,111 @@ def test_api_images_empty_query_never_calls_upstream(monkeypatch):
     assert r.status_code == 200
     assert r.json() == {"results": []}
     assert calls["n"] == 0
+
+
+def test_chain_ddg_success_never_calls_other_sources(monkeypatch):
+    calls = _fake_http_capture(monkeypatch, [FakeHTTPResp(200, LITE_HTML)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json()["source"] == "duckduckgo"
+    assert calls["n"] == 1
+    assert calls["urls"] == [server.DDG_LITE_URL]
+
+
+def test_chain_falls_back_to_bing_on_rate_limit(monkeypatch):
+    calls = _fake_http_capture(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(202),
+                                             FakeHTTPResp(200, BING_HTML)])
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json()["source"] == "bing"
+    assert [x["url"] for x in r.json()["results"]] == [
+        "https://example.com/sky", "https://wiki.example/Rayleigh"]
+    assert calls["urls"] == [server.DDG_LITE_URL, server.DDG_LITE_URL, server.BING_URL]
+    assert calls["params"][2] == {"q": "sky", "first": 1}   # s=0 → first=1
+
+
+def test_chain_falls_back_to_mojeek_when_bing_also_limited(monkeypatch):
+    calls = _fake_http_capture(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(202),
+                                             FakeHTTPResp(403), FakeHTTPResp(403),
+                                             FakeHTTPResp(200, MOJEEK_HTML)])
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky", "s": 30})
+    assert r.status_code == 200
+    assert r.json()["source"] == "mojeek"
+    assert calls["urls"][-1] == server.MOJEEK_URL
+    assert calls["params"][-1] == {"q": "sky", "s": 30}     # s passes straight through
+
+
+def test_chain_network_error_falls_back(monkeypatch):
+    _fake_http_capture(monkeypatch, [httpx.ConnectError("boom"), FakeHTTPResp(200, BING_HTML)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json()["source"] == "bing"
+
+
+def test_chain_empty_results_do_not_failover(monkeypatch):
+    calls = _fake_http_capture(monkeypatch, [FakeHTTPResp(200, "<p>nothing</p>")])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 200
+    assert r.json()["results"] == []
+    assert r.json()["source"] == "duckduckgo"
+    assert calls["n"] == 1   # a legit empty never hammers the other sources
+
+
+def test_chain_all_sources_limited_gives_429(monkeypatch):
+    _fake_http(monkeypatch, [FakeHTTPResp(202)])   # helper repeats it for every call
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 429
+    assert r.json() == {"error": "rate_limited"}
+
+
+def test_chain_all_sources_error_gives_502(monkeypatch):
+    _fake_http(monkeypatch, [httpx.HTTPError("boom")])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.status_code == 502
+    assert r.json() == {"error": "upstream"}
+
+
+def test_chain_fallback_result_is_cached(monkeypatch):
+    calls = _fake_http_capture(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(202),
+                                             FakeHTTPResp(200, BING_HTML)])
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    client.get("/api/search", params={"q": "sky"})
+    r = client.get("/api/search", params={"q": "sky"})
+    assert r.json()["source"] == "bing"
+    assert calls["n"] == 3   # second request served from the bing cache entry
+
+
+def test_chain_dedups_across_sources(monkeypatch):
+    # page 1 from DDG; DDG is limited on page 2 → Bing serves, repeating example.com/blue
+    calls = _fake_http_capture(monkeypatch, [FakeHTTPResp(200, LITE_HTML),
+                                             FakeHTTPResp(202), FakeHTTPResp(202),
+                                             FakeHTTPResp(200, BING_HTML_PAGE2)])
+    monkeypatch.setattr(server.time, "sleep", lambda *_: None)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r1 = client.get("/api/search", params={"q": "sky"})
+    assert len(r1.json()["results"]) == 2
+    r2 = client.get("/api/search", params={"q": "sky", "s": 30})
+    assert r2.json()["source"] == "bing"
+    urls = [x["url"] for x in r2.json()["results"]]
+    assert "https://example.com/ozone" in urls
+    assert "https://example.com/blue" not in urls
