@@ -2044,11 +2044,11 @@ select:focus {
             margin-bottom: 1rem;
         }
 
-        [data-page="editor"] .no-scrollbar::-webkit-scrollbar {
+        [data-page="editor"].no-scrollbar::-webkit-scrollbar {
             display: none;
         }
 
-        [data-page="editor"] .no-scrollbar {
+        [data-page="editor"].no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
