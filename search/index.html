@@ -97,20 +97,16 @@
   /* done: shimmer settles to a plain hairline */
   .ai-panel.done { border-color: var(--border-strong); background: var(--bg-white); animation: none; }
   .ai-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 12px 16px 0; font-weight: 700; font-size: .92rem; color: var(--accent); }
-  .ai-wave { height: 46px; margin: 10px 12px 0; border-radius: 12px; position: relative; overflow: hidden; transition: height .6s ease, margin .6s ease, opacity .6s ease; }
-  .ai-wave .blob { position: absolute; inset: -60%; filter: blur(18px); background:
-      radial-gradient(38% 55% at 25% 45%, rgba(255,95,109,.9), transparent 70%),
-      radial-gradient(38% 55% at 50% 55%, rgba(90,167,255,.85), transparent 70%),
-      radial-gradient(38% 55% at 72% 45%, rgba(95,220,125,.8), transparent 70%),
-      radial-gradient(40% 60% at 60% 60%, rgba(240,194,123,.85), transparent 70%);
-    animation: wave-flow 4.5s ease-in-out infinite alternate; }
-  .ai-wave .wave-label { position: relative; z-index: 2; height: 100%; display: flex; align-items: center; padding: 0 14px; font-size: .8rem; font-weight: 700; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.35); }
-  .ai-panel.done .ai-wave { height: 2px; margin: 8px 16px 0; opacity: .9; }
-  .ai-panel.done .ai-wave .wave-label { display: none; }
   .ai-body { padding: 12px 16px 16px; font-size: .88rem; line-height: 1.6; color: var(--text-primary); }
   .ai-body a { color: var(--accent); }
   .ai-error { padding: 0 16px 14px; font-size: .84rem; color: var(--text-secondary); }
-  @keyframes wave-flow { 0% { transform: translateX(-6%) scale(1.05); } 100% { transform: translateX(6%) scale(1.12); } }
+
+  /* thinking row: pulsing orb + shimmer-sweep line (chatgpt 'thinking…' grammar) */
+  .ai-thinking { display: flex; align-items: center; gap: 9px; padding: 10px 2px; }
+  .ai-orb { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); animation: orb-pulse 1.2s ease-in-out infinite; flex: none; }
+  @keyframes orb-pulse { 0%,100% { transform: scale(.7); opacity: .45; } 50% { transform: scale(1.15); opacity: 1; } }
+  .ai-thinking-line { font-size: .84rem; background: linear-gradient(90deg, var(--text-tertiary) 20%, var(--text-primary) 50%, var(--text-tertiary) 80%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: line-shimmer 1.6s linear infinite; }
+  @keyframes line-shimmer { to { background-position: -200% 0; } }
 
   /* meta row + AI toggle */
   .r-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 640px; }
@@ -196,8 +192,10 @@
     .igp-panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 82vh; border-radius: 18px 18px 0 0; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .star, .ai-ring, .ai-panel, .ai-wave .blob, .ig-skel, .r-sentinel-dot { animation: none !important; }
-    .ai-wave, .ai-panel, .ai-panel.done .ai-wave { transition: none; }
+    .star, .ai-ring, .ai-panel, .r-sentinel-dot, .ig-skel { animation: none !important; }
+    .ai-orb { animation: none; }
+    .ai-thinking-line { animation: none; background: none; color: var(--text-tertiary); }
+    .ai-panel { transition: none; }
   }
 </style>
 </head>
@@ -246,7 +244,7 @@
   </nav>
   <section id="ai-panel" class="ai-panel" hidden>
     <div class="ai-head"><span id="ai-head-label">✦ Astra Answer</span><button class="skuo skuo-icon" id="ai-expand" aria-label="fullscreen" title="fullscreen">⤢</button></div>
-    <div class="ai-wave" id="ai-wave"><div class="blob"></div><div class="wave-label" id="ai-wave-label">✦ consulting the cosmos…</div></div>
+    <div class="ai-thinking" id="ai-thinking" hidden><span class="ai-orb"></span><span class="ai-thinking-line" id="ai-thinking-line"></span></div>
     <div class="ai-body" id="ai-body"></div>
     <div class="ai-error" id="ai-error" hidden></div>
     <div class="ai-follow" id="ai-follow" hidden>

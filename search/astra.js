@@ -33,6 +33,7 @@
     endOfResults: "✦ that's everything in this corner of the universe",
     loadMoreError: 'the telescope jammed — retry?',
     aiSystem: "You are Astra, Saga's search-oracle alter ego built by Okemo. Answer first, then stop — dry humor welcome, never rude, never corporate. Ground answers in the provided sources and cite inline as [1], [2]… matching the numbered results. If no sources are provided, answer from your own knowledge. Keep it tight: a few sentences, not an essay.",
+    waitingLineSystem: "You are Astra's loading screen. Write ONE witty 3–8 word loading line about the user's topic. Dry humor, no emoji, no quotes, no trailing period.",
   };
 
   // ── tiny DOM helper ──
@@ -596,6 +597,7 @@
     $('ai-head-label').textContent = COPY.aiHeaders[0];
     $('ai-body').innerHTML = '';
     $('ai-error').hidden = true;
+    hideThinking();
     $('ai-follow').hidden = true;
     $('r-meta').textContent = 'searching the universe for “' + q + '”…';
     $('result-list').innerHTML = '';
@@ -659,15 +661,54 @@
     if ($('ai-panel').classList.contains('ai-fullscreen')) toggleAiFullscreen(false);
   }
 
-  function startWaveQuips() {
-    const label = $('ai-wave-label');
-    let i = 0;
-    label.textContent = '✦ ' + COPY.loadingQuips[0];
-    return setInterval(() => {
-      i = (i + 1) % COPY.loadingQuips.length;
-      label.textContent = '✦ ' + COPY.loadingQuips[i];
-    }, 2200);
+  // ── model-generated waiting line (tiny parallel call; falls back to static quips) ──
+  async function fetchWaitingLine(topic) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 5000);
+    try {
+      const res = await fetch(backendBase() + '/v1/chat/completions', {
+        method: 'POST',
+        signal: ctl.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          'bypass-tunnel-reminder': 'true',
+        },
+        body: JSON.stringify({
+          model: 'saga-0.7b',
+          stream: false,
+          max_tokens: 24,
+          temperature: 1.0,
+          messages: [
+            { role: 'system', content: COPY.waitingLineSystem },
+            { role: 'user', content: topic },
+          ],
+        }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const c = data && data.choices && data.choices[0] && data.choices[0].message;
+      const line = ((c && c.content) || '').trim().replace(/^["']+|["']+$/g, '').replace(/[.!\s]+$/, '');
+      if (!line || line.length > 80) return null;
+      return line;
+    } catch (_) {
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
   }
+
+  function showThinking(topic, beforeEl) {
+    const t = $('ai-thinking');
+    if (beforeEl) beforeEl.before(t);               // place where the answer will land
+    t.hidden = false;
+    $('ai-thinking-line').textContent = COPY.loadingQuips[Math.floor(Math.random() * COPY.loadingQuips.length)];
+    fetchWaitingLine(topic).then((line) => {
+      if (line && !t.hidden) $('ai-thinking-line').textContent = line;   // dropped if the answer already started
+    });
+  }
+
+  function hideThinking() { $('ai-thinking').hidden = true; }
 
   // ── follow-up thread state (reset on every new search) ──
   let thread = [];           // alternating {role, content} pairs after the seed
@@ -728,7 +769,7 @@
           const delta = data.choices && data.choices[0] && data.choices[0].delta
             ? (data.choices[0].delta.content || '') : '';
           if (delta) {
-            if (!firstToken) { firstToken = true; const wl = $('ai-wave-label'); if (wl) wl.textContent = '✦ streaming from the stars…'; }
+            if (!firstToken) { firstToken = true; hideThinking(); }
             text += delta;
             onToken(text);
           }
@@ -750,25 +791,22 @@
     const aEl = document.createElement('div');      // the seed answer turn
     aEl.className = 'ai-turn';
     body.appendChild(aEl);
+    showThinking(q, aEl);
     $('ai-error').hidden = true;
     $('ai-follow').hidden = false;                  // composer visible from the start (ChatGPT-style)
     setStreaming(true);
     const myToken = searchToken;
-    const quipTimer = startWaveQuips();
     let partial = '';
 
     try {
       const text = await streamTurn((t) => {
-        clearInterval(quipTimer);
         partial = t;
         aEl.innerHTML = linkifyCitations(marked.parse(esc(t)), results.length);
       });
-      clearInterval(quipTimer);
       thread.push({ role: 'assistant', content: text });
       if (!text.trim()) aEl.textContent = '✦ the cosmos answered with silence — try rephrasing?';
       panel.classList.add('done');                  // shimmer settles
     } catch (e) {
-      clearInterval(quipTimer);
       if (e.name === 'AbortError') {
         if (aiStopRequested && partial) {           // user hit stop — keep what streamed
           thread.push({ role: 'assistant', content: partial });
@@ -806,26 +844,23 @@
     const aEl = document.createElement('div');      // the streaming answer under it
     aEl.className = 'ai-turn';
     body.append(qEl, aEl);
+    showThinking(question, aEl);
 
     panel.classList.remove('done');                 // shimmer spins again while answering
     $('ai-error').hidden = true;
     setStreaming(true);
     const myToken = searchToken;
-    const quipTimer = startWaveQuips();
     let partial = '';
 
     try {
       const text = await streamTurn((t) => {
-        clearInterval(quipTimer);
         partial = t;
         aEl.innerHTML = linkifyCitations(marked.parse(esc(t)), threadResults.length);
       });
-      clearInterval(quipTimer);
       thread.push({ role: 'assistant', content: text });
       if (!text.trim()) aEl.textContent = '✦ silence. rude, but on brand.';
       panel.classList.add('done');
     } catch (e) {
-      clearInterval(quipTimer);
       if (e.name === 'AbortError') {
         if (aiStopRequested && partial) {
           thread.push({ role: 'assistant', content: partial });
