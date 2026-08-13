@@ -79,6 +79,7 @@ class FakeHTTPResp:
 def clear_caches():
     server._search_cache.clear()
     server._suggest_cache.clear()
+    server._images_cache.clear()
     yield
 
 
@@ -317,3 +318,80 @@ def test_api_suggest_retries_202_then_succeeds(monkeypatch):
     assert r.status_code == 200
     assert r.json() == ["sky blue"]
     assert calls["n"] == 2
+
+
+SERP_HTML = ('<html><body><script>var a = 1;</script>'
+             '<input type="hidden" name="vqd" value="4-123456789"/>'
+             '<script>window.vqd="4-123456789";</script></body></html>')
+
+IJS_PAYLOAD = {
+    "results": [
+        {"image": "https://cdn.example/cat.jpg", "thumbnail": "https://tse.example/cat.jpg",
+         "title": "A cat", "url": "https://example.com/cats", "width": 800, "height": 600},
+        {"image": "https://cdn.example/dog.jpg", "thumbnail": "https://tse.example/dog.jpg",
+         "title": "A dog", "url": "https://example.com/dogs", "width": 640},
+    ]
+}
+
+
+def test_extract_vqd():
+    assert server._extract_vqd('x vqd="4-123456789" y') == "4-123456789"
+    assert server._extract_vqd("<p>nothing</p>") == ""
+    assert server._extract_vqd("") == ""
+
+
+def test_api_images_happy_path(monkeypatch):
+    calls = _fake_http_capture(monkeypatch,
+                               [FakeHTTPResp(200, SERP_HTML),
+                                FakeHTTPResp(200, payload=IJS_PAYLOAD)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/images", params={"q": "cats"})
+    assert r.status_code == 200
+    results = r.json()["results"]
+    assert len(results) == 2
+    assert results[0] == {"image": "https://cdn.example/cat.jpg",
+                          "thumbnail": "https://tse.example/cat.jpg",
+                          "title": "A cat", "url": "https://example.com/cats",
+                          "width": 800, "height": 600}
+    assert results[1]["height"] == 0          # missing field default
+    assert calls["n"] == 2                    # SERP handshake + i.js
+    assert calls["params"][1]["vqd"] == "4-123456789"
+
+
+def test_api_images_cache_hit_skips_upstream(monkeypatch):
+    calls = _fake_http(monkeypatch,
+                       [FakeHTTPResp(200, SERP_HTML),
+                        FakeHTTPResp(200, payload=IJS_PAYLOAD)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    client.get("/api/images", params={"q": "cats"})
+    r = client.get("/api/images", params={"q": "cats"})
+    assert len(r.json()["results"]) == 2
+    assert calls["n"] == 2   # second request served from cache
+
+
+def test_api_images_no_vqd_gives_502(monkeypatch):
+    _fake_http(monkeypatch, [FakeHTTPResp(200, "<p>no token here</p>")])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/images", params={"q": "cats"})
+    assert r.status_code == 502
+
+
+def test_api_images_ijs_failure_gives_502(monkeypatch):
+    _fake_http(monkeypatch, [FakeHTTPResp(200, SERP_HTML), FakeHTTPResp(403)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/images", params={"q": "cats"})
+    assert r.status_code == 502
+
+
+def test_api_images_empty_query_never_calls_upstream(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(200, SERP_HTML)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/images", params={"q": "  "})
+    assert r.status_code == 200
+    assert r.json() == {"results": []}
+    assert calls["n"] == 0

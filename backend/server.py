@@ -8,6 +8,7 @@ docs/superpowers/specs/2026-08-11-temp-mlx-backend-design.md
 import json
 import os
 import queue
+import re
 import threading
 import time
 import uuid
@@ -125,6 +126,9 @@ def cancel_job(body: dict):
 # ── Web search (DuckDuckGo, keyless) ─────────────────────────────
 DDG_LITE_URL = "https://lite.duckduckgo.com/lite/"
 DDG_AC_URL = "https://duckduckgo.com/ac/"
+DDG_HOME_URL = "https://duckduckgo.com/"
+DDG_IJS_URL = "https://duckduckgo.com/i.js"
+VQD_RE = re.compile(r'vqd="([^"]+)"')
 HTTP_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                   "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -133,6 +137,7 @@ HTTP_HEADERS = {
 CACHE_TTL = 600  # seconds
 _search_cache = {}
 _suggest_cache = {}
+_images_cache = {}
 
 
 def _unwrap_ddg_url(href):
@@ -288,6 +293,57 @@ def api_suggest(q: str = ""):
     out = phrases[:6]
     _cache_set(_suggest_cache, key, out)
     return out
+
+
+def _extract_vqd(html):
+    """Pull the vqd token DDG embeds in its SERP (needed to unlock i.js)."""
+    m = VQD_RE.search(html or "")
+    return m.group(1) if m else ""
+
+
+def _map_image(r):
+    return {
+        "image": r.get("image") or "",
+        "thumbnail": r.get("thumbnail") or "",
+        "title": r.get("title") or "",
+        "url": r.get("url") or "",
+        "width": r.get("width") or 0,
+        "height": r.get("height") or 0,
+    }
+
+
+@app.get("/api/images")
+def api_images(q: str = ""):
+    """Keyless DDG image search: scrape vqd from the SERP, then call i.js."""
+    q = (q or "").strip()
+    if not q:
+        return {"results": []}
+    key = q.lower()
+    cached = _cache_get(_images_cache, key)
+    if cached is not None:
+        return {"results": cached}
+    resp, err = _http_get_backoff(DDG_HOME_URL, params={"q": q})
+    if err:
+        return err
+    vqd = _extract_vqd(resp.text)
+    if not vqd:
+        return JSONResponse({"error": "upstream"}, status_code=502)
+    try:
+        iresp = _http_get(DDG_IJS_URL,
+                          params={"l": "us-en", "o": "json", "q": q, "vqd": vqd},
+                          headers={"Referer": "https://duckduckgo.com/"})
+    except httpx.HTTPError:
+        return JSONResponse({"error": "upstream"}, status_code=502)
+    if iresp.status_code != 200:
+        return JSONResponse({"error": "upstream"}, status_code=502)
+    try:
+        data = iresp.json()
+    except (ValueError, TypeError):
+        data = {}
+    results = [_map_image(r) for r in (data.get("results") or []) if isinstance(r, dict)]
+    results = [r for r in results if r["image"].startswith(("http://", "https://"))]
+    _cache_set(_images_cache, key, results)
+    return {"results": results}
 
 
 model = None
