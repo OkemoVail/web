@@ -1846,3 +1846,213 @@ select:focus {
     [data-page="search"] .ai-panel { transition: none; }
   }
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: EDITOR  —  scoped to [data-page="editor"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+        html:has(> body[data-page="editor"]) {
+            background-color: var(--bg);
+            transition: background-color 0.3s ease;
+        }
+
+        [data-page="editor"] {
+            background-color: transparent;
+            color: var(--text-primary);
+            font-family: 'Satoshi', 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: color 0.3s ease;
+        }
+
+        
+        [data-page="editor"] .header-island {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 9999px;
+            padding: 2px 4px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 38px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto;
+        }
+
+        .dark [data-page="editor"] .header-island {
+            background: rgba(39, 39, 42, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        
+        [data-page="editor"] .editor-toolbar {
+            background: var(--bg-elevated);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .dark [data-page="editor"] .editor-toolbar {
+            background: var(--surface-dark);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* toolbar-btn — layout only; appearance via shared .skuo .skuo-icon */
+        [data-page="editor"] .toolbar-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* control-btn — layout only; appearance via shared .skuo */
+        [data-page="editor"] .control-btn {
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        [data-page="editor"] .editor-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        [data-page="editor"] .editor-paper {
+            background: var(--bg-elevated);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            min-height: 1100px;
+            padding: 80px 90px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .dark [data-page="editor"] .editor-paper {
+            background: var(--surface-dark);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-page="editor"] [contenteditable]:focus {
+            outline: none;
+        }
+
+        
+        [data-page="editor"] .placeholder:empty:before {
+            content: attr(data-placeholder);
+            color: var(--text-tertiary);
+            cursor: text;
+        }
+
+        
+        [data-page="editor"] .editor-image-container {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+            cursor: default;
+            max-width: 100%;
+        }
+
+        [data-page="editor"] .editor-image-container img {
+            display: block;
+            border-radius: 8px;
+            transition: outline 0.2s ease;
+        }
+
+        [data-page="editor"] .editor-image-container:hover img {
+            outline: 2px solid var(--accent);
+        }
+
+        [data-page="editor"] .image-controls {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--deep-dark);
+            border-radius: 8px;
+            padding: 4px;
+            display: none;
+            gap: 4px;
+            z-index: 10;
+        }
+
+        [data-page="editor"] .editor-image-container:hover .image-controls {
+            display: flex;
+        }
+
+
+        [data-page="editor"] .float-left {
+            float: left;
+            margin-right: 20px;
+        }
+
+        [data-page="editor"] .float-right {
+            float: right;
+            margin-left: 20px;
+        }
+
+        [data-page="editor"] .inline {
+            display: block;
+            margin: 20px auto;
+        }
+
+        
+        [data-page="editor"] #blog-editor h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        [data-page="editor"] #blog-editor h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        [data-page="editor"] #blog-editor p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        [data-page="editor"] #blog-editor ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        [data-page="editor"] #blog-editor ol {
+            list-style-type: decimal;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        [data-page="editor"] .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        [data-page="editor"] .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* clear space for the floating nav on the right */
+        [data-page="editor"] header > div:last-child { padding-right: 12.5rem; }
+    
