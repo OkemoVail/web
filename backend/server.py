@@ -5,6 +5,7 @@ the auxiliary endpoints the frontend calls. Spec:
 docs/superpowers/specs/2026-08-11-temp-mlx-backend-design.md
 """
 
+import base64
 import json
 import os
 import queue
@@ -151,6 +152,21 @@ def _unwrap_ddg_url(href):
     return href
 
 
+def _unwrap_bing_url(href):
+    """Bing wraps outbound links in /ck/a?...&u=a1<base64url, no padding>.
+    Return the real URL; "" when there is nothing decodable."""
+    if "/ck/a?" not in href:
+        return href
+    u = parse_qs(urlparse(href).query).get("u", [""])[0]
+    if not u.startswith("a1"):
+        return ""
+    try:
+        pad = "=" * (-len(u[2:]) % 4)
+        return base64.urlsafe_b64decode(u[2:] + pad).decode("utf-8", "replace")
+    except Exception:
+        return ""
+
+
 class _DDGLiteParser(HTMLParser):
     """Pairs each `a.result-link` with the next `td.result-snippet`."""
 
@@ -196,6 +212,69 @@ class _DDGLiteParser(HTMLParser):
 def parse_ddg_lite(html):
     """Parse DDG lite HTML into [{title, url, description}]; rows missing any field are dropped."""
     p = _DDGLiteParser()
+    p.feed(html or "")
+    p.close()
+    p._flush()
+    return p.results
+
+
+class _BingParser(HTMLParser):
+    """Pairs each `<li class="b_algo">` h2-link with its first <p> snippet."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.results = []
+        self._pending = None   # dict being built (inside a b_algo <li>)
+        self._h2 = False
+        self._capture = None   # "title" | "snippet" | None
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        cls = a.get("class") or ""
+        if tag == "li" and "b_algo" in cls:
+            self._pending = {"title": "", "url": "", "description": ""}
+            self._h2 = False
+            self._capture = None
+        elif self._pending is not None:
+            if tag == "h2":
+                self._h2 = True
+            elif tag == "a" and self._h2 and not self._pending["url"]:
+                self._pending["url"] = _unwrap_bing_url(a.get("href") or "")
+                self._capture = "title"
+            elif tag == "p" and not self._pending["description"] and not self._capture:
+                self._capture = "snippet"
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self._capture == "title":
+            self._capture = None
+        elif tag == "h2":
+            self._h2 = False
+        elif tag == "p" and self._capture == "snippet":
+            self._capture = None
+        elif tag == "li" and self._pending is not None:
+            self._flush()
+
+    def handle_data(self, data):
+        if self._pending is None:
+            return
+        if self._capture == "title":
+            self._pending["title"] += data
+        elif self._capture == "snippet":
+            self._pending["description"] += data
+
+    def _flush(self):
+        if self._pending is not None:
+            r = {k: " ".join(v.split()) for k, v in self._pending.items()}
+            if r["title"] and r["url"] and r["description"]:
+                self.results.append(r)
+        self._pending = None
+        self._h2 = False
+        self._capture = None
+
+
+def parse_bing(html):
+    """Parse a Bing SERP into [{title, url, description}]; rows missing any field are dropped."""
+    p = _BingParser()
     p.feed(html or "")
     p.close()
     p._flush()

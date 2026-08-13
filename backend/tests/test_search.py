@@ -59,6 +59,57 @@ def test_parse_ddg_lite_explicitly_excludes_ad_rows():
                for r in results)
 
 
+BING_HTML = """
+<html><body>
+<ol id="b_results">
+  <li class="b_algo">
+    <h2><a href="https://example.com/sky" target="_blank">Why the Sky Is Blue</a></h2>
+    <p>Rayleigh scattering makes the sky appear blue.</p>
+  </li>
+  <li class="b_algo">
+    <h2><a href="/ck/a?p=aaa&u=a1aHR0cHM6Ly93aWtpLmV4YW1wbGUvUmF5bGVpZ2g&ntb=1">Rayleigh scattering</a></h2>
+    <p>Elastic scattering of light by small particles.</p>
+  </li>
+  <li class="b_ad"><h2><a href="https://ads.example/x">Sponsored junk</a></h2><p>Buy things.</p></li>
+</ol>
+</body></html>
+"""
+
+
+def test_unwrap_bing_url_direct_passthrough():
+    assert server._unwrap_bing_url("https://example.com/x") == "https://example.com/x"
+
+
+def test_unwrap_bing_url_ck_redirect():
+    # bing wraps outbound links as /ck/a?...&u=a1<base64url-no-padding>
+    assert server._unwrap_bing_url("/ck/a?p=aaa&u=a1aHR0cHM6Ly93aWtpLmV4YW1wbGUvUmF5bGVpZ2g&ntb=1") == "https://wiki.example/Rayleigh"
+
+
+def test_unwrap_bing_url_garbage():
+    assert server._unwrap_bing_url("/ck/a?x=1") == ""        # no u param
+    assert server._unwrap_bing_url("/ck/a?u=b2aaaa") == ""   # u without the a1 marker
+    assert server._unwrap_bing_url("") == ""
+
+
+def test_parse_bing_extracts_results():
+    results = server.parse_bing(BING_HTML)
+    assert len(results) == 2
+    assert results[0] == {"title": "Why the Sky Is Blue",
+                          "url": "https://example.com/sky",
+                          "description": "Rayleigh scattering makes the sky appear blue."}
+
+
+def test_parse_bing_unwraps_ck_redirects():
+    assert server.parse_bing(BING_HTML)[1]["url"] == "https://wiki.example/Rayleigh"
+
+
+def test_parse_bing_skips_ads_and_garbage():
+    results = server.parse_bing(BING_HTML)
+    assert all("ads.example" not in r["url"] for r in results)   # b_ad li ignored
+    assert server.parse_bing("") == []
+    assert server.parse_bing(None) == []
+
+
 def test_unwrap_ddg_url_relative_redirect():
     assert server._unwrap_ddg_url("/l/?uddg=https%3A%2F%2Fexample.com%2Fx") == "https://example.com/x"
 
