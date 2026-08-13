@@ -17,6 +17,11 @@
  * Also: drops @font-face blocks (they live in site.css §1; warns if the family
  * is not Satoshi) and renames @keyframes that would collide with names already
  * present in src/site.css (renamed to "<page>-<name>", animation decls updated).
+ *
+ * Assumptions: kept-<style>-block detection is by id attribute only (a block
+ * with an id is never moved); <style> inside HTML comments is NOT detected
+ * (none exist in the repo); <style> inside <script> template literals IS
+ * detected and skipped with a warning.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -27,9 +32,13 @@ const argv = process.argv.slice(2);
 const dry = argv.includes('--dry');
 const cssMode = argv[0] === '--css';
 const positional = argv.filter(a => a !== '--dry' && a !== '--css');
-const [target, pageName] = cssMode ? positional : positional;
+const [target, pageName] = positional;
 if (!target || !pageName) {
   console.error('usage: node tools/migrate-page.mjs <page.html>|<--css file.css> <data-page-name> [--dry]');
+  process.exit(1);
+}
+if (!fs.existsSync(path.resolve(process.cwd(), target))) {
+  console.error(`error: file not found: ${target}\n  (resolved against cwd ${process.cwd()} — run from the repo root or pass a correct path)`);
   process.exit(1);
 }
 
@@ -40,6 +49,10 @@ const report = { movedBlocks: 0, keptBlocks: [], rulesScoped: 0, fontFacesDroppe
 
 function scopeOne(sel) {
   const s = sel.trim();
+  const rootHook = `html:has(> body[data-page="${pageName}"])`;
+  if (s === ':root')     return rootHook;
+  if (s === 'html')      return rootHook;
+  if (s === 'html.dark') return `html.dark:has(> body[data-page="${pageName}"])`;
   if (/^:root\b/.test(s))      return s.replace(/^:root\b/, hook);
   if (/^html\.dark\b/.test(s)) return s.replace(/^html\.dark\b/, `html.dark ${hook}`);
   if (/^html\b/.test(s))       return s.replace(/^html\b/, `html ${hook}`);
@@ -74,7 +87,10 @@ function scopeCss(css, existingCss) {
   const renames = Object.entries(report.renamedKeyframes);
   if (renames.length) {
     ast.walkDecls(/^(animation|animation-name)$/, d => {
-      for (const [oldK, nu] of renames) d.value = d.value.replace(new RegExp(`\\b${oldK}\\b`, 'g'), nu);
+      for (const [oldK, nu] of renames) {
+        const esc = oldK.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        d.value = d.value.replace(new RegExp(`(?<![\\w-])${esc}(?![\\w-])`, 'g'), nu);
+      }
     });
   }
 
@@ -105,11 +121,17 @@ if (cssMode) {
   const absHtml = path.resolve(ROOT, target);
   let html = fs.readFileSync(absHtml, 'utf8');
 
-  // --- extract id-less <style> blocks
+  // --- extract id-less <style> blocks (skipping lookalikes inside <script>)
+  const scriptRanges = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/gi)]
+    .map(sm => [sm.index, sm.index + sm[0].length]);
   const styleRe = /<style([^>]*)>([\s\S]*?)<\/style>/gi;
   const moved = [];
   let m;
   while ((m = styleRe.exec(html))) {
+    if (scriptRanges.some(([a, b]) => m.index >= a && m.index < b)) {
+      report.warnings.push(`style-like block inside <script> skipped at index ${m.index} — review manually`);
+      continue;
+    }
     if (/\bid\s*=/.test(m[1])) { report.keptBlocks.push(m[1].trim()); continue; }
     moved.push({ full: m[0], css: m[2], index: m.index });
   }
@@ -130,6 +152,7 @@ if (cssMode) {
   const faBefore = (out.match(/font-awesome|fontawesome/gi) || []).length;
   out = out.replace(/<link[^>]*font-?awesome[^>]*>\s*(\n)?/gi, '');
   if (faBefore) report.links.push(`font-awesome link(s) removed: ${faBefore}`);
+  out = out.replace(/<noscript>\s*<\/noscript>\s*(\n)?/gi, '');
   const dvBefore = (out.match(/devicon/gi) || []).length;
   out = out.replace(/<link[^>]*devicon[^>]*>\s*(\n)?/gi, '');
   if (dvBefore) report.links.push('devicons link removed');
@@ -137,10 +160,12 @@ if (cssMode) {
   const feRe = /<script[^>]*src="https:\/\/[^"]*feather[^"]*"[^>]*>\s*<\/script>\s*\n?/i;
   if (feRe.test(out)) {
     out = out.replace(feRe, `<script src="${prefix}feather-local.js"></script>\n`);
-    report.links.push('feather CDN -> src/feather-local.js');
+    report.links.push(`feather CDN -> ${prefix}feather-local.js`);
   }
 
-  if (moved.length) {
+  if (/site\.css/.test(out)) {
+    report.warnings.push('already links site.css — re-run?');
+  } else if (moved.length) {
     out = out.replace(moved[0].full, siteLink);           // link goes where the first block was
     for (let i = 1; i < moved.length; i++) out = out.replace(moved[i].full, '');
   } else {
