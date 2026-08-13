@@ -122,6 +122,7 @@
 
   function showHero() {
     closeImagePreview();
+    exitAiFullscreen();
     if (aiAbort) aiAbort.abort();
     searchToken++;
     $('results').hidden = true;
@@ -202,7 +203,12 @@
   $('tab-images').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'images') go(r.q, 'images'); });
   $('igp-close').addEventListener('click', closeImagePreview);
   $('igp-scrim').addEventListener('click', closeImagePreview);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImagePreview(); });
+  $('ai-expand').addEventListener('click', () => toggleAiFullscreen());
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (closeImagePreview()) return;
+    exitAiFullscreen();
+  });
   $('hero-cosmic').addEventListener('click', () => {
     const q = cosmicQuery($('hero-input').value.trim());
     $('hero-input').value = q;
@@ -221,12 +227,18 @@
   window.addEventListener('popstate', renderRoute);
   renderRoute();
 
-  // citation jump links: smooth-scroll, no history entry
+  // citation jump links: smooth-scroll inline (new tab in fullscreen), no history entry
   $('ai-body').addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#result-"]');
     if (!a) return;
     e.preventDefault();
-    const el = document.getElementById(a.getAttribute('href').slice(1));
+    const n = +(a.getAttribute('href').slice('#result-'.length));
+    if ($('ai-panel').classList.contains('ai-fullscreen')) {
+      const r = lastResults[n - 1];
+      if (r) window.open(r.url, '_blank', 'noopener');
+      return;
+    }
+    const el = document.getElementById('result-' + n);
     if (el) el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
   });
 
@@ -567,12 +579,14 @@
   }
 
   function closeImagePreview() {
-    if ($('ig-preview').hidden) return;
+    if ($('ig-preview').hidden) return false;
     $('ig-preview').hidden = true;
     document.body.style.overflow = '';
+    return true;
   }
 
   async function runSearch(q) {
+    exitAiFullscreen();                         // a new search always lands inline
     if (aiAbort) aiAbort.abort();
     const token = ++searchToken;
     const panel = $('ai-panel');
@@ -630,6 +644,19 @@
     $('ai-follow-send').disabled = on;
     $('ai-follow-send').hidden = on;
     $('ai-stop').hidden = !on;
+  }
+
+  function toggleAiFullscreen(force) {
+    const panel = $('ai-panel');
+    const on = typeof force === 'boolean' ? force : !panel.classList.contains('ai-fullscreen');
+    panel.classList.toggle('ai-fullscreen', on);
+    $('ai-expand').textContent = on ? '✕' : '⤢';
+    $('ai-expand').setAttribute('aria-label', on ? 'exit fullscreen' : 'fullscreen');
+    document.body.style.overflow = on ? 'hidden' : '';
+  }
+
+  function exitAiFullscreen() {
+    if ($('ai-panel').classList.contains('ai-fullscreen')) toggleAiFullscreen(false);
   }
 
   function startWaveQuips() {
