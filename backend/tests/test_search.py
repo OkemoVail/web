@@ -159,6 +159,74 @@ def test_api_search_empty_query_never_calls_upstream(monkeypatch):
     assert calls["n"] == 0
 
 
+def _fake_http_capture(monkeypatch, responses):
+    """Like _fake_http but also records the params kwarg of each call."""
+    calls = {"n": 0, "params": []}
+
+    def fake(url, **kw):
+        calls["params"].append(kw.get("params"))
+        r = responses[min(calls["n"], len(responses) - 1)]
+        calls["n"] += 1
+        if isinstance(r, Exception):
+            raise r
+        return r
+
+    monkeypatch.setattr(server, "_http_get", fake)
+    return calls
+
+
+LITE_HTML_PAGE2 = """
+<html><body>
+<table border="0" cellpadding="0" cellspacing="0">
+  <tr><td valign="top">
+    <a rel="nofollow" href="https://example.com/blue" class="result-link">Why Is the Sky Blue?</a>
+  </td></tr>
+  <tr><td class="result-snippet">Blue light scatters more than other colors.</td></tr>
+  <tr><td>&nbsp;</td></tr>
+  <tr><td valign="top">
+    <a rel="nofollow" href="https://example.com/ozone" class="result-link">Ozone layer</a>
+  </td></tr>
+  <tr><td class="result-snippet">A different page-two result.</td></tr>
+  <tr><td>&nbsp;</td></tr>
+</table>
+</body></html>
+"""
+
+
+def test_api_search_passes_offset_upstream(monkeypatch):
+    calls = _fake_http_capture(monkeypatch, [FakeHTTPResp(200, LITE_HTML)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r = client.get("/api/search", params={"q": "sky", "s": 30})
+    assert r.status_code == 200
+    assert calls["params"][0] == {"q": "sky", "s": 30}
+
+
+def test_api_search_caches_per_offset(monkeypatch):
+    calls = _fake_http(monkeypatch, [FakeHTTPResp(200, LITE_HTML)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    client.get("/api/search", params={"q": "sky"})
+    client.get("/api/search", params={"q": "sky", "s": 30})
+    client.get("/api/search", params={"q": "sky"})
+    client.get("/api/search", params={"q": "sky", "s": 30})
+    assert calls["n"] == 2   # each (q, s) pair fetched once
+
+
+def test_api_search_dedups_against_earlier_pages(monkeypatch):
+    # page 2 repeats example.com/blue from page 1 — it must be dropped
+    _fake_http_capture(monkeypatch, [FakeHTTPResp(200, LITE_HTML),
+                                     FakeHTTPResp(200, LITE_HTML_PAGE2)])
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+    r1 = client.get("/api/search", params={"q": "sky"})
+    assert len(r1.json()["results"]) == 2
+    r2 = client.get("/api/search", params={"q": "sky", "s": 30})
+    urls = [r["url"] for r in r2.json()["results"]]
+    assert "https://example.com/ozone" in urls
+    assert "https://example.com/blue" not in urls
+
+
 def test_api_search_errors_do_not_poison_cache(monkeypatch):
     calls = _fake_http(monkeypatch, [FakeHTTPResp(202), FakeHTTPResp(202), FakeHTTPResp(200, LITE_HTML)])
     monkeypatch.setattr(server.time, "sleep", lambda *_: None)

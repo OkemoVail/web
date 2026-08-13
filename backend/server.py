@@ -197,8 +197,29 @@ def parse_ddg_lite(html):
     return p.results
 
 
-def _http_get(url, **kw):
-    return httpx.get(url, headers=HTTP_HEADERS, timeout=8, **kw)
+def _http_get(url, headers=None, **kw):
+    h = dict(HTTP_HEADERS)
+    if headers:
+        h.update(headers)
+    return httpx.get(url, headers=h, timeout=8, **kw)
+
+
+def _http_get_backoff(url, **kw):
+    """GET with the standard DDG anomaly backoff: one 2s retry on 202/403.
+    Returns (resp, None) on 200, otherwise (None, JSONResponse error)."""
+    for attempt in (1, 2):
+        try:
+            resp = _http_get(url, **kw)
+        except httpx.HTTPError:
+            return None, JSONResponse({"error": "upstream"}, status_code=502)
+        if resp.status_code == 200:
+            return resp, None
+        if resp.status_code in (202, 403) and attempt == 1:
+            time.sleep(2)   # DDG anomaly check — back off once, then give up
+            continue
+        if resp.status_code in (202, 403, 429):
+            return None, JSONResponse({"error": "rate_limited"}, status_code=429)
+        return None, JSONResponse({"error": "upstream"}, status_code=502)
 
 
 def _cache_get(cache, key):
@@ -213,30 +234,29 @@ def _cache_set(cache, key, value):
 
 
 @app.get("/api/search")
-def api_search(q: str = ""):
+def api_search(q: str = "", s: int = 0):
     q = (q or "").strip()
     if not q:
         return {"results": []}
-    key = q.lower()
+    s = max(0, s)
+    key = (q.lower(), s)
     cached = _cache_get(_search_cache, key)
     if cached is not None:
         return {"results": cached}
-    resp = None
-    for attempt in (1, 2):
-        try:
-            resp = _http_get(DDG_LITE_URL, params={"q": q})
-        except httpx.HTTPError:
-            return JSONResponse({"error": "upstream"}, status_code=502)
-        if resp.status_code == 200:
-            break
-        if resp.status_code in (202, 403) and attempt == 1:
-            time.sleep(2)   # DDG anomaly check — back off once, then give up
-            continue
-        if resp.status_code in (202, 403, 429):
-            return JSONResponse({"error": "rate_limited"}, status_code=429)
-        return JSONResponse({"error": "upstream"}, status_code=502)
+    resp, err = _http_get_backoff(DDG_LITE_URL, params={"q": q, "s": s})
+    if err:
+        return err
     results = [r for r in parse_ddg_lite(resp.text)
-               if r["url"].startswith(("http://", "https://"))][:15]
+               if r["url"].startswith(("http://", "https://"))]
+    if s > 0:
+        # Drop URLs already served on earlier cached pages of this query
+        # (DDG occasionally repeats rows across pages).
+        seen = set()
+        for (kq, ks), (ts, page) in list(_search_cache.items()):
+            if kq == key[0] and ks < s and time.time() - ts < CACHE_TTL:
+                seen.update(r["url"] for r in page)
+        results = [r for r in results if r["url"] not in seen]
+    results = results[:15]
     _cache_set(_search_cache, key, results)
     return {"results": results}
 
@@ -250,20 +270,9 @@ def api_suggest(q: str = ""):
     cached = _cache_get(_suggest_cache, key)
     if cached is not None:
         return cached
-    resp = None
-    for attempt in (1, 2):
-        try:
-            resp = _http_get(DDG_AC_URL, params={"q": q, "type": "list"})
-        except httpx.HTTPError:
-            return JSONResponse({"error": "upstream"}, status_code=502)
-        if resp.status_code == 200:
-            break
-        if resp.status_code in (202, 403) and attempt == 1:
-            time.sleep(2)   # DDG anomaly check — back off once, then give up
-            continue
-        if resp.status_code in (202, 403, 429):
-            return JSONResponse({"error": "rate_limited"}, status_code=429)
-        return JSONResponse({"error": "upstream"}, status_code=502)
+    resp, err = _http_get_backoff(DDG_AC_URL, params={"q": q, "type": "list"})
+    if err:
+        return err
     try:
         data = resp.json()
     except (ValueError, TypeError):
