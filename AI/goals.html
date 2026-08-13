@@ -8,7 +8,6 @@
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../src/design-tokens.css">
     <script>
         (function () {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -59,55 +58,13 @@
             }
         }
     </script>
-    <style>
-        @font-face {
-            font-family: 'Satoshi';
-            src: url('../Fonts/Satoshi-Variable.ttf') format('truetype');
-            font-weight: 300 900;
-            font-display: swap;
-            font-style: normal;
-        }
+    <link rel="stylesheet" href="../src/site.css">
+    
 
-        @font-face {
-            font-family: 'Satoshi';
-            src: url('../Fonts/Satoshi-VariableItalic.ttf') format('truetype');
-            font-weight: 300 900;
-            font-display: swap;
-            font-style: italic;
-        }
-    </style>
-
-    <style>
-        :root {
-            --bg-light: var(--bg);
-            --bg-dark: var(--deep-dark);
-            --accent-olive: var(--accent);
-            --accent-mint: var(--accent-light);
-        }
-
-        body {
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .serif-text {
-            font-family: 'Century', 'Georgia', serif;
-        }
-
-        .mesh-gradient {
-            background-image:
-                radial-gradient(at 10% 20%, rgba(158, 179, 147, 0.1) 0px, transparent 50%),
-                radial-gradient(at 90% 10%, rgba(95, 99, 79, 0.05) 0px, transparent 50%),
-                radial-gradient(at 50% 90%, rgba(158, 179, 147, 0.05) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        /* --- Global Flat Styles --- */
-        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
-
-    </style>
+    
 </head>
 
-<body
+<body data-page="goals"
     class="bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
 
     <main class="flex-1 flex flex-col items-center pt-24 px-6 pb-6 md:pt-28 md:px-12 md:pb-12 z-10 max-w-[1000px] mx-auto w-full">

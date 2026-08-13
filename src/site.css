@@ -1237,3 +1237,35 @@ select:focus {
             transform: translateY(-2px);
         }
     
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: GOALS  —  scoped to [data-page="goals"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+        html:has(> body[data-page="goals"]) {
+            --bg-light: var(--bg);
+            --bg-dark: var(--deep-dark);
+            --accent-olive: var(--accent);
+            --accent-mint: var(--accent-light);
+        }
+
+        [data-page="goals"] {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-page="goals"] .serif-text {
+            font-family: 'Century', 'Georgia', serif;
+        }
+
+        [data-page="goals"] .mesh-gradient {
+            background-image:
+                radial-gradient(at 10% 20%, rgba(158, 179, 147, 0.1) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, rgba(95, 99, 79, 0.05) 0px, transparent 50%),
+                radial-gradient(at 50% 90%, rgba(158, 179, 147, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* --- Global Flat Styles --- */
+        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
+
+    
