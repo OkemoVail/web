@@ -8,7 +8,6 @@
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../src/design-tokens.css">
     <script>
         (function () {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -60,46 +59,13 @@
         }
     </script>
     <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>
-    <style>
-        @font-face {
-            font-family: 'Satoshi';
-            src: url('../Fonts/Satoshi-Variable.ttf') format('truetype');
-            font-weight: 300 900;
-            font-display: swap;
-            font-style: normal;
-        }
+    <link rel="stylesheet" href="../src/site.css">
+    
 
-        @font-face {
-            font-family: 'Satoshi';
-            src: url('../Fonts/Satoshi-VariableItalic.ttf') format('truetype');
-            font-weight: 300 900;
-            font-display: swap;
-            font-style: italic;
-        }
-    </style>
-
-    <style>
-        :root {
-            --bg-dark: var(--deep-dark);
-            --accent-olive: var(--accent);
-            --accent-mint: var(--accent-light);
-        }
-
-        body {
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .serif-text {
-            font-family: 'Century', 'Georgia', serif;
-        }
-
-        /* --- Global Flat Styles --- */
-        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
-
-    </style>
+    
 </head>
 
-<body
+<body data-page="privacy"
     class="bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
     <main class="max-w-4xl mx-auto px-6 pt-24 pb-12 lg:pt-28 lg:pb-24">
         <div class="mb-16 text-center lg:text-left">

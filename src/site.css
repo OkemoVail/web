@@ -1184,3 +1184,26 @@ select:focus {
         /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
 
     
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: PRIVACY  —  scoped to [data-page="privacy"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+        html:has(> body[data-page="privacy"]) {
+            --bg-dark: var(--deep-dark);
+            --accent-olive: var(--accent);
+            --accent-mint: var(--accent-light);
+        }
+
+        [data-page="privacy"] {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-page="privacy"] .serif-text {
+            font-family: 'Century', 'Georgia', serif;
+        }
+
+        /* --- Global Flat Styles --- */
+        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
+
+    
