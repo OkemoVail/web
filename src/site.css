@@ -1338,3 +1338,64 @@ select:focus {
       color: var(--text-secondary); background: var(--bg-elevated); border: 1px solid var(--border-strong);
     }
   
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: VERSION  —  scoped to [data-page="version"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+        html:has(> body[data-page="version"]) {
+            background-color: var(--bg);
+            transition: background-color 0.3s ease;
+        }
+
+        [data-page="version"] {
+            background-color: transparent;
+            color: var(--text-primary);
+            font-family: 'Satoshi', 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: color 0.3s ease;
+        }
+
+        [data-page="version"] .header-island {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 9999px;
+            padding: 2px 4px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 38px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto;
+        }
+
+        .dark [data-page="version"] .header-island {
+            background: rgba(39, 39, 42, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-page="version"] .manage-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 100px 20px;
+        }
+
+        [data-page="version"] .manage-paper {
+            background: var(--bg-elevated);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            border-radius: 24px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dark [data-page="version"] .manage-paper {
+            background: var(--surface-dark);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+    

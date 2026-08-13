@@ -11,7 +11,6 @@
     <script src="https://kit.fontawesome.com/40440288c0.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../src/design-tokens.css">
     <script>
         (function() {
             const stored = localStorage.getItem('vail_theme');
@@ -47,85 +46,14 @@
         }
     </script>
 
-    <style>
-        @font-face {
-            font-family: 'Satoshi';
-            src: url('../Fonts/Satoshi-Variable.ttf') format('truetype');
-            font-weight: 300 900;
-            font-display: swap;
-            font-style: normal;
-        }
+    <link rel="stylesheet" href="../src/site.css">
+    
 
-        @font-face {
-            font-family: 'Satoshi';
-            src: url('../Fonts/Satoshi-VariableItalic.ttf') format('truetype');
-            font-weight: 300 900;
-            font-display: swap;
-            font-style: italic;
-        }
-    </style>
-
-    <style>
-        html {
-            background-color: var(--bg);
-            transition: background-color 0.3s ease;
-        }
-
-        body {
-            background-color: transparent;
-            color: var(--text-primary);
-            font-family: 'Satoshi', 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            transition: color 0.3s ease;
-        }
-
-        .header-island {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 9999px;
-            padding: 2px 4px;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            height: 38px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: auto;
-        }
-
-        .dark .header-island {
-            background: rgba(39, 39, 42, 0.8);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .manage-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 100px 20px;
-        }
-
-        .manage-paper {
-            background: var(--bg-elevated);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            padding: 40px;
-            border-radius: 24px;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .dark .manage-paper {
-            background: var(--surface-dark);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-    </style>
+    
     <script src="updatenotes.js"></script>
 </head>
 
-<body class="h-full overflow-y-auto">
+<body data-page="version" class="h-full overflow-y-auto">
     <main class="manage-container">
         <div class="manage-paper">
             <h1 class="text-2xl font-black mb-2 italic">BUILD <span class="text-blue-500">MGR</span></h1>
