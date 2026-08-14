@@ -801,8 +801,9 @@ select:focus {
 @keyframes vt-root-in  { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
 ::view-transition-old(root) { animation: vt-root-out var(--dur-2) var(--ease-smooth) both; }
 ::view-transition-new(root) { animation: vt-root-in  var(--dur-2) var(--ease-smooth) both; }
-/* the floating nav capsule holds steady while content morphs beneath it */
-.ov-nav__bar { view-transition-name: site-nav; }
+/* the floating nav capsule holds steady while content morphs beneath it
+   (scoped: chat's #tra-bar also carries .ov-nav__bar but has no .ov-nav parent) */
+.ov-nav .ov-nav__bar { view-transition-name: site-nav; }
 
 /* Theme toggle: circular reveal from the switch (nav.js sets --theme-x/y
    and adds .theme-reveal-active for the duration of the transition). */
@@ -828,7 +829,9 @@ html.motion-ready [data-reveal].revealed {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0.001ms !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0.001ms !important;
   }
   html { scroll-behavior: auto !important; }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }

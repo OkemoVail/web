@@ -100,6 +100,7 @@
     }, { passive: true });
 
     // theme toggle
+    var vtSeq = 0;
     if (themeBtn) {
       themeBtn.addEventListener('click', function (e) {
         var apply = function () {
@@ -113,8 +114,15 @@
         document.documentElement.style.setProperty('--theme-x', x + 'px');
         document.documentElement.style.setProperty('--theme-y', y + 'px');
         document.documentElement.classList.add('theme-reveal-active');
+        var id = ++vtSeq;
         var vt = document.startViewTransition(apply);
-        vt.finished.finally(function () { document.documentElement.classList.remove('theme-reveal-active'); });
+        var cleanup = function () {
+          if (id !== vtSeq) return; // a newer transition owns the class now
+          document.documentElement.classList.remove('theme-reveal-active');
+          document.documentElement.style.removeProperty('--theme-x');
+          document.documentElement.style.removeProperty('--theme-y');
+        };
+        vt.finished.then(cleanup, cleanup); // handled on both paths — no unhandled rejection
       });
     }
 
