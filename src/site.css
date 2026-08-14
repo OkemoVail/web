@@ -821,6 +821,11 @@ html.motion-ready [data-reveal].revealed {
   transition: opacity var(--dur-3) var(--ease-smooth), transform var(--dur-3) var(--ease-smooth);
 }
 
+/* print: no observer runs for below-fold content — always show */
+@media print {
+  html.motion-ready [data-reveal] { opacity: 1 !important; transform: none !important; }
+}
+
 /* iMessage-style send morph ghost (src/motion.js motionGhost) */
 .motion-ghost { position: fixed; z-index: 9999; pointer-events: none; }
 
@@ -1605,8 +1610,8 @@ html.motion-ready [data-reveal].revealed {
         @keyframes ai-home-rise { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
         @keyframes ai-home-book-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
         [data-page="ai-home"] .mo-in { animation: ai-home-rise var(--dur-4) var(--ease-smooth) backwards; }
-        [data-page="ai-home"] .mo-d1 { animation-delay: 45ms; }
-        [data-page="ai-home"] .mo-d2 { animation-delay: 90ms; }
+        [data-page="ai-home"] .mo-d1 { animation-delay: var(--stagger); }
+        [data-page="ai-home"] .mo-d2 { animation-delay: calc(var(--stagger) * 2); }
         [data-page="ai-home"] .book-scene { animation: ai-home-book-in var(--dur-4) var(--ease-smooth) 120ms backwards; }
 
 /* ═══════════════════════════════════════════════════════════════════
