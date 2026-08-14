@@ -10,6 +10,11 @@
    Everything bails (content shown instantly, morph skipped) under
    prefers-reduced-motion AND under automation (navigator.webdriver) so
    Playwright screenshots stay deterministic.
+   LIMITATIONS: reduce/automated are read once at load (a mid-session OS
+   toggle applies next reload — the CSS media query adapts live regardless);
+   [data-reveal] is for STATIC markup only — elements added after
+   DOMContentLoaded are never observed (and under reduced-motion would stay
+   hidden), so never put it on dynamically-created content.
    ═══════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
