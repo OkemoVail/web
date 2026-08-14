@@ -12,7 +12,7 @@
      §5+ PAGE SECTIONS     — one per page, scoped [data-page="..."], alphabetized:
                              ai-home · chat · design · design-lab · editor · goals ·
                              home · manage · privacy · research · search · themes ·
-                             tos · version · whitename · word
+                             tos · version · word
 
    RULES
    - Page-local styles go in that page's section, scoped [data-page="<name>"].
@@ -1176,7 +1176,7 @@ select:focus {
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* .discord rules removed — shared .discord in design-tokens.css */
+        /* .discord rules removed — shared .discord in src/site.css §3 */
 
         /* --- Flipping Storybook --- */
         /* Open book with a leather cover, stacked page edges and a bookmark
@@ -2090,7 +2090,7 @@ select:focus {
         }
 
         /* Scoped under .sb-search-wrap (specificity 0,2,0) so the left padding
-           beats the global input[type=text] rule (0,1,1) in design-tokens.css —
+           beats the global input[type=text] rule (0,1,1) in src/site.css §3 —
            otherwise the 38px is dropped and the search glyph overlaps the text. */
         [data-page="chat"] .sb-search-wrap .sb-search-input {
             width: 100%;
@@ -2792,7 +2792,7 @@ select:focus {
         [data-page="chat"] #user-input {
             transition: height 0.32s cubic-bezier(0.16, 1, 0.3, 1);
             /* Kill the global input/textarea chrome (border + radius + inset shadow
-               from design-tokens.css) so the field is a bare transparent surface
+               from src/site.css §3) so the field is a bare transparent surface
                inside the .input-box-wrap capsule — no nested outline. */
             border: none;
             border-radius: 0;
@@ -4376,7 +4376,7 @@ select:focus {
         }
 
         /* --- Flat Styles --- */
-        /* .skuomorphic-btn appearance removed — shared .skuo alias in design-tokens.css handles it */
+        /* .skuomorphic-btn appearance removed — shared .skuo alias in src/site.css §3 handles it */
         /* #send-btn appearance removed — shared .skuo.skuo-accent handles it; layout via Tailwind on the element */
 
         [data-page="chat"] .skuomorphic-toast {
@@ -4770,7 +4770,7 @@ select:focus {
 
         /* ── Chrome override blocks removed ──
            All chat-specific buttons now use shared .skuo / .skuo-accent / .skuo-neutral / .skuo-icon
-           classes from design-tokens.css. No per-page --chrome-* wiring needed. */
+           classes from src/site.css §3. No per-page --chrome-* wiring needed. */
     
 
 
@@ -5046,7 +5046,7 @@ select:focus {
 
     /* ── Showcase layout scaffolding ONLY.
        Every component (.ui-*, .skuo*, inputs, .card) lives in
-       src/design-tokens.css so editing it there updates every page. ── */
+       src/site.css §3 so editing it there updates every page. ── */
     [data-page="design"] { font-family: ui-sans-serif, system-ui, sans-serif; }
 
     [data-page="design"] .ds-frame {
@@ -5113,7 +5113,7 @@ select:focus {
    PAGE: DESIGN-LAB  —  scoped to [data-page="design-lab"]
    ═══════════════════════════════════════════════════════════════════ */
 
-    /* ── DEMO-ONLY sandbox. Nothing here touches design-tokens.css.
+    /* ── DEMO-ONLY sandbox. Nothing here touches src/site.css §2–§3.
        Three columns compare button design languages against the
        current glossy .skuo look so we can pick a direction. ── */
     [data-page="design-lab"] { font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--text-primary); margin: 0; }
@@ -5492,7 +5492,7 @@ select:focus {
         }
 
         /* --- Global Flat Styles --- */
-        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
+        /* .skuomorphic-button rules removed — shared .skuo + .discord in src/site.css §3 */
 
     
 
@@ -5566,7 +5566,7 @@ select:focus {
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 80%);
     }
 
-    /* local reset of the global unified-input styling (design-tokens.css),
+    /* local reset of the global unified-input styling (src/site.css §3),
        same scoping Astra's .bar input uses (incl. the .dark shadow reset) */
     [data-page="home"] .hero-search input {
       flex: 1;
@@ -5728,7 +5728,7 @@ select:focus {
     }
 
     /* Generic focus ring for links/plain controls. Excludes .skuo — those
-       have their own focus ring in design-tokens.css; forcing border-radius
+       have their own focus ring in src/site.css §3; forcing border-radius
        here would reshape the round icon buttons into a square. */
     [data-page="home"] :focus-visible:not(.skuo) {
       outline: 2px solid var(--accent);
@@ -5787,7 +5787,7 @@ select:focus {
         }
 
         /* --- Global Flat Styles --- */
-        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
+        /* .skuomorphic-button rules removed — shared .skuo + .discord in src/site.css §3 */
 
     
 
@@ -5904,7 +5904,7 @@ select:focus {
    PAGE: SEARCH  —  scoped to [data-page="search"]
    ═══════════════════════════════════════════════════════════════════ */
 
-  /* ── Astra layout & identity (appearance tokens come from design-tokens.css) ── */
+  /* ── Astra layout & identity (appearance tokens come from src/site.css §2) ── */
   /* Cosmic playground canvas: page-local warm parchment (do NOT edit shared tokens). */
   [data-page="search"] { margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; background-color: #fdf9f4; }
   .dark [data-page="search"] { background-color: #1e1a18; }
@@ -6096,9 +6096,6 @@ select:focus {
 /* ═══════════════════════════════════════════════════════════════════
    PAGE: themes (styles.css)  —  scoped to [data-page="themes"]
    ═══════════════════════════════════════════════════════════════════ */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 
 
@@ -6303,7 +6300,7 @@ font-family: 'Inter', sans-serif;
         }
 
         /* --- Global Flat Styles --- */
-        /* .skuomorphic-button rules removed — shared .skuo + .discord in design-tokens.css */
+        /* .skuomorphic-button rules removed — shared .skuo + .discord in src/site.css §3 */
 
     
 
