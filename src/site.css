@@ -6012,13 +6012,14 @@ html.motion-ready [data-reveal].revealed {
 
   /* hero */
   [data-page="search"] .hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 1rem; box-sizing: border-box; }
-  [data-page="search"] .wordmark { margin: 0; font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; }
+  /* seamlessly-tiled brand gradient, panning continuously (6s drift) */
+  [data-page="search"] .wordmark { margin: 0; font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(92deg, var(--accent) 0%, #f0c27b 25%, var(--accent) 50%, #f0c27b 75%, var(--accent) 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; animation: astra-logo-pan 6s linear infinite; }
+  @keyframes astra-logo-pan { to { background-position: -200% 0; } }
   [data-page="search"] .tagline { margin: -2px 0 2px; font-size: .85rem; font-style: italic; color: var(--text-tertiary); }
   [data-page="search"] .constellation { position: absolute; top: 16%; right: 14%; width: 76px; height: 50px; color: var(--accent); opacity: .55; pointer-events: none; }
   [data-page="search"] .hint { margin: 2px 0 0; font-size: .72rem; color: var(--text-tertiary); }
   [data-page="search"] .foot { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-size: .72rem; color: var(--text-tertiary); }
   [data-page="search"] .foot a { color: inherit; }
-  [data-page="search"] .theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 30; width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; font-size: .9rem; }
 
   /* search bar (hero + results share .bar) */
   [data-page="search"] .bar { display: flex; align-items: center; gap: 6px; width: min(560px, 92vw); height: 46px; box-sizing: border-box; padding: 4px 5px 4px 14px; border-radius: 999px; background: var(--bg-white); border: 1px solid var(--border-strong); box-shadow: 0 1px 6px rgba(0,0,0,.06); position: relative; }
@@ -6053,7 +6054,7 @@ html.motion-ready [data-reveal].revealed {
   /* results view */
   [data-page="search"] .results { position: relative; z-index: 1; max-width: none; margin: 0; padding: 1rem 1rem 4rem clamp(1rem, 12vw, 180px); }
   [data-page="search"] .r-top { display: flex; align-items: center; gap: 14px; padding: 6px 2.8rem 18px 0; }
-  [data-page="search"] .r-logo { font-weight: 700; font-size: 1.05rem; text-decoration: none; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
+  [data-page="search"] .r-logo { font-weight: 700; font-size: 1.05rem; text-decoration: none; background: linear-gradient(92deg, var(--accent) 0%, #f0c27b 25%, var(--accent) 50%, #f0c27b 75%, var(--accent) 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; animation: astra-logo-pan 6s linear infinite; }
   [data-page="search"] .results .bar { width: 100%; max-width: 560px; height: 42px; }
   [data-page="search"] .results .bar .skuo { height: 32px; }
   [data-page="search"] .r-meta { font-size: .75rem; color: var(--text-tertiary); margin: 0 4px 14px; }
@@ -6080,8 +6081,14 @@ html.motion-ready [data-reveal].revealed {
   /* done: shimmer settles to a plain hairline */
   [data-page="search"] .ai-panel.done { border-color: var(--border-strong); background: var(--bg-white); animation: none; }
   [data-page="search"] .ai-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 12px 16px 0; font-weight: 700; font-size: .92rem; color: var(--accent); }
-  [data-page="search"] .ai-body { padding: 12px 16px 16px; font-size: .88rem; line-height: 1.6; color: var(--text-primary); }
+  [data-page="search"] .ai-body { padding: 12px 16px 16px; font-size: .88rem; line-height: 1.6; color: var(--text-primary); transition: color .6s ease, text-shadow .6s ease; }
+  /* while streaming (panel not yet .done): brand gradient clipped to glyphs + a per-glyph glow. The glow is text-shadow, NOT filter: drop-shadow — a filter on the same element as background-clip:text breaks the clip on WebKit/iOS and paints the gradient as a solid block. Settles to plain text on completion. */
+  [data-page="search"] .ai-panel:not(.done) .ai-body { color: transparent; background: linear-gradient(92deg, var(--accent) 10%, #f0c27b 90%); -webkit-background-clip: text; background-clip: text; text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 35%, transparent); }
+  /* dark canvas: accent-light first stop keeps the gradient legible on #1e1a18, slightly stronger glow */
+  .dark [data-page="search"] .ai-panel:not(.done) .ai-body { background: linear-gradient(92deg, var(--accent-light) 10%, #f0c27b 90%); text-shadow: 0 0 12px color-mix(in srgb, var(--accent-light) 45%, transparent); }
+  /* links keep an opaque accent color — it paints over the clip and stays readable */
   [data-page="search"] .ai-body a { color: var(--accent); }
+  .dark [data-page="search"] .ai-body a { color: var(--accent-light); }
   [data-page="search"] .ai-error { padding: 0 16px 14px; font-size: .84rem; color: var(--text-secondary); }
 
   /* thinking row: pulsing orb + shimmer-sweep line (chatgpt 'thinking…' grammar) */
@@ -6155,32 +6162,65 @@ html.motion-ready [data-reveal].revealed {
     /* ── mobile mode: a different layout, not a shrunk desktop column ── */
     [data-page="search"] .bar .skuo .lbl { display: none; }        /* icon-first bar button */
     [data-page="search"] .hero-btns .skuo .lbl { display: none; }  /* icon-first hero pills */
-    [data-page="search"] .hero .wordmark { font-size: 1.5rem; }
+    [data-page="search"] .hero .wordmark { font-size: clamp(2rem, 8vw, 2.6rem); }
+    [data-page="search"] .tagline { font-size: .95rem; }
+    [data-page="search"] .hint,
+[data-page="search"] .foot { font-size: .78rem; }
     [data-page="search"] .constellation { right: 6%; top: 12%; }
+
+    /* bigger touch targets; 16px input text stops iOS focus auto-zoom */
+    [data-page="search"] .bar { height: 50px; }
+    [data-page="search"] .bar input { font-size: 16px; }
+    [data-page="search"] .bar-icon { font-size: 1.05rem; }
+    [data-page="search"] .bar .skuo { height: 40px; }
+    [data-page="search"] .hero-btns .skuo { height: 46px; }
+    [data-page="search"] .hero-btns .ai-ring .skuo { height: 43px; }  /* ring padding eats ~3px */
+    [data-page="search"] .suggest button { padding: 13px 16px; font-size: 1rem; }
+
     [data-page="search"] .results { padding: .75rem 0 3rem; }      /* full-bleed: rows go edge to edge */
-    [data-page="search"] .r-top { flex-wrap: nowrap; gap: 8px; padding: 6px calc(2.2rem + 18px) 12px 12px; }
-    [data-page="search"] .r-logo { font-size: .95rem; }
-    [data-page="search"] .results .bar { max-width: none; height: 40px; }
+    [data-page="search"] .r-top { flex-wrap: nowrap; gap: 8px; padding: 6px 12px 12px; }  /* symmetric: bar spans full width */
+    [data-page="search"] .r-logo { font-size: 1.05rem; }
+    [data-page="search"] .results .bar { max-width: none; height: 50px; }
+    [data-page="search"] .results .bar .skuo { height: 40px; }
     [data-page="search"] .r-meta-row,
 [data-page="search"] .ai-panel,
 [data-page="search"] #result-list { max-width: none; }
     [data-page="search"] .r-meta-row { margin: 0 16px 12px; }
     [data-page="search"] .r-meta-row .r-meta { margin: 0; }
-    [data-page="search"] #ai-toggle { margin-bottom: 0; }
+    [data-page="search"] .r-meta { font-size: .8rem; }
+    [data-page="search"] #ai-toggle { margin-bottom: 0; height: 36px; padding: 0 16px; font-size: .8rem; }
     [data-page="search"] .r-tabs { max-width: none; margin: -4px 16px 14px; }
+    [data-page="search"] .r-tab { padding: 12px 2px; font-size: .95rem; }
     [data-page="search"] #image-grid { max-width: none; margin: 0 12px; columns: 150px; }
     [data-page="search"] .ai-panel { margin: 0 12px 18px; }
+    [data-page="search"] .ai-head { font-size: 1rem; }
+    [data-page="search"] .ai-body { font-size: 1rem; }
+    [data-page="search"] .ai-error { font-size: .9rem; }
+    [data-page="search"] .ai-bubble-user { font-size: .95rem; padding: 10px 15px; }
+    [data-page="search"] .ai-follow input { height: 44px; font-size: 16px; }
+    [data-page="search"] .ai-follow .skuo { height: 44px; width: 44px; }
+    [data-page="search"] #ai-expand { width: 36px; height: 36px; font-size: 1rem; }
     [data-page="search"] #result-list { gap: 0; }
     [data-page="search"] .result { padding: 12px 16px; gap: 8px; border-top: 1px solid var(--border-strong); }
     [data-page="search"] .result:last-child { border-bottom: 1px solid var(--border-strong); }
+    [data-page="search"] .result .r-title { font-size: 1.15rem; }
+    [data-page="search"] .result .r-snippet { font-size: .95rem; }
+    [data-page="search"] .r-site { font-size: .85rem; }
+    [data-page="search"] .r-crumb { font-size: .78rem; }
     [data-page="search"] .status-card { margin: 0 12px; }
     [data-page="search"] .igp-panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 82vh; border-radius: 18px 18px 0 0; }
+    [data-page="search"] .igp-close { width: 40px; height: 40px; }
+    [data-page="search"] .igp-title { font-size: 1rem; }
+    [data-page="search"] .igp-host { font-size: .8rem; }
+    [data-page="search"] .igp-actions .skuo { height: 44px; font-size: .9rem; }
   }
   @media (prefers-reduced-motion: reduce) {
     [data-page="search"] .star,
 [data-page="search"] .ai-ring,
 [data-page="search"] .ai-panel,
 [data-page="search"] .r-sentinel-dot,
+[data-page="search"] .wordmark,
+[data-page="search"] .r-logo,
 [data-page="search"] .ig-skel { animation: none !important; }
     [data-page="search"] .ai-orb { animation: none; }
     [data-page="search"] .ai-thinking-line { animation: none; background: none; color: var(--text-tertiary); }

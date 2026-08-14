@@ -49,16 +49,8 @@
     if (!on && aiAbort) aiAbort.abort();
   }
 
-  // ── theme toggle (writes vail_theme like src/nav.js does) ──
-  function initTheme() {
-    $('theme-toggle').addEventListener('click', () => {
-      const dark = document.documentElement.classList.toggle('dark');
-      try { localStorage.setItem('vail_theme', dark ? 'dark' : 'light'); } catch (_) {}
-    });
-  }
-
   // ── twinkling stars (Perplexity-style sparse dots) ──
-  const STAR_COLORS = ['#c96478', '#f0c27b', '#5aa7ff', '#5fdc7d', '#ffffff'];
+  const STAR_COLORS = ['#ffffff'];
   function makeStars() {
     const host = $('stars');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -197,8 +189,16 @@
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
+  // ── system theme tracking (no on-page toggle: follow the device live) ──
+  const themeMq = window.matchMedia('(prefers-color-scheme: dark)');
+  themeMq.addEventListener('change', () => {
+    let stored = null;
+    try { stored = localStorage.getItem('vail_theme'); } catch (_) {}
+    const dark = stored === 'dark' || (stored !== 'light' && themeMq.matches);
+    document.documentElement.classList.toggle('dark', dark);
+  });
+
   // ── boot ──
-  initTheme();
   makeStars();
   rotatePlaceholders();
   wireBar('hero-input', 'hero-search', 'hero-suggest');
@@ -657,9 +657,14 @@
 
   // ── AI answer: scraped-results-grounded Saga, streamed over SSE ──
   function linkifyCitations(html, count) {
-    // [n] → jump link to the matching result card (must run on marked output)
-    return html.replace(/\[(\d{1,2})\]/g, (m, n) =>
-      (+n >= 1 && +n <= count) ? '<a href="#result-' + n + '">[' + n + ']</a>' : m);
+    // [n] and grouped [n, m, …] → jump links to the matching result cards (must run on marked output)
+    return html.replace(/\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\]/g, (m, grp) => {
+      const linked = grp.split(',').map((num) => {
+        const n = num.trim();
+        return (+n >= 1 && +n <= count) ? '<a href="#result-' + n + '">' + n + '</a>' : n;
+      });
+      return '[' + linked.join(', ') + ']';
+    });
   }
 
   function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }

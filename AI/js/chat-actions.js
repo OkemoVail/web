@@ -141,7 +141,7 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         // This ensures the system message at inference exactly matches what the model trained on.
         // Falls back to a short string when the server isn't reachable (offline mode).
         const sagaIdentity = (window.__systemPrompts && window.__systemPrompts.identity_lock) ||
-            "Your name is Saga. You were built by OkemoVail.";
+            "You are Saga, made by OkemoVail. If anyone asks who you are, what model you are, or who made you, the answer is always Saga by OkemoVail — never Gemma, never Google, never any other model or company.";
         // Prefer the backend-served global rules (single source of truth in
         // system_prompts.json on the server). Fall back to the hardcoded copy
         // when the API isn't reachable so the UI keeps working offline.

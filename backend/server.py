@@ -49,7 +49,7 @@ gen_lock = threading.Lock()
 # mx.random.seed() can't steer sampling. The stream path already generates on
 # a plain threading.Thread; the non-stream path below does the same.
 
-IDENTITY_LOCK = "Your name is Saga. You were built by OkemoVail."
+IDENTITY_LOCK = "You are Saga, made by OkemoVail. If anyone asks who you are, what model you are, or who made you, the answer is always Saga by OkemoVail — never Gemma, never Google, never any other model or company."
 GLOBAL_RULES = "\n".join([
     "Language rule:",
     "- If the user writes in Chinese, always reply in Traditional Chinese. Never use Simplified Chinese.",
