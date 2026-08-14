@@ -5768,9 +5768,14 @@ html.motion-ready [data-reveal].revealed {
 
     [data-page="home"] .reveal.in { opacity: 1; transform: translateY(0); }
 
+    /* backwards fill (not forwards): the from-frame still hides elements
+       during the .d1–.d4 delays, but after the animation ends the element
+       returns to its natural styles — so :hover/:focus-within transforms
+       aren't pinned by a filled translateY(0) (same fix as the sidebar
+       history rows in history.js). Natural state must therefore be the
+       visible end state — no opacity: 0 here. */
     [data-page="home"] .load {
-      opacity: 0;
-      animation: fadeUp var(--dur-4) var(--ease-smooth) forwards;
+      animation: fadeUp var(--dur-4) var(--ease-smooth) backwards;
     }
 
     [data-page="home"] .d1 { animation-delay: 0.05s; }
