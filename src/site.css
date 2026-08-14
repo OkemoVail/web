@@ -50,6 +50,17 @@
    (formerly src/design-tokens.css — verbatim)
    ════════════════════════════════════════════════════════════════════════ */
 
+/* ── Motion tokens (motion system, spec 2026-08-14) ─────────────────────
+   Every transition/animation consumes these. Re-tune the whole site's
+   feel by editing this block. Recipe B: silky base + gentle spring. ── */
+:root {
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);  /* workhorse: hovers, fades, rises, expands, page transitions */
+  --ease-soft:   cubic-bezier(0.34, 1.3, 0.64, 1); /* gentle spring: presses, pops, entrances — the "fun" */
+  --dur-1: 140ms;  --dur-2: 220ms;  --dur-3: 360ms;  --dur-4: 560ms;
+  --stagger: 45ms;
+  --rise: 10px;
+}
+
 /* ── Light tokens ───────────────────────────────────────────── */
 :root {
   --bg:              #f5f4ed;
@@ -213,10 +224,10 @@ code, pre, .font-mono, [class*="code"] {
   color: var(--text-primary);
   cursor: pointer;
   transition:
-    transform 0.12s ease,
-    box-shadow 0.2s ease,
-    filter 0.18s ease,
-    background-image 0.2s ease;
+    transform var(--dur-1) var(--ease-soft),
+    box-shadow var(--dur-2) var(--ease-smooth),
+    filter var(--dur-2) var(--ease-smooth),
+    background-image var(--dur-2) var(--ease-smooth);
 }
 
 /* Vestigial sheen layer — the refined surface has NO wet-glass reflection
@@ -247,7 +258,7 @@ code, pre, .font-mono, [class*="code"] {
 .skuo:active,
 .skuomorphic-btn:active,
 .skuomorphic-button:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
   filter: brightness(0.98);
   box-shadow: var(--chrome-shadow-active);
 }
@@ -702,7 +713,7 @@ select:focus {
   100% { transform: scale(1); opacity: 1; }
 }
 
-.ov-nav__bar.pop { animation: ov-nav-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.ov-nav__bar.pop { animation: ov-nav-pop 0.28s var(--ease-soft) both; }
 
 @media (prefers-reduced-motion: reduce) {
   .ov-nav__bar.pop { animation: none; }
@@ -1738,7 +1749,7 @@ select:focus {
                rest, subtle hover tint, and a press-scale — all via theme tokens so it
                reads correctly in both light and dark mode. */
             transition: color 0.2s ease, background-color 0.2s ease,
-                        transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+                        transform 0.34s var(--ease-soft);
         }
 
         [data-page="chat"] .sb-icon-btn:hover {
@@ -1888,7 +1899,7 @@ select:focus {
            translateX collapse-sync transform) with an overshoot easing so nav
            icons pop on hover and squish on press. */
         [data-page="chat"] .sb-nav-icon svg {
-            transition: transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.34s var(--ease-soft);
         }
 
         [data-page="chat"] .sb-tile:hover .sb-nav-icon svg {
@@ -1990,7 +2001,7 @@ select:focus {
             transition: background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
                         box-shadow 0.25s ease,
                         margin 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                        transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+                        transform 0.34s var(--ease-soft);
         }
 
         [data-page="chat"] .sb-new-chat-btn:hover {
@@ -2026,7 +2037,7 @@ select:focus {
             margin-right: 0;
             color: var(--text-tertiary);
             flex-shrink: 0;
-            transition: transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+            transition: transform 0.34s var(--ease-soft), color 0.2s ease;
         }
 
         /* .sb-new-chat-btn:hover — appearance removed, shared .skuo handles it */
@@ -2257,7 +2268,7 @@ select:focus {
             color: var(--text-primary);
             padding: 0.75rem 1.25rem;
             max-width: 100%;
-            animation: chat-fadeIn 0.3s ease-out forwards;
+            animation: chat-fadeIn var(--dur-2) var(--ease-smooth) forwards;
             word-wrap: break-word;
             overflow-wrap: anywhere;
             font-weight: 500;
@@ -2959,7 +2970,7 @@ select:focus {
             /* same springy motion as .sb-new-chat-btn: overshoot easing so hover
                pops and a released press bounces back */
             transition: background 0.15s ease,
-                        transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+                        transform 0.34s var(--ease-soft);
         }
 
         [data-page="chat"] .history-btn-container:hover {
@@ -4212,7 +4223,7 @@ select:focus {
             gap: 0.1rem;
             padding: 0.3rem;
             /* springy pop on hover; no background transition so theme toggles are instant */
-            transition: transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+            transition: transform 0.34s var(--ease-soft), box-shadow 0.4s ease;
         }
 
         [data-page="chat"] #top-right-actions:hover .ov-nav__bar {
@@ -5704,14 +5715,14 @@ select:focus {
     [data-page="home"] .reveal {
       opacity: 0;
       transform: translateY(22px);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity var(--dur-4) var(--ease-smooth), transform var(--dur-4) var(--ease-smooth);
     }
 
     [data-page="home"] .reveal.in { opacity: 1; transform: translateY(0); }
 
     [data-page="home"] .load {
       opacity: 0;
-      animation: fadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: fadeUp var(--dur-4) var(--ease-smooth) forwards;
     }
 
     [data-page="home"] .d1 { animation-delay: 0.05s; }
