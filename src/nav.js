@@ -101,9 +101,20 @@
 
     // theme toggle
     if (themeBtn) {
-      themeBtn.addEventListener('click', function () {
-        var isDark = document.documentElement.classList.toggle('dark');
-        try { localStorage.setItem('vail_theme', isDark ? 'dark' : 'light'); } catch (e) {}
+      themeBtn.addEventListener('click', function (e) {
+        var apply = function () {
+          var isDark = document.documentElement.classList.toggle('dark');
+          try { localStorage.setItem('vail_theme', isDark ? 'dark' : 'light'); } catch (err) {}
+        };
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!document.startViewTransition || reduce || navigator.webdriver) { apply(); return; }
+        var x = (e && e.clientX) || window.innerWidth - 60;
+        var y = (e && e.clientY) || 40;
+        document.documentElement.style.setProperty('--theme-x', x + 'px');
+        document.documentElement.style.setProperty('--theme-y', y + 'px');
+        document.documentElement.classList.add('theme-reveal-active');
+        var vt = document.startViewTransition(apply);
+        vt.finished.finally(function () { document.documentElement.classList.remove('theme-reveal-active'); });
       });
     }
 
