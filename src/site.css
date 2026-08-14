@@ -23,6 +23,11 @@
      look like:  .dark [data-page="chat"] .thing { ... }
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── JetBrains Mono ─────────────────────────────────────────────
+   @import MUST stay above every rule in this file (only comments
+   may precede it) — browsers silently drop a misplaced @import. ── */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
 /* ═══ §1 FONTS ═══════════════════════════════════════════════════════════ */
 
 @font-face {
@@ -44,8 +49,6 @@
 /* ═══ §2 DESIGN TOKENS · §3 SHARED COMPONENTS ════════════════════════════
    (formerly src/design-tokens.css — verbatim)
    ════════════════════════════════════════════════════════════════════════ */
-/* ── JetBrains Mono ─────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ── Light tokens ───────────────────────────────────────────── */
 :root {
