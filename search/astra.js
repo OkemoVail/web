@@ -171,7 +171,8 @@
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!document.startViewTransition || reduce || navigator.webdriver) { renderRouteDom(); return; }
     const vt = document.startViewTransition(renderRouteDom);
-    vt.ready.catch(() => {}); vt.finished.catch(() => {}); // skipped transitions reject — swallow, the DOM swap already happened
+    // skipped transitions reject — swallow, the DOM swap already happened
+    vt.updateCallbackDone.catch(() => {}); vt.ready.catch(() => {}); vt.finished.catch(() => {});
   }
 
   // ── bar wiring (hero + results bars behave identically) ──
@@ -389,7 +390,7 @@
         li.classList.add('r-enter');
         li.style.transitionDelay = Math.min(i, 7) * 45 + 'ms';
         requestAnimationFrame(() => requestAnimationFrame(() => li.classList.add('on')));
-        li.addEventListener('transitionend', () => { li.classList.remove('r-enter', 'on'); li.style.transitionDelay = ''; }, { once: true });
+        li.addEventListener('transitionend', (e) => { if (e.target !== li) return; li.classList.remove('r-enter', 'on'); li.style.transitionDelay = ''; }, { once: true });
       }
 
       const img = document.createElement('img');
@@ -520,6 +521,7 @@
       const revealItem = () => requestAnimationFrame(() => requestAnimationFrame(() => b.classList.add('on')));
       img.addEventListener('load', revealItem, { once: true });
       if (img.complete && img.naturalWidth) revealItem();   // cached images
+      b.addEventListener('transitionend', (e) => { if (e.target !== b) return; b.classList.remove('ig-enter', 'on'); }, { once: true });
     });
   }
 
