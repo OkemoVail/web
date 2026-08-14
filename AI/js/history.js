@@ -46,8 +46,9 @@ window.renderHistory = (query = "") => {
 
     const allChatArray = Object.values(window.allChats).sort(byManual);
 
-    // New-chat bounce: ids never rendered before get the pop-in animation.
-    // The first render seeds silently so the whole list doesn't bounce at boot.
+    // The seen-set still tracks which ids have rendered (it feeds the
+    // just-selected check below), but no pop-in class is emitted for new
+    // chats — new rows simply appear (the bounce read as a flash).
     if (!window.__seenChatIds) {
         window.__seenChatIds = new Set(allChatArray.map(c => c.id));
         window.__lastActiveChatId = window.currentChatId;
@@ -162,23 +163,20 @@ window.renderHistory = (query = "") => {
 
     allChatArray.forEach(c => window.__seenChatIds.add(c.id));
     window.__lastActiveChatId = window.currentChatId;
-    window.__titleShimmerChatId = null;   // one-shot: consumed by this render
 };
 
 window.renderChatItem = (c, dict) => {
     const isNew = window.__seenChatIds && !window.__seenChatIds.has(c.id);
-    // Pop the row that just became active (chat switch), unless it's already
-    // playing the new-chat bounce.
+    // Pop the row that just became active (chat switch). New chats are
+    // excluded — they appear plainly, no pop-in.
     const justSelected = !isNew && c.id === window.currentChatId && window.__lastActiveChatId !== c.id;
-    // One-shot text shimmer on the row whose title was just (re)generated.
-    const shimmer = c.id === window.__titleShimmerChatId;
     return `
-    <div class="history-btn-container ${isNew ? 'chat-item-in ' : ''}${justSelected ? 'chat-item-selected ' : ''}${c.id === window.currentChatId ? 'history-item-active' : ''} rounded-xl group relative"
+    <div class="history-btn-container ${justSelected ? 'chat-item-selected ' : ''}${c.id === window.currentChatId ? 'history-item-active' : ''} rounded-xl group relative"
          data-chat-id="${c.id}"
          draggable="true"
          ondragstart="window.onChatDragStart(event, '${c.id}')"
          ondragend="window.onChatDragEnd(event)">
-        <button onclick="window.loadChat('${c.id}')"${shimmer ? ` onanimationend="this.classList.remove('title-shimmer')"` : ''} class="flex-1 text-left px-3 py-2.5 rounded-lg text-xs font-medium truncate ${shimmer ? 'title-shimmer ' : ''}${c.id === window.currentChatId ? '' : 'text-zinc-500'}">${window.truncateTitle(c.title)}</button>
+        <button onclick="window.loadChat('${c.id}')" class="flex-1 text-left px-3 py-2.5 rounded-lg text-xs font-medium truncate ${c.id === window.currentChatId ? '' : 'text-zinc-500'}">${window.truncateTitle(c.title)}</button>
         <div class="flex items-center gap-1 pr-1">
             <button onclick="window.showChatMenu('${c.id}', this, event)" class="history-action-btn" title="More actions">
                 <i data-feather="more-vertical" class="w-[1.1rem] h-[1.1rem]"></i>

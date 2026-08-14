@@ -106,11 +106,9 @@ window._requestChatTitle = async (baseUrl, messages) => {
 window.generateChatTitle = async (chatId, force = false) => {
     if (!force && window[`_generatingTitle_${chatId}`]) return;
     window[`_generatingTitle_${chatId}`] = true;
-    // Shimmer the title capsule while a title generates for the chat on screen
-    // (covers auto cadence re-titles; manual regenerate adds the class itself —
-    // the add is idempotent and both finallys remove it).
-    const titleEl = chatId === window.currentChatId ? document.getElementById('top-left-chat-title') : null;
-    if (titleEl) titleEl.classList.add('shimmer-active');
+    // Titles land silently — no capsule shimmer, no sidebar text shimmer.
+    // (Both were removed: the shimmer sweep fired right as an answer finished
+    // and read as a flash. The title text simply updates when it's ready.)
     try {
         const history = chatId === window.currentChatId
             ? window.chatHistory
@@ -146,13 +144,11 @@ window.generateChatTitle = async (chatId, force = false) => {
                 window.allChats[chatId].titleFeedback = null;
                 window.updateTitleFeedbackUI(chatId);
             }
-            window.__titleShimmerChatId = chatId;   // sidebar row text-shimmer on next render
             window.renderHistory();
         }
     } catch (e) {
         console.error("Failed to generate title", e);
     } finally {
-        if (titleEl) titleEl.classList.remove('shimmer-active');
         delete window[`_generatingTitle_${chatId}`];
     }
 };
@@ -175,13 +171,9 @@ window.updateChatTitleDisplay = (title) => {
 window.regenerateCurrentTitle = () => {
     if (!window.currentChatId || window.chatHistory.length === 0) return;
 
-    const titleEl = document.getElementById('top-left-chat-title');
-    if (titleEl) titleEl.classList.add('shimmer-active');
-
+    // Feedback = the button's own icon spin only (no capsule shimmer sweep).
     const btn = document.querySelector('#top-left-chat-title button[onclick*="regenerateCurrentTitle"] i');
-    window.generateChatTitle(window.currentChatId, true).finally(() => {
-        if (titleEl) titleEl.classList.remove('shimmer-active');
-    });
+    window.generateChatTitle(window.currentChatId, true);
 
     if (window.updateTitleFeedbackUI) window.updateTitleFeedbackUI(window.currentChatId);
     if (btn) {

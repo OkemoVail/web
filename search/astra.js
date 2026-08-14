@@ -256,7 +256,13 @@
 
   // ── backend base (same resolution as chat's api.js, minus the tunnel fetch) ──
   function backendBase() {
-    try { return (localStorage.getItem('vail_custom_backend_url') || 'https://api.okemovail.com').replace(/\/$/, ''); }
+    try {
+      const origin = window.location.origin;
+      const isLocal = origin.includes('localhost:8001') || origin.includes('127.0.0.1:8001');
+      const isTunnel = origin.includes('api.okemovail.com');
+      if (isLocal || isTunnel) return origin;
+      return (localStorage.getItem('vail_custom_backend_url') || 'https://api.okemovail.com').replace(/\/$/, '');
+    }
     catch (_) { return 'https://api.okemovail.com'; }
   }
 

@@ -14,7 +14,7 @@ function loadModule(overrides = {}) {
         window,
         console,
         fetch: overrides.fetch || (async () => { throw new Error('fetch not stubbed'); }),
-        // generateChatTitle shimmers the title capsule via document.getElementById
+        // generateChatTitle must NOT touch the title capsule (no shimmer — titles land silently)
         document: overrides.document || { getElementById: () => null },
     });
     vm.runInContext(code, ctx);
@@ -113,9 +113,9 @@ function loadModule(overrides = {}) {
     assert(!/<think>/.test(sent), 'think tags stripped from payload');
     assert.strictEqual(w.allChats.c1.title, 'css grief, then docker (classic)', 'retry title applied');
     assert.strictEqual(w.allChats.c1.titleGenAt, 2, 'titleGenAt recorded');
-    assert.deepStrictEqual(added, ['shimmer-active'], 'capsule shimmer added at start');
-    assert.deepStrictEqual(removed, ['shimmer-active'], 'capsule shimmer removed at end');
-    assert.strictEqual(w.__titleShimmerChatId, 'c1', 'sidebar row shimmer flagged for next render');
+    assert.deepStrictEqual(added, [], 'no capsule classes added (shimmer removed — titles land silently)');
+    assert.deepStrictEqual(removed, [], 'no capsule classes removed');
+    assert.strictEqual(w.__titleShimmerChatId, undefined, 'no sidebar row shimmer flag');
     assert.strictEqual(calls[0].seed, 42, 'request carries a seed');
     assert.strictEqual(calls[0].temperature, 0.6, 'title temperature is 0.6');
     console.log('✓ generateChatTitle');

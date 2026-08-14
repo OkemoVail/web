@@ -22,8 +22,8 @@
     if (window.els && window.els.chatCont) window.els.chatCont.scrollTop = window.els.chatCont.scrollHeight;
 
     target.style.visibility = 'hidden';
-    // NB: the bubble's own chat-fadeIn runs underneath the cover and ends
-    // at opacity 1 (forwards fill), so revealing needs no animation reset.
+    // Rows have no entrance animation (render() rebuilds would replay it),
+    // so the ghost is the only motion — revealing needs no animation reset.
     var started = window.motionGhost(target, fromRect, function () {
       target.style.visibility = '';
     });

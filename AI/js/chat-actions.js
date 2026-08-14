@@ -57,12 +57,14 @@ window.finalizeLastAIMessage = () => {
     }
 
     // 2. Append the actions row (copy / regen / sources / feedback / timestamp).
+    // Appears without an entrance animation — the book-flip lane fading out
+    // beside it is the only settle cue (a fade here read as a "flash" on done).
     const prose = aiRow.querySelector('.prose-target');
     if (prose && !aiRow.querySelector('.ai-msg-actions')) {
         const pairIdx = window.chatHistory.length - 1;
         const sources = (window.chatHistory[pairIdx] && window.chatHistory[pairIdx][5]) || [];
         const actionRow = document.createElement('div');
-        actionRow.className = 'ai-msg-actions animate-fade-in';
+        actionRow.className = 'ai-msg-actions';
         actionRow.innerHTML = `
             <div class="ai-actions-left">
                 <button onclick="window.copyMsg(${pairIdx}, this)" class="ai-action-btn" title="Copy"><i data-feather="copy" class="w-4 h-4"></i></button>

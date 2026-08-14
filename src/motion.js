@@ -5,7 +5,8 @@
       html.motion-ready, so content is NEVER hidden when JS is absent.
    2. window.motionGhost(targetEl, fromRect, onDone) — FLIP-style travel:
       a clone of targetEl flies from fromRect to the element's real rect
-      (the "iMessage send" morph). Caller hides the real element and
+      (the "iMessage send" morph), following a gently curved arc rather
+      than a straight line. Caller hides the real element and
       reveals it in onDone.
    Everything bails (content shown instantly, morph skipped) under
    prefers-reduced-motion AND under automation (navigator.webdriver) so
@@ -69,10 +70,23 @@
     });
     document.body.appendChild(ghost);
 
+    /* Curved flight path: bow the midpoint perpendicular to the straight
+       from→to line (upward-bowing arc) so the ghost follows a curve. */
+    var fromCX = fromRect.left + fromRect.width / 2, fromCY = fromRect.top + fromRect.height / 2;
+    var toCX = toRect.left + toRect.width / 2, toCY = toRect.top + toRect.height / 2;
+    var dx = toCX - fromCX, dy = toCY - fromCY, dist = Math.hypot(dx, dy) || 1;
+    var perpX = -dy / dist, perpY = dx / dist;                       // unit perpendicular
+    if (perpY > 0 || (perpY === 0 && perpX < 0)) { perpX = -perpX; perpY = -perpY; } // bow upward
+    var bow = Math.min(dist * 0.12, 56);
+    var arcCX = (fromCX + toCX) / 2 + perpX * bow, arcCY = (fromCY + toCY) / 2 + perpY * bow;
+    var midW = (fromRect.width + toRect.width) / 2, midH = (fromRect.height + toRect.height) / 2;
+    var midRadius = /^\d+(\.\d+)?px$/.test(radius) ? ((22 + parseFloat(radius)) / 2) + 'px' : '22px';
+
     var anim = ghost.animate([
       { left: fromRect.left + 'px', top: fromRect.top + 'px', width: fromRect.width + 'px', height: fromRect.height + 'px', borderRadius: '22px' },
+      { left: (arcCX - midW / 2) + 'px', top: (arcCY - midH / 2) + 'px', width: midW + 'px', height: midH + 'px', borderRadius: midRadius },
       { left: toRect.left + 'px', top: toRect.top + 'px', width: toRect.width + 'px', height: toRect.height + 'px', borderRadius: radius }
-    ], { duration: 420, easing: 'cubic-bezier(0.34, 1.3, 0.64, 1)', fill: 'forwards' }); /* var(--ease-soft) */
+    ], { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }); /* var(--ease-smooth) — no overshoot */
 
     function finish() { ghost.remove(); done(); }
     anim.onfinish = finish;

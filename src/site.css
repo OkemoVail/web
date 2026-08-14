@@ -55,7 +55,7 @@
    feel by editing this block. Recipe B: silky base + gentle spring. ── */
 :root {
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);  /* workhorse: hovers, fades, rises, expands, page transitions */
-  --ease-soft:   cubic-bezier(0.34, 1.3, 0.64, 1); /* gentle spring: presses, pops, entrances — the "fun" */
+  --ease-soft:   cubic-bezier(0.25, 1, 0.5, 1);   /* soft ease-out (no overshoot): presses, pops, entrances — the "fun" */
   --dur-1: 140ms;  --dur-2: 220ms;  --dur-3: 360ms;  --dur-4: 560ms;
   --stagger: 45ms;
   --rise: 10px;
@@ -1618,18 +1618,6 @@ html.motion-ready [data-reveal].revealed {
    PAGE: CHAT  —  scoped to [data-page="chat"]
    ═══════════════════════════════════════════════════════════════════ */
 
-        [data-page="chat"] .shimmer-active {
-            background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-color), white 40%), transparent);
-            background-size: 200% 100%;
-            animation: shimmer-btn 1.5s infinite;
-        }
-
-        .dark [data-page="chat"] .shimmer-active {
-            background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-color), transparent 80%), transparent);
-            background-size: 200% 100%;
-            animation: shimmer-btn 1.5s infinite;
-        }
-
         [data-page="chat"] button,
 [data-page="chat"] a,
 [data-page="chat"] input,
@@ -2327,7 +2315,9 @@ html.motion-ready [data-reveal].revealed {
             color: var(--text-primary);
             padding: 0.75rem 1.25rem;
             max-width: 100%;
-            animation: chat-fadeIn var(--dur-2) var(--ease-smooth) forwards;
+            /* no entrance animation — render() rebuilds the list, so a fade
+               here replayed on every message (the "flash"). Typed sends get
+               their motion from the send-morph ghost instead. */
             word-wrap: break-word;
             overflow-wrap: anywhere;
             font-weight: 500;
@@ -3041,34 +3031,8 @@ html.motion-ready [data-reveal].revealed {
             transform: scale(0.96);
         }
 
-        /* Bouncy pop-in for a chat that just appeared in the sidebar.
-           renderHistory() adds this only to ids it hasn't rendered before,
-           so re-renders (saves, reorders) don't replay it on the whole list. */
-        [data-page="chat"] .history-btn-container.chat-item-in {
-            /* backwards (not both): a forwards fill would keep overriding
-               transform after the animation ends, blocking the hover lift */
-            animation: chat-item-bounce-in 0.55s ease backwards;
-        }
-
-        @keyframes chat-item-bounce-in {
-            0% {
-                opacity: 0;
-                transform: scale(0.55) translateY(-10px);
-            }
-
-            55% {
-                opacity: 1;
-                transform: scale(1.06) translateY(3px);
-            }
-
-            78% {
-                transform: scale(0.97) translateY(-1px);
-            }
-
-            100% {
-                transform: scale(1) translateY(0);
-            }
-        }
+        /* (the new-chat bounce-in was removed — new sidebar rows appear
+           plainly; a pop right after the first reply read as a flash) */
 
         /* Springy pop on the chat that just became active. loadChat() rebuilds
            the list synchronously, so the clicked row can't animate itself —
@@ -3079,26 +3043,17 @@ html.motion-ready [data-reveal].revealed {
 
         @keyframes chat-item-select-pop {
             0% {
-                transform: scale(0.94);
-            }
-
-            50% {
-                transform: scale(1.04);
-            }
-
-            75% {
-                transform: scale(0.985);
+                transform: scale(.96);
             }
 
             100% {
-                transform: scale(1);
+                transform: none;
             }
         }
 
         @media (prefers-reduced-motion: reduce) {
 
-            [data-page="chat"] .history-btn-container.chat-item-in,
-[data-page="chat"] .history-btn-container.chat-item-selected,
+            [data-page="chat"] .history-btn-container.chat-item-selected,
 [data-page="chat"] .history-btn-container:hover,
 [data-page="chat"] .history-btn-container:active {
                 animation: none;
@@ -4351,42 +4306,9 @@ html.motion-ready [data-reveal].revealed {
 
         [data-page="chat"] #menu-toggle-btn svg { width: 1.15rem; height: 1.15rem; }
 
-        /* keep the title-regen shimmer visible on top of the capsule fill:
-           .shimmer-active alone loses to this id rule, so layer the sweep over
-           the capsule gradient here */
-        [data-page="chat"] #top-left-chat-title.shimmer-active {
-            background-image:
-                linear-gradient(90deg, transparent,
-                    color-mix(in srgb, var(--accent-color), white 40%), transparent),
-                linear-gradient(180deg,
-                    color-mix(in srgb, var(--bg-elevated), white 7%),
-                    color-mix(in srgb, var(--bg-elevated), black 7%));
-            background-size: 200% 100%, 100% 100%;
-            animation: shimmer-btn 1.5s infinite;
-        }
-
-        .dark [data-page="chat"] #top-left-chat-title.shimmer-active {
-            background-image:
-                linear-gradient(90deg, transparent,
-                    color-mix(in srgb, var(--accent-color), transparent 80%), transparent),
-                linear-gradient(180deg,
-                    color-mix(in srgb, var(--bg-elevated), white 8%),
-                    color-mix(in srgb, var(--bg-elevated), black 8%));
-            background-size: 200% 100%, 100% 100%;
-            animation: shimmer-btn 1.5s infinite;
-        }
-
-        /* one-shot accent text-shimmer on the sidebar row whose title was just
-           (re)generated — same gradient-text idiom as .model-generating-label;
-           the class is removed on animationend so the text returns to normal */
-        [data-page="chat"] .title-shimmer {
-            background: linear-gradient(90deg, var(--text-secondary, #aaa) 20%, var(--accent-color) 50%, var(--text-secondary, #aaa) 80%);
-            background-size: 200% 100%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gen-text-shimmer 1.2s linear 2;
-        }
+        /* (title-generation shimmer rules were removed — titles update
+           silently now; the sweep fired on answer completion and read as
+           a flash) */
 
         @media (max-width: 1023px) {
             [data-page="chat"] #top-right-actions {
@@ -4711,7 +4633,7 @@ html.motion-ready [data-reveal].revealed {
             border-radius: 14px;
             font-size: 0.95rem;
             font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
             cursor: pointer;
             border: 1px solid transparent;
         }

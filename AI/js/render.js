@@ -21,8 +21,12 @@ window.render = () => {
         const [userMsg, responseText, feedback, timestamp, attachment, sources] = pair;
 
         // 1. Render USER Row
+        // No entrance animation on rows — render() rebuilds the whole list, so
+        // a per-row fade replays on EVERY message whenever anything re-renders
+        // (the flash this removes). New turns get their motion from the
+        // send-morph ghost instead (same seamless model as Astra's ai-panel).
         const userRow = document.createElement('div');
-        userRow.className = 'user-row animate-fade-in group';
+        userRow.className = 'user-row group';
 
         let attachmentHtml = '';
         if (attachment && attachment.dataUrl) {
@@ -70,7 +74,7 @@ window.render = () => {
         const isLast = pairIdx === window.chatHistory.length - 1;
         if (responseText !== null || (isLast && window.isGenerating)) {
             const aiRow = document.createElement('div');
-            aiRow.className = 'ai-row animate-fade-in';
+            aiRow.className = 'ai-row';
             
             let contentHtml = "";
             const _modelName = window.currentModel ? window.currentModel.name : '';
