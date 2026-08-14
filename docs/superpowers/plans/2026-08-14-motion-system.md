@@ -412,10 +412,10 @@ In `src/site.css`, find the banner `PAGE: CHAT  —  scoped to [data-page="chat"
         /* ── Motion (spec 2026-08-14) ── */
         @keyframes ai-home-rise { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
         @keyframes ai-home-book-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
-        [data-page="ai-home"] .mo-in { animation: ai-home-rise var(--dur-4) var(--ease-smooth) both; }
+        [data-page="ai-home"] .mo-in { animation: ai-home-rise var(--dur-4) var(--ease-smooth) backwards; }
         [data-page="ai-home"] .mo-d1 { animation-delay: 45ms; }
         [data-page="ai-home"] .mo-d2 { animation-delay: 90ms; }
-        [data-page="ai-home"] .book-scene { animation: ai-home-book-in var(--dur-4) var(--ease-smooth) 120ms both; }
+        [data-page="ai-home"] .book-scene { animation: ai-home-book-in var(--dur-4) var(--ease-smooth) 120ms backwards; }
 
 ```
 
@@ -480,8 +480,8 @@ In `src/site.css`, find the banner `PAGE: themes (styles.css)  —  scoped to [d
     @keyframes search-sheet-in { from { opacity: 0; transform: translateY(48px); } to { opacity: 1; transform: none; } }
   }
   @keyframes search-scrim-in { from { opacity: 0; } to { opacity: 1; } }
-  [data-page="search"] #ig-preview:not([hidden]) .igp-panel { animation: search-sheet-in var(--dur-3) var(--ease-smooth) both; }
-  [data-page="search"] #ig-preview:not([hidden]) .igp-scrim { animation: search-scrim-in var(--dur-2) var(--ease-smooth) both; }
+  [data-page="search"] #ig-preview:not([hidden]) .igp-panel { animation: search-sheet-in var(--dur-3) var(--ease-smooth) backwards; }
+  [data-page="search"] #ig-preview:not([hidden]) .igp-scrim { animation: search-scrim-in var(--dur-2) var(--ease-smooth) backwards; }
 
 ```
 
@@ -704,7 +704,7 @@ In `src/site.css`, find the banner `PAGE: DESIGN  —  scoped to [data-page="des
         /* AI rows rise in (render.js tags them .animate-fade-in, which had
            no rule in this section — this gives it the intended entrance) */
         @keyframes chat-rise-in { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
-        [data-page="chat"] .ai-row.animate-fade-in { animation: chat-rise-in var(--dur-3) var(--ease-smooth) both; }
+        [data-page="chat"] .ai-row.animate-fade-in { animation: chat-rise-in var(--dur-3) var(--ease-smooth) backwards; }
 
         /* modals pop softly when shown (display:none → shown restarts the
            animation each open; all four start hidden so nothing runs at load) */
@@ -712,7 +712,7 @@ In `src/site.css`, find the banner `PAGE: DESIGN  —  scoped to [data-page="des
         [data-page="chat"] #personality-modal > .card,
         [data-page="chat"] #memories-modal > .card,
         [data-page="chat"] #changelog-modal > .card,
-        [data-page="chat"] #account-modal > div { animation: chat-modal-pop var(--dur-2) var(--ease-soft) both; }
+        [data-page="chat"] #account-modal > div { animation: chat-modal-pop var(--dur-2) var(--ease-soft) backwards; }
 
 ```
 
@@ -799,6 +799,23 @@ git commit -m "feat(motion): site-wide motion system complete — docs + sweep"
 ```
 
 ---
+
+## Execution errata (added during subagent-driven execution)
+
+- **Forwards-fill transform trap (found in Task 4 quality review):** entrance
+  animations whose end frame pins `transform` must use `backwards` fill, NOT
+  `both`/`forwards` — a forwards fill overrides later interactive transforms
+  (same trap CLAUDE.md documents for sidebar rows). Applied to: `.mo-in`,
+  `.book-scene`, `#ig-preview` panel/scrim, `.ai-row` rise, modal pop (all now
+  `backwards` in this plan) and the pre-existing home `.load` rule
+  (`forwards` → `backwards`, fixed in Task 4). The end state equals the
+  natural state in every case, so settled rendering is unchanged; `backwards`
+  still covers the pre-delay from-frame. View-transition pseudo rules keep
+  `both` (transient, non-interactive).
+- **Snapshot harness (fixed mid-flight, commit e5eec76):** `tools/snapshot.mjs`
+  now waits for chat's `#app-preloader` to detach before shooting; the
+  pre-loader-veiled `before/chat-light.png` baseline was re-captured
+  (commit 7d9104e). Deterministic 0.000% chat diffs since.
 
 ## Self-review notes (plan author)
 
