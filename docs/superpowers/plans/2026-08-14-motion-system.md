@@ -811,7 +811,12 @@ git commit -m "feat(motion): site-wide motion system complete — docs + sweep"
   (`forwards` → `backwards`, fixed in Task 4). The end state equals the
   natural state in every case, so settled rendering is unchanged; `backwards`
   still covers the pre-delay from-frame. View-transition pseudo rules keep
-  `both` (transient, non-interactive).
+  `both` (transient, non-interactive). **Paired requirement:** the element's
+  natural state must be the visible end state — drop any `opacity: 0` base
+  from the entrance rule when switching to `backwards` (the backwards fill
+  covers the pre-start window; leaving `opacity: 0` hides the element
+  forever after the animation). Applied to home `.load` in Task 4
+  (commit 9a132e8).
 - **Snapshot harness (fixed mid-flight, commit e5eec76):** `tools/snapshot.mjs`
   now waits for chat's `#app-preloader` to detach before shooting; the
   pre-loader-veiled `before/chat-light.png` baseline was re-captured
