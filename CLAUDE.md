@@ -22,7 +22,7 @@ This is a vanilla JS, no-framework AI chat frontend called **Oaky** (`AI/chat.ht
 
 ### CDN dependencies (loaded by `chat.html` at runtime)
 
-`marked`, `KaTeX`, `anime.js`, Tailwind CDN, Google GSI client, and Font Awesome are loaded from CDN — there is no local npm bundle for these. Do not try to install them via npm. (`feather-icons` is NOT a CDN dep: it's self-hosted as `src/feather-local.js` — see Build above.)
+`marked`, `KaTeX`, `anime.js`, Tailwind CDN, and the Google GSI client are loaded from CDN — there is no local npm bundle for these. Do not try to install them via npm. (`feather-icons` is NOT a CDN dep: it's self-hosted as `src/feather-local.js`, and Font Awesome is NOT a CDN dep either — glyphs are §4 CSS masks in `src/site.css` — see Build above.)
 
 ### JS load order (`AI/js/`)
 
