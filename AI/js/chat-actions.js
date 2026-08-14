@@ -99,6 +99,12 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
         displayMsg = displayMsg.substring(8).trim();
     }
 
+    // iMessage morph: capture the input geometry BEFORE clearing it.
+    // Only typed sends morph (txt === null, no attachment) — programmatic
+    // resends (regenMsg) and attachment messages take the plain path.
+    const _morphFrom = (!txt && !attachment && window.els.input)
+        ? window.els.input.getBoundingClientRect() : null;
+
     window.streamQueue = "";
     window.typedResponseText = "";
     window.charAccu = 0;
@@ -116,7 +122,10 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
     window.currentGenerationIsSearch = window.isWebSearch || forceSearch;
     window.isGenerating = true;
     window.currentJobId = Math.random().toString(36).substring(7);
-    window.render(); window.els.chatCont.scrollTo({ top: window.els.chatCont.scrollHeight, behavior: 'smooth' });
+    window.render();
+    const _morphed = _morphFrom && window.motionMorphLastUserBubble
+        && window.motionMorphLastUserBubble(_morphFrom);
+    if (!_morphed) window.els.chatCont.scrollTo({ top: window.els.chatCont.scrollHeight, behavior: 'smooth' });
     window.updateUI();
     window.toggleSendIcon('stop');
     try {

@@ -5111,7 +5111,21 @@ html.motion-ready [data-reveal].revealed {
             color: var(--accent-color, currentColor);
         }
         @keyframes chat-fadeIn { from { opacity: 0 } to { opacity: 1 } }
-    
+
+        /* ── Motion (spec 2026-08-14) ── */
+        /* AI rows rise in (render.js tags them .animate-fade-in, which had
+           no rule in this section — this gives it the intended entrance) */
+        @keyframes chat-rise-in { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
+        [data-page="chat"] .ai-row.animate-fade-in { animation: chat-rise-in var(--dur-3) var(--ease-smooth) backwards; }
+
+        /* modals pop softly when shown (display:none → shown restarts the
+           animation each open; all four start hidden so nothing runs at load) */
+        @keyframes chat-modal-pop { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: none; } }
+        [data-page="chat"] #personality-modal > .card,
+        [data-page="chat"] #memories-modal > .card,
+        [data-page="chat"] #changelog-modal > .card,
+        [data-page="chat"] #account-modal > div { animation: chat-modal-pop var(--dur-2) var(--ease-soft) backwards; }
+
 
 /* ═══════════════════════════════════════════════════════════════════
    PAGE: DESIGN  —  scoped to [data-page="design"]
