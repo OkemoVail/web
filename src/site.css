@@ -2677,3 +2677,194 @@ select:focus {
             }
         }
     
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: themes (styles.css)  —  scoped to [data-page="themes"]
+   ═══════════════════════════════════════════════════════════════════ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+
+@keyframes gradient-sweep-y {
+0% {
+background-position: 50% 120%;
+}
+50% {
+background-position: 50% 50%;
+}
+100% {
+background-position: 50% -20%;
+}
+}
+
+[data-page="themes"] .animate-gradient-sweep-y {
+background-size: 100% 300%;
+animation: gradient-sweep-y 2.2s ease-out 200ms both;
+will-change: background-position;
+}
+
+
+
+[data-page="themes"] .animate-gradient {
+min-height: 200px;
+
+
+  background: linear-gradient(180deg, #ff6b6b, #f7d794, #54a0ff, #ff6b6b);
+  background: linear-gradient(180deg, #ff6b6b, #f7d794, #54a0ff, #a454ff, #ff6b6b);
+
+
+background-size: 100% 300%;
+
+
+animation: animatedgradientY 6s ease infinite;
+}
+
+@keyframes animatedgradientY {
+0% {
+background-position: 0% 0%;
+}
+50% {
+    background-position: 0% 110%;
+  }
+  100% {
+    background-position: 0% 300%;
+  }
+}
+
+[data-page="themes"] .animate-gradient-alt {
+  min-height: 200px;
+
+  
+  background: linear-gradient(180deg, #ff6b6b, #f7d794, #54a0ff, #a454ff, #ff6b6b);
+
+  
+  background-size: 100% 300%;
+
+  
+  animation: animatedgradientY2 7s ease infinite;
+}
+
+@keyframes animatedgradientY2 {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 0% 110%;
+}
+100% {
+background-position: 0% 300%;
+}
+}
+
+
+
+[data-page="themes"] .animate-gradient2 {
+background-size: 200%;
+-webkit-animation: animatedgradient2 3s linear infinite forwards;
+-moz-animation: animatedgradient2 3s linear infinite forwards;
+animation: animatedgradient2 3s linear infinite forwards;
+color: transparent; 
+-webkit-background-clip: text; 
+background-clip: text;
+
+}
+
+@keyframes animatedgradient2 {
+0% {
+background-position: 0% 0%;
+}
+50% {
+background-position: 100% 0%;
+}
+100% {
+background-position: 200% 0%;
+}
+}
+
+
+html:has(> body[data-page="themes"]) {
+--background-gra: repeating-linear-gradient( -45deg, rgba(220, 220, 220, 0.5), rgba(220, 220, 220, 0.5) 6.5px, #ffffff 6.5px, #ffffff 32.5px );
+--background-gra-dark: repeating-linear-gradient( -45deg, rgb(26, 26, 26), rgb(26, 26, 26) 6.5px, #000000 6.5px, #000000 32.5px );
+}
+
+[data-page="themes"] .changingtext:hover:after {
+content: attr(data-hover);
+}
+
+[data-page="themes"] header {
+transition: all 0.2s ease-out;
+position: fixed;
+}
+
+[data-page="themes"] header.sticky {
+transition: all 0.2s ease-in-out;
+background: rgba(125, 125, 125, 0);
+position: fixed;
+}
+
+[data-page="themes"] #fact-container {
+
+opacity: 0;
+transform: translateY(-10px);
+transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+
+
+overflow: hidden; 
+}
+
+[data-page="themes"] #fact-container.show {
+opacity: 1;
+transform: translateY(0);
+}
+
+[data-page="themes"] {
+font-family: 'Inter', sans-serif;
+
+}
+
+
+
+
+[data-page="themes"] .fade-in-blur {
+  animation: fadeInBlur 0.4s ease-out forwards;
+}
+
+@keyframes fadeInBlur {
+  0% { 
+    opacity: 0; 
+    backdrop-filter: blur(0px); 
+    pointer-events: none; 
+  }
+  100% { 
+    opacity: 1; 
+    backdrop-filter: blur(100px); 
+    pointer-events: auto; 
+  }
+}
+
+
+[data-page="themes"] .fade-in-text {
+  animation: fadeInText 2s ease-out forwards;
+}
+
+
+@keyframes fadeInText {
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    -position: 200% 0%;
+  }
+}
