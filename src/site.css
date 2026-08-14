@@ -6173,6 +6173,37 @@ html.motion-ready [data-reveal].revealed {
   }
 
 
+  /* ── Motion (spec 2026-08-14) ── */
+  /* bar morph: hero bar and results bar share one VT name — only the
+     visible bar carries it, pairing hero⇄results (same-document) and
+     homepage pill⇄results bar (cross-document). */
+  [data-page="search"] #hero:not([hidden]) #hero-bar,
+  [data-page="search"] #results:not([hidden]) #results-bar { view-transition-name: site-search; }
+
+  /* result rows: load stagger (capped at 8 — see astra.js renderResults) */
+  [data-page="search"] .result.r-enter { opacity: 0; transform: translateY(var(--rise)); }
+  [data-page="search"] .result.r-enter.on {
+    opacity: 1; transform: none;
+    transition: opacity var(--dur-3) var(--ease-smooth), transform var(--dur-3) var(--ease-soft);
+  }
+
+  /* image grid: fade-rise as each thumbnail loads */
+  [data-page="search"] .ig-item.ig-enter { opacity: 0; transform: translateY(var(--rise)) scale(0.98); }
+  [data-page="search"] .ig-item.ig-enter.on {
+    opacity: 1; transform: none;
+    transition: opacity var(--dur-3) var(--ease-smooth), transform var(--dur-3) var(--ease-soft);
+  }
+
+  /* image preview sheet: slides in (right sheet on desktop, bottom sheet on mobile) */
+  @keyframes search-sheet-in { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
+  @media (max-width: 768px) {
+    @keyframes search-sheet-in { from { opacity: 0; transform: translateY(48px); } to { opacity: 1; transform: none; } }
+  }
+  @keyframes search-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+  [data-page="search"] #ig-preview:not([hidden]) .igp-panel { animation: search-sheet-in var(--dur-3) var(--ease-smooth) backwards; }
+  [data-page="search"] #ig-preview:not([hidden]) .igp-scrim { animation: search-scrim-in var(--dur-2) var(--ease-smooth) backwards; }
+
+
 /* ═══════════════════════════════════════════════════════════════════
    PAGE: themes (styles.css)  —  scoped to [data-page="themes"]
    ═══════════════════════════════════════════════════════════════════ */

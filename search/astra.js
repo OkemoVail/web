@@ -159,9 +159,19 @@
     }
   }
 
-  function renderRoute() {
+  function renderRouteDom() {
     const { q, tab } = readRoute();
     if (!q) showHero(); else showResults(q, tab);
+  }
+
+  // Same-document view transition: hero⇄results swaps and tab switches
+  // cross-fade/morph (the search bar holds steady via view-transition-name).
+  // Bailed under reduced-motion/automation → instant swap.
+  function renderRoute() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!document.startViewTransition || reduce || navigator.webdriver) { renderRouteDom(); return; }
+    const vt = document.startViewTransition(renderRouteDom);
+    vt.ready.catch(() => {}); vt.finished.catch(() => {}); // skipped transitions reject — swallow, the DOM swap already happened
   }
 
   // ── bar wiring (hero + results bars behave identically) ──
@@ -374,6 +384,13 @@
       const li = document.createElement('li');
       li.className = 'result';
       li.id = 'result-' + (start + i + 1);
+      // entrance stagger, capped at 8 rows so long/infinite pages don't trail
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !navigator.webdriver) {
+        li.classList.add('r-enter');
+        li.style.transitionDelay = Math.min(i, 7) * 45 + 'ms';
+        requestAnimationFrame(() => requestAnimationFrame(() => li.classList.add('on')));
+        li.addEventListener('transitionend', () => { li.classList.remove('r-enter', 'on'); li.style.transitionDelay = ''; }, { once: true });
+      }
 
       const img = document.createElement('img');
       img.className = 'r-favi';
@@ -486,6 +503,7 @@
     results.forEach((r) => {
       const b = document.createElement('button');
       b.className = 'ig-item';
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !navigator.webdriver) b.classList.add('ig-enter');
       b.type = 'button';
       const img = document.createElement('img');
       img.src = r.thumbnail || r.image;
@@ -499,6 +517,9 @@
       b.append(img, host);
       b.addEventListener('click', () => openImagePreview(r));
       grid.appendChild(b);
+      const revealItem = () => requestAnimationFrame(() => requestAnimationFrame(() => b.classList.add('on')));
+      img.addEventListener('load', revealItem, { once: true });
+      if (img.complete && img.naturalWidth) revealItem();   // cached images
     });
   }
 
@@ -844,6 +865,13 @@
     const aEl = document.createElement('div');      // the streaming answer under it
     aEl.className = 'ai-turn';
     body.append(qEl, aEl);
+    // iMessage-style morph: a ghost of the bubble travels from the composer
+    const _fromRect = $('ai-follow-input').getBoundingClientRect();
+    if (typeof window.motionGhost === 'function') {
+      qEl.style.visibility = 'hidden';
+      const started = window.motionGhost(qEl, _fromRect, () => { qEl.style.visibility = ''; });
+      if (!started) qEl.style.visibility = '';
+    }
     showThinking(question, aEl);
 
     panel.classList.remove('done');                 // shimmer spins again while answering
