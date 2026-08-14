@@ -46,6 +46,11 @@ try {
           await page.close();
           continue;
         }
+        // chat's #app-preloader fades out then self-removes on a racy timer —
+        // wait for it to be gone so chat screenshots are deterministic.
+        // (state:'hidden' also resolves when the element never existed, so
+        // this is a no-op on every other page.)
+        await page.waitForSelector('#app-preloader', { state: 'hidden', timeout: 8000 }).catch(() => {});
         await page.waitForTimeout(1500);
         await page.screenshot({ path: path.join(outDir, `${name}-${theme}.png`) });
         await page.close();
