@@ -331,9 +331,37 @@ Chat's floating chrome was remade 2026-07-04 in the capsule language:
 
 Sidebar history rows (`.history-btn-container`) share the New-chat button's
 springy motion (2026-07-04): hover = `translateY(-1px) scale(1.015)`, held
-press = `scale(0.96)`, both on the overshoot easing
-`cubic-bezier(0.34, 1.56, 0.64, 1)` — release springs back. Gotcha: the row
+press = `scale(0.96)`, both on the gentle-spring easing `var(--ease-soft)`
+(the motion tokens live in `src/site.css` §2 — the old hard-overshoot
+`cubic-bezier(0.34, 1.56, 0.64, 1)` was retuned site-wide 2026-08-14) —
+release springs back. Gotcha: the row
 pop-in/select animations (`chat-item-in` / `chat-item-selected`, tagged by
 `renderHistory()` in `history.js`) must use `animation-fill-mode: backwards`,
 NOT `both` — a forwards fill keeps overriding `transform` after the animation
 ends and silently kills the row's hover/press transforms.
+
+## Motion system (site-wide)
+
+One motion language ("premium but fun", spec/plan 2026-08-14): tokens in
+`src/site.css` §2 — `--ease-smooth` (workhorse), `--ease-soft` (gentle spring
+for presses/entrances), `--dur-1..4`, `--stagger`, `--rise`. Every new
+transition/animation consumes the tokens; transform/opacity only.
+
+- `src/motion.js` (loaded by AI/index.html, search/index.html, AI/chat.html):
+  `[data-reveal]` scroll entrances (gated behind `html.motion-ready` — content
+  is never hidden without JS) and `window.motionGhost(targetEl, fromRect, onDone)`,
+  the FLIP ghost behind the iMessage-style send morph.
+- Cross-page view transitions (`@view-transition { navigation: auto }` in §3):
+  content cross-fades/rises; `.ov-nav__bar` holds steady (`view-transition-name:
+  site-nav`); theme toggle is a circular reveal (nav.js + `--theme-x/y` +
+  `.theme-reveal-active`). Firefox: plain navigation (progressive enhancement).
+- iMessage send morph: chat (`AI/js/send-morph.js`, wired in `sendMessage` —
+  typed sends only; regen/attachments plain) and Astra's AI-panel composer
+  (in `askFollowUp`). Homepage pill ⇄ Astra bars pair via `view-transition-name:
+  site-search`.
+- Hard invariants: everything bails under `prefers-reduced-motion` AND
+  `navigator.webdriver` (keeps the Playwright snapshot harness deterministic —
+  new JS-driven motion MUST keep both guards). Entrance animations that touch
+  transform use `backwards` fill (never `both`/`forwards` — a forwards fill
+  pins transform forever and kills hover/press transforms); `[data-reveal]`
+  is print-safe via a `@media print` reveal-all rule.
