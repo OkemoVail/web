@@ -5116,7 +5116,7 @@ html.motion-ready [data-reveal].revealed {
         /* AI rows rise in (render.js tags them .animate-fade-in, which had
            no rule in this section — this gives it the intended entrance) */
         @keyframes chat-rise-in { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
-        [data-page="chat"] .ai-row.animate-fade-in { animation: chat-rise-in var(--dur-3) var(--ease-smooth) backwards; }
+        [data-page="chat"] .ai-row.animate-fade-in:last-child { animation: chat-rise-in var(--dur-3) var(--ease-smooth) backwards; }
 
         /* modals pop softly when shown (display:none → shown restarts the
            animation each open; all four start hidden so nothing runs at load) */
@@ -5124,6 +5124,7 @@ html.motion-ready [data-reveal].revealed {
         [data-page="chat"] #personality-modal > .card,
         [data-page="chat"] #memories-modal > .card,
         [data-page="chat"] #changelog-modal > .card,
+        [data-page="chat"] #sources-modal > div,
         [data-page="chat"] #account-modal > div { animation: chat-modal-pop var(--dur-2) var(--ease-soft) backwards; }
 
 
