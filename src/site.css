@@ -5618,12 +5618,14 @@ html.motion-ready [data-reveal].revealed {
       background: var(--bg-elevated);
       border: 1px solid var(--border-strong);
       box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      transition: border-color var(--dur-2) var(--ease-smooth), box-shadow var(--dur-2) var(--ease-smooth), transform var(--dur-2) var(--ease-soft);
+      view-transition-name: site-search; /* morphs into Astra's results bar on submit */
     }
 
     [data-page="home"] .hero-search:focus-within {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 80%);
+      transform: translateY(-2px);
     }
 
     /* local reset of the global unified-input styling (src/site.css §3),
