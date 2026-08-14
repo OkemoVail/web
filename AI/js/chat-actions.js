@@ -403,23 +403,6 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
     }
 };
 
-(function _injectSourcesCSS() {
-    if (document.getElementById('sources-btn-css')) return;
-    const s = document.createElement('style');
-    s.id = 'sources-btn-css';
-    s.textContent = `
-        .ai-action-btn.sources-btn { display: inline-flex; align-items: center; gap: 0.25rem; }
-        .ai-action-btn.sources-btn .sources-count {
-            font-size: 0.7rem; font-weight: 700; line-height: 1;
-            padding: 2px 6px; border-radius: 9999px;
-            background: var(--accent-glow, rgba(127,127,127,0.18));
-            color: var(--accent-color, currentColor);
-        }
-        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-    `;
-    document.head.appendChild(s);
-})();
-
 window.showSources = (idx) => {
     const entry = window.chatHistory[idx];
     const sources = entry && entry[5];
@@ -430,7 +413,7 @@ window.showSources = (idx) => {
 
     overlay = document.createElement('div');
     overlay.id = 'sources-modal-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn 0.18s ease;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:chat-fadeIn 0.18s ease;';
 
     const card = document.createElement('div');
     card.className = 'sources-modal-card';
