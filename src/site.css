@@ -1601,6 +1601,14 @@ html.motion-ready [data-reveal].revealed {
         }
     
 
+        /* ── Motion (spec 2026-08-14) ── */
+        @keyframes ai-home-rise { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
+        @keyframes ai-home-book-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
+        [data-page="ai-home"] .mo-in { animation: ai-home-rise var(--dur-4) var(--ease-smooth) backwards; }
+        [data-page="ai-home"] .mo-d1 { animation-delay: 45ms; }
+        [data-page="ai-home"] .mo-d2 { animation-delay: 90ms; }
+        [data-page="ai-home"] .book-scene { animation: ai-home-book-in var(--dur-4) var(--ease-smooth) 120ms backwards; }
+
 /* ═══════════════════════════════════════════════════════════════════
    PAGE: CHAT  —  scoped to [data-page="chat"]
    ═══════════════════════════════════════════════════════════════════ */
