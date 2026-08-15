@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motion Demo — Apple-style ease-in-out</title>
+<link rel="stylesheet" href="src/site.css">
+<script>
+    // Anti-FOUC theme, same convention as every page
+    (function () {
+        var t = localStorage.getItem('vail_theme') || 'system';
+        var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+    })();
+</script>
+<style>
+    /* Layout only — all surfaces/motion come from src/site.css tokens */
+    body {
+        background: var(--bg);
+        color: var(--text-primary);
+        font-family: 'Satoshi', 'Inter', sans-serif;
+        margin: 0;
+        min-height: 100vh;
+    }
+    .wrap { max-width: 880px; margin: 0 auto; padding: 3.5rem 1.25rem 6rem; }
+    .serif { font-family: 'Century', Georgia, serif; }
+    h1 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -0.02em; margin: 0 0 0.5rem; }
+    h2 { font-size: 1.25rem; margin: 0 0 0.25rem; }
+    .sub { color: var(--text-secondary); margin: 0 0 3rem; font-size: 1.05rem; }
+    section { margin-bottom: 3.5rem; }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .hint { color: var(--text-tertiary); font-size: 0.85rem; margin: 0.35rem 0 0; }
+    header.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
+    .badge-row { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+
+    /* ── Curve plots ── */
+    .curve-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+    .curve-card svg { width: 100%; height: auto; display: block; }
+    .curve-legend { display: flex; gap: 1.25rem; font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; flex-wrap: wrap; }
+    .swatch { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 0.4rem; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-tertiary); }
+
+    /* ── Race track ── */
+    .track { position: relative; height: 44px; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border); overflow: hidden; }
+    .track + .track { margin-top: 0.6rem; }
+    .track-label { font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin: 0.9rem 0 0.35rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .racer {
+        position: absolute; top: 5px; left: 5px; height: 32px; width: 110px;
+        border-radius: 999px; display: flex; align-items: center; justify-content: center;
+        font-size: 0.72rem; font-weight: 900; letter-spacing: 0.06em; color: white;
+        background-image: var(--chrome-fill); box-shadow: var(--chrome-shadow);
+        --skuo-surface: var(--skuo-accent); --skuo-glow: var(--accent-glow, transparent);
+        background-color: var(--accent);
+        will-change: transform;
+    }
+    .racer.ghost-grey { background-color: #9a998f; --skuo-surface: #9a998f; --skuo-glow: transparent; }
+
+    /* ── Entrance cards ── */
+    .rise-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+    @media (max-width: 640px) { .rise-row { grid-template-columns: repeat(2, 1fr); } }
+    .rise-card { padding: 1.1rem 0.9rem; text-align: center; font-weight: 700; font-size: 0.85rem; opacity: 0; }
+    .rise-card.play { animation: demo-rise 560ms var(--demo-ease, var(--ease-smooth)) backwards; }
+    @keyframes demo-rise { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
+
+    /* ── Button feel ── */
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+
+    /* ── Generation indicator (recreates chat's book-flip — that block is
+          scoped to [data-page="chat"] in site.css, so the demo re-declares it
+          with the same geometry, driving everything off the live tokens) ── */
+    .gen-stage { min-height: 96px; display: flex; align-items: center; }
+    .demo-lane { width: 100%; height: 28px; position: relative; }
+    .demo-lane.in { animation: demo-gen-in var(--dur-3) var(--ease-smooth) backwards; }
+    .demo-lane.done { opacity: 0; transition: opacity 0.3s var(--ease-smooth); }
+    @keyframes demo-gen-in { from { opacity: 0; transform: translateY(var(--rise)); } to { opacity: 1; transform: none; } }
+    .demo-flipper {
+        position: absolute; left: 2px; top: calc(50% - 13px); width: 26px; height: 26px;
+        color: var(--accent); opacity: 0.85;
+        animation: demo-book-bob 2.6s ease-in-out infinite;
+    }
+    .demo-flipper svg { width: 100%; height: 100%; stroke: currentColor; stroke-width: 1.8px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .demo-flipper .book-page { transform-box: view-box; transform-origin: 12px 12px; animation: demo-page-flip 1.5s ease-in-out infinite; }
+    @keyframes demo-page-flip {
+        0% { transform: scaleX(1); opacity: 1; }
+        48% { transform: scaleX(-1); opacity: 1; }
+        60% { transform: scaleX(-1); opacity: 0; }
+        61% { transform: scaleX(1); opacity: 0; }
+        76%, 100% { transform: scaleX(1); opacity: 1; }
+    }
+    @keyframes demo-book-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+    @media (prefers-reduced-motion: reduce) {
+        .demo-flipper, .demo-flipper .book-page { animation: none; }
+    }
+
+    /* ── Arc lab (10 flight variants) ── */
+    .lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 1rem; }
+    .lab-card { padding: 0; overflow: hidden; cursor: pointer; }
+    .lab-card:hover { filter: brightness(1.02); }
+    .lab-stage { position: relative; height: 230px; padding: 0.9rem; display: flex; flex-direction: column; justify-content: space-between; }
+    .lab-target { align-self: flex-end; max-width: 70%; padding: 0.5rem 0.85rem; border-radius: 18px; font-size: 0.85rem; color: #fff; background-color: var(--accent); background-image: var(--chrome-fill); box-shadow: var(--chrome-shadow); --skuo-surface: var(--skuo-accent); }
+    .lab-composer { height: 34px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; padding: 0 0.9rem; font-size: 0.8rem; color: var(--text-tertiary); }
+    .lab-meta { padding: 0.7rem 1rem 0.9rem; border-top: 1px solid var(--border); }
+    .lab-name { font-weight: 800; font-size: 0.88rem; }
+    .lab-blurb { color: var(--text-tertiary); font-size: 0.76rem; margin-top: 0.15rem; }
+    .lab-ghost {
+        position: fixed; z-index: 9999; pointer-events: none; margin: 0;
+        padding: 0.5rem 0.85rem; border-radius: 18px; font-size: 0.85rem; color: #fff;
+        background-color: var(--accent); overflow: hidden; box-sizing: border-box;
+        display: flex; align-items: center; box-shadow: var(--chrome-shadow);
+    }
+
+    /* ── Send morph mini-chat ── */
+    .chat-box { display: flex; flex-direction: column; height: 420px; }
+    .chat-log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding: 1rem; }
+    .bubble {
+        align-self: flex-end; max-width: 75%; padding: 0.6rem 0.95rem; border-radius: 20px;
+        color: #fff; font-size: 0.92rem; line-height: 1.45; overflow-wrap: break-word;
+        background-image: var(--chrome-fill); box-shadow: var(--chrome-shadow);
+        --skuo-surface: var(--skuo-accent); --skuo-glow: var(--accent-glow, transparent);
+        background-color: var(--accent);
+    }
+    .bubble.them { align-self: flex-start; color: var(--text-primary); background-color: var(--bg-elevated); --skuo-surface: var(--skuo-neutral); --skuo-glow: transparent; border: 1px solid var(--border); }
+    .composer { display: flex; gap: 0.6rem; padding: 0.9rem 1rem; border-top: 1px solid var(--border); }
+    .composer input { flex: 1; }
+    .composer .skuo { border-radius: 999px; padding: 0 1.2rem; height: 44px; font-weight: 700; }
+    .composer input { border-radius: 999px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <header class="top">
+        <div class="serif" style="font-size:1.15rem; font-weight:700;">◦ motion lab</div>
+        <button class="skuo skuo-icon" id="theme-btn" title="Toggle theme" style="width:2.6rem;height:2.6rem;border-radius:999px;">◐</button>
+    </header>
+
+    <h1 class="serif">Apple-style ease-in-out, everywhere.</h1>
+    <p class="sub">Every animation on search, chat &amp; home now accelerates gently and settles gently.
+       Old curves on the left of each demo — new feel on the right. This page consumes the live tokens from
+       <span class="mono">src/site.css</span>, so it always shows the current motion.</p>
+
+    <div class="badge-row">
+        <span class="ui-badge">--ease-smooth · cubic-bezier(0.65, 0, 0.35, 1)</span>
+        <span class="ui-badge">--ease-soft · cubic-bezier(0.4, 0, 0.2, 1)</span>
+    </div>
+
+    <!-- 1 · The curves -->
+    <section>
+        <div class="section-head"><h2 class="serif">1 · The curves</h2><span class="hint">time → &nbsp;·&nbsp; progress ↑</span></div>
+        <div class="curve-grid">
+            <div class="card card-pad curve-card">
+                <h2 class="serif">--ease-smooth <span class="mono">workhorse</span></h2>
+                <svg viewBox="0 0 100 108" aria-hidden="true">
+                    <g stroke="var(--border)" stroke-width="0.5">
+                        <line x1="0" y1="25" x2="100" y2="25"/><line x1="0" y1="50" x2="100" y2="50"/><line x1="0" y1="75" x2="100" y2="75"/>
+                    </g>
+                    <line x1="0" y1="100" x2="100" y2="0" stroke="var(--text-tertiary)" stroke-width="0.75" stroke-dasharray="3 3" opacity="0.5"/>
+                    <path d="M0,100 C22,0 36,0 100,0" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="4 3"/>
+                    <path d="M0,100 C65,100 35,0 100,0" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <div class="curve-legend">
+                    <span><span class="swatch" style="background:var(--accent);"></span>new · in-out (0.65, 0, 0.35, 1)</span>
+                    <span><span class="swatch" style="background:var(--text-tertiary);"></span>old · ease-out (0.22, 1, 0.36, 1)</span>
+                </div>
+            </div>
+            <div class="card card-pad curve-card">
+                <h2 class="serif">--ease-soft <span class="mono">presses &amp; pops</span></h2>
+                <svg viewBox="0 0 100 108" aria-hidden="true">
+                    <g stroke="var(--border)" stroke-width="0.5">
+                        <line x1="0" y1="25" x2="100" y2="25"/><line x1="0" y1="50" x2="100" y2="50"/><line x1="0" y1="75" x2="100" y2="75"/>
+                    </g>
+                    <line x1="0" y1="100" x2="100" y2="0" stroke="var(--text-tertiary)" stroke-width="0.75" stroke-dasharray="3 3" opacity="0.5"/>
+                    <path d="M0,100 C25,0 50,0 100,0" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="4 3"/>
+                    <path d="M0,100 C40,100 20,0 100,0" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <div class="curve-legend">
+                    <span><span class="swatch" style="background:var(--accent);"></span>new · in-out (0.4, 0, 0.2, 1)</span>
+                    <span><span class="swatch" style="background:var(--text-tertiary);"></span>old · ease-out (0.25, 1, 0.5, 1)</span>
+                </div>
+            </div>
+        </div>
+        <p class="hint">Dotted diagonal = linear. Notice the new curves leave slowly <em>and</em> arrive slowly — no snap at either end.</p>
+    </section>
+
+    <!-- 2 · Race -->
+    <section>
+        <div class="section-head"><h2 class="serif">2 · The race</h2>
+            <button class="skuo skuo-accent skuo-pill" id="race-btn" style="padding:0.55rem 1.4rem;font-weight:700;">Race</button>
+        </div>
+        <div class="track-label">Before — ease-out (fast start, hard stop)</div>
+        <div class="track"><div class="racer ghost-grey" id="racer-old">OLD</div></div>
+        <div class="track-label">After — ease-in-out (glides out, glides in)</div>
+        <div class="track"><div class="racer" id="racer-new">NEW</div></div>
+    </section>
+
+    <!-- 3 · Entrances -->
+    <section>
+        <div class="section-head"><h2 class="serif">3 · Entrances</h2>
+            <button class="skuo skuo-accent skuo-pill" id="rise-btn" style="padding:0.55rem 1.4rem;font-weight:700;">Replay</button>
+        </div>
+        <div class="track-label">Before</div>
+        <div class="rise-row" id="rise-old">
+            <div class="card rise-card">One</div><div class="card rise-card">Two</div>
+            <div class="card rise-card">Three</div><div class="card rise-card">Four</div>
+        </div>
+        <div class="track-label">After</div>
+        <div class="rise-row" id="rise-new">
+            <div class="card rise-card">One</div><div class="card rise-card">Two</div>
+            <div class="card rise-card">Three</div><div class="card rise-card">Four</div>
+        </div>
+    </section>
+
+    <!-- 4 · Buttons (live tokens) -->
+    <section>
+        <div class="section-head"><h2 class="serif">4 · Hover &amp; press</h2><span class="hint">real .skuo buttons — hover lifts, press squishes, all on the new curves</span></div>
+        <div class="card card-pad">
+            <div class="btn-row">
+                <button class="skuo skuo-accent" style="padding:0.7rem 1.6rem;font-weight:700;">Accent</button>
+                <button class="skuo" style="padding:0.7rem 1.6rem;font-weight:700;">Neutral</button>
+                <button class="skuo skuo-neutral skuo-pill" style="padding:0.7rem 1.6rem;font-weight:700;">Pill</button>
+                <button class="skuo skuo-icon" style="width:2.8rem;height:2.8rem;">✦</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5 · Generation indicator -->
+    <section>
+        <div class="section-head"><h2 class="serif">5 · Generation indicator</h2>
+            <button class="skuo skuo-accent skuo-pill" id="gen-btn" style="padding:0.55rem 1.4rem;font-weight:700;">Replay</button>
+        </div>
+        <p class="hint" style="margin-bottom:1rem;">Chat's book page-flip — now enters bottom→top with a fade on the ease-in-out curve, and fades out when the answer lands.</p>
+        <div class="card card-pad gen-stage" id="gen-stage"></div>
+    </section>
+
+    <!-- 6 · Send morph -->
+    <section>
+        <div class="section-head"><h2 class="serif">6 · The send morph</h2><span class="hint">the real motionGhost() from src/motion.js — same as chat &amp; Astra</span></div>
+        <div class="card chat-box">
+            <div class="chat-log" id="chat-log">
+                <div class="bubble them">This is exactly how a sent message travels in chat now.</div>
+                <div class="bubble them">Type below and hit send — watch it arc up on the new ease-in-out. ✦</div>
+            </div>
+            <form class="composer" id="composer">
+                <input type="text" id="composer-input" placeholder="Say something…" autocomplete="off">
+                <button type="submit" class="skuo skuo-accent">Send</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 7 · Arc lab -->
+    <section>
+        <div class="section-head"><h2 class="serif">7 · Pick the arc — 10 options</h2>
+            <button class="skuo skuo-accent skuo-pill" id="lab-all" style="padding:0.55rem 1.4rem;font-weight:700;">Play all</button>
+        </div>
+        <p class="hint" style="margin-bottom:1rem;">Click any card to replay it. Tell me the number and I'll bake it into <span class="mono">src/motion.js</span> for chat + Astra.</p>
+        <div class="lab-grid" id="lab-grid"></div>
+    </section>
+
+    <p class="hint" style="text-align:center;margin-top:4rem;">
+        Reduced-motion users: everything above respects <span class="mono">prefers-reduced-motion</span> —
+        the ghosts skip and entrances settle instantly.
+    </p>
+</div>
+
+<script src="src/motion.js"></script>
+<script>
+(function () {
+    'use strict';
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* theme toggle (site convention: vail_theme + .dark) */
+    document.getElementById('theme-btn').addEventListener('click', function () {
+        var dark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('vail_theme', dark ? 'dark' : 'light');
+    });
+
+    var OLD_SMOOTH = 'cubic-bezier(0.22, 1, 0.36, 1)';   /* pre-2026-08-15 --ease-smooth */
+    var NEW_SMOOTH = getComputedStyle(document.documentElement).getPropertyValue('--ease-smooth').trim() || 'cubic-bezier(0.65, 0, 0.35, 1)';
+    var OLD_SOFT = 'cubic-bezier(0.25, 1, 0.5, 1)';      /* pre-2026-08-15 --ease-soft */
+
+    /* ── 2 · race ── */
+    var raceBtn = document.getElementById('race-btn');
+    raceBtn.addEventListener('click', function () {
+        var track = document.querySelector('.track');
+        var racerW = 120; /* 110 + 5 left offset */
+        var dist = track.clientWidth - racerW - 5;
+        if (dist <= 0) return;
+        [['racer-old', OLD_SMOOTH], ['racer-new', NEW_SMOOTH]].forEach(function (pair) {
+            var el = document.getElementById(pair[0]);
+            el.getAnimations().forEach(function (a) { a.cancel(); });
+            if (reduce) { el.style.transform = 'translateX(' + dist + 'px)'; return; }
+            el.animate(
+                [{ transform: 'translateX(0)' }, { transform: 'translateX(' + dist + 'px)' }],
+                { duration: 1100, easing: pair[1], fill: 'forwards' }
+            );
+        });
+    });
+
+    /* ── 3 · entrances ── */
+    function playRow(id, ease) {
+        document.querySelectorAll('#' + id + ' .rise-card').forEach(function (card, i) {
+            card.classList.remove('play');
+            card.style.animationDelay = '';
+            void card.offsetWidth; /* restart */
+            card.style.setProperty('--demo-ease', ease);
+            card.style.animationDelay = (i * 45) + 'ms'; /* --stagger */
+            card.classList.add('play');
+        });
+    }
+    document.getElementById('rise-btn').addEventListener('click', function () {
+        playRow('rise-old', OLD_SOFT);
+        playRow('rise-new', NEW_SMOOTH);
+    });
+    /* auto-play once on load */
+    document.getElementById('rise-btn').click();
+
+    /* ── 5 · generation indicator (same lifecycle as chat: rise+fade in on
+          start, stream, then .done fade-out — finalizeLastAIMessage) ── */
+    var genStage = document.getElementById('gen-stage');
+    var genBtn = document.getElementById('gen-btn');
+    var genTimers = [];
+    function playGen() {
+        genTimers.forEach(clearTimeout); genTimers = [];
+        var old = genStage.querySelector('.demo-lane');
+        if (old) old.remove();
+        var lane = document.createElement('div');
+        lane.className = 'demo-lane in';
+        lane.innerHTML = '<div class="demo-flipper"><svg viewBox="0 0 24 24"><path d="M12 6 C10 4.5,6.5 4.5,4.5 6 L4.5 18.5 C6.5 17,10 17,12 18.5 C14 17,17.5 17,19.5 18.5 L19.5 6 C17.5 4.5,14 4.5,12 6 Z"/><path d="M12 6 L12 18.5"/><path class="book-page" d="M12 6 C14 4.5,17.5 4.5,19.5 6 L19.5 18.5 C17.5 17,14 17,12 18.5 Z"/></svg></div>';
+        genStage.appendChild(lane);
+        /* simulate the stream finishing ~3.2s later → .done fade-out */
+        genTimers.push(setTimeout(function () {
+            lane.classList.add('done');
+            genTimers.push(setTimeout(function () { lane.remove(); }, 340));
+        }, 3200));
+    }
+    genBtn.addEventListener('click', playGen);
+    playGen(); /* auto-play once on load */
+
+    /* ── 7 · arc lab ─────────────────────────────────────────────────────
+       Parametric flight paths. path(t) returns {x,y} center for eased
+       progress t (0→1, may overshoot past 1); extra(t) may add scale/opacity.
+       ctx: { P0, P1, perp (unit), dist, w0,h0,w1,h1 } — centers in px. */
+    var easeIO = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+    var easeOut = function (t) { return 1 - Math.pow(1 - t, 3); };
+    function qbez(P0, C, P1) { return function (t) { var u = 1 - t; return { x: u*u*P0.x + 2*u*t*C.x + t*t*P1.x, y: u*u*P0.y + 2*u*t*C.y + t*t*P1.y }; }; }
+    function cbez(P0, C1, C2, P1) { return function (t) { var u = 1 - t; return { x: u*u*u*P0.x + 3*u*u*t*C1.x + 3*u*t*t*C2.x + t*t*t*P1.x, y: u*u*u*P0.y + 3*u*u*t*C1.y + 3*u*t*t*C2.y + t*t*t*P1.y }; }; }
+    function lin(P0, P1) { return function (t) { return { x: P0.x + (P1.x - P0.x) * t, y: P0.y + (P1.y - P0.y) * t }; }; }
+    function midCtrl(c, k) { return { x: (c.P0.x + c.P1.x) / 2 + c.perp.x * Math.min(c.dist * Math.abs(k), 140) * Math.sign(k), y: (c.P0.y + c.P1.y) / 2 + c.perp.y * Math.min(c.dist * Math.abs(k), 140) * Math.sign(k) }; }
+    function downCtrl(c, k) { var b = Math.min(c.dist * k, 170); return { x: (c.P0.x + c.P1.x) / 2, y: (c.P0.y + c.P1.y) / 2 + b }; }   /* screen-y down */
+    function upCtrl(c, k) { var b = Math.min(c.dist * k, 170); return { x: (c.P0.x + c.P1.x) / 2, y: (c.P0.y + c.P1.y) / 2 - b }; }
+
+    var VARIANTS = [
+        { name: '1 · Downward sag', blurb: 'lobs below the line, 25% bow', dur: 420, ease: easeIO,
+          path: function (c) { return qbez(c.P0, downCtrl(c, 0.25), c.P1); } },
+        { name: '2 · Upward hill', blurb: 'rises above the line, settles down onto target', dur: 420, ease: easeIO,
+          path: function (c) { return qbez(c.P0, upCtrl(c, 0.25), c.P1); } },
+        { name: '3 · Serpentine sway', blurb: 'S-curve: sways one way, then the other', dur: 460, ease: easeIO,
+          path: function (c) { var b = Math.min(c.dist * 0.18, 90);
+              var c1 = { x: c.P0.x + (c.P1.x-c.P0.x)*0.33 + c.perp.x*b, y: c.P0.y + (c.P1.y-c.P0.y)*0.33 + c.perp.y*b };
+              var c2 = { x: c.P0.x + (c.P1.x-c.P0.x)*0.66 - c.perp.x*b, y: c.P0.y + (c.P1.y-c.P0.y)*0.66 - c.perp.y*b };
+              return cbez(c.P0, c1, c2, c.P1); } },
+        { name: '4 · Pure straight', blurb: 'no arc at all — just a buttery ease-in-out line', dur: 400, ease: easeIO,
+          path: function (c) { return lin(c.P0, c.P1); } },
+        { name: '5 · Shrink & regrow', blurb: 'straight line, dips to 82% scale mid-flight', dur: 430, ease: easeIO,
+          path: function (c) { return lin(c.P0, c.P1); },
+          extra: function (t) { return { scale: 1 - 0.18 * Math.sin(Math.PI * Math.min(Math.max(t, 0), 1)) }; } },
+        { name: '6 · Deep gravity', blurb: 'heavy sag, 40% — feels weighty, tossed not slid', dur: 480, ease: easeIO,
+          path: function (c) { return qbez(c.P0, downCtrl(c, 0.4), c.P1); } },
+        { name: '7 · High lob', blurb: 'big upward toss, drops in from above, slower', dur: 520, ease: easeIO,
+          path: function (c) { return qbez(c.P0, upCtrl(c, 0.38), c.P1); } },
+        { name: '8 · Overshoot snap', blurb: 'straight, glides ~5% past the target and settles back', dur: 460, ease: function (o) { return o < 0.8 ? easeIO(o / 0.8) * 1.05 : 1.05 - 0.05 * easeIO((o - 0.8) / 0.2); },
+          path: function (c) { return lin(c.P0, c.P1); } },
+        { name: '9 · Sideways whip ✓', blurb: 'IN PRODUCTION — snaps off the line fast (45% bow), long glide in', dur: 480, ease: easeOut,
+          path: function (c) { var C = midCtrl(c, 0.45); return qbez(c.P0, C, c.P1); } },
+        { name: '10 · Fade-port', blurb: 'no travel — source shrinks & fades while the bubble fades in', dur: 300, ease: easeIO,
+          path: null }
+    ];
+
+    var labGrid = document.getElementById('lab-grid');
+    var labCards = [];
+
+    VARIANTS.forEach(function (v, idx) {
+        var card = document.createElement('div');
+        card.className = 'card lab-card';
+        card.innerHTML =
+            '<div class="lab-stage">' +
+                '<div class="lab-target">sounds good ✦</div>' +
+                '<div class="lab-composer">sounds good ✦</div>' +
+            '</div>' +
+            '<div class="lab-meta"><div class="lab-name">' + v.name + '</div><div class="lab-blurb">' + v.blurb + '</div></div>';
+        labGrid.appendChild(card);
+        labCards.push(card);
+        card.addEventListener('click', function () { playVariant(idx, card); });
+    });
+
+    function playVariant(idx, card) {
+        var v = VARIANTS[idx];
+        var stage = card.querySelector('.lab-stage');
+        var target = card.querySelector('.lab-target');
+        var composer = card.querySelector('.lab-composer');
+        var fromRect = composer.getBoundingClientRect();
+        var toRect = target.getBoundingClientRect();
+        if (reduce || !toRect.width) { return; }
+
+        target.style.visibility = 'hidden';
+        var ghost = document.createElement('div');
+        ghost.className = 'lab-ghost';
+        ghost.textContent = 'sounds good ✦';
+        Object.assign(ghost.style, {
+            left: fromRect.left + 'px', top: fromRect.top + 'px',
+            width: fromRect.width + 'px', height: fromRect.height + 'px',
+            transformOrigin: 'center'
+        });
+        document.body.appendChild(ghost);
+        var finish = function () { ghost.remove(); target.style.visibility = ''; };
+
+        if (v.path === null) {   /* fade-port */
+            var a1 = ghost.animate(
+                [{ opacity: '1', transform: 'scale(1)' }, { opacity: '0', transform: 'scale(0.9)' }],
+                { duration: v.dur * 0.7, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'forwards' });
+            a1.onfinish = function () {
+                ghost.remove();
+                target.style.visibility = '';
+                target.animate(
+                    [{ opacity: '0', transform: 'translateY(10px) scale(0.96)' }, { opacity: '1', transform: 'none' }],
+                    { duration: v.dur, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+            };
+            a1.oncancel = finish;
+            return;
+        }
+
+        var ctx = {
+            P0: { x: fromRect.left + fromRect.width / 2, y: fromRect.top + fromRect.height / 2 },
+            P1: { x: toRect.left + toRect.width / 2, y: toRect.top + toRect.height / 2 },
+            dist: 0, perp: { x: 0, y: 0 },
+            w0: fromRect.width, h0: fromRect.height, w1: toRect.width, h1: toRect.height
+        };
+        var dx = ctx.P1.x - ctx.P0.x, dy = ctx.P1.y - ctx.P0.y;
+        ctx.dist = Math.hypot(dx, dy) || 1;
+        ctx.perp = { x: -dy / ctx.dist, y: dx / ctx.dist };
+        if (ctx.perp.x < 0) { ctx.perp.x = -ctx.perp.x; ctx.perp.y = -ctx.perp.y; }  /* bow right on verticals */
+
+        var pathFn = v.path(ctx);
+        var STEPS = 12, frames = [];
+        for (var i = 0; i <= STEPS; i++) {
+            var o = i / STEPS;
+            var t = v.ease(o);
+            var pt = pathFn(t);
+            var w = ctx.w0 + (ctx.w1 - ctx.w0) * Math.min(Math.max(t, 0), 1.05);
+            var h = ctx.h0 + (ctx.h1 - ctx.h0) * Math.min(Math.max(t, 0), 1.05);
+            var ex = v.extra ? v.extra(t) : null;
+            frames.push({
+                offset: o,
+                left: (pt.x - w / 2) + 'px', top: (pt.y - h / 2) + 'px',
+                width: w + 'px', height: h + 'px',
+                transform: ex && ex.scale ? 'scale(' + ex.scale + ')' : 'none',
+                opacity: ex && ex.opacity != null ? ex.opacity : '1'
+            });
+        }
+        var anim = ghost.animate(frames, { duration: v.dur, easing: 'linear', fill: 'forwards' });
+        anim.onfinish = finish;
+        anim.oncancel = finish;
+    }
+
+    document.getElementById('lab-all').addEventListener('click', function (e) {
+        e.stopPropagation();
+        labCards.forEach(function (card, i) {
+            setTimeout(function () { playVariant(i, card); }, i * 130);
+        });
+    });
+
+    /* ── 6 · send morph (same wiring as AI/js/send-morph.js) ── */
+    var form = document.getElementById('composer');
+    var input = document.getElementById('composer-input');
+    var log = document.getElementById('chat-log');
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var text = input.value.trim();
+        if (!text) return;
+        var fromRect = input.getBoundingClientRect();
+        input.value = '';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = text;
+        log.appendChild(bubble);
+        log.scrollTop = log.scrollHeight; /* settle scroll so target rect is final */
+
+        bubble.style.visibility = 'hidden';
+        var started = window.motionGhost ? window.motionGhost(bubble, fromRect, function () {
+            bubble.style.visibility = '';
+        }) : false;
+        if (!started) bubble.style.visibility = '';
+    });
+})();
+</script>
+</body>
+</html>

@@ -52,10 +52,12 @@
 
 /* ── Motion tokens (motion system, spec 2026-08-14) ─────────────────────
    Every transition/animation consumes these. Re-tune the whole site's
-   feel by editing this block. Recipe B: silky base + gentle spring. ── */
+   feel by editing this block. Recipe C: Apple-style ease-in-out — every
+   motion accelerates gently AND decelerates gently (polished S-curves,
+   no snap at either end). ── */
 :root {
-  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);  /* workhorse: hovers, fades, rises, expands, page transitions */
-  --ease-soft:   cubic-bezier(0.25, 1, 0.5, 1);   /* soft ease-out (no overshoot): presses, pops, entrances — the "fun" */
+  --ease-smooth: cubic-bezier(0.65, 0, 0.35, 1);  /* ease-in-out workhorse: hovers, fades, rises, expands, page transitions */
+  --ease-soft:   cubic-bezier(0.4, 0, 0.2, 1);    /* gentle ease-in-out (no overshoot): presses, pops, entrances — the "fun" */
   --dur-1: 140ms;  --dur-2: 220ms;  --dur-3: 360ms;  --dur-4: 560ms;
   --stagger: 45ms;
   --rise: 10px;
@@ -1627,7 +1629,7 @@ html.motion-ready [data-reveal].revealed {
 [data-page="chat"] [class*="hover:"],
 [data-page="chat"] .__menu-item,
 [data-page="chat"] .skuomorphic-btn {
-            transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+            transition: background-color 0.2s var(--ease-smooth), border-color 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth), opacity 0.2s ease;
         }
 
         [data-page="chat"] .no-scrollbar::-webkit-scrollbar {
@@ -1652,7 +1654,7 @@ html.motion-ready [data-reveal].revealed {
             width: 100%;
             overflow: hidden;
             /* Elements inside keep fixed positions; aside clips them as width changes */
-            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: width 0.3s var(--ease-smooth), transform 0.3s var(--ease-smooth);
             transform: translateZ(0);
             backface-visibility: hidden;
         }
@@ -1726,25 +1728,25 @@ html.motion-ready [data-reveal].revealed {
             white-space: nowrap;
             overflow: hidden;
             opacity: 1;
-            transition: opacity 0.18s ease-out 0.08s;
+            transition: opacity 0.18s var(--ease-smooth) 0.08s;
         }
 
         [data-page="chat"].sidebar-collapsed .sb-row-text {
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.08s ease-in;
+            transition: opacity 0.08s var(--ease-smooth);
         }
 
         /* Hide chat history + folders in collapsed rail */
         [data-page="chat"] #sidebar-history-area {
             opacity: 1;
-            transition: opacity 0.18s ease-out 0.08s;
+            transition: opacity 0.18s var(--ease-smooth) 0.08s;
         }
 
         [data-page="chat"].sidebar-collapsed #sidebar-history-area {
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.08s ease-in;
+            transition: opacity 0.08s var(--ease-smooth);
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1774,8 +1776,8 @@ html.motion-ready [data-reveal].revealed {
 
         @media (prefers-reduced-motion: no-preference) {
             [data-page="chat"] #sidebar {
-                transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                transition: width 0.3s var(--ease-smooth),
+                            transform 0.3s var(--ease-smooth),
                             box-shadow 0.3s ease;
             }
         }
@@ -1818,7 +1820,7 @@ html.motion-ready [data-reveal].revealed {
             flex-shrink: 0;
             border-radius: 9999px;
             color: var(--text-secondary);
-            transition: background 0.18s ease, color 0.2s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: background 0.18s ease, color 0.2s ease, transform 0.18s var(--ease-smooth);
         }
 
         /* Collapsed: suppress full-width rect, highlight only icon slot */
@@ -1857,7 +1859,7 @@ html.motion-ready [data-reveal].revealed {
         }
 
         [data-page="chat"] .sb-profile-btn .sb-nav-icon {
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.12s ease;
+            transition: transform 0.3s var(--ease-smooth), background 0.12s ease;
             transform: translateX(10px);
         }
 
@@ -1923,7 +1925,7 @@ html.motion-ready [data-reveal].revealed {
             opacity: 0;
             transform: translateY(-50%) scaleY(0.35);
             transition: opacity 0.2s ease,
-                        transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+                        transform 0.28s var(--ease-smooth);
         }
 
         /* Hover: a clean rounded fill — plain icons, no box.
@@ -1964,7 +1966,7 @@ html.motion-ready [data-reveal].revealed {
            is synced to the sidebar width transition (0.3s, same easing). */
         [data-page="chat"] .sb-nav-item.sb-tile .sb-nav-icon {
             transform: translateX(8px);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            transition: transform 0.3s var(--ease-smooth),
                         background 0.18s ease,
                         color 0.2s ease;
         }
@@ -2047,7 +2049,7 @@ html.motion-ready [data-reveal].revealed {
             /* background + box-shadow removed — shared .skuo handles appearance */
             transition: background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
                         box-shadow 0.25s ease,
-                        margin 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                        margin 0.3s var(--ease-smooth),
                         transform 0.34s var(--ease-soft);
         }
 
@@ -2614,7 +2616,7 @@ html.motion-ready [data-reveal].revealed {
             border: 1px solid rgba(0, 0, 0, 0.08);
             color: #71717a;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s var(--ease-smooth);
             position: relative;
             overflow: hidden;
         }
@@ -2762,7 +2764,10 @@ html.motion-ready [data-reveal].revealed {
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border-strong);
-            border-radius: 28px;
+            /* Corner radius = #send-btn radius (8px) + #input-inner vertical
+               padding (py-2.5 = 10px), so the bar's corners nest concentrically
+               around the send button. */
+            border-radius: calc(8px + 10px);
             box-shadow:
                 0 2px 10px -3px rgba(0, 0, 0, 0.07),
                 0 1px 2px -1px rgba(0, 0, 0, 0.04);
@@ -2853,7 +2858,7 @@ html.motion-ready [data-reveal].revealed {
 
         /* Field grows/shrinks fluidly as lines are added or removed. */
         [data-page="chat"] #user-input {
-            transition: height 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: height 0.32s var(--ease-smooth);
             /* Kill the global input/textarea chrome (border + radius + inset shadow
                from src/site.css §3) so the field is a bare transparent surface
                inside the .input-box-wrap capsule — no nested outline. */
@@ -2882,11 +2887,11 @@ html.motion-ready [data-reveal].revealed {
         [data-page="chat"] #input-inner.is-multiline .input-textarea-wrap {
             order: -1;
             flex: 1 0 100%;
-            animation: ib-textarea-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: ib-textarea-rise 0.4s var(--ease-smooth);
         }
 
         [data-page="chat"] #input-inner.is-collapsing .input-textarea-wrap {
-            animation: ib-textarea-sink 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: ib-textarea-sink 0.4s var(--ease-smooth);
         }
 
         @keyframes ib-textarea-rise {
@@ -3006,7 +3011,7 @@ html.motion-ready [data-reveal].revealed {
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            transition: background 0.3s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), top 0.5s cubic-bezier(0.16, 1, 0.3, 1), bottom 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: background 0.3s ease, transform 0.5s var(--ease-smooth), top 0.5s var(--ease-smooth), bottom 0.5s var(--ease-smooth);
         }
 
         [data-page="chat"] .history-btn-container {
@@ -3144,11 +3149,22 @@ html.motion-ready [data-reveal].revealed {
         }
 
         [data-page="chat"] .book-flip-lane {
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s var(--ease-smooth);
+            /* Entrance: rises from below + fades in, once, as generation starts.
+               backwards fill only — forwards would pin transform/opacity and
+               fight the .done fade-out (same invariant as the sidebar rows). */
+            animation: gen-in var(--dur-3) var(--ease-smooth) backwards;
         }
 
         [data-page="chat"] .book-flip-lane.done {
             opacity: 0;
+        }
+
+        /* Generation-indicator entrance, shared by chat + Astra: bottom→top
+           rise + fade on the ease-in-out workhorse. */
+        @keyframes gen-in {
+            from { opacity: 0; transform: translateY(var(--rise)); }
+            to { opacity: 1; transform: none; }
         }
 
         [data-page="chat"] .book-flipper {
@@ -3302,7 +3318,7 @@ html.motion-ready [data-reveal].revealed {
 
         [data-page="chat"] .thought-content.expanded {
             display: block;
-            animation: slideDown 0.2s ease-out;
+            animation: slideDown 0.2s var(--ease-soft);
         }
 
         @keyframes slideDown {
@@ -3354,7 +3370,7 @@ html.motion-ready [data-reveal].revealed {
             background: var(--bg);
             display: flex;
             flex-direction: column;
-            animation: chat-fadeIn 0.4s ease-out;
+            animation: chat-fadeIn 0.4s var(--ease-smooth);
             overflow: hidden;
         }
 
@@ -3444,7 +3460,7 @@ html.motion-ready [data-reveal].revealed {
         /* ── Memory encoding card ──────────────────────────────────── */
         /* ── Memory pending entry (inline in memories tab) ─────────── */
         [data-page="chat"] .mpc-pending-entry {
-            animation: mpc-slide-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: mpc-slide-in 0.28s var(--ease-smooth) forwards;
         }
 
         @keyframes mpc-slide-in {
@@ -3547,7 +3563,7 @@ html.motion-ready [data-reveal].revealed {
             border-radius: 14px;
             background: var(--input-bg, #f4f4f5);
             border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
-            animation: mem-consent-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: mem-consent-in 0.22s var(--ease-smooth) forwards;
             pointer-events: auto;
         }
 
@@ -3584,7 +3600,7 @@ html.motion-ready [data-reveal].revealed {
         }
 
         [data-page="chat"] .mem-consent-card.dismissing {
-            animation: mem-consent-out 0.18s ease-in forwards;
+            animation: mem-consent-out 0.18s var(--ease-smooth) forwards;
         }
 
         [data-page="chat"] .mem-consent-label {
@@ -3757,7 +3773,7 @@ html.motion-ready [data-reveal].revealed {
             border-radius: 16px;
             overflow: hidden;
             box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: slideUp 0.4s var(--ease-smooth) forwards;
         }
 
         .dark [data-page="chat"] .changelog-card {
@@ -3815,7 +3831,7 @@ html.motion-ready [data-reveal].revealed {
             display: none;
             flex-direction: column;
             opacity: 0;
-            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.25s ease, transform 0.3s var(--ease-smooth);
 
             inset: 0;
             border-radius: 0;
@@ -4144,7 +4160,7 @@ html.motion-ready [data-reveal].revealed {
             z-index: 450;
             display: none;
             opacity: 0;
-            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.25s var(--ease-smooth);
         }
 
         [data-page="chat"] #sidebar-overlay.sidebar-overlay-visible {
@@ -4166,7 +4182,7 @@ html.motion-ready [data-reveal].revealed {
 
         [data-page="chat"] .tutorial-step.active {
             display: block;
-            animation: chat-fadeIn 0.3s ease-out;
+            animation: chat-fadeIn 0.3s var(--ease-smooth);
         }
 
         [data-page="chat"] .lang-btn {
@@ -4330,7 +4346,7 @@ html.motion-ready [data-reveal].revealed {
             -webkit-backdrop-filter: blur(32px);
             display: none;
             flex-direction: column;
-            animation: chat-fadeIn 0.4s ease-out;
+            animation: chat-fadeIn 0.4s var(--ease-smooth);
         }
 
         .dark [data-page="chat"] #research-page-overlay {
@@ -4349,8 +4365,8 @@ html.motion-ready [data-reveal].revealed {
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.5s var(--ease-smooth);
+            animation: fadeInScale 0.6s var(--ease-smooth);
         }
 
         [data-page="chat"] #welcome-logo-container svg {
@@ -4508,7 +4524,7 @@ html.motion-ready [data-reveal].revealed {
             opacity: 0;
             pointer-events: none;
             transform: scale(0.95) translateY(-5px);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s var(--ease-smooth);
         }
 
         .dark [data-page="chat"] .chat-action-menu {
@@ -4557,7 +4573,7 @@ html.motion-ready [data-reveal].revealed {
             padding: 2.25rem;
             box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
             transform: scale(0.92) translateY(30px);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.5s var(--ease-smooth);
         }
 
         .dark [data-page="chat"] .custom-modal-card {
@@ -4600,7 +4616,7 @@ html.motion-ready [data-reveal].revealed {
             outline: none;
             font-size: 1rem;
             margin-bottom: 1.75rem;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s var(--ease-smooth);
         }
 
         .dark [data-page="chat"] .custom-modal-input {
@@ -4633,7 +4649,7 @@ html.motion-ready [data-reveal].revealed {
             border-radius: 14px;
             font-size: 0.95rem;
             font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: all 0.3s var(--ease-smooth);
             cursor: pointer;
             border: 1px solid transparent;
         }
@@ -4898,7 +4914,7 @@ html.motion-ready [data-reveal].revealed {
             color: var(--text-primary);
             cursor: pointer;
             text-align: left;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s var(--ease-smooth);
             max-width: 520px;
             width: 100%;
             font-family: inherit;
@@ -5123,9 +5139,14 @@ html.motion-ready [data-reveal].revealed {
    PAGE: DESIGN-LAB  —  scoped to [data-page="design-lab"]
    ═══════════════════════════════════════════════════════════════════ */
 
-    /* ── DEMO-ONLY sandbox. Nothing here touches src/site.css §2–§3.
-       Three columns compare button design languages against the
-       current glossy .skuo look so we can pick a direction. ── */
+    /* ── THE FLAT DESIGN SHEET (spec/plan 2026-08-15 — Phase 0 review artifact).
+       Renders the REAL shared classes under a page-local override, so the sheet
+       previews the finished flat language in light + dark. The FLAT OVERRIDE
+       block below is exactly the CSS Phase 1 moves into §2/§3 — it doubles as
+       the copy-paste source. Nothing here touches §2/§3 proper; every rule is
+       scoped under [data-page="design-lab"]. ── */
+
+    /* Lab frame */
     [data-page="design-lab"] { font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--text-primary); margin: 0; }
 
     [data-page="design-lab"] .lab-frame { max-width: 1180px; margin: 2rem auto; padding: 1.25rem; }
@@ -5138,9 +5159,7 @@ html.motion-ready [data-reveal].revealed {
     }
     [data-page="design-lab"] .lab-sub { color: var(--text-secondary); font-size: 0.9rem; margin: 0.25rem 0 1.75rem; }
 
-    [data-page="design-lab"] .lab-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-    @media (min-width: 720px)  { [data-page="design-lab"] .lab-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (min-width: 1040px) { [data-page="design-lab"] .lab-grid { grid-template-columns: repeat(3, 1fr); } }
+    [data-page="design-lab"] .lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
 
     [data-page="design-lab"] .lab-col {
       border: 1px solid var(--border); border-radius: 18px; padding: 1.25rem;
@@ -5149,119 +5168,235 @@ html.motion-ready [data-reveal].revealed {
     .dark [data-page="design-lab"] .lab-col { background: var(--bg-elevated); border-color: var(--border-strong); }
     [data-page="design-lab"] .lab-col h2 { margin: 0 0 0.2rem; font-size: 1rem; font-weight: 600; }
     [data-page="design-lab"] .lab-col .note { margin: 0 0 1.1rem; font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.4; }
-    [data-page="design-lab"] .lab-col.is-current { outline: 2px dashed color-mix(in srgb, var(--skuo-accent), transparent 55%); outline-offset: 4px; }
-    [data-page="design-lab"] .lab-col.is-pick { outline: 2px solid var(--skuo-accent); outline-offset: 4px; }
 
     [data-page="design-lab"] .stack { display: flex; flex-direction: column; gap: 0.7rem; align-items: flex-start; }
     [data-page="design-lab"] .stack .row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
     [data-page="design-lab"] .icn { width: 15px; height: 15px; }
 
-    /* Shared geometry so only the *language* differs between columns */
-    [data-page="design-lab"] .b {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.55rem 1.15rem; border-radius: 10px;
-      font-size: 0.85rem; font-weight: 550; cursor: pointer;
-      border: 1px solid transparent; transition: all 0.16s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    [data-page="design-lab"] .b.icon { padding: 0; width: 40px; height: 40px; justify-content: center; }
-    [data-page="design-lab"] .b.pill { border-radius: 9999px; }
-
-    /* ─────────────────────────────────────────────────────────
-       LANGUAGE A — FLAT / REFINED  (Linear / Vercel / Stripe)
-       Solid fill, no gradient, hairline border, whisper shadow.
-       ───────────────────────────────────────────────────────── */
-    [data-page="design-lab"] .flat.accent {
-      background: var(--skuo-accent); color: #fff;
-      border-color: color-mix(in srgb, var(--skuo-accent), black 12%);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-    }
-    [data-page="design-lab"] .flat.accent:hover { background: color-mix(in srgb, var(--skuo-accent), black 8%); }
-    [data-page="design-lab"] .flat.accent:active { background: color-mix(in srgb, var(--skuo-accent), black 16%); box-shadow: none; }
-
-    [data-page="design-lab"] .flat.neutral {
-      background: var(--bg-white); color: var(--text-primary);
-      border-color: var(--border-strong);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-    [data-page="design-lab"] .flat.neutral:hover { background: var(--bg-elevated); border-color: var(--text-tertiary); }
-    [data-page="design-lab"] .flat.neutral:active { background: color-mix(in srgb, var(--bg-elevated), black 4%); box-shadow: none; }
-    .dark [data-page="design-lab"] .flat.neutral { background: var(--bg-elevated); }
-    .dark [data-page="design-lab"] .flat.neutral:hover { background: color-mix(in srgb, var(--bg-elevated), white 6%); }
-
-    /* ─────────────────────────────────────────────────────────
-       LANGUAGE B — SOFT NEUMORPHIC
-       Monochrome extrude: light shadow top-left, dark bottom-right,
-       no shine. Press inverts to an inset.
-       ───────────────────────────────────────────────────────── */
-    [data-page="design-lab"] .neu-scope-host { --neu-bg: #e8e6de; --neu-light: #ffffff; --neu-dark: #c3c0b4; }
-    .dark [data-page="design-lab"] .neu-scope-host { --neu-bg: #33322f; --neu-light: #414039; --neu-dark: #232220; }
-    [data-page="design-lab"] .neu-scope-host.lab-col { background: var(--neu-bg); border-color: transparent; }
-
-    [data-page="design-lab"] .neu {
-      background: var(--neu-bg); color: var(--text-primary); border: none;
-      box-shadow: -5px -5px 10px var(--neu-light), 5px 5px 12px var(--neu-dark);
-    }
-    [data-page="design-lab"] .neu:hover { box-shadow: -3px -3px 7px var(--neu-light), 3px 3px 9px var(--neu-dark); }
-    [data-page="design-lab"] .neu:active { box-shadow: inset -3px -3px 7px var(--neu-light), inset 4px 4px 9px var(--neu-dark); }
-    [data-page="design-lab"] .neu.accent {
-      background: var(--skuo-accent); color: #fff;
-      box-shadow: -5px -5px 10px var(--neu-light),
-                   5px 5px 12px color-mix(in srgb, var(--skuo-accent), black 30%);
-    }
-    [data-page="design-lab"] .neu.accent:active {
-      box-shadow: inset -3px -3px 7px color-mix(in srgb, var(--skuo-accent), white 22%),
-                  inset 4px 4px 9px color-mix(in srgb, var(--skuo-accent), black 34%);
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       LANGUAGE C — REFINED  (A + Current combined)
-       Flat's hairline border + clean hover/press, but keeps a
-       WHISPER of the current gradient, a soft lift shadow and a
-       faint accent glow. No wet-glass sheen, no hard top-shine.
-       ───────────────────────────────────────────────────────── */
-    [data-page="design-lab"] .ref.accent {
-      color: #fff;
-      background-image: linear-gradient(to bottom,
-        color-mix(in srgb, var(--skuo-accent), white 7%),
-        color-mix(in srgb, var(--skuo-accent), black 6%));
-      border-color: color-mix(in srgb, var(--skuo-accent), black 14%);
-      box-shadow: 0 1px 0 color-mix(in srgb, var(--skuo-accent), white 20%) inset,
-                  0 2px 6px -2px color-mix(in srgb, var(--skuo-accent), transparent 55%);
-    }
-    [data-page="design-lab"] .ref.accent:hover {
-      background-image: linear-gradient(to bottom,
-        color-mix(in srgb, var(--skuo-accent), white 12%),
-        color-mix(in srgb, var(--skuo-accent), black 2%));
-      box-shadow: 0 1px 0 color-mix(in srgb, var(--skuo-accent), white 24%) inset,
-                  0 4px 12px -3px color-mix(in srgb, var(--skuo-accent), transparent 45%);
-    }
-    [data-page="design-lab"] .ref.accent:active {
-      background-image: linear-gradient(to bottom,
-        color-mix(in srgb, var(--skuo-accent), black 4%),
-        color-mix(in srgb, var(--skuo-accent), black 10%));
-      box-shadow: 0 1px 3px rgba(0,0,0,0.14) inset;
-    }
-
-    [data-page="design-lab"] .ref.neutral {
-      color: var(--text-primary);
-      background-image: linear-gradient(to bottom, var(--bg-white), var(--bg-elevated));
-      border-color: var(--border-strong);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 1px 3px -1px rgba(0,0,0,0.12);
-    }
-    [data-page="design-lab"] .ref.neutral:hover {
-      background-image: linear-gradient(to bottom, var(--bg-white), color-mix(in srgb, var(--bg-elevated), black 3%));
-      border-color: var(--text-tertiary);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 3px 9px -2px rgba(0,0,0,0.16);
-    }
-    [data-page="design-lab"] .ref.neutral:active { box-shadow: 0 1px 3px rgba(0,0,0,0.14) inset; }
-    .dark [data-page="design-lab"] .ref.neutral {
-      background-image: linear-gradient(to bottom, color-mix(in srgb, var(--bg-elevated), white 6%), var(--bg-elevated));
-      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 2px 6px -2px rgba(0,0,0,0.5);
-    }
-
     [data-page="design-lab"] .swatches { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; margin-top: 2rem; }
     [data-page="design-lab"] .swatch { height: 46px; border-radius: 10px; border: 1px solid var(--border); display:flex; align-items:flex-end; padding: 0.3rem; font-size: 0.55rem; color:#fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+
+    /* Scoped flat tokens (Phase 1: these move to :root / .dark) */
+    [data-page="design-lab"] { --shadow-float: 0 12px 32px -12px rgba(0,0,0,0.28); }
+    .dark [data-page="design-lab"] { --shadow-float: 0 12px 32px -12px rgba(0,0,0,0.6); }
+
+    /* ── FLAT OVERRIDE — exactly what Phase 1 moves into §2/§3 ──────────
+       Invariants kept: the --chrome-* recipe is declared on the consumer
+       selector list (never bare :root); no !important; :focus-visible rings
+       survive on every interactive control; transitions consume the
+       --dur-* / --ease-* motion tokens and reference background-color. ── */
+
+    /* Flat --chrome-* recipe, light — solid fills, all shadows none */
+    [data-page="design-lab"] .skuo, [data-page="design-lab"] .skuomorphic-btn, [data-page="design-lab"] .skuomorphic-button,
+    [data-page="design-lab"] .ui-badge, [data-page="design-lab"] .ui-badge--tiny, [data-page="design-lab"] .ui-opt input, [data-page="design-lab"] .ui-seg button.on {
+      --chrome-border: color-mix(in srgb, var(--skuo-surface, #eceae2), black 14%);
+      --chrome-fill: var(--skuo-surface, #eceae2);
+      --chrome-fill-hover: color-mix(in srgb, var(--skuo-surface, #eceae2), black 5%);
+      --chrome-fill-active: color-mix(in srgb, var(--skuo-surface, #eceae2), black 10%);
+      --chrome-shadow: none;
+      --chrome-shadow-hover: none;
+      --chrome-shadow-active: none;
+    }
+
+    /* Flat --chrome-* recipe, dark — hover/active lighten instead */
+    .dark [data-page="design-lab"] .skuo, .dark [data-page="design-lab"] .skuomorphic-btn, .dark [data-page="design-lab"] .skuomorphic-button,
+    .dark [data-page="design-lab"] .ui-badge, .dark [data-page="design-lab"] .ui-badge--tiny, .dark [data-page="design-lab"] .ui-opt input, .dark [data-page="design-lab"] .ui-seg button.on {
+      --chrome-border: rgba(0, 0, 0, 0.5);
+      --chrome-fill: var(--skuo-surface, #3a3a37);
+      --chrome-fill-hover: color-mix(in srgb, var(--skuo-surface, #3a3a37), white 8%);
+      --chrome-fill-active: color-mix(in srgb, var(--skuo-surface, #3a3a37), white 13%);
+      --chrome-shadow: none;
+      --chrome-shadow-hover: none;
+      --chrome-shadow-active: none;
+    }
+
+    /* Buttons — solid color fill, no gradient, no shadow, no lift */
+    [data-page="design-lab"] .skuo,
+    [data-page="design-lab"] .skuomorphic-btn,
+    [data-page="design-lab"] .skuomorphic-button {
+      background-color: var(--chrome-fill);
+      background-image: none;
+      box-shadow: none;
+      transition:
+        transform var(--dur-1) var(--ease-soft),
+        box-shadow var(--dur-2) var(--ease-smooth),
+        filter var(--dur-2) var(--ease-smooth),
+        background-color var(--dur-2) var(--ease-smooth);
+    }
+
+    /* Vestigial sheen pseudo-element — deleted outright */
+    [data-page="design-lab"] .skuo::before,
+    [data-page="design-lab"] .skuomorphic-btn::before,
+    [data-page="design-lab"] .skuomorphic-button::before {
+      content: none;
+    }
+
+    [data-page="design-lab"] .skuo:hover,
+    [data-page="design-lab"] .skuomorphic-btn:hover,
+    [data-page="design-lab"] .skuomorphic-button:hover {
+      background-color: var(--chrome-fill-hover);
+      transform: none;
+      filter: none;
+      box-shadow: none;
+    }
+
+    [data-page="design-lab"] .skuo:active,
+    [data-page="design-lab"] .skuomorphic-btn:active,
+    [data-page="design-lab"] .skuomorphic-button:active {
+      background-color: var(--chrome-fill-active);
+      transform: scale(0.97);
+      box-shadow: none;
+    }
+
+    /* Flat crisp focus ring (a11y indicator, not depth) — no inset layer */
+    [data-page="design-lab"] .skuo:focus-visible,
+    [data-page="design-lab"] .skuomorphic-btn:focus-visible,
+    [data-page="design-lab"] .skuomorphic-button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--skuo-accent), transparent 55%);
+    }
+
+    [data-page="design-lab"] .skuo:disabled,
+    [data-page="design-lab"] .skuo[disabled],
+    [data-page="design-lab"] .skuomorphic-btn:disabled,
+    [data-page="design-lab"] .skuomorphic-button:disabled {
+      opacity: 0.55;
+      box-shadow: none;
+    }
+
+    /* Accent glow retired — accent surfaces are flat too */
+    [data-page="design-lab"] .skuo-accent { --skuo-glow: transparent; }
+
+    /* Icon buttons — same flattening; hover no longer translates */
+    [data-page="design-lab"] .skuo-icon { box-shadow: none; }
+    [data-page="design-lab"] .skuo-icon:hover {
+      transform: none;
+      filter: none;
+      background-color: var(--chrome-fill-hover);
+    }
+    [data-page="design-lab"] .skuo-icon:active { transform: scale(0.94); box-shadow: none; }
+
+    /* Badges — bordered flat chips */
+    [data-page="design-lab"] .ui-badge,
+    [data-page="design-lab"] .ui-badge--tiny {
+      background-image: none;
+      background-color: var(--chrome-fill);
+      box-shadow: none;
+    }
+
+    /* Checkbox / radio — unchecked = neutral chip, no shadow; checked = solid
+       accent + white glyph (same SVG check / radial dot, over --skuo-accent) */
+    [data-page="design-lab"] .ui-opt input {
+      background-image: none;
+      background-color: var(--chrome-fill);
+      box-shadow: none;
+      transition: background-color var(--dur-1) var(--ease-soft), box-shadow var(--dur-2) var(--ease-smooth), border-color var(--dur-1) var(--ease-soft);
+    }
+    [data-page="design-lab"] .ui-opt input[type="checkbox"]:checked {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+      background-color: var(--skuo-accent);
+      background-size: 68%;
+    }
+    [data-page="design-lab"] .ui-opt input[type="radio"]:checked {
+      background-image: radial-gradient(circle at center, #ffffff 0 33%, transparent 38%);
+      background-color: var(--skuo-accent);
+    }
+    [data-page="design-lab"] .ui-opt input:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--skuo-accent), transparent 55%);
+    }
+    [data-page="design-lab"] .ui-opt input:disabled { box-shadow: none; }
+
+    /* Segmented control — selected = solid accent fill, no inset highlight */
+    [data-page="design-lab"] .ui-seg button.on {
+      background-image: none;
+      background-color: var(--skuo-accent);
+      box-shadow: none;
+    }
+
+    /* Unified inputs — white fields, no inset recessed shadow, flat focus ring */
+    [data-page="design-lab"] input[type="text"],
+    [data-page="design-lab"] input[type="email"],
+    [data-page="design-lab"] input[type="search"],
+    [data-page="design-lab"] input[type="password"],
+    [data-page="design-lab"] input[type="number"],
+    [data-page="design-lab"] input[type="url"],
+    [data-page="design-lab"] input[type="tel"],
+    [data-page="design-lab"] textarea,
+    [data-page="design-lab"] select {
+      background-color: var(--bg-white);
+      box-shadow: none;
+    }
+
+    [data-page="design-lab"] input[type="text"]:focus,
+    [data-page="design-lab"] input[type="email"]:focus,
+    [data-page="design-lab"] input[type="search"]:focus,
+    [data-page="design-lab"] input[type="password"]:focus,
+    [data-page="design-lab"] input[type="number"]:focus,
+    [data-page="design-lab"] input[type="url"]:focus,
+    [data-page="design-lab"] input[type="tel"]:focus,
+    [data-page="design-lab"] textarea:focus,
+    [data-page="design-lab"] select:focus {
+      border-color: var(--skuo-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--skuo-accent), transparent 78%);
+    }
+
+    .dark [data-page="design-lab"] input[type="text"],
+    .dark [data-page="design-lab"] input[type="email"],
+    .dark [data-page="design-lab"] input[type="search"],
+    .dark [data-page="design-lab"] input[type="password"],
+    .dark [data-page="design-lab"] input[type="number"],
+    .dark [data-page="design-lab"] input[type="url"],
+    .dark [data-page="design-lab"] input[type="tel"],
+    .dark [data-page="design-lab"] textarea,
+    .dark [data-page="design-lab"] select {
+      box-shadow: none;
+    }
+
+    /* Cards — border-defined resting surface, no shadow, no inset highlight */
+    [data-page="design-lab"] .card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    .dark [data-page="design-lab"] .card {
+      background-color: var(--bg-elevated);
+      border-color: var(--border-strong);
+      box-shadow: none;
+    }
+
+    /* Nav capsule — solid surface + 1px border + the ONE functional shadow.
+       --shadow-float is reserved for layers that float above the page. */
+    [data-page="design-lab"] .ov-nav__bar {
+      background-image: none;
+      background-color: var(--bg-white);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-float);
+    }
+    [data-page="design-lab"] .ov-nav.scrolled .ov-nav__bar { box-shadow: var(--shadow-float); }
+    .dark [data-page="design-lab"] .ov-nav__bar { background-color: var(--bg-elevated); }
+    .dark [data-page="design-lab"] .ov-nav.scrolled .ov-nav__bar { box-shadow: var(--shadow-float); }
+
+    /* ── Mock extras (lab-only) ── */
+    [data-page="design-lab"] .mock-drop {
+      position: relative;
+      width: 220px;
+      border-radius: 14px;
+      background: var(--bg-white);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-float);
+      padding: 0.4rem;
+    }
+    .dark [data-page="design-lab"] .mock-drop { background: var(--bg-elevated); }
+    [data-page="design-lab"] .mock-item {
+      padding: 0.5rem 0.7rem;
+      border-radius: 9px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    [data-page="design-lab"] .mock-item:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+    [data-page="design-lab"] .sheet-note { font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.5; }
   
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -5295,7 +5430,7 @@ html.motion-ready [data-reveal].revealed {
             gap: 2px;
             height: 38px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s var(--ease-smooth);
             pointer-events: auto;
         }
 
@@ -5547,7 +5682,7 @@ html.motion-ready [data-reveal].revealed {
       filter: grayscale(1);
       border: 1px solid var(--border-strong);
       background: var(--bg-elevated);
-      transition: filter 0.6s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: filter 0.6s ease, transform 0.4s var(--ease-smooth);
     }
 
     [data-page="home"] .hero-pfp:hover {
@@ -5676,7 +5811,7 @@ html.motion-ready [data-reveal].revealed {
       opacity: 0;
       transform: translateX(-6px);
       color: var(--accent);
-      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.3s ease, transform 0.3s var(--ease-smooth);
     }
 
     [data-page="home"] .work-row:not(.is-soon):hover .work-arrow {
@@ -5886,7 +6021,7 @@ html.motion-ready [data-reveal].revealed {
         [data-page="research"] #reader-modal {
             display: none;
             opacity: 0;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.5s var(--ease-smooth);
             pointer-events: none;
             background-color: var(--bg);
             z-index: 1000;
@@ -5903,7 +6038,7 @@ html.motion-ready [data-reveal].revealed {
 
         [data-page="research"] .modal-content {
             transform: translateY(20px);
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.6s var(--ease-smooth);
             width: 100%;
             height: 100%;
             display: flex;
@@ -6014,7 +6149,7 @@ html.motion-ready [data-reveal].revealed {
   [data-page="search"] .ai-error { padding: 0 16px 14px; font-size: .84rem; color: var(--text-secondary); }
 
   /* thinking row: pulsing orb + shimmer-sweep line (chatgpt 'thinking…' grammar) */
-  [data-page="search"] .ai-thinking { display: flex; align-items: center; gap: 9px; padding: 10px 2px; }
+  [data-page="search"] .ai-thinking { display: flex; align-items: center; gap: 9px; padding: 10px 2px; animation: gen-in var(--dur-3) var(--ease-smooth) backwards; }
   [data-page="search"] .ai-orb { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); animation: orb-pulse 1.2s ease-in-out infinite; flex: none; }
   @keyframes orb-pulse { 0%,100% { transform: scale(.7); opacity: .45; } 50% { transform: scale(1.15); opacity: 1; } }
   [data-page="search"] .ai-thinking-line { font-size: .84rem; background: linear-gradient(90deg, var(--text-tertiary) 20%, var(--text-primary) 50%, var(--text-tertiary) 80%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: line-shimmer 1.6s linear infinite; }
@@ -6050,6 +6185,11 @@ html.motion-ready [data-reveal].revealed {
 
   /* chat thread: plain Astra turns, grey right-aligned user bubbles */
   [data-page="search"] .ai-turn { margin: 2px 0 8px; }
+  /* Turns render whole when the stream completes (no typewriter) — the
+     completed answer rises in from below + fades on the ease-in-out curve.
+     Class is added by astra.js at render time (the element itself is
+     appended empty when the request starts, so the animation must wait). */
+  [data-page="search"] .ai-turn.enter { animation: gen-in var(--dur-3) var(--ease-smooth) backwards; }
   [data-page="search"] .ai-bubble-user { width: fit-content; max-width: 85%; margin: 12px 0 4px auto; padding: 8px 13px; border-radius: 16px 16px 4px 16px; background: var(--bg-elevated); border: 1px solid var(--border-strong); font-size: .85rem; color: var(--text-primary); }
   [data-page="search"] #ai-expand { width: 28px; height: 28px; padding: 0; border-radius: 8px; font-size: .85rem; flex: none; }
 
@@ -6422,7 +6562,7 @@ font-family: 'Inter', sans-serif;
             gap: 2px;
             height: 38px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s var(--ease-smooth);
             pointer-events: auto;
         }
 
@@ -6802,10 +6942,10 @@ font-family: 'Inter', sans-serif;
             flex-direction: column;
             background: var(--bg-elevated);
             overflow: hidden;
-            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                min-width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            transition: width 0.3s var(--ease-smooth),
+                min-width 0.3s var(--ease-smooth),
                 opacity 0.25s ease,
-                transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                transform 0.3s var(--ease-smooth);
             z-index: 200;
         }
 

@@ -110,7 +110,7 @@
 
         body.chat-empty #bottom-fade {
             pointer-events: none;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.5s var(--ease-smooth);
         }
 
         body.chat-empty .input-box-wrap {
@@ -129,7 +129,7 @@
             visibility: hidden !important;
             pointer-events: none !important;
             transform: translateY(-20px);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.5s var(--ease-smooth);
         }
 
 
@@ -177,8 +177,8 @@
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out forwards',
-                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in': 'fadeIn 0.5s var(--ease-smooth) forwards',
+                        'slide-up': 'slideUp 0.4s var(--ease-smooth) forwards',
                         'shimmer': 'shimmer 2.5s linear infinite',
                     },
                     keyframes: {
@@ -669,7 +669,7 @@
             <div id="memory-consent-stack" class="flex flex-col gap-2 mb-2 w-full"></div>
 
             <div
-                class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none rounded-[20px] relative flex flex-col !overflow-visible pointer-events-auto">
+                class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none relative flex flex-col !overflow-visible pointer-events-auto">
 
                 <div id="upload-preview-container" class="hidden px-4 pt-3 flex gap-2 overflow-x-auto w-full"></div>
 
@@ -1825,7 +1825,7 @@
                 'pointer-events:auto',
                 'opacity:0',
                 'transform:translateY(8px)',
-                'transition:opacity 0.22s cubic-bezier(0.16,1,0.3,1),transform 0.22s cubic-bezier(0.16,1,0.3,1)',
+                'transition:opacity 0.22s var(--ease-smooth),transform 0.22s var(--ease-smooth)',
             ].join(';');
 
             const dismiss = () => {

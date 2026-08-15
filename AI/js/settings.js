@@ -317,7 +317,7 @@ window.renderStorageTab = async () => {
                     <div class="text-sm font-semibold text-zinc-900 dark:text-white leading-tight">${r.label}</div>
                     <div class="text-[11px] text-zinc-400 mt-0.5">${r.sub}</div>
                     <div class="mt-1.5 h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden max-w-[140px]">
-                        <div style="width:${barW}%;background:${r.color};transition:width 0.6s cubic-bezier(0.16,1,0.3,1);" class="h-full rounded-full"></div>
+                        <div style="width:${barW}%;background:${r.color};transition:width 0.6s var(--ease-smooth);" class="h-full rounded-full"></div>
                     </div>
                 </div>
                 <span class="text-sm font-mono font-semibold ${r.isFree ? 'text-zinc-400' : 'text-zinc-700 dark:text-zinc-200'} shrink-0">${fmt(r.bytes)}</span>

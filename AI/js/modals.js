@@ -15,7 +15,7 @@ window.showToast = (message, duration = 4000) => {
         'font-size:13px', 'font-weight:500', 'color:#71717a',
         'box-shadow:0 4px 24px rgba(0,0,0,0.10)', 'max-width:320px',
         'pointer-events:auto', 'opacity:0', 'transform:translateY(8px)',
-        'transition:opacity 0.22s cubic-bezier(0.16,1,0.3,1),transform 0.22s cubic-bezier(0.16,1,0.3,1)',
+        'transition:opacity 0.22s var(--ease-smooth),transform 0.22s var(--ease-smooth)',
     ].join(';');
     const dismiss = () => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; setTimeout(() => toast.remove(), 250); };
     toast.innerHTML = `<span style="flex:1;min-width:0;">${message}</span><button style="flex-shrink:0;background:none;border:none;cursor:pointer;padding:2px 0 2px 4px;color:#a1a1aa;" title="Dismiss"><i data-feather="x" style="width:14px;height:14px;"></i></button>`;

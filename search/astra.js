@@ -760,7 +760,8 @@
     thread = [{ role: 'user', content: q + '\n\nSources:\n' + (snippets || '(no sources — answer from knowledge)') }];
   }
 
-  // streams one assistant turn; onToken(text) renders incrementally, returns full text
+  // streams one assistant turn; onToken(text) only accumulates partials (for
+  // stop-early) — turns render WHOLE on completion, no incremental typewriter
   async function streamTurn(onToken) {
     if (aiAbort) aiAbort.abort();
     aiAbort = new AbortController();
@@ -786,7 +787,7 @@
     // SSE consumption — same line protocol as AI/js/chat-actions.js
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
-    let buf = '', text = '', firstToken = false, sawDone = false;
+    let buf = '', text = '', sawDone = false;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -803,9 +804,8 @@
           const delta = data.choices && data.choices[0] && data.choices[0].delta
             ? (data.choices[0].delta.content || '') : '';
           if (delta) {
-            if (!firstToken) { firstToken = true; hideThinking(); }
             text += delta;
-            onToken(text);
+            if (onToken) onToken(text);          // accumulation only — no render
           }
         } catch { /* partial JSON chunk — ignore */ }
       }
@@ -833,21 +833,27 @@
     let partial = '';
 
     try {
-      const text = await streamTurn((t) => {
-        partial = t;
-        aEl.innerHTML = linkifyCitations(marked.parse(esc(t)), results.length);
-      });
+      const text = await streamTurn((t) => { partial = t; });   // no per-token render
+      hideThinking();
+      aEl.classList.add('enter');               // whole answer rises + fades in
+      aEl.innerHTML = linkifyCitations(marked.parse(esc(text)), results.length);
       thread.push({ role: 'assistant', content: text });
       if (!text.trim()) aEl.textContent = '✦ the cosmos answered with silence — try rephrasing?';
       panel.classList.add('done');                  // shimmer settles
     } catch (e) {
       if (e.name === 'AbortError') {
         if (aiStopRequested && partial) {           // user hit stop — keep what streamed
+          hideThinking();
+          aEl.classList.add('enter');
+          aEl.innerHTML = linkifyCitations(marked.parse(esc(partial)), results.length);
           thread.push({ role: 'assistant', content: partial });
           panel.classList.add('done');
+        } else {
+          hideThinking();
         }
         return;                                     // superseded / toggled off / stopped
       }
+      hideThinking();
       panel.classList.add('done');
       showAiError(() => askAstra(q, results));
     } finally {
@@ -894,19 +900,23 @@
     let partial = '';
 
     try {
-      const text = await streamTurn((t) => {
-        partial = t;
-        aEl.innerHTML = linkifyCitations(marked.parse(esc(t)), threadResults.length);
-      });
+      const text = await streamTurn((t) => { partial = t; });   // no per-token render
+      hideThinking();
+      aEl.classList.add('enter');               // whole answer rises + fades in
+      aEl.innerHTML = linkifyCitations(marked.parse(esc(text)), threadResults.length);
       thread.push({ role: 'assistant', content: text });
       if (!text.trim()) aEl.textContent = '✦ silence. rude, but on brand.';
       panel.classList.add('done');
     } catch (e) {
       if (e.name === 'AbortError') {
         if (aiStopRequested && partial) {
+          hideThinking();
+          aEl.classList.add('enter');
+          aEl.innerHTML = linkifyCitations(marked.parse(esc(partial)), threadResults.length);
           thread.push({ role: 'assistant', content: partial });
           panel.classList.add('done');
         } else if (aiStopRequested) {
+          hideThinking();
           thread.pop();                             // stopped before anything streamed
           qEl.remove(); aEl.remove();
         }
@@ -914,6 +924,7 @@
       }
       thread.pop();                                 // don't keep an unanswered question in context
       qEl.remove(); aEl.remove();
+      hideThinking();
       panel.classList.add('done');
       showAiError(() => askFollowUp(question));
     } finally {

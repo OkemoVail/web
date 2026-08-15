@@ -5,9 +5,9 @@
       html.motion-ready, so content is NEVER hidden when JS is absent.
    2. window.motionGhost(targetEl, fromRect, onDone) — FLIP-style travel:
       a clone of targetEl flies from fromRect to the element's real rect
-      (the "iMessage send" morph), following a gently curved arc rather
-      than a straight line. Caller hides the real element and
-      reveals it in onDone.
+      (the "iMessage send" morph) on a "sideways whip" — a 45%-bowed
+      quadratic-bezier arc timed easeOutCubic (snap off, long glide in).
+      Caller hides the real element and reveals it in onDone.
    Everything bails (content shown instantly, morph skipped) under
    prefers-reduced-motion AND under automation (navigator.webdriver) so
    Playwright screenshots stay deterministic.
@@ -70,23 +70,41 @@
     });
     document.body.appendChild(ghost);
 
-    /* Curved flight path: bow the midpoint perpendicular to the straight
-       from→to line (upward-bowing arc) so the ghost follows a curve. */
+    /* Flight: "sideways whip" — a quadratic bezier that bows perpendicular
+       to the from→to line (45% of the distance, capped at 140px, toward
+       screen-right on vertical flights), timed with easeOutCubic so the
+       ghost snaps off the line fast and glides in long (picked from the
+       10-variant arc lab, motion-demo.html §7, 2026-08-15). Frames are
+       pre-eased and linearly interpolated, so the flight is ONE smooth
+       curve — no velocity bumps at keyframe joints. */
     var fromCX = fromRect.left + fromRect.width / 2, fromCY = fromRect.top + fromRect.height / 2;
     var toCX = toRect.left + toRect.width / 2, toCY = toRect.top + toRect.height / 2;
     var dx = toCX - fromCX, dy = toCY - fromCY, dist = Math.hypot(dx, dy) || 1;
     var perpX = -dy / dist, perpY = dx / dist;                       // unit perpendicular
-    if (perpY > 0 || (perpY === 0 && perpX < 0)) { perpX = -perpX; perpY = -perpY; } // bow upward
-    var bow = Math.min(dist * 0.12, 56);
+    if (perpX < 0) { perpX = -perpX; perpY = -perpY; }               // bow toward screen-right
+    var bow = Math.min(dist * 0.45, 140);
     var arcCX = (fromCX + toCX) / 2 + perpX * bow, arcCY = (fromCY + toCY) / 2 + perpY * bow;
-    var midW = (fromRect.width + toRect.width) / 2, midH = (fromRect.height + toRect.height) / 2;
-    var midRadius = /^\d+(\.\d+)?px$/.test(radius) ? ((22 + parseFloat(radius)) / 2) + 'px' : '22px';
+    var rFrom = 22, rTo = /^\d+(\.\d+)?px$/.test(radius) ? parseFloat(radius) : 22;
+    var easeOut = function (t) { return 1 - Math.pow(1 - t, 3); };
 
-    var anim = ghost.animate([
-      { left: fromRect.left + 'px', top: fromRect.top + 'px', width: fromRect.width + 'px', height: fromRect.height + 'px', borderRadius: '22px' },
-      { left: (arcCX - midW / 2) + 'px', top: (arcCY - midH / 2) + 'px', width: midW + 'px', height: midH + 'px', borderRadius: midRadius },
-      { left: toRect.left + 'px', top: toRect.top + 'px', width: toRect.width + 'px', height: toRect.height + 'px', borderRadius: radius }
-    ], { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }); /* var(--ease-smooth) — no overshoot */
+    var STEPS = 8, frames = [];
+    for (var i = 0; i <= STEPS; i++) {
+      var o = i / STEPS;                                             // uniform time offset
+      var t = easeOut(o);                                            // eased progress
+      var u = 1 - t;
+      var w = fromRect.width + (toRect.width - fromRect.width) * t;
+      var h = fromRect.height + (toRect.height - fromRect.height) * t;
+      var cx = u * u * fromCX + 2 * u * t * arcCX + t * t * toCX;    // quad bezier point
+      var cy = u * u * fromCY + 2 * u * t * arcCY + t * t * toCY;
+      frames.push({
+        offset: o,
+        left: (cx - w / 2) + 'px', top: (cy - h / 2) + 'px',
+        width: w + 'px', height: h + 'px',
+        borderRadius: i === STEPS ? radius : (rFrom + (rTo - rFrom) * t) + 'px'
+      });
+    }
+
+    var anim = ghost.animate(frames, { duration: 480, easing: 'linear', fill: 'forwards' }); /* easing is baked into the sampled frames */
 
     function finish() { ghost.remove(); done(); }
     anim.onfinish = finish;

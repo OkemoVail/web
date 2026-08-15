@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Button Design Lab — Okemovail</title>
+  <title>Flat Design Sheet — Okemovail</title>
   <link rel="stylesheet" href="src/output.css">
   <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
   <link rel="stylesheet" href="src/site.css">
-    
+
 </head>
 <body data-page="design-lab">
   <div class="lab-frame">
     <div class="lab-top">
       <div>
-        <h1 class="lab-title">Button Design Lab</h1>
-        <p class="lab-sub">Same buttons, three design languages. Pick one and I'll roll it into <code>src/site.css</code> site-wide.</p>
+        <h1 class="lab-title">Flat Design Sheet</h1>
+        <p class="lab-sub">One language: solid fills, 1px borders, no shadows on resting surfaces, no gradients, no glows. Depth budget = a single <code>--shadow-float</code> reserved for floating layers (nav, dropdowns, modals). Hover = color shift; press = deepen + scale(0.97). This page renders the real shared classes under a page-scoped override of <code>src/site.css</code> — what you see is what ships.</p>
       </div>
       <button id="theme-toggle" class="skuo skuo-icon" aria-label="Toggle theme" title="Toggle theme">
         <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -23,77 +23,100 @@
 
     <div class="lab-grid">
 
-      <!-- CURRENT: glossy .skuo (the thing we're moving away from) -->
-      <section class="lab-col is-current">
-        <h2>Current — Glossy</h2>
-        <p class="note">Gradient fill + wet-glass sheen + inset highlight. The look you find too glassy.</p>
+      <!-- Buttons -->
+      <section class="lab-col">
+        <h2>Buttons</h2>
+        <p class="note">Solid fill + 1px border. Hover = color shift only; press = deepen + scale(0.97). Focus = crisp accent ring.</p>
         <div class="stack">
           <div class="row">
             <button class="skuo skuo-accent" style="padding:.55rem 1.15rem;border-radius:10px;font-size:.85rem;">Primary</button>
             <button class="skuo skuo-neutral" style="padding:.55rem 1.15rem;border-radius:10px;font-size:.85rem;">Neutral</button>
+            <button class="skuo skuo-accent" disabled style="padding:.55rem 1.15rem;border-radius:10px;font-size:.85rem;">Disabled</button>
           </div>
           <div class="row">
             <button class="skuo skuo-accent skuo-pill" style="padding:.55rem 1.15rem;font-size:.85rem;">Pill</button>
-            <button class="skuo skuo-icon" aria-label="icon" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;">
+            <button class="skuo skuo-icon" aria-label="icon" style="width:40px;height:40px;">
               <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
           </div>
         </div>
       </section>
 
-      <!-- LANGUAGE A: FLAT / REFINED -->
+      <!-- Badges & segmented -->
       <section class="lab-col">
-        <h2>A — Flat / Refined</h2>
-        <p class="note">Solid fill, hairline border, whisper shadow. Modern &amp; calm. Hover darkens; press flattens.</p>
+        <h2>Badges &amp; segmented</h2>
+        <p class="note">Bordered flat chips, same recipe as the buttons. Selected segment = solid accent, white text.</p>
         <div class="stack">
           <div class="row">
-            <button class="b flat accent">Primary</button>
-            <button class="b flat neutral">Neutral</button>
+            <span class="ui-badge">badge</span>
+            <span class="ui-badge ui-badge--accent">accent</span>
+            <span class="ui-badge ui-badge--tiny">tiny</span>
           </div>
           <div class="row">
-            <button class="b flat accent pill">Pill</button>
-            <button class="b flat neutral icon" aria-label="icon">
-              <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </button>
+            <span class="ui-seg"><button class="on">All</button><button>Images</button></span>
           </div>
         </div>
       </section>
 
-      <!-- LANGUAGE B: SOFT NEUMORPHIC -->
-      <section class="lab-col neu-scope-host">
-        <div class="neu-scope">
-          <h2>B — Soft Neumorphic</h2>
-          <p class="note">Monochrome extrude — soft light/dark shadows, no shine. Press sinks to an inset.</p>
-          <div class="stack">
-            <div class="row">
-              <button class="b neu accent">Primary</button>
-              <button class="b neu neutral">Neutral</button>
-            </div>
-            <div class="row">
-              <button class="b neu accent pill">Pill</button>
-              <button class="b neu neutral icon" aria-label="icon">
-                <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </button>
-            </div>
+      <!-- Checks & radios -->
+      <section class="lab-col">
+        <h2>Checks &amp; radios</h2>
+        <p class="note">Unchecked = neutral chip; checked = solid accent + white glyph. Focus ring kept.</p>
+        <div class="stack">
+          <div class="row">
+            <label class="ui-opt"><input type="checkbox" checked> checkbox</label>
+            <label class="ui-opt"><input type="checkbox"> checkbox</label>
+          </div>
+          <div class="row">
+            <label class="ui-opt"><input type="radio" name="sheet-r" checked> radio</label>
+            <label class="ui-opt"><input type="radio" name="sheet-r"> radio</label>
           </div>
         </div>
       </section>
 
-      <!-- LANGUAGE C: REFINED (A + CURRENT) -->
-      <section class="lab-col is-pick">
-        <h2>C — Refined <span style="font-weight:400;color:var(--text-tertiary);font-size:.8rem;">(A + current)</span></h2>
-        <p class="note">Flat's hairline border &amp; clean press, plus a whisper of gradient, a soft lift shadow and a faint accent glow. No wet-glass sheen.</p>
+      <!-- Inputs -->
+      <section class="lab-col">
+        <h2>Inputs</h2>
+        <p class="note">White fields, 1px border, no inset recessed shadow. Focus = accent border + flat ring.</p>
         <div class="stack">
-          <div class="row">
-            <button class="b ref accent">Primary</button>
-            <button class="b ref neutral">Neutral</button>
+          <input type="text" placeholder="Text input…" style="width:100%;box-sizing:border-box;">
+          <textarea placeholder="Textarea…" rows="3" style="width:100%;box-sizing:border-box;"></textarea>
+          <select style="width:100%;box-sizing:border-box;">
+            <option>Option one</option>
+            <option>Option two</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Card -->
+      <section class="lab-col">
+        <h2>Card</h2>
+        <p class="note">Resting surface: border-defined, no shadow, no inset highlight.</p>
+        <div class="card card-pad" style="width:100%;box-sizing:border-box;">
+          <strong style="font-size:.88rem;">Card title</strong>
+          <div style="font-size:.78rem;color:var(--text-tertiary);margin:.2rem 0 .8rem;">Border-defined flat surface</div>
+          <button class="skuo skuo-neutral" style="padding:.4rem .9rem;border-radius:9px;font-size:.8rem;">Action</button>
+        </div>
+      </section>
+
+      <!-- Floating layers -->
+      <section class="lab-col">
+        <h2>Floating layers</h2>
+        <p class="note">The only shadow in the system: <code>--shadow-float</code>. Reserved for layers above the page.</p>
+        <div class="stack">
+          <div class="ov-nav__bar" style="max-width:none;">
+            <span class="ov-nav__link">Home</span>
+            <span class="ov-nav__link">Design</span>
+            <span class="ov-nav__link">GitHub</span>
+            <span class="ov-nav__div"></span>
+            <button class="skuo skuo-accent skuo-pill" style="padding:.4rem .9rem;font-size:.8rem;">Labs21</button>
           </div>
-          <div class="row">
-            <button class="b ref accent pill">Pill</button>
-            <button class="b ref neutral icon" aria-label="icon">
-              <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </button>
+          <div class="mock-drop">
+            <div class="mock-item">Profile</div>
+            <div class="mock-item">Settings</div>
+            <div class="mock-item">Sign out</div>
           </div>
+          <p class="sheet-note" style="margin:.2rem 0 0;">The nav above is a bare <code>.ov-nav__bar</code> used in-flow; the menu is <code>.mock-drop</code>. Modals, popovers and toasts spend the same single depth budget.</p>
         </div>
       </section>
 

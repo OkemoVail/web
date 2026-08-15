@@ -120,7 +120,7 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 - `AI/research.html` — research mode
 - `AI/tos.html`, `AI/privacy.html`, `AI/goals.html`, `AI/version.html` — static info pages
 - `AI/data/blogs.json` — static blog data
-- `index.html` / `whitename.html` — root landing pages (`index.html` uses the Tailwind Play CDN; `whitename.html` has no Tailwind — both style via `src/site.css`). The `index.html` hero has no CTA buttons — they were replaced 2026-08-13 by `.hero-search`, a centered pill `<form action="/search/" method="get">` (native GET → Astra's `?q=` router, no JS). Its CSS lives in `src/site.css` under the `[data-page="home"]` section; note the input needs both a `:focus-visible` reset (the page's global `:focus-visible:not(.skuo)` outline) and a `.dark .hero-search input { box-shadow: none; }` reset (the `.dark input[type=text]` inset shadow in `src/site.css` §2 leaks in otherwise — same fix as Astra's `.dark .bar input`).
+- `index.html` / `whitename.html` — root landing pages (`index.html` uses the Tailwind Play CDN; `whitename.html` has no Tailwind — both style via `src/site.css`). `okemollm/index.html` is a byte-identical deployed copy of `web/index.html` — keep them in sync when editing. 2026-08-15: landing copy was rewritten out of vibecoded marketing-speak into the site's own dry first-person voice (match the meta description's tone: "one-person corner of the internet… made of stardust ✦"); the work row was also fixed to say "Saga" (the Pisces rename had never been applied there), and the quotes section now uses Feynman + Torvalds instead of Jobs + Google. The `index.html` hero has no CTA buttons — they were replaced 2026-08-13 by `.hero-search`, a centered pill `<form action="/search/" method="get">` (native GET → Astra's `?q=` router, no JS). Its CSS lives in `src/site.css` under the `[data-page="home"]` section; note the input needs both a `:focus-visible` reset (the page's global `:focus-visible:not(.skuo)` outline) and a `.dark .hero-search input { box-shadow: none; }` reset (the `.dark input[type=text]` inset shadow in `src/site.css` §2 leaks in otherwise — same fix as Astra's `.dark .bar input`).
 - `AI/index.html` — Oaky entry/landing page for the AI section (uses Tailwind CDN, not `src/output.css`)
 - `Themes/Themes.html` — theme browser
 - `search/index.html` — Okemo Astra: keyless Google-style web search. Results + autocomplete come from the temp backend (`/api/search` fails over DDG lite → Bing → Mojeek, keyless; `/api/suggest` proxies DDG autocomplete — no API key anywhere); every search also streams a dry-humor Saga answer grounded in the top 5 results, cited `[n]`. UI: "Google bones, cosmic playground skin" — breadcrumb URLs above accent titles, tilted favicon chips, rainbow-conic AI panel border, warm parchment canvas (`#fdf9f4` / `#1e1a18`, page-local), hero buttons below the bar incl. `✦ i'm feeling cosmic` (random quip query). Layout modes split at 768px (v2.1): Google-classic left-rail results on desktop, full-bleed divided result rows + compact top bar on mobile. Results page has `All | ✦ Images` tabs with `?tab=images` URL state: the Images tab calls `/api/images` (DDG `vqd` handshake) and renders a masonry grid (CSS columns, aspect-ratio placeholders, skeleton shimmer, in-memory per-query cache) with a side-panel preview (right sheet on desktop, bottom sheet on mobile; ESC/scrim/✕ close). The All tab infinite-scrolls via the backend `s` offset param + an IntersectionObserver sentinel (30/page, 120 cap, cross-page dedup server-side; retry button on the sentinel if a page fails). AI panel (v2.3): ChatGPT-style chat thread — the seed answer and follow-up answers are plain turns, user follow-ups are right-aligned grey bubbles, the composer is visible from the start (input disabled + ⏹ stop button while streaming; stop keeps the partial answer), the header has a ⤢ fullscreen toggle (fixed overlay, centered 760px column, stream continues uninterrupted, citations open in a new tab instead of scrolling, ESC exits), and a "thinking row" (pulsing orb + shimmer-sweep line) shows a model-generated one-line quip about the query (tiny parallel non-stream call, static-quip fallback) until the first token lands. The conic shimmer still settles to a hairline on completion; thread context is re-sent per follow-up with sources pinned to the original top-5; persisted on/off toggle (`localStorage.astra_ai_mode`, default on; NOT a cookie — site convention is localStorage). Deployment coupling: the search/suggest/images endpoints (`/api/search`, `/api/suggest`, `/api/images`) now ALSO exist on the real OkemoLLM backend (ported into `train.py` 2026-08-14), so pointing `api.okemovail.com` back at okemollm no longer breaks Astra. Intentional exceptions: no `src/nav.js` (chromeless by design), no Tailwind. Specs: `docs/superpowers/specs/2026-08-11-okemo-astra-design.md` (v1), `docs/superpowers/specs/2026-08-12-astra-keyless-cosmic-redesign-design.md` (v2), `docs/superpowers/specs/2026-08-12-astra-layout-redesign-design.md` (v2.1), `docs/superpowers/specs/2026-08-12-astra-ai-panel-followups-design.md` (v2.2), `docs/superpowers/specs/2026-08-13-astra-results-images-ai-panel-design.md` (v2.3). 2026-08-14 polish: the on-page theme toggle was removed — theme tracks the device live (the anti-FOUC script still applies `vail_theme` at load; a `prefers-color-scheme` change listener in `astra.js` re-applies the same semantics: explicit `'light'`/`'dark'` pin, `'system'`/unset follows the device). Stars are white-only (`STAR_COLORS = ['#ffffff']`). The wordmark/r-logo brand gradient pans continuously (`astra-logo-pan` over a seamless 200%-size tiled gradient; the reduced-motion media query kills it). Streamed AI answer text wears the brand gradient + a per-glyph `text-shadow` glow ONLY while generating — gated on `.ai-panel:not(.done) .ai-body` (light + `.dark` variants), settles to `--text-primary` on completion since `.done` is added on success/error/abort alike. (The glow must be `text-shadow`, NOT `filter: drop-shadow` — a filter on the same element as `background-clip: text` breaks the clip on WebKit/iOS and paints the gradient as a solid block.) Citations linkify via `linkifyCitations` on the marked output: `[n]` AND comma groups `[1, 2, 3]` each become `#result-n` jump anchors (out-of-range numbers stay plain text); the `ai-body` click handler smooth-scrolls inline or opens a new tab in fullscreen. Mobile (≤768px) UI enlarged (50px bars, 16px input text = no iOS focus zoom, ≥44px touch targets, viewport-clamped wordmark) and the results top bar spans the full phone width (its old `calc(2.2rem + 18px)` right padding had been clearing the deleted theme toggle). Favicon is a 🔭 emoji SVG data-URI (no image file).
@@ -260,7 +260,10 @@ What changed:
 
 Intentional exceptions (deliberately NOT `.skuo`, kept page-local):
 - `.modal-btn-danger` (semantic red) and `manage.html`'s red delete icon button.
-- Chat bespoke surfaces: `.input-box-wrap` (animated conic-gradient input bar),
+- Chat bespoke surfaces: `.input-box-wrap` (animated conic-gradient input bar —
+  its corner radius is derived from the send button: `calc(8px + 10px)` =
+  `#send-btn` radius + `#input-inner` vertical padding, so the corners nest
+  concentrically around the button, 2026-08-15),
   `.sb-search-input`, `.Cadance-card` (blurred panel), `.mem-consent-card`
   (accent-tinted notice).
 - `word/#doc-title` (deliberately borderless inline title field).
@@ -334,11 +337,11 @@ Chat's floating chrome was remade 2026-07-04 in the capsule language:
 
 Sidebar history rows (`.history-btn-container`) share the New-chat button's
 motion (2026-07-04): hover = `translateY(-1px) scale(1.015)`, held
-press = `scale(0.96)`, both on the soft ease-out `var(--ease-soft)`
-(the motion tokens live in `src/site.css` §2 — the old hard-overshoot
-`cubic-bezier(0.34, 1.56, 0.64, 1)` was retuned site-wide 2026-08-14, and
-`--ease-soft` itself lost its overshoot in a second pass the same day) —
-release eases back. Gotcha: the row
+press = `scale(0.96)`, both on `var(--ease-soft)` (the motion tokens live in
+`src/site.css` §2 — the old hard-overshoot `cubic-bezier(0.34, 1.56, 0.64, 1)`
+was retuned site-wide 2026-08-14, `--ease-soft` lost its overshoot in a second
+pass the same day, and both easings became Apple-style ease-in-out
+2026-08-15) — release eases back. Gotcha: the row
 select animation (`chat-item-selected`, tagged by `renderHistory()` in
 `history.js`) must use `animation-fill-mode: backwards`,
 NOT `both` — a forwards fill keeps overriding `transform` after the animation
@@ -357,13 +360,38 @@ send-morph ghost (`send-morph.js`) — the same model as Astra's AI panel.
 ## Motion system (site-wide)
 
 One motion language ("premium but fun", spec/plan 2026-08-14): tokens in
-`src/site.css` §2 — `--ease-smooth` (workhorse), `--ease-soft` (soft ease-out
+`src/site.css` §2 — `--ease-smooth` (workhorse), `--ease-soft` (gentler curve
 for presses/entrances), `--dur-1..4`, `--stagger`, `--rise`. Every new
 transition/animation consumes the tokens; transform/opacity only.
-Second pass, same day (2026-08-14): `--ease-soft` no longer overshoots — it is
-now `cubic-bezier(0.25, 1, 0.5, 1)` — and `motionGhost` flies a curved arc
-(perpendicular-bowed midpoint, ~12% of the distance capped at 56px) on
-`--ease-smooth` easing instead of a straight line with spring easing.
+Second pass, same day (2026-08-14): `--ease-soft` lost its overshoot, and
+`motionGhost` flies a curved arc instead of a straight line. The flight was
+**finalized 2026-08-15** after a 10-variant bake-off (`motion-demo.html` §7,
+"arc lab" — kept as the playground for future flight tweaks): the winner is
+**variant 9, "sideways whip"** — a quadratic bezier bowed perpendicular to
+the from→to line (45% of the distance, capped at 140px, toward screen-right
+on vertical flights), timed with easeOutCubic (`1−(1−t)³`) so the ghost
+snaps off the line fast and glides in long, 480ms. Frames are pre-eased and
+linearly interpolated, so the flight is one smooth curve with no per-keyframe
+velocity bumps. (This is the one deliberate non-ease-in-out in the system —
+the whip's character comes from the ease-out snap.)
+Third pass (2026-08-15): both easings became **Apple-style ease-in-out** —
+`--ease-smooth: cubic-bezier(0.65, 0, 0.35, 1)` (symmetric S-curve),
+`--ease-soft: cubic-bezier(0.4, 0, 0.2, 1)` (gentle in-out) — and every
+hardcoded ease-out curve was converted to the tokens: the expo
+`cubic-bezier(0.16, 1, 0.3, 1)` (34× site.css + chat.html + modals.js +
+settings.js), the old smooth `cubic-bezier(0.22, 1, 0.36, 1)` (modal-btn +
+motion.js ghost), and the chat page's `ease-out`/`ease-in` keyword one-offs
+(sidebar text/history fades, slideDown, chat-fadeIn, mem-consent-out). Still
+deliberately untouched: continuous `linear`/`ease-in-out` infinite loops
+(spins, bobs, shimmers, twinkle), the AI-landing book page-turn's two-phase
+WAAPI easings (accelerate-in/decelerate-out per keyframe), and raw `ease`
+micro color-fades (already the in-out family). Generation indicators now also
+share one entrance — `@keyframes gen-in` (bottom→top rise + fade, `--dur-3`
+`--ease-smooth backwards`): chat's `.book-flip-lane`, Astra's `.ai-thinking`,
+and Astra's completed `.ai-turn.enter`. Astra turns render WHOLE on stream
+completion (2026-08-15 — the per-token `innerHTML` typewriter re-render was
+removed from `streamTurn`; `onToken` only accumulates `partial` for
+stop-early, and `hideThinking()` moved from first-token to completion/abort).
 
 - `src/motion.js` (loaded by AI/index.html, search/index.html, AI/chat.html):
   `[data-reveal]` scroll entrances (gated behind `html.motion-ready` — content
