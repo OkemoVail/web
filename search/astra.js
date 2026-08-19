@@ -675,6 +675,40 @@
 
   function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
 
+  // ── streaming renderer: apple-intelligence-style materialization ──
+  // Completed blocks (blank-line separated) bake to crisp static nodes; the open
+  // block lives in one persistent .ai-tail div whose CSS animation (pop + unblur
+  // breathe) survives innerHTML swaps because the div itself is never recreated.
+  // Call render.finalize(text) at completion for one crisp full-parse render.
+  function makeStreamRenderer(aEl, count) {
+    let finalized = 0;               // source chars already baked into crisp nodes
+    let tail = null;                 // the live open block
+    const render = (t) => {
+      const cut = t.lastIndexOf('\n\n');
+      const fenced = cut !== -1 && ((t.slice(0, cut).match(/```/g) || []).length % 2 === 1);
+      if (cut > finalized && !fenced) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = linkifyCitations(marked.parse(esc(t.slice(finalized, cut))), count);
+        if (tail) { tail.remove(); tail = null; }
+        while (tmp.firstChild) aEl.appendChild(tmp.firstChild);
+        finalized = cut;
+      }
+      const open = t.slice(finalized);
+      if (open.trim()) {
+        if (!tail) {
+          tail = document.createElement('div');
+          tail.className = 'ai-tail';
+          aEl.appendChild(tail);
+        }
+        tail.innerHTML = linkifyCitations(marked.parse(esc(open)), count);
+      }
+    };
+    render.finalize = (t) => {
+      aEl.innerHTML = linkifyCitations(marked.parse(esc(t)), count);
+    };
+    return render;
+  }
+
   function setStreaming(on) {
     $('ai-follow-input').disabled = on;
     $('ai-follow-send').disabled = on;
@@ -832,13 +866,15 @@
     const myToken = searchToken;
     let partial = '';
 
+    const renderStream = makeStreamRenderer(aEl, results.length);
     try {
-      const text = await streamTurn((t) => { partial = t; });   // no per-token render
-      hideThinking();
-      aEl.classList.add('enter');               // whole answer rises + fades in
-      aEl.innerHTML = linkifyCitations(marked.parse(esc(text)), results.length);
+      const text = await streamTurn((t) => {
+        partial = t;
+        renderStream(t);
+      });
       thread.push({ role: 'assistant', content: text });
       if (!text.trim()) aEl.textContent = '✦ the cosmos answered with silence — try rephrasing?';
+      else renderStream.finalize(text);             // one crisp full parse, tail gone
       panel.classList.add('done');                  // shimmer settles
     } catch (e) {
       if (e.name === 'AbortError') {
@@ -899,13 +935,15 @@
     const myToken = searchToken;
     let partial = '';
 
+    const renderStream = makeStreamRenderer(aEl, threadResults.length);
     try {
-      const text = await streamTurn((t) => { partial = t; });   // no per-token render
-      hideThinking();
-      aEl.classList.add('enter');               // whole answer rises + fades in
-      aEl.innerHTML = linkifyCitations(marked.parse(esc(text)), threadResults.length);
+      const text = await streamTurn((t) => {
+        partial = t;
+        renderStream(t);
+      });
       thread.push({ role: 'assistant', content: text });
       if (!text.trim()) aEl.textContent = '✦ silence. rude, but on brand.';
+      else renderStream.finalize(text);
       panel.classList.add('done');
     } catch (e) {
       if (e.name === 'AbortError') {
