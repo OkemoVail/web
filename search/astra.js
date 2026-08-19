@@ -11,6 +11,48 @@
       "how do black holes even",
       "is water wet. settle it.",
       "teach a goldfish calculus",
+      "do astronauts do their own laundry",
+      "the moon landing but make it fashion",
+      "why do we park on driveways",
+      "explain wifi to a medieval peasant",
+      "are aliens ghosting us",
+      "what's the deal with dark matter, actually",
+      "can you cry in space",
+      "ranking the planets by vibes",
+      "how many pizzas fit in the observable universe",
+      "did the chicken cross the event horizon",
+      "why is pluto not a planet. fight me.",
+      "do black holes dream",
+      "what if the moon is just very shy",
+      "speedrun guide to the heat death of the universe",
+      "is mercury okay. genuinely asking.",
+      "how to apologize to a satellite",
+      "the sun's skincare routine",
+      "can fish get thirsty",
+      "what does the ISS smell like",
+      "astrology but peer-reviewed",
+      "why is it called a building when it's already built",
+      "are there wifi dead zones in the bermuda triangle",
+      "do parallel universes have parallel parking",
+      "how loud is the sun",
+      "what's jupiter's great red spot so angry about",
+      "can you hear meowing in space",
+      "the oxford comma: a space opera",
+      "why is time. like, in general.",
+      "do satellites get bored",
+      "what if gravity is just social pressure",
+      "how to file taxes in zero-g",
+      "is the ocean space but wet",
+      "why does the moon follow my car",
+      "can a telescope see itself",
+      "what do pigeons think of airplanes",
+      "how many humans could outrun a comet",
+      "the andromeda galaxy is coming. should i worry",
+      "what sound does a supernova actually make",
+      "do worms have opinions about soil",
+      "why are manhole covers round (real answers only)",
+      "could the moon win a fight against the sun",
+      "what's the point of neptune",
     ],
     loadingQuips: [
       'consulting the cosmos…',
@@ -71,16 +113,54 @@
     }
   }
 
-  // ── rotating placeholder quips (both bars) ──
+  // ── rotating placeholder ghosts (both bars, in sync) ──
+  // The native placeholder is the static default "search the web…" (shown at load,
+  // during rests, and as the no-JS fallback); the quips ride on an animated
+  // .ph-ghost overlay — quips fade/swipe every 4s and the cycle rests on the
+  // default for a double beat after every 3rd quip. Reduced-motion / webdriver:
+  // instant swaps, no slide (CSS also kills the transition).
   function rotatePlaceholders() {
+    const pairs = [
+      { input: $('hero-input'), ghost: $('hero-ghost') },
+      { input: $('results-input'), ghost: $('results-ghost') },
+    ];
+    const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || navigator.webdriver;
     let i = Math.floor(Math.random() * COPY.placeholders.length);
-    const apply = () => {
-      $('hero-input').placeholder = COPY.placeholders[i];
-      $('results-input').placeholder = COPY.placeholders[i];
-      i = (i + 1) % COPY.placeholders.length;
+    let current = '', quipsSinceRest = 0, resting = false;
+
+    const paint = (t) => {
+      current = t;
+      pairs.forEach(({ input, ghost }) => {
+        ghost.textContent = t;
+        ghost.classList.toggle('on', !!t && !input.value);
+      });
     };
-    apply();
-    setInterval(apply, 4000);
+    pairs.forEach(({ input }) => input.addEventListener('input', () => paint(current)));
+
+    const transition = (t) => {
+      if (reduced) { paint(t); return; }
+      pairs.forEach(({ ghost }) => ghost.classList.add('ph-out'));
+      setTimeout(() => {
+        pairs.forEach(({ ghost }) => {
+          ghost.classList.remove('on', 'ph-out');
+          void ghost.offsetWidth;               // reflow so the enter transition runs
+        });
+        paint(t);
+      }, 220);
+    };
+
+    const tick = () => {
+      if (resting) { resting = false; return; }                    // second half of the rest
+      if (quipsSinceRest >= 3) {
+        quipsSinceRest = 0; resting = true;
+        transition('');                                            // ghost hides → default shows ~8s
+        return;
+      }
+      transition(COPY.placeholders[i]);
+      i = (i + 1) % COPY.placeholders.length;
+      quipsSinceRest++;
+    };
+    setInterval(tick, 4000);                                       // default shows until the first tick
   }
 
   // ── router: URL is the state. ?q= results (AI answer always included) ──

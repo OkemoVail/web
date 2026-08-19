@@ -80,9 +80,28 @@ what's the point of neptune
 - Results-page pagination/scroll caps (unchanged)
 - `loadingQuips`, `aiHeaders`, other COPY lists (unchanged)
 
+## Placeholder ghost animation (added after pool approval — user directive, proceed-as-approved)
+
+The rotating placeholder becomes an animated "ghost" span, since the native
+`placeholder` attribute can't be animated:
+
+- Each `.bar` input is wrapped in `<span class="ph-wrap">` (flex:1, position:relative)
+  holding the input + `<span class="ph-ghost" aria-hidden="true">` — absolutely
+  positioned over the input text, `pointer-events: none`, ellipsis overflow.
+- Native placeholder on both inputs becomes the static default **"search the web…"**
+  (also the no-JS fallback; ghost is empty/hidden at load, so the default shows first).
+- Rotation (`rotatePlaceholders` in `astra.js`): every 4s the ghost exits
+  (fade + `translateY(-8px)`, ~200ms) and the next quip enters (fade + slide up from
+  `+8px`, ~250ms, `--ease-smooth`). After every **3rd quip** the ghost hides for a
+  double beat (~8s) so the bar rests on the native default. Both bars stay in sync;
+  random start index preserved. Ghost hides whenever the input has text.
+- Reduced-motion/webdriver: instant swap, no slide (JS bail + `transition: none` in
+  the reduced-motion kill list).
+
 ## Testing
 
 - `node --check search/astra.js` (syntax)
-- Headless Chromium: load `/search/`, sample the hero placeholder rotation + fire the
-  cosmic button repeatedly; assert every query drawn comes from the pool and repeats
-  are non-adjacent across a handful of clicks.
+- Headless Chromium: load `/search/`; assert native placeholder is "search the web…",
+  ghost cycles through pool quips (fade-swipe classes toggle), rests after every 3rd
+  quip, hides on input; cosmic button draws from the 48-quip pool; reduced-motion
+  context cycles instantly without transition classes.
