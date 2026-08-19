@@ -6095,6 +6095,12 @@ html.motion-ready [data-reveal].revealed {
   [data-page="search"] .ph-ghost { position: absolute; left: 0; right: 8px; top: 0; bottom: 0; display: flex; align-items: center; font-size: .95rem; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; opacity: 0; transform: translateY(8px); }
   [data-page="search"] .ph-ghost.on { opacity: 1; transform: none; transition: opacity .25s var(--ease-smooth) .02s, transform .25s var(--ease-smooth) .02s; }
   [data-page="search"] .ph-ghost.ph-out { opacity: 0; transform: translateY(-8px); transition: opacity .2s var(--ease-smooth), transform .2s var(--ease-smooth); }
+  /* while a quip ghost is on, hide the input's native placeholder (else the two
+     texts overlap); while focused, the ghost itself fades out so it never covers
+     the caret — the native placeholder returns for the focused empty bar */
+  [data-page="search"] .ph-wrap:has(.ph-ghost.on) input::placeholder { color: transparent; }
+  [data-page="search"] .ph-wrap:focus-within:has(.ph-ghost.on) input::placeholder { color: var(--text-tertiary); }
+  [data-page="search"] .ph-wrap:focus-within .ph-ghost.on { opacity: 0; }
   /* rainbow ring (i'm feeling cosmic) */
   [data-page="search"] .ai-ring { border-radius: 999px; padding: 1.5px; background: conic-gradient(from var(--rb, 0deg), #ff5f6d, #ffc371, #f0e05a, #5fdc7d, #5aa7ff, #b06bff, #ff5f6d); animation: rb-spin 3.2s linear infinite; }
   [data-page="search"] .ai-ring .skuo { height: 33px; background: var(--bg-white); color: var(--text-primary); font-weight: 600; box-shadow: none; }
