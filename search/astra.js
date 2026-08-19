@@ -709,6 +709,46 @@
     return render;
   }
 
+  // ── typewriter drain: sse deltas queue up and a 50 ms interval reveals them
+  // char-by-char (chat's cadence: 4 chars/tick baseline, backlog-aware catch-up
+  // capped at 50/tick) — the typing itself is the animation, text stays crisp.
+  // Bails to instant render under prefers-reduced-motion / navigator.webdriver
+  // (snapshot-harness determinism invariant, see CLAUDE.md motion system).
+  function makeTypewriter(renderFn) {
+    const INSTANT = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || navigator.webdriver;
+    let received = '', revealed = 0, acc = 0, timer = null, doneResolve = null;
+    const tick = () => {
+      const backlog = received.length - revealed;
+      if (backlog > 0) {
+        acc = Math.min(acc + Math.min(Math.max(4, backlog / 6), 50), backlog);
+        const take = Math.floor(acc);
+        revealed += take;
+        acc -= take;
+        renderFn(received.slice(0, revealed));
+      }
+      if (revealed >= received.length) {              // caught up: go idle (push restarts)
+        clearInterval(timer); timer = null;
+        if (doneResolve) { const r = doneResolve; doneResolve = null; r(); }
+      }
+    };
+    return {
+      push(fullText) {                                // called per SSE delta with full text so far
+        received = fullText;
+        if (INSTANT) { revealed = received.length; renderFn(received); return; }
+        if (!timer) timer = setInterval(tick, 50);
+      },
+      finish() {                                      // resolves once the queue has played out
+        if (INSTANT || revealed >= received.length) return Promise.resolve();
+        return new Promise((res) => { doneResolve = res; });
+      },
+      halt() {                                        // stop typing now; returns what was revealed
+        if (timer) { clearInterval(timer); timer = null; }
+        doneResolve = null;
+        return received.slice(0, revealed);
+      },
+    };
+  }
+
   function setStreaming(on) {
     $('ai-follow-input').disabled = on;
     $('ai-follow-send').disabled = on;
@@ -864,25 +904,21 @@
     $('ai-follow').hidden = false;                  // composer visible from the start (ChatGPT-style)
     setStreaming(true);
     const myToken = searchToken;
-    let partial = '';
 
     const renderStream = makeStreamRenderer(aEl, results.length);
+    const typer = makeTypewriter(renderStream);
     try {
-      const text = await streamTurn((t) => {
-        partial = t;
-        renderStream(t);
-      });
+      const text = await streamTurn((t) => typer.push(t));
+      await typer.finish();                         // let the typewriter play out — no slam
       thread.push({ role: 'assistant', content: text });
       if (!text.trim()) aEl.textContent = '✦ the cosmos answered with silence — try rephrasing?';
       else renderStream.finalize(text);             // one crisp full parse, tail gone
       panel.classList.add('done');                  // shimmer settles
     } catch (e) {
+      const kept = typer.halt();                    // stop the typewriter whatever happened
       if (e.name === 'AbortError') {
-        if (aiStopRequested && partial) {           // user hit stop — keep what streamed
-          hideThinking();
-          aEl.classList.add('enter');
-          aEl.innerHTML = linkifyCitations(marked.parse(esc(partial)), results.length);
-          thread.push({ role: 'assistant', content: partial });
+        if (aiStopRequested && kept) {              // user hit stop — keep what streamed
+          thread.push({ role: 'assistant', content: kept });
           panel.classList.add('done');
         } else {
           hideThinking();
@@ -933,25 +969,21 @@
     $('ai-error').hidden = true;
     setStreaming(true);
     const myToken = searchToken;
-    let partial = '';
 
     const renderStream = makeStreamRenderer(aEl, threadResults.length);
+    const typer = makeTypewriter(renderStream);
     try {
-      const text = await streamTurn((t) => {
-        partial = t;
-        renderStream(t);
-      });
+      const text = await streamTurn((t) => typer.push(t));
+      await typer.finish();                         // let the typewriter play out — no slam
       thread.push({ role: 'assistant', content: text });
       if (!text.trim()) aEl.textContent = '✦ silence. rude, but on brand.';
       else renderStream.finalize(text);
       panel.classList.add('done');
     } catch (e) {
+      const kept = typer.halt();                    // stop the typewriter whatever happened
       if (e.name === 'AbortError') {
-        if (aiStopRequested && partial) {
-          hideThinking();
-          aEl.classList.add('enter');
-          aEl.innerHTML = linkifyCitations(marked.parse(esc(partial)), threadResults.length);
-          thread.push({ role: 'assistant', content: partial });
+        if (aiStopRequested && kept) {
+          thread.push({ role: 'assistant', content: kept });
           panel.classList.add('done');
         } else if (aiStopRequested) {
           hideThinking();
