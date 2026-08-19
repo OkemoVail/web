@@ -675,10 +675,10 @@
 
   function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
 
-  // ── streaming renderer: apple-intelligence-style materialization ──
+  // ── streaming renderer ──
   // Completed blocks (blank-line separated) bake to crisp static nodes; the open
-  // block lives in one persistent .ai-tail div whose CSS animation (pop + unblur
-  // breathe) survives innerHTML swaps because the div itself is never recreated.
+  // block lives in one persistent .ai-tail div whose innerHTML is swapped by the
+  // typewriter drain (makeTypewriter) — the typing cadence is the animation.
   // Call render.finalize(text) at completion for one crisp full-parse render.
   function makeStreamRenderer(aEl, count) {
     let finalized = 0;               // source chars already baked into crisp nodes
