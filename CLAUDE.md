@@ -387,11 +387,10 @@ deliberately untouched: continuous `linear`/`ease-in-out` infinite loops
 WAAPI easings (accelerate-in/decelerate-out per keyframe), and raw `ease`
 micro color-fades (already the in-out family). Generation indicators now also
 share one entrance — `@keyframes gen-in` (bottom→top rise + fade, `--dur-3`
-`--ease-smooth backwards`): chat's `.book-flip-lane`, Astra's `.ai-thinking`,
-and Astra's completed `.ai-turn.enter`. Astra turns render WHOLE on stream
-completion (2026-08-15 — the per-token `innerHTML` typewriter re-render was
-removed from `streamTurn`; `onToken` only accumulates `partial` for
-stop-early, and `hideThinking()` moved from first-token to completion/abort).
+`--ease-smooth backwards`): chat's `.book-flip-lane` and Astra's `.ai-thinking`.
+Astra turns TYPE character-by-character as tokens stream (2026-08-19
+`makeTypewriter`, superseding the 2026-08-15 whole-render-on-completion);
+`hideThinking()` fires on the first token so typing starts immediately.
 
 - `src/motion.js` (loaded by AI/index.html, search/index.html, AI/chat.html):
   `[data-reveal]` scroll entrances (gated behind `html.motion-ready` — content

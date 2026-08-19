@@ -6193,11 +6193,6 @@ html.motion-ready [data-reveal].revealed {
 
   /* chat thread: plain Astra turns, grey right-aligned user bubbles */
   [data-page="search"] .ai-turn { margin: 2px 0 8px; }
-  /* Turns render whole when the stream completes (no typewriter) — the
-     completed answer rises in from below + fades on the ease-in-out curve.
-     Class is added by astra.js at render time (the element itself is
-     appended empty when the request starts, so the animation must wait). */
-  [data-page="search"] .ai-turn.enter { animation: gen-in var(--dur-3) var(--ease-smooth) backwards; }
   [data-page="search"] .ai-bubble-user { width: fit-content; max-width: 85%; margin: 12px 0 4px auto; padding: 8px 13px; border-radius: 16px 16px 4px 16px; background: var(--bg-elevated); border: 1px solid var(--border-strong); font-size: .85rem; color: var(--text-primary); }
   [data-page="search"] #ai-expand { width: 28px; height: 28px; padding: 0; border-radius: 8px; font-size: .85rem; flex: none; }
 
