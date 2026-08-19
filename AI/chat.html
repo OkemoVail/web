@@ -64,19 +64,12 @@
             --header-height: 56px;
             --sidebar-section-first-margin-top: 8px;
 
-            /* Floating sidebar shell — matches .ov-nav__bar (src/site.css §3) */
+            /* Floating sidebar shell — flat language (2026-08-19): solid
+               surface + 1px border, no gradient, no depth shadow. */
             --sb-float-gap: 0.9rem;
             --sb-radius: 20px;
-            --sb-float-surface: linear-gradient(
-                180deg,
-                color-mix(in srgb, var(--bg-elevated), white 7%),
-                color-mix(in srgb, var(--bg-elevated), black 7%)
-            );
-            --sb-float-border: color-mix(in srgb, var(--bg-elevated), black 14%);
-            --sb-float-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.5),
-                0 1px 2px -1px rgba(0, 0, 0, 0.12),
-                0 6px 22px -8px rgba(0, 0, 0, 0.18);
+            --sb-float-surface: var(--bg-elevated);
+            --sb-float-border: var(--border-strong);
         }
 
         .dark {
@@ -91,12 +84,8 @@
             --sb-item-hover: color-mix(in srgb, var(--accent-color) 14%, transparent);
             --sb-active-soft: color-mix(in srgb, var(--accent-color) 12%, transparent);
 
-            /* Floating shell — mirrors .dark .ov-nav__bar */
-            --sb-float-border: rgba(0, 0, 0, 0.5);
-            --sb-float-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.06),
-                0 1px 2px rgba(0, 0, 0, 0.4),
-                0 8px 28px -8px rgba(0, 0, 0, 0.55);
+            /* Floating shell — flat language (solid + border, no shadow) */
+            --sb-float-border: var(--border-strong);
 
             /* dark mode keeps chat bg + sidebar pinned to the same rosewood — no shift */
             --bg-color: #c96478;
@@ -232,7 +221,7 @@
                     <!-- Sign In / Register toggle -->
                     <div class="flex gap-2 mb-4 bg-zinc-100 dark:bg-zinc-900/60 rounded-xl p-1">
                         <button id="ob-mode-login" onclick="window.setOnboardingAuthMode('login')"
-                            class="flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                            class="flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                             data-t="ob_sign_in">
                             Sign In
                         </button>
@@ -496,7 +485,7 @@
                                     <i data-feather="settings" class="w-[1.3rem] h-[1.3rem]"></i>
                                 </button>
                                 <div id="settings-submenu"
-                                    class="hidden absolute bottom-full right-0 mb-2 w-44 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl shadow-xl z-50 p-1 flex flex-col gap-0.5">
+                                    class="hidden absolute bottom-full right-0 mb-2 w-44 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl z-50 p-1 flex flex-col gap-0.5" style="box-shadow: var(--shadow-float)">
                                     <button onclick="event.stopPropagation(); window.openSettingsTo('general')"
                                         class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
                                         <i data-feather="sliders" class="w-3.5 h-3.5 shrink-0"></i>
@@ -718,7 +707,7 @@
                             </span>
                         </button>
                         <div id="plus-menu"
-                            class="absolute bottom-full left-0 mb-2 w-52 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl shadow-xl opacity-0 invisible transition-all duration-200 z-50 origin-bottom-left"
+                            class="absolute bottom-full left-0 mb-2 w-52 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl opacity-0 invisible transition-all duration-200 z-50 origin-bottom-left" style="box-shadow: var(--shadow-float)"
                             style="transform: translateY(6px) scale(0.97)">
                             <div class="p-2 flex flex-col gap-2">
                                 <div class="grid grid-cols-2 gap-1.5">
@@ -808,12 +797,12 @@
 
     <!-- CANVAS CONTAINER -->
     <aside id="canvas-container"
-        class="hidden w-full lg:w-1/2 flex-shrink-0 h-full bg-white dark:bg-[#1e1e1e] border-l border-zinc-200 dark:border-zinc-800 flex-col z-[100] absolute lg:relative inset-0 lg:inset-auto shadow-2xl lg:shadow-none transition-all duration-300 transform lg:transform-none">
+        class="hidden w-full lg:w-1/2 flex-shrink-0 h-full bg-white dark:bg-[#1e1e1e] border-l border-zinc-200 dark:border-zinc-800 flex-col z-[100] absolute lg:relative inset-0 lg:inset-auto transition-all duration-300 transform lg:transform-none">
         <div
             class="flex items-center justify-between p-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#252526]">
             <div class="flex items-center gap-2">
                 <button id="canvas-tab-preview" onclick="window.switchCanvasTab('preview')"
-                    class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] shadow-sm text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors"
+                    class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-[#1e1e1e] text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors"
                     data-t="live_preview">Live
                     Preview</button>
                 <button id="canvas-tab-code" onclick="window.switchCanvasTab('code')"
@@ -955,7 +944,7 @@
                             <div
                                 class="flex bg-zinc-100 dark:bg-zinc-800/80 p-0.5 rounded-xl border border-zinc-200 dark:border-zinc-700/50">
                                 <button id="btn-lang-en" onclick="window.setLang('en')"
-                                    class="min-h-[36px] px-3 rounded-lg text-xs font-bold transition-all bg-white dark:bg-zinc-600 text-zinc-900 dark:text-white shadow-sm">English</button>
+                                    class="min-h-[36px] px-3 rounded-lg text-xs font-bold transition-all bg-white dark:bg-zinc-600 text-zinc-900 dark:text-white">English</button>
                                 <button id="btn-lang-zh" onclick="window.setLang('zh')"
                                     class="min-h-[36px] px-3 rounded-lg text-xs font-bold transition-all text-zinc-500 hover:bg-white dark:hover:bg-zinc-700">中文</button>
                             </div>
@@ -1050,14 +1039,14 @@
                     <div class="Cadance-card">
                         <div class="p-5 flex flex-col sm:flex-row gap-5 items-center">
                             <div class="relative shrink-0">
-                                <div id="pfp-workspace" class="shadow-inner ring-1 ring-zinc-900/5 dark:ring-white/10"
+                                <div id="pfp-workspace" class="ring-1 ring-zinc-900/5 dark:ring-white/10"
                                     style="width: 100px; height: 100px; border-radius: 50%;"
                                     onpointerdown="window.pfpDragStart(event)">
                                     <img id="pfp-movable-img" src="" alt="">
                                     <div id="pfp-mask"></div>
                                 </div>
                                 <button onclick="document.getElementById('pfp-upload-settings').click()"
-                                    class="absolute bottom-0 right-0 w-10 h-10 rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-transform"
+                                    class="absolute bottom-0 right-0 w-10 h-10 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
                                     style="background: var(--accent-color);">
                                     <i data-feather="camera" class="w-4 h-4"></i>
                                 </button>
@@ -1103,7 +1092,7 @@
                     <div class="Cadance-card">
                         <button id="sign-in-btn" class="Cadance-theme-item text-left">
                             <div
-                                class="w-10 h-10 rounded-full bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 flex items-center justify-center shrink-0 shadow-sm">
+                                class="w-10 h-10 rounded-full bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 flex items-center justify-center shrink-0">
                                 <i data-feather="cloud" class="w-5 h-5 text-zinc-600 dark:text-zinc-300" style="stroke-width: 3px;"></i>
                             </div>
                             <div class="flex flex-col min-w-0 flex-1">
@@ -1122,7 +1111,7 @@
                             <div id="st-auth-form">
                                 <div class="flex gap-2 mb-3 bg-zinc-100 dark:bg-zinc-900/60 rounded-xl p-1">
                                     <button id="st-mode-login" onclick="window.setSettingsAuthMode('login')"
-                                        class="flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                                        class="flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                                         data-t="ob_sign_in">
                                         Sign In
                                     </button>
@@ -1284,13 +1273,13 @@
     <div id="research-page-overlay">
         <div class="flex-1 flex flex-col items-center justify-center p-6 max-w-4xl mx-auto w-full relative">
             <button onclick="window.closeResearchPage()"
-                class="absolute top-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all shadow-lg active:scale-95">
+                class="absolute top-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all active:scale-95">
                 <i data-feather="x" class="w-5 h-5"></i>
             </button>
 
             <div class="text-center mb-12 animate-slide-up">
                 <div
-                    class="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    class="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
                     <span class="text-4xl">🧪</span>
                 </div>
                 <h1
@@ -1306,14 +1295,14 @@
 
             <div class="w-full max-w-2xl animate-slide-up" style="animation-delay: 0.1s">
                 <div
-                    class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-2 shadow-2xl focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
+                    class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-2 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
                     <div class="flex items-center">
                         <input type="text" id="research-input" placeholder="What do you want to research..."
                             data-t-placeholder="ph_research"
                             class="flex-1 bg-transparent px-6 py-5 outline-none text-xl font-medium text-zinc-900 dark:text-white placeholder-zinc-400"
                             onkeydown="if(event.key === 'Enter') window.startResearch()">
                         <button onclick="window.startResearch()"
-                            class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl">
+                            class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
                             <i data-feather="arrow-right" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -1323,7 +1312,7 @@
     </div>
 
     <div id="personality-modal"
-        style="position:fixed;inset:0;z-index:4000;background:rgba(15, 15, 15, 0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;padding:1rem;">
+        style="position:fixed;inset:0;z-index:4000;background:rgba(15, 15, 15, 0.4);display:none;align-items:center;justify-content:center;padding:1rem;">
         <div class="changelog-card card" style="max-width:520px;">
             <div class="p-8 relative z-10">
                 <div class="flex items-center gap-3 mb-6">
@@ -1388,7 +1377,7 @@
 
     <!-- Memories modal -->
     <div id="memories-modal"
-        style="position:fixed;inset:0;z-index:4000;background:rgba(15,15,15,0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;padding:1rem;">
+        style="position:fixed;inset:0;z-index:4000;background:rgba(15,15,15,0.4);display:none;align-items:center;justify-content:center;padding:1rem;">
         <div class="changelog-card card" style="max-width:520px;width:100%;">
             <div class="p-8 relative z-10">
                 <div class="flex items-center justify-between mb-6">
@@ -1820,7 +1809,7 @@
                 'font-size:13px',
                 'font-weight:500',
                 'color:#71717a',
-                'box-shadow:0 4px 24px rgba(0,0,0,0.10)',
+                'box-shadow:var(--shadow-float)',
                 'max-width:320px',
                 'pointer-events:auto',
                 'opacity:0',
@@ -1925,7 +1914,7 @@
 
     <!-- Account modal -->
     <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm mx-4 p-6" style="box-shadow: var(--shadow-float)">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold dark:text-white">Account</h2>
                 <button id="modal-close"

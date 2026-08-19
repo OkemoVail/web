@@ -64,7 +64,7 @@
 
     <main class="max-w-4xl mx-auto px-6 pt-40 pb-24">
         <div id="status-msg"
-            class="fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold transition-opacity opacity-0 px-4 py-2 rounded-full bg-ivory border border-border-cream shadow-xl z-50">
+            class="fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold transition-opacity opacity-0 px-4 py-2 rounded-full bg-ivory border border-border-cream z-50" style="box-shadow: var(--shadow-float)">
         </div>
         <div class="mb-16">
             <h1 class="text-4xl font-black tracking-tight text-text-warm mb-4">Research Management
@@ -173,7 +173,7 @@
                     const statusMsg = document.getElementById('status-msg');
                     if (statusMsg) {
                         statusMsg.innerText = "Syncing deletion to file...";
-                        statusMsg.className = "fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold text-blue-500 px-4 py-2 rounded-full bg-ivory border border-border-cream shadow-xl z-50 transition-opacity opacity-100";
+                        statusMsg.className = "fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold text-blue-500 px-4 py-2 rounded-full bg-ivory border border-border-cream z-50 transition-opacity opacity-100";
                     }
 
                     const options = { mode: 'readwrite' };
@@ -185,7 +185,7 @@
 
                     if (statusMsg) {
                         statusMsg.innerText = "File Synced";
-                        statusMsg.className = "fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold text-rosewood px-4 py-2 rounded-full bg-ivory border border-border-cream shadow-xl z-50 transition-opacity opacity-100";
+                        statusMsg.className = "fixed top-24 left-1/2 -translate-x-1/2 text-xs font-bold text-rosewood px-4 py-2 rounded-full bg-ivory border border-border-cream z-50 transition-opacity opacity-100";
                         setTimeout(() => statusMsg.style.opacity = "0", 2000);
                     }
                 } catch (error) {

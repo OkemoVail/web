@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-15
 **Spec:** `docs/superpowers/specs/2026-08-15-flat-design-language-design.md`
-**Status:** Phase 0 only, until the design sheet is approved
+**Status:** Complete (2026-08-19) — sheet approved, all phases executed
 
 ## Phase 0 — Design sheet (review artifact)
 

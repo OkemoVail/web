@@ -1,7 +1,7 @@
 # Flat Design Language — Design
 
 **Date:** 2026-08-15
-**Status:** Draft (pending design-sheet review)
+**Status:** Shipped 2026-08-19 (design sheet approved; Phases 1–3 executed)
 
 ## Problem
 
