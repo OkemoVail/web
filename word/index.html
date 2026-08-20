@@ -48,30 +48,33 @@
     <div id="app">
 
         <!-- ── Header ──────────────────────────────────────────────── -->
-        <header class="ow-header">
-            <span class="ow-app-name">Okemo Word</span>
-            <div class="vr"></div>
+        <header class="ow-header" aria-label="Document controls">
+            <div class="wordmark" aria-label="Okemo Word"><span aria-hidden="true">W</span></div>
             <input id="doc-title" type="text" value="Untitled Document" spellcheck="false" onblur="saveDoc(true)"
-                oninput="markUnsaved()">
-            <div style="flex:1;"></div>
-            <span id="hdr-word-count" class="hdr-word-pill">0 words</span>
-            <div class="vr"></div>
-            <button class="hdr-btn skuo skuo-icon" onclick="newDoc()" title="New document"><i class="fa-regular fa-file"></i></button>
-            <button class="hdr-btn skuo skuo-icon" id="save-btn" onclick="saveDoc()" title="Save  Ctrl+S"><i
-                    class="fa-regular fa-floppy-disk"></i></button>
-            <button class="hdr-btn skuo skuo-icon" onclick="showExportMenu(event)" title="Export"><i
-                    class="fa-solid fa-arrow-up-from-bracket"></i></button>
-            <button class="hdr-btn skuo skuo-icon" onclick="printDoc()" title="Print"><i class="fa-solid fa-print"></i></button>
-            <div class="vr"></div>
-            <button class="hdr-btn skuo skuo-icon" id="ai-toggle-btn" onclick="toggleAIPanel()" title="Oaky AI  —  writing assistant">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-            </button>
-            <div id="hdr-profile" class="hdr-profile"></div>
+                oninput="markUnsaved()" aria-label="Document title">
+            <div class="document-state" id="workspace-status" aria-live="polite">
+                <span id="hdr-word-count">0 words</span>
+                <span aria-hidden="true">·</span>
+                <span id="st-save">Not saved</span>
+            </div>
+            <div class="document-actions">
+                <button class="hdr-btn skuo skuo-icon" onclick="newDoc()" title="New document" aria-label="New document"><i
+                        class="fa-regular fa-file" aria-hidden="true"></i></button>
+                <button class="hdr-btn skuo skuo-icon" id="save-btn" onclick="saveDoc()" title="Save document"
+                    aria-label="Save document"><i class="fa-regular fa-floppy-disk" aria-hidden="true"></i></button>
+                <button class="hdr-btn skuo skuo-icon" id="document-menu-btn" onclick="toggleDocumentMenu(event)"
+                    title="Document actions" aria-label="Document actions" aria-haspopup="menu" aria-controls="document-menu"
+                    aria-expanded="false"><span class="menu-dots" aria-hidden="true">•••</span></button>
+                <button class="hdr-btn skuo skuo-icon" id="ai-toggle-btn" onclick="toggleAIPanel(event)"
+                    title="Open Oaky writing assistant" aria-label="Open Oaky writing assistant" aria-controls="ai-panel"
+                    aria-expanded="false"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></button>
+                <div id="hdr-profile" class="hdr-profile" aria-label="Profile"></div>
+            </div>
         </header>
 
         <!-- ── Formatting toolbar ──────────────────────────────────── -->
-        <div class="ow-toolbar" role="toolbar" aria-label="Formatting">
-            <select class="tb-select" id="fmt-select" title="Paragraph style"
+        <div class="ow-toolbar format-capsule" role="toolbar" aria-label="Formatting">
+            <select class="tb-select" id="fmt-select" title="Paragraph style" aria-label="Paragraph style"
                 onchange="formatBlock(this.value); this.blur();" style="width:110px;">
                 <option value="p">Normal</option>
                 <option value="h1">Heading 1</option>
@@ -81,51 +84,55 @@
                 <option value="pre">Code Block</option>
             </select>
             <div class="tb-sep"></div>
-            <button class="tb-btn skuo skuo-icon" id="tb-bold" onclick="fmt('bold')" title="Bold  Ctrl+B"><b>B</b></button>
-            <button class="tb-btn skuo skuo-icon" id="tb-italic" onclick="fmt('italic')" title="Italic  Ctrl+I"><em
-                    style="font-style:italic;">I</em></button>
+            <button class="tb-btn skuo skuo-icon" id="tb-bold" onclick="fmt('bold')" title="Bold  Ctrl+B" aria-label="Bold"
+                aria-pressed="false"><b aria-hidden="true">B</b></button>
+            <button class="tb-btn skuo skuo-icon" id="tb-italic" onclick="fmt('italic')" title="Italic  Ctrl+I"
+                aria-label="Italic" aria-pressed="false"><em
+                    style="font-style:italic;" aria-hidden="true">I</em></button>
             <button class="tb-btn skuo skuo-icon" id="tb-underline" onclick="fmt('underline')" title="Underline  Ctrl+U"
-                style="text-decoration:underline;">U</button>
+                aria-label="Underline" aria-pressed="false" style="text-decoration:underline;">U</button>
             <button class="tb-btn skuo skuo-icon" id="tb-strike" onclick="fmt('strikeThrough')" title="Strikethrough"
-                style="text-decoration:line-through;">S</button>
+                aria-label="Strikethrough" aria-pressed="false" style="text-decoration:line-through;">S</button>
             <div class="tb-sep"></div>
-            <button class="tb-btn skuo skuo-icon" id="tb-al" onclick="fmt('justifyLeft')" title="Align left"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-al" onclick="fmt('justifyLeft')" title="Align left" aria-label="Align left" aria-pressed="false"><i
                     class="fa-solid fa-align-left" style="font-size:12px;"></i></button>
-            <button class="tb-btn skuo skuo-icon" id="tb-ac" onclick="fmt('justifyCenter')" title="Align center"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-ac" onclick="fmt('justifyCenter')" title="Align center" aria-label="Align center" aria-pressed="false"><i
                     class="fa-solid fa-align-center" style="font-size:12px;"></i></button>
-            <button class="tb-btn skuo skuo-icon" id="tb-ar" onclick="fmt('justifyRight')" title="Align right"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-ar" onclick="fmt('justifyRight')" title="Align right" aria-label="Align right" aria-pressed="false"><i
                     class="fa-solid fa-align-right" style="font-size:12px;"></i></button>
-            <button class="tb-btn skuo skuo-icon" id="tb-aj" onclick="fmt('justifyFull')" title="Justify"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-aj" onclick="fmt('justifyFull')" title="Justify" aria-label="Justify" aria-pressed="false"><i
                     class="fa-solid fa-align-justify" style="font-size:12px;"></i></button>
             <div class="tb-sep"></div>
-            <button class="tb-btn skuo skuo-icon" id="tb-ul" onclick="fmt('insertUnorderedList')" title="Bullet list"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-ul" onclick="fmt('insertUnorderedList')" title="Bullet list" aria-label="Bullet list" aria-pressed="false"><i
                     class="fa-solid fa-list-ul" style="font-size:12px;"></i></button>
-            <button class="tb-btn skuo skuo-icon" id="tb-ol" onclick="fmt('insertOrderedList')" title="Numbered list"><i
+            <button class="tb-btn skuo skuo-icon" id="tb-ol" onclick="fmt('insertOrderedList')" title="Numbered list" aria-label="Numbered list" aria-pressed="false"><i
                     class="fa-solid fa-list-ol" style="font-size:12px;"></i></button>
-            <button class="tb-btn skuo skuo-icon" onclick="fmt('outdent')" title="Decrease indent"><i class="fa-solid fa-outdent"
+            <button class="tb-btn skuo skuo-icon" onclick="fmt('outdent')" title="Decrease indent" aria-label="Decrease indent"><i class="fa-solid fa-outdent"
                     style="font-size:12px;"></i></button>
-            <button class="tb-btn skuo skuo-icon" onclick="fmt('indent')" title="Increase indent"><i class="fa-solid fa-indent"
-                    style="font-size:12px;"></i></button>
-            <div class="tb-sep"></div>
-            <button class="tb-btn skuo skuo-icon" onclick="insertLink()" title="Insert link"><i class="fa-solid fa-link"
-                    style="font-size:12px;"></i></button>
-            <button class="tb-btn skuo skuo-icon" onclick="insertTable()" title="Insert table"><i class="fa-solid fa-table"
-                    style="font-size:12px;"></i></button>
-            <button class="tb-btn skuo skuo-icon" onclick="insertHR()" title="Insert divider"><i class="fa-solid fa-minus"
+            <button class="tb-btn skuo skuo-icon" onclick="fmt('indent')" title="Increase indent" aria-label="Increase indent"><i class="fa-solid fa-indent"
                     style="font-size:12px;"></i></button>
             <div class="tb-sep"></div>
-            <button class="tb-btn skuo skuo-icon" onclick="fmt('removeFormat')" title="Clear formatting"><i
+            <button class="tb-btn skuo skuo-icon" onclick="insertLink()" title="Insert link" aria-label="Insert link"><i class="fa-solid fa-link"
+                    style="font-size:12px;"></i></button>
+            <button class="tb-btn skuo skuo-icon" onclick="insertTable()" title="Insert table" aria-label="Insert table"><i class="fa-solid fa-table"
+                    style="font-size:12px;"></i></button>
+            <button class="tb-btn skuo skuo-icon" onclick="insertHR()" title="Insert divider" aria-label="Insert divider"><i class="fa-solid fa-minus"
+                    style="font-size:12px;"></i></button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn skuo skuo-icon" onclick="fmt('removeFormat')" title="Clear formatting" aria-label="Clear formatting"><i
                     class="fa-solid fa-text-slash" style="font-size:12px;"></i></button>
         </div>
 
         <!-- ── Export menu ─────────────────────────────────────────── -->
-        <div id="export-menu">
-            <button class="export-item skuo" onclick="exportHTML()"><i class="fa-brands fa-html5"></i> Export as
+        <div id="document-menu" role="menu" aria-hidden="true">
+            <button class="export-item skuo" role="menuitem" onclick="exportHTML()"><i class="fa-brands fa-html5"></i> Export as
                 HTML</button>
-            <button class="export-item skuo" onclick="exportText()"><i class="fa-regular fa-file-lines"></i> Export as
+            <button class="export-item skuo" role="menuitem" onclick="exportText()"><i class="fa-regular fa-file-lines"></i> Export as
                 Text</button>
-            <button class="export-item skuo" onclick="copyAsHTML()"><i class="fa-regular fa-copy"></i> Copy HTML</button>
-            <button class="export-item skuo" onclick="copyAsText()"><i class="fa-solid fa-clipboard"></i> Copy Text</button>
+            <button class="export-item skuo" role="menuitem" onclick="copyAsHTML()"><i class="fa-regular fa-copy"></i> Copy HTML</button>
+            <button class="export-item skuo" role="menuitem" onclick="copyAsText()"><i class="fa-solid fa-clipboard"></i> Copy Text</button>
+            <div class="menu-separator" role="separator"></div>
+            <button class="export-item skuo" role="menuitem" onclick="printDoc()"><i class="fa-solid fa-print"></i> Print</button>
         </div>
 
         <!-- ── Main ────────────────────────────────────────────────── -->
@@ -141,7 +148,11 @@
             </div>
 
             <!-- AI Panel -->
-            <aside id="ai-panel">
+            <button id="ai-edge-tab" class="skuo skuo-accent" onclick="toggleAIPanel(event)"
+                aria-label="Open Oaky writing assistant" aria-controls="ai-panel" aria-expanded="false">
+                <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><span>Oaky</span>
+            </button>
+            <aside id="ai-panel" class="collapsed" aria-label="Oaky writing assistant" aria-hidden="true">
 
                 <!-- Header -->
                 <div class="ai-header">
@@ -150,10 +161,12 @@
                         <span class="ai-title">Oaky AI</span>
                     </div>
                     <div class="ai-header-right">
-                        <button class="ai-clear-btn skuo skuo-accent" onclick="clearAIChat()" title="Clear conversation">
+                        <button class="ai-clear-btn skuo skuo-accent" onclick="clearAIChat()" title="Clear conversation"
+                            aria-label="Clear conversation">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
-                        <button class="ai-mobile-close skuo skuo-icon skuo-accent" onclick="toggleAIPanel()" title="Close AI panel">
+                        <button class="ai-mobile-close skuo skuo-icon skuo-accent" onclick="toggleAIPanel(event)" title="Close AI panel"
+                            aria-label="Close Oaky writing assistant">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -170,24 +183,24 @@
                 </div>
 
                 <!-- Quick actions -->
-                <div class="ai-quick-actions">
-                    <button class="skuo skuo-pill" onclick="quickPrompt('improve')">✨ Improve</button>
-                    <button class="skuo skuo-pill" onclick="quickPrompt('continue')">➡️ Continue</button>
-                    <button class="skuo skuo-pill" onclick="quickPrompt('summarize')">📝 Summarize</button>
-                    <button class="skuo skuo-pill" onclick="quickPrompt('grammar')">✔️ Fix Grammar</button>
-                    <button class="skuo skuo-pill" onclick="quickPrompt('shorter')">📏 Shorter</button>
-                    <button class="skuo skuo-pill" onclick="quickPrompt('expand')">📖 Expand</button>
-                    <button class="skuo skuo-pill" onclick="quickPrompt('suggest')">💡 Suggest Edits</button>
-                    <button class="skuo skuo-pill" onclick="quickPrompt('professional')">👔 Professional</button>
-                    <button class="skuo skuo-pill" onclick="quickPrompt('casual')">😊 Casual</button>
+                <div class="ai-quick-actions" aria-label="Writing shortcuts">
+                    <button class="skuo skuo-pill" onclick="quickPrompt('improve')"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button>
+                    <button class="skuo skuo-pill" onclick="quickPrompt('continue')"><i class="fa-solid fa-arrow-turn-down"></i> Continue</button>
+                    <button class="skuo skuo-pill" onclick="quickPrompt('summarize')"><i class="fa-regular fa-file-lines"></i> Summarize</button>
+                    <button class="skuo skuo-pill" onclick="quickPrompt('grammar')"><i class="fa-solid fa-text-slash"></i> Fix Grammar</button>
+                    <button class="skuo skuo-pill" onclick="quickPrompt('shorter')">Shorter</button>
+                    <button class="skuo skuo-pill" onclick="quickPrompt('expand')">Expand</button>
+                    <button class="skuo skuo-pill" onclick="quickPrompt('suggest')"><i class="fa-regular fa-file-pen"></i> Suggest Edits</button>
+                    <button class="skuo skuo-pill" onclick="quickPrompt('professional')">Professional</button>
+                    <button class="skuo skuo-pill" onclick="quickPrompt('casual')">Casual</button>
                 </div>
 
                 <!-- Input -->
                 <div class="ai-input-area">
                     <div class="ai-input-wrap">
-                        <textarea id="ai-input" rows="1" onkeydown="handleAIKey(event)"
+                        <textarea id="ai-input" rows="1" onkeydown="handleAIKey(event)" aria-label="Ask Oaky"
                             oninput="autoResizeTA(this)"></textarea>
-                        <button id="ai-send-btn" onclick="handleSendAI()">
+                        <button id="ai-send-btn" onclick="handleSendAI()" aria-label="Send message">
                             <i class="fa-solid fa-arrow-up"></i>
                         </button>
                     </div>
@@ -197,21 +210,20 @@
         </div>
 
         <!-- ── Status bar ──────────────────────────────────────────── -->
-        <div class="ow-status">
+        <div class="ow-status" aria-label="Document statistics">
             <span id="st-words">0 words</span>
-            <span class="dot">·</span>
+            <span class="dot" aria-hidden="true">·</span>
             <span id="st-chars">0 characters</span>
-            <span class="dot">·</span>
+            <span class="dot" aria-hidden="true">·</span>
             <span id="st-read">&lt; 1 min read</span>
-            <div style="flex:1;"></div>
-            <span id="st-save">Not saved</span>
         </div>
 
         <!-- Toast -->
         <div id="ow-toast"></div>
 
         <!-- Mobile AI FAB -->
-        <button id="ai-fab" class="hidden" onclick="toggleAIPanel()" title="Open Oaky AI">
+        <button id="ai-fab" class="hidden" onclick="toggleAIPanel(event)" title="Open Oaky AI"
+            aria-label="Open Oaky writing assistant" aria-controls="ai-panel" aria-expanded="false">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
         </button>
 
@@ -225,7 +237,8 @@
 
         let currentModel = 'Octan-1.2B';
         let isGenerating = false;
-        let aiPanelOpen = true;
+        let aiPanelOpen = false;
+        let aiPanelTrigger = null;
         let savedRange = null;
         let autoSaveTimer = null;
         let responseMap = {};   // msgId → full text
@@ -250,20 +263,24 @@
             updateStats();
             loadProfile();
 
-            // Start AI panel collapsed on mobile
-            if (window.innerWidth <= 768) {
-                aiPanelOpen = false;
-                document.getElementById('ai-panel').classList.add('collapsed');
-                document.getElementById('ai-fab').classList.remove('hidden');
-            } else {
-                document.getElementById('ai-toggle-btn').classList.add('skuo-accent');
-            }
+            setAIPanel(false);
 
             // Global keyboard shortcuts
             document.addEventListener('keydown', e => {
                 const mod = e.ctrlKey || e.metaKey;
                 if (mod && e.key === 's') { e.preventDefault(); saveDoc(); }
                 if (mod && e.key === 'p') { e.preventDefault(); printDoc(); }
+                if (e.key === 'Escape') {
+                    const menu = document.getElementById('document-menu');
+                    if (menu.getAttribute('aria-hidden') === 'false') {
+                        closeDocumentMenu();
+                        document.getElementById('document-menu-btn').focus();
+                    } else if (aiPanelOpen) {
+                        const trigger = aiPanelTrigger || document.getElementById('ai-toggle-btn');
+                        setAIPanel(false);
+                        trigger.focus();
+                    }
+                }
             });
 
             // Editor events
@@ -290,12 +307,9 @@
                 if (e.target.closest('button')) e.preventDefault();
             });
 
-            // Close export menu on outside click
+            // Close the document menu when focus moves back to the workspace.
             document.addEventListener('click', e => {
-                const menu = document.getElementById('export-menu');
-                if (menu.style.display !== 'none' && !menu.contains(e.target)) {
-                    menu.style.display = 'none';
-                }
+                if (!e.target.closest('#document-menu, #document-menu-btn')) closeDocumentMenu();
             });
 
             // Listen for live updates from parent (e.g., Canvas mode in AI chat)
@@ -324,12 +338,24 @@
         }
 
         // ─── AI panel toggle ───────────────────────────────────────────
-        function toggleAIPanel() {
-            aiPanelOpen = !aiPanelOpen;
-            document.getElementById('ai-panel').classList.toggle('collapsed', !aiPanelOpen);
-            document.getElementById('ai-toggle-btn').classList.toggle('skuo-accent', aiPanelOpen);
+        function setAIPanel(open, trigger = null) {
+            aiPanelOpen = open;
+            if (open && trigger) aiPanelTrigger = trigger;
+            const panel = document.getElementById('ai-panel');
+            const toggle = document.getElementById('ai-toggle-btn');
+            const edgeTab = document.getElementById('ai-edge-tab');
             const fab = document.getElementById('ai-fab');
-            if (fab) fab.classList.toggle('hidden', aiPanelOpen);
+            panel.classList.toggle('collapsed', !open);
+            panel.setAttribute('aria-hidden', String(!open));
+            toggle.setAttribute('aria-expanded', String(open));
+            edgeTab.setAttribute('aria-expanded', String(open));
+            toggle.classList.toggle('skuo-accent', open);
+            fab.setAttribute('aria-expanded', String(open));
+            fab.classList.toggle('hidden', open);
+        }
+
+        function toggleAIPanel(event) {
+            setAIPanel(!aiPanelOpen, event?.currentTarget || null);
         }
 
         // ─── Formatting ────────────────────────────────────────────────
@@ -405,7 +431,11 @@
         function syncToolbar() {
             for (const [id, cmd] of Object.entries(TB_CMDS)) {
                 const el = document.getElementById(id);
-                if (el) el.classList.toggle('skuo-accent', document.queryCommandState(cmd));
+                if (el) {
+                    const active = document.queryCommandState(cmd);
+                    el.classList.toggle('skuo-accent', active);
+                    el.setAttribute('aria-pressed', String(active));
+                }
             }
             const blk = document.queryCommandValue('formatBlock').toLowerCase().replace(/[<>]/g, '');
             const sel = document.getElementById('fmt-select');
@@ -501,16 +531,22 @@
         }
 
         // ─── Export ────────────────────────────────────────────────────
-        function showExportMenu(e) {
-            const menu = document.getElementById('export-menu');
-            const rect = e.currentTarget.getBoundingClientRect();
-            menu.style.top = (rect.bottom + 6) + 'px';
-            menu.style.right = (window.innerWidth - rect.right) + 'px';
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        function toggleDocumentMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('document-menu');
+            const open = menu.getAttribute('aria-hidden') === 'true';
+            menu.setAttribute('aria-hidden', String(!open));
+            document.getElementById('document-menu-btn').setAttribute('aria-expanded', String(open));
+            if (open) menu.querySelector('[role="menuitem"]').focus();
+        }
+
+        function closeDocumentMenu() {
+            document.getElementById('document-menu').setAttribute('aria-hidden', 'true');
+            document.getElementById('document-menu-btn').setAttribute('aria-expanded', 'false');
         }
 
         function exportHTML() {
-            closeExportMenu();
+            closeDocumentMenu();
             const title = document.getElementById('doc-title').value || 'document';
             const content = editor.innerHTML;
             const html = `<!DOCTYPE html>
@@ -527,26 +563,24 @@
         }
 
         function exportText() {
-            closeExportMenu();
+            closeDocumentMenu();
             const title = document.getElementById('doc-title').value || 'document';
             dlFile(title + '.txt', editor.innerText, 'text/plain');
         }
 
         function copyAsHTML() {
-            closeExportMenu();
+            closeDocumentMenu();
             navigator.clipboard.writeText(editor.innerHTML)
                 .then(() => showToast('HTML copied to clipboard'))
                 .catch(() => showToast('Could not access clipboard'));
         }
 
         function copyAsText() {
-            closeExportMenu();
+            closeDocumentMenu();
             navigator.clipboard.writeText(editor.innerText)
                 .then(() => showToast('Text copied to clipboard'))
                 .catch(() => showToast('Could not access clipboard'));
         }
-
-        function closeExportMenu() { document.getElementById('export-menu').style.display = 'none'; }
 
         function dlFile(name, content, type) {
             const a = Object.assign(document.createElement('a'), {
@@ -556,7 +590,10 @@
             a.click(); URL.revokeObjectURL(a.href);
         }
 
-        function printDoc() { window.print(); }
+        function printDoc() {
+            closeDocumentMenu();
+            window.print();
+        }
 
         // ─── Toast ─────────────────────────────────────────────────────
         let toastTimer = null;
