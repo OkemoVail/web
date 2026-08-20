@@ -113,6 +113,11 @@ test('AI toggle and fullscreen control keep accessible labels and expanded state
   assert.match(js, /document\.title = on \? 'Astra Answer — Okemo Astra' : fullscreenTitle/);
 });
 
+test('fullscreen AI content stays centered without horizontal overflow', () => {
+  assert.match(css, /\.ai-panel\.ai-fullscreen\s*\{[^}]*box-sizing:\s*border-box/);
+  assert.match(css, /\.ai-panel\.ai-fullscreen > \*\s*\{[^}]*width:\s*min\(100%,\s*760px\)[^}]*box-sizing:\s*border-box/);
+});
+
 test('image preview and fullscreen AI use the shared modal accessibility controller', () => {
   assert.match(html, /id="ig-preview"[^>]*role="dialog"[^>]*aria-modal="true"[^>]*aria-labelledby="igp-title"/);
   assert.match(js, /function openModalLayer\(dialog, initialFocus, restoreFocus\)/);
@@ -133,6 +138,11 @@ test('results use local identities and never request Google favicons', () => {
   assert.doesNotMatch(js, /google\.com\/s2\/favicons/);
   assert.match(js, /AstraHelpers\.domainIdentity\(r\.url\)/);
   assert.match(js, /r-monogram/);
+});
+
+test('long result URLs cannot widen the results page', () => {
+  assert.match(css, /\.result > div\s*\{[^}]*min-width:\s*0[^}]*max-width:\s*100%/);
+  assert.match(css, /\.r-crumb\s*\{[^}]*max-width:\s*100%[^}]*overflow:\s*hidden[^}]*text-overflow:\s*ellipsis[^}]*white-space:\s*nowrap/);
 });
 
 test('search supports skeletons, actionable empty state, and hybrid loading', () => {
@@ -157,6 +167,20 @@ test('mobile results header stacks the logo above the search bar', () => {
   const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
   assert.match(css, /@media \(max-width: 768px\)[\s\S]*?\.r-top\s*\{[^}]*flex-direction:\s*column/);
   assert.match(css, /@media \(max-width: 768px\)[\s\S]*?\.r-logo\s*\{[^}]*align-self:\s*center/);
+});
+
+test('cosmic button uses a drifting aurora border with reduced-motion fallback', () => {
+  const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
+  assert.match(css, /\.ai-ring\s*\{[^}]*display:\s*inline-flex[^}]*line-height:\s*0[^}]*padding:\s*2px[^}]*linear-gradient\([^}]*#d97790[^}]*#f0a35e[^}]*#f6c177[^}]*#d97790[^}]*background-size:\s*300% 100%[^}]*animation:\s*astra-aurora-drift 8s var\(--ease-smooth\) infinite alternate/);
+  assert.match(css, /@keyframes astra-aurora-drift\s*\{[^}]*background-position:\s*100% 50%/);
+  assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.ai-ring[^}]*animation:\s*none/);
+});
+
+test('cosmic button press scales the gradient wrapper and inner button together', () => {
+  const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
+  assert.match(css, /\.ai-ring\s*\{[^}]*transition:\s*transform var\(--dur-1\) var\(--ease-soft\)/);
+  assert.match(css, /\.ai-ring:has\(\.skuo:active\)\s*\{[^}]*transform:\s*scale\(0\.97\)/);
+  assert.match(css, /\.ai-ring \.skuo:active\s*\{[^}]*transform:\s*none/);
 });
 
 console.log('Astra helper tests passed');

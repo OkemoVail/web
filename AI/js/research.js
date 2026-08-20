@@ -40,7 +40,7 @@ window.showSources = (pairIdx) => {
 
     const modal = document.createElement('div');
     modal.id = 'sources-modal';
-    modal.className = 'fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50';
+    modal.className = 'fixed inset-0 flex items-end sm:items-center justify-center p-4 bg-black/50';
     modal.innerHTML = `
         <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-md max-h-[70vh] flex flex-col">
             <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">

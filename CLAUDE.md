@@ -127,6 +127,20 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
+## Stacking layers
+
+As of 2026-08-20, root-level floating UI uses one semantic z-index scale in
+`src/site.css`: `--z-content` (0), `--z-chrome` (100), `--z-nav` (200),
+`--z-popover` (300), `--z-scrim` (400), `--z-dialog` (500), `--z-toast` (600),
+and `--z-preloader` (700). Use these tokens for fixed/sticky page-level layers;
+do not add arbitrary large values or Tailwind `z-*` utilities for new overlays.
+Small numeric values remain valid for local ordering inside an intentional
+component stacking context (illustration leaves, pseudo-element covers, code
+headers, etc.). A child's z-index cannot escape an ancestor stacking context:
+fullscreen/dialog elements must be direct root participants, or their ancestors
+must not set `z-index`, `transform`, `filter`, `contain: paint`, or similar traps.
+Regression harness: `node test-z-index.mjs`.
+
 ## Flat design language (site-wide)
 
 **As of 2026-08-19 the site is FLAT** (spec `docs/superpowers/specs/2026-08-15-flat-design-language-design.md`,

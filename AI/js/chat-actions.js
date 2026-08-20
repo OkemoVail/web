@@ -424,7 +424,7 @@ window.showSources = (idx) => {
 
     overlay = document.createElement('div');
     overlay.id = 'sources-modal-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:chat-fadeIn 0.18s ease;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:var(--z-dialog);background:rgba(0,0,0,0.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:chat-fadeIn 0.18s ease;';
 
     const card = document.createElement('div');
     card.className = 'sources-modal-card';

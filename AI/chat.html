@@ -1312,7 +1312,7 @@
     </div>
 
     <div id="personality-modal"
-        style="position:fixed;inset:0;z-index:4000;background:rgba(15, 15, 15, 0.4);display:none;align-items:center;justify-content:center;padding:1rem;">
+        style="position:fixed;inset:0;z-index:var(--z-dialog);background:rgba(15, 15, 15, 0.4);display:none;align-items:center;justify-content:center;padding:1rem;">
         <div class="changelog-card card" style="max-width:520px;">
             <div class="p-8 relative z-10">
                 <div class="flex items-center gap-3 mb-6">
@@ -1377,7 +1377,7 @@
 
     <!-- Memories modal -->
     <div id="memories-modal"
-        style="position:fixed;inset:0;z-index:4000;background:rgba(15,15,15,0.4);display:none;align-items:center;justify-content:center;padding:1rem;">
+        style="position:fixed;inset:0;z-index:var(--z-dialog);background:rgba(15,15,15,0.4);display:none;align-items:center;justify-content:center;padding:1rem;">
         <div class="changelog-card card" style="max-width:520px;width:100%;">
             <div class="p-8 relative z-10">
                 <div class="flex items-center justify-between mb-6">
@@ -1798,7 +1798,7 @@
                 'position:fixed',
                 'bottom:24px',
                 'right:24px',
-                'z-index:9999',
+                'z-index:var(--z-toast)',
                 'display:flex',
                 'align-items:center',
                 'gap:10px',

@@ -8,7 +8,7 @@ window.showToast = (message, duration = 4000) => {
     // Fallback for when the input stack isn't available yet (e.g. early boot)
     const toast = document.createElement('div');
     toast.style.cssText = [
-        'position:fixed', 'bottom:24px', 'right:24px', 'z-index:9999',
+        'position:fixed', 'bottom:24px', 'right:24px', 'z-index:var(--z-toast)',
         'display:flex', 'align-items:center', 'gap:10px', 'padding:10px 14px',
         'border-radius:14px', 'background:var(--input-bg,#f4f4f5)',
         'border:1px solid color-mix(in srgb,var(--accent-color,#3b82f6) 30%,transparent)',
