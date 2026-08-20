@@ -265,6 +265,16 @@
 
             setAIPanel(false);
 
+            // Close an open Oaky panel when crossing the mobile/desktop breakpoint
+            let mobileLayout = window.matchMedia('(max-width: 768px)').matches;
+            window.addEventListener('resize', () => {
+                const nextMobileLayout = window.matchMedia('(max-width: 768px)').matches;
+                if (nextMobileLayout !== mobileLayout) {
+                    mobileLayout = nextMobileLayout;
+                    setAIPanel(false);
+                }
+            });
+
             // Global keyboard shortcuts
             document.addEventListener('keydown', e => {
                 const mod = e.ctrlKey || e.metaKey;

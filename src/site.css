@@ -6514,10 +6514,6 @@ font-family: 'Inter', sans-serif;
             z-index: var(--z-chrome);
         }
 
-        @media (max-width: 767px) {
-            [data-page="word"] .ow-header { padding-right: 14px; }
-        }
-
         [data-page="word"] .wordmark {
             width: 32px;
             height: 32px;
@@ -6715,12 +6711,6 @@ font-family: 'Inter', sans-serif;
             }
         }
 
-        @media (max-width: 600px) {
-            [data-page="word"] .editor-paper {
-                padding: 32px 24px;
-            }
-        }
-
         /* ── Editor content ──────────────────────────────────────── */
         [data-page="word"] #editor {
             outline: none;
@@ -6898,31 +6888,6 @@ font-family: 'Inter', sans-serif;
             opacity: 0;
             pointer-events: none;
             overflow: hidden;
-        }
-
-        @media (max-width: 768px) {
-            [data-page="word"] #ai-panel {
-                position: fixed;
-                top: 52px;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                width: 100% !important;
-                min-width: 100% !important;
-                border-left: none;
-                border-top: 1px solid var(--border);
-                transform: translateY(0);
-                opacity: 1;
-                z-index: var(--z-dialog);
-            }
-
-            [data-page="word"] #ai-panel.collapsed {
-                transform: translateY(100%);
-                opacity: 0;
-                pointer-events: none;
-                width: 100% !important;
-                min-width: 100% !important;
-            }
         }
 
         [data-page="word"] .ai-header {
@@ -7361,53 +7326,72 @@ font-family: 'Inter', sans-serif;
             pointer-events: none;
         }
 
-        @media (max-width: 768px) {
-            [data-page="word"] .ai-mobile-close {
-                display: flex;
+        /* ── Responsive ──────────────────────────────────────────── */
+        /* tablet: Oaky overlays the workspace instead of squeezing it */
+        @media (max-width: 1024px) {
+            [data-page="word"] .ow-header { padding-right: 14px; }
+            [data-page="word"] .hdr-profile { display: none; }
+            [data-page="word"] #ai-panel {
+                position: absolute; inset: 0 0 0 auto; width: min(360px, 100%); min-width: min(360px, 100%);
+                box-shadow: var(--shadow-float); z-index: var(--z-dialog);
             }
+            [data-page="word"] #ai-panel.collapsed { width: min(360px, 100%); min-width: min(360px, 100%); }
+            [data-page="word"] .doc-scroll { padding-inline: 28px; }
+        }
 
-            [data-page="word"] #ai-fab {
-                display: flex;
+        /* mobile: edge-to-edge sheet, Oaky full-screen behind the FAB */
+        @media (max-width: 768px) {
+            [data-page="word"] .ow-header { min-height: 58px; padding: 0 10px; gap: 6px; }
+            [data-page="word"] .wordmark, .document-state #hdr-word-count, .document-state > span[aria-hidden="true"] { display: none; }
+            [data-page="word"] #doc-title { min-width: 0; width: auto; flex: 1; font-size: 14px; }
+            [data-page="word"] .hdr-btn { width: 44px; height: 44px; }
+            [data-page="word"] .document-actions .hdr-btn:first-child { display: none; }
+            [data-page="word"] .format-capsule {
+                top: 66px; left: 8px; right: 8px; transform: none; width: auto; max-width: none;
+                border-radius: 11px; overscroll-behavior-inline: contain;
             }
+            [data-page="word"] .tb-btn { width: 44px; height: 44px; flex-basis: 44px; }
+            [data-page="word"] .tb-select { height: 44px; }
+            [data-page="word"] .doc-scroll { padding: 70px 0 58px; }
+            [data-page="word"] .editor-paper {
+                width: 100%; min-height: 100%; padding: 38px 22px; border-left: 0; border-right: 0; border-radius: 0;
+            }
+            [data-page="word"] #editor { min-height: calc(100dvh - 210px); font-size: 16px; line-height: 1.68; }
+            [data-page="word"] #ai-edge-tab { display: none; }
+            [data-page="word"] #ai-panel {
+                position: fixed; top: 58px; right: 0; bottom: 0; left: 0;
+                width: 100%; min-width: 100%; border-left: 0; box-shadow: none; z-index: var(--z-dialog);
+            }
+            [data-page="word"] #ai-panel.collapsed { width: 100%; min-width: 100%; transform: translateY(100%); }
+            [data-page="word"] .ai-mobile-close { display: flex; }
+            [data-page="word"] #ai-fab { display: flex; width: 52px; height: 52px; bottom: 16px; right: 14px; }
+            [data-page="word"] .ow-status { left: 10px; bottom: 10px; }
+            [data-page="word"] #st-chars, [data-page="word"] #st-chars + .dot { display: none; }
+            [data-page="word"] #document-menu { top: 54px; right: 10px; }
+        }
+
+        /* ── Reduced motion ──────────────────────────────────────── */
+        @media (prefers-reduced-motion: reduce) {
+            [data-page="word"] #ai-panel,
+            [data-page="word"] #ai-fab,
+            [data-page="word"] #ow-toast { transition: none; }
+            [data-page="word"] .thinking-dots span { animation: none; opacity: .65; transform: none; }
         }
 
         /* ── Print ───────────────────────────────────────────────── */
         @media print {
-
             [data-page="word"] .ow-header,
-[data-page="word"] .ow-toolbar,
-[data-page="word"] .ow-status,
-[data-page="word"] #ai-panel,
-[data-page="word"] #ow-toast,
-[data-page="word"] #export-menu {
-                display: none !important;
-            }
-
-            html:has(> body[data-page="word"]),
-[data-page="word"] {
-                overflow: visible !important;
-                height: auto !important;
-            }
-
-            [data-page="word"] #app {
-                height: auto !important;
-            }
-
-            [data-page="word"] .ow-main {
-                overflow: visible !important;
-                height: auto !important;
-            }
-
-            [data-page="word"] .doc-scroll {
-                overflow: visible !important;
-                padding: 0 !important;
-            }
-
-            [data-page="word"] .editor-paper {
-                box-shadow: none !important;
-                min-height: auto !important;
-                border: none !important;
-            }
+            [data-page="word"] .format-capsule,
+            [data-page="word"] .ow-status,
+            [data-page="word"] #ai-panel,
+            [data-page="word"] #ai-edge-tab,
+            [data-page="word"] #ai-fab,
+            [data-page="word"] #ow-toast,
+            [data-page="word"] #document-menu,
+            [data-page="word"] .ov-nav { display: none !important; }
+            html:has(> body[data-page="word"]), [data-page="word"], [data-page="word"] #app, [data-page="word"] .ow-main { height: auto !important; overflow: visible !important; }
+            [data-page="word"] .doc-scroll { overflow: visible !important; padding: 0 !important; }
+            [data-page="word"] .editor-paper { min-height: auto !important; padding: 0 !important; border: 0 !important; }
         }
 
         /* ── Scrollbars ──────────────────────────────────────────── */
