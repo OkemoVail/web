@@ -5863,6 +5863,7 @@ html.motion-ready [data-reveal].revealed {
   /* ── Astra layout & identity (appearance tokens come from src/site.css §2) ── */
   /* Cosmic playground canvas: page-local warm parchment (do NOT edit shared tokens). */
   [data-page="search"] { margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; background-color: #fdf9f4; }
+  [data-page="search"].modal-open { overflow: hidden; }
   .dark [data-page="search"] { background-color: #1e1a18; }
   [data-page="search"] [hidden] { display: none !important; }
 
@@ -5942,16 +5943,28 @@ html.motion-ready [data-reveal].revealed {
   [data-page="search"] #result-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
   [data-page="search"] .result { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
   /* favicon chip, slightly tilted (cosmic playground mischief) */
-  [data-page="search"] .r-favi { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-white); margin-top: 2px; }
+  [data-page="search"] .r-favi { width: 22px; height: 22px; border-radius: 7px; border: 1px solid var(--border-strong); background: var(--bg-white); margin-top: 2px; }
   [data-page="search"] .result:nth-of-type(odd) .r-favi { transform: rotate(-7deg); }
   [data-page="search"] .result:nth-of-type(even) .r-favi { transform: rotate(6deg); }
-  [data-page="search"] .r-favi-fallback { display: inline-grid; place-items: center; font-size: .7rem; color: var(--accent); }
+  [data-page="search"] .r-monogram { display: inline-grid; place-items: center; font-size: .57rem; line-height: 1; font-weight: 800; letter-spacing: -.03em; color: var(--text-primary); }
+  [data-page="search"] .r-monogram-0 { background-color: color-mix(in srgb, var(--accent) 15%, var(--bg-white)); }
+  [data-page="search"] .r-monogram-1 { background-color: color-mix(in srgb, #e4a65f 20%, var(--bg-white)); }
+  [data-page="search"] .r-monogram-2 { background-color: color-mix(in srgb, #55a883 18%, var(--bg-white)); }
+  [data-page="search"] .r-monogram-3 { background-color: color-mix(in srgb, #5b8fd9 17%, var(--bg-white)); }
+  [data-page="search"] .r-monogram-4 { background-color: color-mix(in srgb, #d66f8c 16%, var(--bg-white)); }
+  [data-page="search"] .r-monogram-5 { background-color: color-mix(in srgb, #8c72d8 16%, var(--bg-white)); }
+  [data-page="search"] .r-monogram-6 { background-color: color-mix(in srgb, #65a6ad 18%, var(--bg-white)); }
   /* google grammar: site + breadcrumb above the title */
   [data-page="search"] .r-site { font-size: .78rem; color: var(--text-primary); }
-  [data-page="search"] .r-crumb { font-size: .72rem; color: var(--text-tertiary); word-break: break-all; }
+  [data-page="search"] .r-crumb { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; color: var(--text-tertiary); }
   [data-page="search"] .result .r-title { font-size: 1.05rem; color: var(--accent); text-decoration: none; line-height: 1.35; display: inline-block; margin-top: 2px; overflow-wrap: anywhere; }
   [data-page="search"] .result .r-title:hover { text-decoration: underline wavy var(--accent-light); text-underline-offset: 3px; }
   [data-page="search"] .result .r-snippet { margin: 2px 0 0; font-size: .84rem; color: var(--text-secondary); line-height: 1.5; }
+  [data-page="search"] .result.citation-target { background-color: color-mix(in srgb, var(--accent) 9%, transparent); outline: 2px solid color-mix(in srgb, var(--accent) 42%, transparent); outline-offset: 7px; border-radius: 8px; transition: background-color var(--dur-3) var(--ease-smooth), outline-color var(--dur-3) var(--ease-smooth); }
+  [data-page="search"] .result-skel i { display: block; height: 9px; max-width: 90%; margin: 0 0 7px; border-radius: 999px; background: var(--bg-elevated); animation: ig-shimmer 1.4s linear infinite; }
+  [data-page="search"] .result-skel i:nth-child(2) { max-width: 66%; }
+  [data-page="search"] .result-skel i:nth-child(3) { max-width: 82%; margin-bottom: 0; }
+  [data-page="search"] .r-skel-dot { width: 22px; height: 22px; border-radius: 7px; background: var(--bg-elevated); }
 
   /* AI answer panel — rainbow conic ring, always on while streaming.
      The ring is an ::before pseudo-element with a solid cover, NOT the old
@@ -5968,6 +5981,10 @@ html.motion-ready [data-reveal].revealed {
   [data-page="search"] .ai-panel.done::before { animation: none; opacity: 0; }
   [data-page="search"] .ai-panel.done::after { opacity: 0; }
   [data-page="search"] .ai-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 12px 16px 0; font-weight: 700; font-size: .92rem; color: var(--accent); }
+  [data-page="search"] .ai-provenance { margin: 5px 16px 0; font-size: .7rem; line-height: 1.4; color: var(--text-tertiary); }
+  [data-page="search"] .ai-sources { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 16px 0; }
+  [data-page="search"] .ai-source { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 3px 8px; border: 1px solid var(--border-strong); border-radius: 999px; color: var(--text-secondary); font-size: .67rem; text-decoration: none; background-color: var(--bg-elevated); }
+  [data-page="search"] .ai-source:hover { background-color: color-mix(in srgb, var(--bg-elevated), var(--text-primary) 5%); }
   [data-page="search"] .ai-body { padding: 12px 16px 16px; font-size: .88rem; line-height: 1.6; color: var(--text-primary); }
   /* streaming text: the open block lives in one persistent .ai-tail div (astra.js only swaps its
      innerHTML) and the typewriter drain in astra.js is the animation — text stays crisp. The rainbow
@@ -6017,6 +6034,7 @@ html.motion-ready [data-reveal].revealed {
 
   [data-page="search"] .status-card { text-align: center; padding: 2rem 1rem; font-size: .9rem; color: var(--text-secondary); }
   [data-page="search"] .status-card .big { font-size: 1.6rem; display: block; margin-bottom: 8px; }
+  [data-page="search"] .status-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
 
   /* image preview: right side panel (desktop) / bottom sheet (mobile) */
   [data-page="search"] #ig-preview { position: fixed; inset: 0; z-index: 70; }
@@ -6027,7 +6045,7 @@ html.motion-ready [data-reveal].revealed {
   [data-page="search"] .igp-imgwrap img { display: block; width: 100%; height: auto; }
   [data-page="search"] .igp-title { font-size: .9rem; color: var(--text-primary); line-height: 1.4; }
   [data-page="search"] .igp-host { font-size: .75rem; color: var(--text-tertiary); }
-  [data-page="search"] .igp-actions { display: flex; gap: 8px; }
+  [data-page="search"] .igp-actions { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: env(safe-area-inset-bottom); }
   [data-page="search"] .igp-actions .skuo { height: 34px; padding: 0 14px; border-radius: 999px; font-size: .8rem; display: inline-flex; align-items: center; text-decoration: none; }
 
   /* fullscreen: the same panel becomes a fixed overlay (no state loss mid-stream) */
@@ -6063,8 +6081,8 @@ html.motion-ready [data-reveal].revealed {
     [data-page="search"] .suggest button { padding: 13px 16px; font-size: 1rem; }
 
     [data-page="search"] .results { padding: .75rem 0 3rem; }      /* full-bleed: rows go edge to edge */
-    [data-page="search"] .r-top { flex-wrap: nowrap; gap: 8px; padding: 6px 12px 12px; }  /* symmetric: bar spans full width */
-    [data-page="search"] .r-logo { font-size: 1.05rem; }
+    [data-page="search"] .r-top { flex-direction: column; align-items: stretch; gap: 9px; padding: 6px 12px 12px; }
+    [data-page="search"] .r-logo { align-self: center; font-size: 1.16rem; }
     [data-page="search"] .results .bar { max-width: none; height: 50px; }
     [data-page="search"] .results .bar .skuo { height: 40px; }
     [data-page="search"] .r-meta-row,
@@ -6099,6 +6117,10 @@ html.motion-ready [data-reveal].revealed {
     [data-page="search"] .igp-host { font-size: .8rem; }
     [data-page="search"] .igp-actions .skuo { height: 44px; font-size: .9rem; }
   }
+  @media (max-width: 360px) {
+    [data-page="search"] .igp-actions { flex-direction: column; }
+    [data-page="search"] .igp-actions .skuo { width: 100%; justify-content: center; }
+  }
   @media (prefers-reduced-motion: reduce) {
     [data-page="search"] .star,
 [data-page="search"] .ai-ring,
@@ -6106,7 +6128,8 @@ html.motion-ready [data-reveal].revealed {
 [data-page="search"] .r-sentinel-dot,
 [data-page="search"] .wordmark,
 [data-page="search"] .r-logo,
-[data-page="search"] .ig-skel { animation: none !important; }
+[data-page="search"] .ig-skel,
+[data-page="search"] .result-skel i { animation: none !important; }
     [data-page="search"] .ai-orb { animation: none; }
     [data-page="search"] .ph-ghost { transition: none !important; }
     [data-page="search"] .ai-panel { transition: none; }
@@ -7251,4 +7274,3 @@ font-family: 'Inter', sans-serif;
             border-radius: 10px;
         }
     
-

@@ -87,6 +87,7 @@
     try { localStorage.setItem('astra_ai_mode', on ? 'on' : 'off'); } catch (_) {}
     const t = $('ai-toggle');
     t.setAttribute('aria-pressed', on ? 'true' : 'false');
+    t.setAttribute('aria-label', on ? 'Hide AI answer' : 'Show AI answer');
     t.classList.toggle('skuo-accent', on);
     if (!on && aiAbort) aiAbort.abort();
   }
@@ -132,10 +133,14 @@
       current = t;
       pairs.forEach(({ input, ghost }) => {
         ghost.textContent = t;
-        ghost.classList.toggle('on', !!t && !input.value);
+        ghost.classList.toggle('on', !!t && !input.value && document.activeElement !== input);
       });
     };
-    pairs.forEach(({ input }) => input.addEventListener('input', () => paint(current)));
+    pairs.forEach(({ input }) => {
+      input.addEventListener('input', () => paint(current));
+      input.addEventListener('focus', () => paint(current));
+      input.addEventListener('blur', () => paint(current));
+    });
 
     const transition = (t) => {
       if (reduced) { paint(t); return; }
@@ -177,6 +182,61 @@
   let lastSecs = '0.00';
   let lastResults = [];         // first-page results (citation lookups)
   let scrollObserver = null;
+  let fullscreenTitle = '';
+  const modalStack = [];
+
+  function focusableIn(root) {
+    return Array.from(root.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+      .filter((el) => !el.hidden && el.getClientRects().length);
+  }
+
+  function setLayerBackgroundInert(dialog, open) {
+    let node = dialog;
+    while (node && node !== document.body) {
+      const parent = node.parentElement;
+      if (!parent) break;
+      Array.from(parent.children).forEach((child) => {
+        if (child !== node && !child.matches('script')) child.inert = open;
+      });
+      node = parent;
+    }
+  }
+
+  function openModalLayer(dialog, initialFocus, restoreFocus) {
+    if (modalStack.some((layer) => layer.dialog === dialog)) return;
+    modalStack.push({ dialog, restoreFocus });
+    setLayerBackgroundInert(dialog, true);
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => initialFocus.focus({ preventScroll: true }));
+  }
+
+  function closeModalLayer(dialog) {
+    const index = modalStack.findIndex((layer) => layer.dialog === dialog);
+    if (index < 0) return;
+    const [{ restoreFocus }] = modalStack.splice(index, 1);
+    setLayerBackgroundInert(dialog, false);
+    document.body.classList.toggle('modal-open', modalStack.length > 0);
+    if (restoreFocus && restoreFocus.isConnected) restoreFocus.focus({ preventScroll: true });
+  }
+
+  function trapModalFocus(e) {
+    const layer = modalStack[modalStack.length - 1];
+    if (!layer) return;
+    const focusable = focusableIn(layer.dialog);
+    if (!focusable.length) { e.preventDefault(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  function closeTopModal() {
+    const layer = modalStack[modalStack.length - 1];
+    if (!layer) return false;
+    if (layer.dialog === $('ig-preview')) return closeImagePreview();
+    if (layer.dialog === $('ai-panel')) { exitAiFullscreen(); return true; }
+    return false;
+  }
 
   function readRoute() {
     const p = new URLSearchParams(location.search);
@@ -207,8 +267,12 @@
   let lastImgQuery = '';
 
   function paintTabs(tab) {
-    $('tab-all').classList.toggle('on', tab !== 'images');
-    $('tab-images').classList.toggle('on', tab === 'images');
+    [$('tab-all'), $('tab-images')].forEach((tabEl, index) => {
+      const selected = tab === 'images' ? index === 1 : index === 0;
+      tabEl.classList.toggle('on', selected);
+      tabEl.setAttribute('aria-selected', selected ? 'true' : 'false');
+      tabEl.tabIndex = selected ? 0 : -1;
+    });
   }
 
   function showResults(q, tab) {
@@ -293,13 +357,22 @@
   });
   $('tab-all').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'all') go(r.q, 'all'); });
   $('tab-images').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'images') go(r.q, 'images'); });
+  $('r-tabs').addEventListener('keydown', (e) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const tabs = [$('tab-all'), $('tab-images')];
+    const current = Math.max(0, tabs.indexOf(document.activeElement));
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1
+      : (current + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[next].focus();
+    tabs[next].click();
+  });
   $('igp-close').addEventListener('click', closeImagePreview);
   $('igp-scrim').addEventListener('click', closeImagePreview);
   $('ai-expand').addEventListener('click', () => toggleAiFullscreen());
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (closeImagePreview()) return;
-    exitAiFullscreen();
+    if (e.key === 'Tab') trapModalFocus(e);
+    if (e.key === 'Escape') closeTopModal();
   });
   $('hero-cosmic').addEventListener('click', () => {
     const q = cosmicQuery($('hero-input').value.trim());
@@ -331,7 +404,31 @@
       return;
     }
     const el = document.getElementById('result-' + n);
-    if (el) el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+    if (el) {
+      el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      el.classList.remove('citation-target');
+      void el.offsetWidth;
+      el.classList.add('citation-target');
+      setTimeout(() => el.classList.remove('citation-target'), 1600);
+    }
+  });
+
+  $('ai-sources').addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#result-"]');
+    if (!a) return;
+    e.preventDefault();
+    const n = +(a.hash.slice('#result-'.length));
+    if ($('ai-panel').classList.contains('ai-fullscreen')) {
+      const result = lastResults[n - 1];
+      if (result) window.open(result.url, '_blank', 'noopener');
+      return;
+    }
+    const target = $('result-' + n);
+    if (target) {
+      target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      target.classList.add('citation-target');
+      setTimeout(() => target.classList.remove('citation-target'), 1600);
+    }
   });
 
   // ── backend base (same resolution as chat's api.js, minus the tunnel fetch) ──
@@ -361,13 +458,20 @@
     if (!input || !box) return;
     let items = [], active = -1, timer = null, dead = 0, typed = '';
 
-    function close() { clearTimeout(timer); box.hidden = true; items = []; active = -1; }
+    function syncCombobox() {
+      input.setAttribute('aria-expanded', box.hidden ? 'false' : 'true');
+      input.setAttribute('aria-activedescendant', active >= 0 ? box.children[active].id : '');
+    }
+    function close() { clearTimeout(timer); box.hidden = true; items = []; active = -1; syncCombobox(); }
     function render() {
       box.innerHTML = '';
       if (!items.length) return close();
       items.forEach((s, i) => {
         const b = document.createElement('button');
         b.type = 'button';
+        b.id = box.id + '-option-' + i;
+        b.role = 'option';
+        b.setAttribute('aria-selected', i === active ? 'true' : 'false');
         b.textContent = s;
         b.className = i === active ? 'active' : '';
         b.addEventListener('mousedown', (e) => {   // mousedown beats input blur
@@ -379,6 +483,7 @@
         box.appendChild(b);
       });
       box.hidden = false;
+      syncCombobox();
     }
 
     input.addEventListener('input', () => {
@@ -404,6 +509,11 @@
         if (active >= 0) input.value = items[active];
         else input.value = typed;
         render();
+      } else if (e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        active = e.key === 'Home' ? 0 : items.length - 1;
+        input.value = items[active];
+        render();
       } else if (e.key === 'Enter' && active >= 0) {
         e.preventDefault(); e.stopPropagation();
         close();
@@ -422,11 +532,6 @@
     if (!res.ok) { const e = new Error('search ' + res.status); e.status = res.status; throw e; }
     const data = await res.json();
     return (data && Array.isArray(data.results)) ? data.results : [];
-  }
-
-  function faviconFor(url) {
-    try { return 'https://www.google.com/s2/favicons?domain=' + new URL(url).hostname + '&sz=32'; }
-    catch { return ''; }
   }
 
   // google-style breadcrumb: host + up to 2 path segments, chevron-separated
@@ -479,12 +584,11 @@
         li.addEventListener('transitionend', (e) => { if (e.target !== li) return; li.classList.remove('r-enter', 'on'); li.style.transitionDelay = ''; }, { once: true });
       }
 
-      const img = document.createElement('img');
-      img.className = 'r-favi';
-      img.src = faviconFor(r.url);
-      img.alt = '';
-      img.loading = 'lazy';
-      img.onerror = () => { img.replaceWith(Object.assign(document.createElement('span'), { textContent: '✦', className: 'r-favi r-favi-fallback' })); };
+      const identity = AstraHelpers.domainIdentity(r.url);
+      const img = document.createElement('span');
+      img.className = 'r-favi r-monogram r-monogram-' + identity.paletteIndex;
+      img.textContent = identity.monogram;
+      img.setAttribute('aria-hidden', 'true');
 
       const c = crumbFor(r.url);
       const wrap = document.createElement('div');
@@ -502,6 +606,10 @@
       a.target = '_blank';
       a.rel = 'noopener';
       a.textContent = r.title || r.url;
+      const newTab = document.createElement('span');
+      newTab.className = 'sr-only';
+      newTab.textContent = ' (opens in a new tab)';
+      a.appendChild(newTab);
       const snip = document.createElement('p');
       snip.className = 'r-snippet';
       snip.textContent = r.description || '';
@@ -512,6 +620,35 @@
     });
   }
 
+  function renderResultSkeletons() {
+    const list = $('result-list');
+    list.innerHTML = '';
+    for (let i = 0; i < 4; i++) {
+      const row = document.createElement('li');
+      row.className = 'result result-skel';
+      row.setAttribute('aria-hidden', 'true');
+      row.innerHTML = '<span class="r-skel-dot"></span><span><i></i><i></i><i></i></span>';
+      list.appendChild(row);
+    }
+  }
+
+  function renderEmptyResults(q) {
+    statusCard('✦', COPY.emptyResults + ' Try fewer words or check the spelling.');
+    const card = $('result-list').firstElementChild;
+    const edit = document.createElement('button');
+    edit.className = 'skuo skuo-neutral';
+    edit.textContent = 'edit search';
+    edit.addEventListener('click', () => $('results-input').focus());
+    const images = document.createElement('button');
+    images.className = 'skuo skuo-neutral';
+    images.textContent = 'try Images';
+    images.addEventListener('click', () => go(q, 'images'));
+    const actions = document.createElement('div');
+    actions.className = 'status-actions';
+    actions.append(edit, images);
+    card.appendChild(actions);
+  }
+
   function ensureSentinel() {
     let s = $('result-sentinel');
     if (!s) {
@@ -520,7 +657,14 @@
       s.className = 'r-sentinel';
       $('result-list').appendChild(s);
     }
-    s.innerHTML = '<span class="r-sentinel-dot">✦</span>';
+    s.innerHTML = '';
+    const button = document.createElement('button');
+    button.id = 'result-load-more';
+    button.className = 'skuo skuo-neutral';
+    button.type = 'button';
+    button.textContent = '✦ Load more stars';
+    button.addEventListener('click', () => loadMore(readRoute().q));
+    s.appendChild(button);
     return s;
   }
 
@@ -546,8 +690,9 @@
     const btn = document.createElement('button');
     btn.className = 'skuo skuo-neutral';
     btn.type = 'button';
+    btn.id = 'result-load-more';
     btn.textContent = COPY.loadMoreError;
-    btn.addEventListener('click', () => { s.innerHTML = '<span class="r-sentinel-dot">✦</span>'; loadMore(q); });
+    btn.addEventListener('click', () => { ensureSentinel(); loadMore(q); });
     s.appendChild(btn);
   }
 
@@ -555,6 +700,9 @@
     if (loadingMore || resultsDone || $('result-list').hidden) return;
     const token = searchToken;
     loadingMore = true;
+    let failed = false;
+    const button = $('result-load-more');
+    if (button) { button.disabled = true; button.setAttribute('aria-busy', 'true'); button.textContent = 'consulting the cosmos…'; }
     try {
       let more = await astraSearch(q, nextOffset);
       more = more.filter((r) => /^https?:\/\//i.test(r.url || ''));
@@ -567,9 +715,17 @@
       if (totalResults >= MAX_RESULTS) finishResults();
     } catch (e) {
       if (token !== searchToken) return;
+      failed = true;
       sentinelLoadError(q);
     } finally {
       loadingMore = false;
+      if (token !== searchToken) return;
+      const current = $('result-load-more');
+      if (current) {
+        current.disabled = false;
+        current.removeAttribute('aria-busy');
+        if (!failed) current.textContent = '✦ Load more stars';
+      }
     }
   }
 
@@ -675,10 +831,11 @@
   }
 
   function openImagePreview(r) {
+    const restoreFocus = document.activeElement;
     $('ig-preview').hidden = false;
-    document.body.style.overflow = 'hidden';
     const img = $('igp-img');
     img.src = r.thumbnail || r.image;               // thumbnail paints instantly…
+    img.alt = r.title || 'Image from ' + crumbFor(r.url).site;
     $('igp-title').textContent = r.title || '';
     $('igp-host').textContent = crumbFor(r.url).site;
     $('igp-visit').href = r.url;
@@ -686,12 +843,13 @@
     const full = new Image();                       // …full image swaps in when ready
     full.onload = () => { img.src = r.image; };
     full.src = r.image;
+    openModalLayer($('ig-preview'), $('igp-close'), restoreFocus);
   }
 
   function closeImagePreview() {
     if ($('ig-preview').hidden) return false;
+    closeModalLayer($('ig-preview'));
     $('ig-preview').hidden = true;
-    document.body.style.overflow = '';
     return true;
   }
 
@@ -705,11 +863,13 @@
     panel.classList.remove('done');
     $('ai-head-label').textContent = COPY.aiHeaders[0];
     $('ai-body').innerHTML = '';
+    $('ai-sources').innerHTML = '';
     $('ai-error').hidden = true;
     hideThinking();
     $('ai-follow').hidden = true;
     $('r-meta').textContent = 'searching the universe for “' + q + '”…';
-    $('result-list').innerHTML = '';
+    $('result-list').setAttribute('aria-busy', 'true');
+    renderResultSkeletons();
     nextOffset = 0; loadingMore = false; resultsDone = false; totalResults = 0;
     if (scrollObserver) scrollObserver.disconnect();
 
@@ -725,6 +885,7 @@
       const retry = () => runSearch(q);
       if (e.status === 429) statusCard('🌙', COPY.rateLimited, retry);
       else statusCard('📡', COPY.offline, retry);
+      $('result-list').setAttribute('aria-busy', 'false');
       return;
     }
     if (token !== searchToken) return;
@@ -736,25 +897,13 @@
     lastSecs = secs;
     $('r-meta').textContent = results.length ? COPY.metaLine(totalResults, secs) : '';
     if (results.length) { renderResults(results, 0, false); watchSentinel(q); }
-    else statusCard('🌌', COPY.emptyResults);   // AI still answers from knowledge
+    else renderEmptyResults(q);   // AI still answers from knowledge
+    $('result-list').setAttribute('aria-busy', 'false');
 
     if (aiOn) askAstra(q, results);
   }
 
   // ── AI answer: scraped-results-grounded Saga, streamed over SSE ──
-  function linkifyCitations(html, count) {
-    // [n] and grouped [n, m, …] → jump links to the matching result cards (must run on marked output)
-    return html.replace(/\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\]/g, (m, grp) => {
-      const linked = grp.split(',').map((num) => {
-        const n = num.trim();
-        return (+n >= 1 && +n <= count) ? '<a href="#result-' + n + '">' + n + '</a>' : n;
-      });
-      return '[' + linked.join(', ') + ']';
-    });
-  }
-
-  function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
-
   // ── streaming renderer ──
   // Completed blocks (blank-line separated) bake to crisp static nodes; the open
   // block lives in one persistent .ai-tail div whose innerHTML is swapped by the
@@ -768,7 +917,7 @@
       const fenced = cut !== -1 && ((t.slice(0, cut).match(/```/g) || []).length % 2 === 1);
       if (cut > finalized && !fenced) {
         const tmp = document.createElement('div');
-        tmp.innerHTML = linkifyCitations(marked.parse(esc(t.slice(finalized, cut))), count);
+        tmp.innerHTML = AstraHelpers.renderAssistantHtml(t.slice(finalized, cut), count, window.marked);
         if (tail) { tail.remove(); tail = null; }
         while (tmp.firstChild) aEl.appendChild(tmp.firstChild);
         finalized = cut;
@@ -780,11 +929,11 @@
           tail.className = 'ai-tail';
           aEl.appendChild(tail);
         }
-        tail.innerHTML = linkifyCitations(marked.parse(esc(open)), count);
+        tail.innerHTML = AstraHelpers.renderAssistantHtml(open, count, window.marked);
       }
     };
     render.finalize = (t) => {
-      aEl.innerHTML = linkifyCitations(marked.parse(esc(t)), count);
+      aEl.innerHTML = AstraHelpers.renderAssistantHtml(t, count, window.marked);
     };
     return render;
   }
@@ -830,6 +979,7 @@
   }
 
   function setStreaming(on) {
+    $('ai-panel').setAttribute('aria-busy', on ? 'true' : 'false');
     $('ai-follow-input').disabled = on;
     $('ai-follow-send').disabled = on;
     $('ai-follow-send').hidden = on;
@@ -839,10 +989,24 @@
   function toggleAiFullscreen(force) {
     const panel = $('ai-panel');
     const on = typeof force === 'boolean' ? force : !panel.classList.contains('ai-fullscreen');
+    if (on) fullscreenTitle = document.title;
     panel.classList.toggle('ai-fullscreen', on);
     $('ai-expand').textContent = on ? '✕' : '⤢';
     $('ai-expand').setAttribute('aria-label', on ? 'exit fullscreen' : 'fullscreen');
-    document.body.style.overflow = on ? 'hidden' : '';
+    $('ai-expand').title = on ? 'exit fullscreen' : 'fullscreen';
+    $('ai-expand').setAttribute('aria-expanded', on ? 'true' : 'false');
+    document.title = on ? 'Astra Answer — Okemo Astra' : fullscreenTitle;
+    if (on) {
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-modal', 'true');
+      panel.setAttribute('aria-labelledby', 'ai-head-label');
+      openModalLayer(panel, $('ai-expand'), $('ai-expand'));
+    } else {
+      closeModalLayer(panel);
+      panel.removeAttribute('role');
+      panel.removeAttribute('aria-modal');
+      panel.removeAttribute('aria-labelledby');
+    }
   }
 
   function exitAiFullscreen() {
@@ -914,6 +1078,18 @@
     thread = [{ role: 'user', content: q + '\n\nSources:\n' + (snippets || '(no sources — answer from knowledge)') }];
   }
 
+  function renderAiSources(results) {
+    const host = $('ai-sources');
+    host.innerHTML = '';
+    results.slice(0, 5).forEach((r, i) => {
+      const a = document.createElement('a');
+      a.className = 'ai-source';
+      a.href = '#result-' + (i + 1);
+      a.textContent = (i + 1) + ' · ' + crumbFor(r.url).site;
+      host.appendChild(a);
+    });
+  }
+
   // streams one assistant turn; onToken(text) only accumulates partials (for
   // stop-early) — turns render WHOLE on completion, no incremental typewriter
   async function streamTurn(onToken) {
@@ -941,7 +1117,7 @@
     // SSE consumption — same line protocol as AI/js/chat-actions.js
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
-    let buf = '', text = '', sawDone = false;
+    let buf = '', text = '', firstToken = false, sawDone = false;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -958,8 +1134,9 @@
           const delta = data.choices && data.choices[0] && data.choices[0].delta
             ? (data.choices[0].delta.content || '') : '';
           if (delta) {
+            if (!firstToken) { firstToken = true; hideThinking(); }   // orb hands off to the typewriter
             text += delta;
-            if (onToken) onToken(text);          // accumulation only — no render
+            if (onToken) onToken(text);
           }
         } catch { /* partial JSON chunk — ignore */ }
       }
@@ -970,6 +1147,7 @@
 
   async function askAstra(q, results) {
     seedThread(q, results);
+    renderAiSources(results);
     const panel = $('ai-panel');
     panel.hidden = false;
     panel.classList.remove('done');

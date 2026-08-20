@@ -36,8 +36,8 @@
   </div>
   <div class="bar" id="hero-bar">
     <span class="bar-icon">🔭</span>
-    <span class="ph-wrap"><input id="hero-input" type="text" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web" placeholder="search the web…"><span class="ph-ghost" id="hero-ghost" aria-hidden="true"></span></span>
-    <div class="suggest" id="hero-suggest" hidden></div>
+    <span class="ph-wrap"><input id="hero-input" type="text" role="combobox" aria-autocomplete="list" aria-controls="hero-suggest" aria-expanded="false" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web" placeholder="search the web…"><span class="ph-ghost" id="hero-ghost" aria-hidden="true"></span></span>
+    <div class="suggest" id="hero-suggest" role="listbox" hidden></div>
   </div>
   <div class="hero-btns">
     <button class="skuo skuo-neutral" id="hero-search" aria-label="search">🔍 <span class="lbl">search the cosmos</span></button>
@@ -53,20 +53,22 @@
     <a class="r-logo" href="./" id="logo-home">✦ Astra</a>
     <div class="bar" id="results-bar">
       <span class="bar-icon">🔭</span>
-      <span class="ph-wrap"><input id="results-input" type="text" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web" placeholder="search the web…"><span class="ph-ghost" id="results-ghost" aria-hidden="true"></span></span>
+      <span class="ph-wrap"><input id="results-input" type="text" role="combobox" aria-autocomplete="list" aria-controls="results-suggest" aria-expanded="false" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web" placeholder="search the web…"><span class="ph-ghost" id="results-ghost" aria-hidden="true"></span></span>
       <button class="skuo skuo-neutral" id="results-search" aria-label="search">🔍 <span class="lbl">Search</span></button>
-      <div class="suggest" id="results-suggest" hidden></div>
+      <div class="suggest" id="results-suggest" role="listbox" hidden></div>
     </div>
   </header>
-  <nav class="r-tabs" id="r-tabs">
-    <button class="r-tab on" id="tab-all" type="button">All</button>
-    <button class="r-tab" id="tab-images" type="button">✦ Images</button>
+  <nav class="r-tabs" id="r-tabs" role="tablist" aria-label="Search result views">
+    <button class="r-tab on" id="tab-all" type="button" role="tab" aria-controls="result-list" aria-selected="true" tabindex="0">All</button>
+    <button class="r-tab" id="tab-images" type="button" role="tab" aria-controls="image-grid" aria-selected="false" tabindex="-1">✦ Images</button>
   </nav>
-  <section id="ai-panel" class="ai-panel" hidden>
-    <div class="ai-head"><span id="ai-head-label">✦ Astra Answer</span><button class="skuo skuo-icon" id="ai-expand" aria-label="fullscreen" title="fullscreen">⤢</button></div>
-    <div class="ai-thinking" id="ai-thinking" hidden><span class="ai-orb"></span><span class="ai-thinking-line" id="ai-thinking-line"></span></div>
+  <section id="ai-panel" class="ai-panel" aria-busy="false" hidden>
+    <div class="ai-head"><span id="ai-head-label">✦ Astra Answer</span><button class="skuo skuo-icon" id="ai-expand" aria-label="fullscreen" aria-expanded="false" aria-controls="ai-panel" title="fullscreen">⤢</button></div>
+    <p class="ai-provenance" id="ai-provenance">AI-generated, grounded in the first five results. It can still be confidently wrong.</p>
+    <div class="ai-sources" id="ai-sources" aria-label="Grounding sources"></div>
+    <div class="ai-thinking" id="ai-thinking" role="status" aria-live="polite" hidden><span class="ai-orb"></span><span class="ai-thinking-line" id="ai-thinking-line"></span></div>
     <div class="ai-body" id="ai-body"></div>
-    <div class="ai-error" id="ai-error" hidden></div>
+    <div class="ai-error" id="ai-error" role="status" aria-live="polite" hidden></div>
     <div class="ai-follow" id="ai-follow" hidden>
       <input id="ai-follow-input" type="text" enterkeyhint="send" autocomplete="off" spellcheck="false" aria-label="Ask a follow-up" placeholder="ask more…">
       <button class="skuo skuo-accent" id="ai-follow-send" aria-label="ask follow-up">→</button>
@@ -74,14 +76,14 @@
     </div>
   </section>
   <div class="r-meta-row">
-    <p class="r-meta" id="r-meta"></p>
-    <button class="skuo skuo-icon" id="ai-toggle" aria-pressed="true" aria-label="toggle AI answer">✦ AI</button>
+    <p class="r-meta" id="r-meta" role="status" aria-live="polite"></p>
+    <button class="skuo skuo-icon" id="ai-toggle" aria-pressed="true" aria-label="Hide AI answer">✦ AI</button>
   </div>
-  <ol id="result-list"></ol>
-  <div id="image-grid" hidden></div>
+  <ol id="result-list" role="tabpanel" aria-labelledby="tab-all" aria-busy="false"></ol>
+  <div id="image-grid" role="tabpanel" aria-labelledby="tab-images" hidden></div>
 </main>
 
-<aside id="ig-preview" hidden>
+<aside id="ig-preview" role="dialog" aria-modal="true" aria-labelledby="igp-title" hidden>
   <div class="igp-scrim" id="igp-scrim"></div>
   <div class="igp-panel card">
     <button class="skuo skuo-icon igp-close" id="igp-close" aria-label="close preview">✕</button>
@@ -96,6 +98,7 @@
 </aside>
 
 <script src="../src/motion.js"></script>
+<script src="astra-helpers.js"></script>
 <script src="astra.js"></script>
 </body>
 </html>
