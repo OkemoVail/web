@@ -137,6 +137,7 @@ try {
 
 async function assertPanelState(page, open) {
   assert.equal(await page.locator('#ai-panel').getAttribute('aria-hidden'), String(!open));
+  assert.equal(await page.locator('#ai-panel').evaluate(panel => panel.inert), !open);
   assert.equal(await page.locator('#ai-toggle-btn').getAttribute('aria-expanded'), String(open));
   assert.equal(await page.locator('#ai-edge-tab').getAttribute('aria-expanded'), String(open));
 }
