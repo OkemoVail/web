@@ -6511,7 +6511,8 @@ font-family: 'Inter', sans-serif;
             background: var(--bg-elevated);
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
-            z-index: var(--z-chrome);
+            position: relative;
+            z-index: var(--z-nav);
         }
 
         [data-page="word"] .wordmark {
@@ -7024,6 +7025,11 @@ font-family: 'Inter', sans-serif;
 
         .dark [data-page="word"] .msg-ai-bubble {
             background: var(--bg);
+        }
+
+        [data-page="word"] .msg-ai-bubble.is-error {
+            color: var(--text-tertiary);
+            font-style: italic;
         }
 
         [data-page="word"] .msg-insert-btn {

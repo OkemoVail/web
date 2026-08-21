@@ -67,12 +67,13 @@ try {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => {
-      if (message.type() === 'error') errors.push(message.text());
+      if (message.type() === 'error' && !message.text().includes('500 (Internal Server Error)')) errors.push(message.text());
     });
     await page.addInitScript(() => {
       localStorage.clear();
       localStorage.setItem('vail_theme', 'light');
     });
+    await page.route('**/v1/chat/completions', route => route.fulfill({ status: 500, body: 'failure' }));
 
     try {
       await page.goto(`http://127.0.0.1:${address.port}/word/index.html`, { waitUntil: 'load' });
@@ -97,6 +98,17 @@ try {
         await assertPanelState(page, false);
         await page.locator('#ai-edge-tab').click();
         await assertPanelState(page, true);
+
+        // Verify graceful recovery from a failed AI request (desktop only)
+        if (viewport.name === 'desktop') {
+          await page.locator('#ai-input').fill('Improve this');
+          await page.locator('#ai-send-btn').click();
+          await page.locator('.msg-ai-bubble.is-error').waitFor();
+          assert.equal(await page.locator('#ai-send-btn').isEnabled(), true, 'desktop: send re-enabled after failure');
+          assert.equal(await page.locator('#ai-panel').getAttribute('aria-busy'), 'false', 'desktop: aria-busy cleared after failure');
+          assert.equal(await page.locator('.msg-ai .msg-insert-btn').count(), 0, 'desktop: no insert buttons on error');
+        }
+
         await page.locator('#ai-toggle-btn').click();
         await assertPanelState(page, false);
       } else {

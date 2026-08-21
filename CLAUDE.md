@@ -141,6 +141,10 @@ fullscreen/dialog elements must be direct root participants, or their ancestors
 must not set `z-index`, `transform`, `filter`, `contain: paint`, or similar traps.
 Regression harness: `node test-z-index.mjs`.
 
+### Okemo Word Focus Canvas
+
+`word/index.html` uses the Focus Canvas layout: a slim document bar, always-visible floating `.format-capsule`, centered editorial `.editor-paper`, and Oaky collapsed by default behind `#ai-edge-tab`. At `<=1024px` Oaky overlays instead of squeezing the document; at `<=768px` the sheet is edge-to-edge and Oaky is full-screen. Word page styles remain in the `[data-page="word"]` section of `src/site.css`; retain all existing editor/formatting IDs because the inline script and `test-word-focus.mjs` depend on them. Use semantic z-index tokens and reserve `--shadow-float` for the capsule, menus, status chip, and other genuinely floating layers. Run `node test-word-focus.mjs` and `node test-z-index.mjs` after Word changes.
+
 ## Flat design language (site-wide)
 
 **As of 2026-08-19 the site is FLAT** (spec `docs/superpowers/specs/2026-08-15-flat-design-language-design.md`,

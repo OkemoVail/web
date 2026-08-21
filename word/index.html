@@ -693,6 +693,8 @@
             msgsEl.appendChild(aiDiv);
             msgsEl.scrollTop = msgsEl.scrollHeight;
 
+            const panel = document.getElementById('ai-panel');
+            panel.setAttribute('aria-busy', 'true');
             document.getElementById('ai-send-btn').disabled = true;
 
             // Build context
@@ -706,6 +708,7 @@
             ];
 
             let accumulated = '';
+            let requestFailed = false;
             const txtEl = document.getElementById(`${id}-txt`);
 
             try {
@@ -754,18 +757,30 @@
                     }
                 }
             } catch (err) {
+                requestFailed = true;
                 accumulated = 'Could not reach Oaky — check your connection and try again.';
+            } finally {
+                isGenerating = false;
+                panel.setAttribute('aria-busy', 'false');
+                document.getElementById('ai-send-btn').disabled = false;
             }
 
             // Finalise
             const cleanOutput = accumulated.replace(/<(?:think|thought)>[\s\S]*?(?:<\/(?:think|thought)>|$)/gi, '').trim();
             if (txtEl) {
-                if (!cleanOutput) txtEl.textContent = '(No response)';
-                else txtEl.textContent = cleanOutput;
+                txtEl.textContent = cleanOutput || '(No response)';
+                txtEl.classList.toggle('is-error', requestFailed);
             }
-            responseMap[id] = cleanOutput || '(No response)';
 
-            // Insert / Replace buttons — always show both
+            if (!requestFailed && cleanOutput) {
+                responseMap[id] = cleanOutput;
+                appendResponseActions(aiDiv, id);
+            }
+
+            msgsEl.scrollTop = msgsEl.scrollHeight;
+        }
+
+        function appendResponseActions(aiDiv, id) {
             const actionsDiv = document.createElement('div');
             actionsDiv.style.cssText = 'display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;';
 
@@ -785,10 +800,6 @@
             actionsDiv.appendChild(insertBtn);
             actionsDiv.appendChild(replaceBtn);
             aiDiv.appendChild(actionsDiv);
-
-            msgsEl.scrollTop = msgsEl.scrollHeight;
-            isGenerating = false;
-            document.getElementById('ai-send-btn').disabled = false;
         }
 
         // ─── AI — insert into doc ──────────────────────────────────────
