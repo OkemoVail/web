@@ -4904,7 +4904,7 @@ html.motion-ready [data-reveal].revealed {
     /* ── Showcase layout scaffolding ONLY.
        Every component (.ui-*, .skuo*, inputs, .card) lives in
        src/site.css §3 so editing it there updates every page. ── */
-    [data-page="design"] { font-family: ui-sans-serif, system-ui, sans-serif; }
+    [data-page="design"] { font-family: 'Satoshi', 'Inter', sans-serif; }
 
     [data-page="design"] .ds-frame {
       max-width: 1080px;
@@ -4977,7 +4977,7 @@ html.motion-ready [data-reveal].revealed {
        scoped under [data-page="design-lab"]. ── */
 
     /* Lab frame */
-    [data-page="design-lab"] { font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--text-primary); margin: 0; }
+    [data-page="design-lab"] { font-family: 'Satoshi', 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); margin: 0; }
 
     [data-page="design-lab"] .lab-frame { max-width: 1180px; margin: 2rem auto; padding: 1.25rem; }
     @media (min-width: 768px) { [data-page="design-lab"] .lab-frame { padding: 2rem; } }
@@ -5886,7 +5886,7 @@ html.motion-ready [data-reveal].revealed {
 
   /* ── Astra layout & identity (appearance tokens come from src/site.css §2) ── */
   /* Cosmic playground canvas: page-local warm parchment (do NOT edit shared tokens). */
-  [data-page="search"] { margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; background-color: #fdf9f4; }
+  [data-page="search"] { margin: 0; min-height: 100vh; font-family: 'Satoshi', 'Inter', sans-serif; overflow-x: hidden; background-color: #fdf9f4; }
   [data-page="search"].modal-open { overflow: hidden; }
   .dark [data-page="search"] { background-color: #1e1a18; }
   [data-page="search"] [hidden] { display: none !important; }
@@ -6335,7 +6335,7 @@ transform: translateY(0);
 }
 
 [data-page="themes"] {
-font-family: 'Inter', sans-serif;
+font-family: 'Satoshi', 'Inter', sans-serif;
 
 }
 
@@ -6465,6 +6465,13 @@ font-family: 'Inter', sans-serif;
         }
 
     
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: WHITENAME  —  scoped to [data-page="whitename"]
+   ═══════════════════════════════════════════════════════════════════ */
+
+    [data-page="whitename"] { font-family: 'Satoshi', 'Inter', sans-serif; }
+
 
 /* ═══════════════════════════════════════════════════════════════════
    PAGE: WORD  —  scoped to [data-page="word"]
