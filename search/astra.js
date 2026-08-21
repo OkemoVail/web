@@ -605,49 +605,56 @@
     favicon.onerror = () => { favicon.style.visibility = 'hidden'; };
     favicon.src = 'https://' + identity.hostname + '/favicon.ico';
 
+    const ogImage = $('lp-ogimage');
+    const ogImgWrap = $('lp-ogwrap');
+    ogImage.style.visibility = 'hidden';
+    ogImgWrap.hidden = true;
+
     const frame = $('lp-frame');
-    const fallback = $('lp-fallback');
-    const loading = $('lp-loading');
+    const snippetBlock = $('lp-snippet-block');
     clearTimeout(previewLoadTimer);
     previewToken++;
     const token = previewToken;
     frame.onload = null;
     frame.src = 'about:blank';
     frame.hidden = true;
-    fallback.hidden = true;
-    loading.hidden = false;
+    snippetBlock.hidden = false;
 
     dock.classList.add('open');
     dock.setAttribute('aria-hidden', 'false');
     dock.inert = false;
 
-    if (AstraHelpers.isLikelyFrameBlocked(r.url)) {
-      loading.hidden = true;
-      fallback.hidden = false;
-      return;
-    }
+    fetch(backendBase() + '/api/preview?url=' + encodeURIComponent(r.url),
+      { headers: { 'ngrok-skip-browser-warning': 'true', 'bypass-tunnel-reminder': 'true' } })
+      .then(function (res) { return res.ok ? res.json() : {}; })
+      .catch(function () { return {}; })
+      .then(function (og) {
+        if (token !== previewToken) return;
+        if (og.image && /^https?:\/\//i.test(og.image)) {
+          ogImgWrap.hidden = false;
+          ogImage.src = og.image;
+          ogImage.onload = function () { ogImage.style.visibility = ''; };
+          ogImage.onerror = function () { ogImgWrap.hidden = true; };
+        }
+        if (og.title) $('lp-title').textContent = og.title;
+        if (og.description) $('lp-snippet').textContent = og.description;
+        if (og.site_name) $('lp-host').textContent = og.site_name;
+      });
 
-    frame.onload = () => {
+    if (AstraHelpers.isLikelyFrameBlocked(r.url)) return;
+
+    frame.onload = function () {
       if (token !== previewToken) return;
       clearTimeout(previewLoadTimer);
-      loading.hidden = true;
-      // 'load' fires even when a site blocks framing via X-Frame-Options/CSP —
-      // when that happens the browser aborts the navigation and leaves the frame
-      // on its last same-origin document (the about:blank we just set), so this
-      // read succeeds instead of throwing. A page that actually loaded is now
-      // cross-origin and throws a SecurityError here. That's how we tell blocked
-      // (blank iframe) apart from a real load without ever reading its content.
-      let blocked = false;
+      var blocked = false;
       try { void frame.contentWindow.location.href; blocked = true; } catch (_) { blocked = false; }
       frame.hidden = blocked;
-      fallback.hidden = !blocked;
+      if (!blocked) snippetBlock.hidden = true;
     };
     frame.src = r.url;
-    previewLoadTimer = setTimeout(() => {
+    previewLoadTimer = setTimeout(function () {
       if (token !== previewToken) return;
-      loading.hidden = true;
       frame.hidden = true;
-      fallback.hidden = false;
     }, 1500);
   }
 

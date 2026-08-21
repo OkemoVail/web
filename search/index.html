@@ -108,12 +108,13 @@
       </div>
     </div>
     <div class="lp-frame-wrap">
-      <iframe id="lp-frame" class="lp-frame" title="Website preview" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" loading="lazy" hidden></iframe>
-      <div class="lp-fallback" id="lp-fallback" hidden>
-        <p class="lp-snippet" id="lp-snippet"></p>
-        <p class="lp-note">live preview isn't available for this site</p>
+      <div class="lp-ogwrap" id="lp-ogwrap" hidden>
+        <img id="lp-ogimage" class="lp-ogimage" alt="" aria-hidden="true" referrerpolicy="no-referrer" loading="lazy">
       </div>
-      <div class="lp-loading" id="lp-loading" hidden>loading preview…</div>
+      <div id="lp-snippet-block">
+        <p class="lp-snippet" id="lp-snippet"></p>
+      </div>
+      <iframe id="lp-frame" class="lp-frame" title="Website preview" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" loading="lazy" hidden></iframe>
     </div>
     <a class="skuo skuo-accent lp-visit" id="lp-visit" target="_blank" rel="noopener">open in new tab ↗</a>
   </div>

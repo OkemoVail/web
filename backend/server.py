@@ -141,6 +141,19 @@ CACHE_TTL = 600  # seconds
 _search_cache = {}
 _suggest_cache = {}
 _images_cache = {}
+_preview_cache = {}
+
+# ── OG meta extraction patterns ──
+OG_TITLE_RE = re.compile(r'<meta\s[^>]*property=["\']og:title["\'][^>]*content=("([^"]*)"|\'([^\']*)\')', re.I)
+OG_DESC_RE = re.compile(r'<meta\s[^>]*property=["\']og:description["\'][^>]*content=("([^"]*)"|\'([^\']*)\')', re.I)
+OG_IMAGE_RE = re.compile(r'<meta\s[^>]*property=["\']og:image["\'][^>]*content=("([^"]*)"|\'([^\']*)\')', re.I)
+OG_SITE_RE = re.compile(r'<meta\s[^>]*property=["\']og:site_name["\'][^>]*content=("([^"]*)"|\'([^\']*)\')', re.I)
+def _og_val(m):
+    """Extract content from OG regex match (handles both " and ' quoting)."""
+    if m is None:
+        return None
+    return (m.group(2) or m.group(3) or "").strip()
+TITLE_RE = re.compile(r'<title>([^<]*)</title>', re.I)
 
 
 def _unwrap_ddg_url(href):
@@ -532,6 +545,39 @@ def api_images(q: str = ""):
     results = [r for r in results if r["image"].startswith(("http://", "https://"))]
     _cache_set(_images_cache, key, results)
     return {"results": results}
+
+
+@app.get("/api/preview")
+def api_preview(url: str = ""):
+    """Fetch OG metadata for a URL server-side (CORS-safe).
+    Returns { title, description, image, site_name } or {} on failure.
+    Cached 10 min per URL."""
+    url = (url or "").strip()
+    if not url.startswith(("http://", "https://")):
+        return {}
+    key = url.rstrip("/")
+    cached = _cache_get(_preview_cache, key)
+    if cached is not None:
+        return cached
+    try:
+        resp, err = _http_get_backoff(url, params={})
+    except Exception:
+        return {}
+    if err:
+        return {}
+    html = resp.text or ""
+    out = {}
+    for pat, field in ((OG_TITLE_RE, "title"), (OG_DESC_RE, "description"),
+                       (OG_IMAGE_RE, "image"), (OG_SITE_RE, "site_name")):
+        v = _og_val(pat.search(html))
+        if v:
+            out[field] = v
+    if not out.get("title"):
+        m = TITLE_RE.search(html)
+        if m:
+            out["title"] = m.group(1).strip()
+    _cache_set(_preview_cache, key, out)
+    return out
 
 
 model = None
