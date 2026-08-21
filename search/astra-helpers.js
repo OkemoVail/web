@@ -35,6 +35,17 @@
     return tab === 'images' ? 'images' : 'all';
   }
 
+  const FRAME_BLOCKED_DOMAINS = [
+    'google.com', 'accounts.google.com', 'github.com', 'facebook.com', 'instagram.com',
+    'twitter.com', 'x.com', 'linkedin.com', 'amazon.com', 'youtube.com', 'reddit.com',
+    'paypal.com', 'chase.com', 'bankofamerica.com', 'wellsfargo.com', 'netflix.com',
+  ];
+
+  function isLikelyFrameBlocked(value) {
+    const hostname = hostnameFor(value);
+    return FRAME_BLOCKED_DOMAINS.some((d) => hostname === d || hostname.endsWith('.' + d));
+  }
+
   function linkifyCitations(html, count) {
     return String(html || '').replace(/\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\]/g, (match, group) => {
       const linked = group.split(',').map((value) => {
@@ -62,5 +73,5 @@
     return linkifyCitations(html, count);
   }
 
-  return { domainIdentity, normalizeTab, linkifyCitations, renderAssistantHtml };
+  return { domainIdentity, normalizeTab, linkifyCitations, renderAssistantHtml, isLikelyFrameBlocked };
 });

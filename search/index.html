@@ -97,6 +97,28 @@
   </div>
 </aside>
 
+<aside id="link-preview" class="link-preview" aria-hidden="true" aria-label="Website preview">
+  <div class="lp-panel card">
+    <button class="skuo skuo-icon lp-close" id="lp-close" aria-label="close preview">✕</button>
+    <div class="lp-head">
+      <img id="lp-favicon" class="lp-favicon" alt="" aria-hidden="true" referrerpolicy="no-referrer">
+      <div class="lp-headtext">
+        <div class="lp-title" id="lp-title"></div>
+        <div class="lp-host" id="lp-host"></div>
+      </div>
+    </div>
+    <div class="lp-frame-wrap">
+      <iframe id="lp-frame" class="lp-frame" title="Website preview" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" loading="lazy" hidden></iframe>
+      <div class="lp-fallback" id="lp-fallback" hidden>
+        <p class="lp-snippet" id="lp-snippet"></p>
+        <p class="lp-note">live preview isn't available for this site</p>
+      </div>
+      <div class="lp-loading" id="lp-loading" hidden>loading preview…</div>
+    </div>
+    <a class="skuo skuo-accent lp-visit" id="lp-visit" target="_blank" rel="noopener">open in new tab ↗</a>
+  </div>
+</aside>
+
 <script src="../src/motion.js"></script>
 <script src="astra-helpers.js"></script>
 <script src="astra.js"></script>

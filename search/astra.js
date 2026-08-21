@@ -255,6 +255,7 @@
 
   function showHero() {
     closeImagePreview();
+    closeLinkPreview();
     exitAiFullscreen();
     if (aiAbort) aiAbort.abort();
     searchToken++;
@@ -291,6 +292,7 @@
       if (q !== lastAllQuery) { lastAllQuery = q; runSearch(q); }
     } else {
       $('ai-panel').hidden = true;               // AI panel lives on All; the thread survives
+      closeLinkPreview();                        // Images tab has no result rows — never leave the dock open
       if (q !== lastImgQuery) { lastImgQuery = q; runImages(q); }
     }
   }
@@ -367,6 +369,19 @@
     tabs[next].focus();
     tabs[next].click();
   });
+  const linkPreviewDock = $('link-preview');
+  if (linkPreviewDock) {
+    linkPreviewDock.inert = true;
+    $('lp-close').addEventListener('click', closeLinkPreview);
+    // stays open once shown — only a click outside it (or hovering another
+    // result, which just swaps its contents) closes it, per design
+    document.addEventListener('click', (e) => {
+      if (!linkPreviewDock.classList.contains('open')) return;
+      if (linkPreviewDock.contains(e.target)) return;
+      if (e.target.closest && e.target.closest('.r-title')) return;
+      closeLinkPreview();
+    });
+  }
   $('igp-close').addEventListener('click', closeImagePreview);
   $('igp-scrim').addEventListener('click', closeImagePreview);
   $('ai-expand').addEventListener('click', () => toggleAiFullscreen());
@@ -568,10 +583,90 @@
     list.appendChild(div);
   }
 
+  let hoverTimer = null;
+  let previewLoadTimer = null;
+  let previewToken = 0;
+
+  function canShowLinkPreview() {
+    return window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 1180px)').matches;
+  }
+
+  function openLinkPreview(r) {
+    const dock = $('link-preview');
+    if (!dock) return;
+    const identity = AstraHelpers.domainIdentity(r.url);
+    const c = crumbFor(r.url);
+    $('lp-title').textContent = r.title || r.url;
+    $('lp-host').textContent = c.site;
+    $('lp-snippet').textContent = r.description || '';
+    $('lp-visit').href = r.url;
+    const favicon = $('lp-favicon');
+    favicon.style.visibility = '';
+    favicon.onerror = () => { favicon.style.visibility = 'hidden'; };
+    favicon.src = 'https://' + identity.hostname + '/favicon.ico';
+
+    const frame = $('lp-frame');
+    const fallback = $('lp-fallback');
+    const loading = $('lp-loading');
+    clearTimeout(previewLoadTimer);
+    previewToken++;
+    const token = previewToken;
+    frame.onload = null;
+    frame.src = 'about:blank';
+    frame.hidden = true;
+    fallback.hidden = true;
+    loading.hidden = false;
+
+    dock.classList.add('open');
+    dock.setAttribute('aria-hidden', 'false');
+    dock.inert = false;
+
+    if (AstraHelpers.isLikelyFrameBlocked(r.url)) {
+      loading.hidden = true;
+      fallback.hidden = false;
+      return;
+    }
+
+    frame.onload = () => {
+      if (token !== previewToken) return;
+      clearTimeout(previewLoadTimer);
+      loading.hidden = true;
+      // 'load' fires even when a site blocks framing via X-Frame-Options/CSP —
+      // when that happens the browser aborts the navigation and leaves the frame
+      // on its last same-origin document (the about:blank we just set), so this
+      // read succeeds instead of throwing. A page that actually loaded is now
+      // cross-origin and throws a SecurityError here. That's how we tell blocked
+      // (blank iframe) apart from a real load without ever reading its content.
+      let blocked = false;
+      try { void frame.contentWindow.location.href; blocked = true; } catch (_) { blocked = false; }
+      frame.hidden = blocked;
+      fallback.hidden = !blocked;
+    };
+    frame.src = r.url;
+    previewLoadTimer = setTimeout(() => {
+      if (token !== previewToken) return;
+      loading.hidden = true;
+      frame.hidden = true;
+      fallback.hidden = false;
+    }, 1500);
+  }
+
+  function closeLinkPreview() {
+    const dock = $('link-preview');
+    if (!dock) return;
+    dock.classList.remove('open');
+    dock.setAttribute('aria-hidden', 'true');
+    dock.inert = true;
+    previewToken++;
+    clearTimeout(previewLoadTimer);
+    const frame = $('lp-frame');
+    if (frame) { frame.onload = null; frame.src = 'about:blank'; }
+  }
+
   function renderResults(results, start, append) {
     const list = $('result-list');
     const sentinel = append ? $('result-sentinel') : null;
-    if (!append) list.innerHTML = '';
+    if (!append) { list.innerHTML = ''; closeLinkPreview(); }
     results.forEach((r, i) => {
       const li = document.createElement('li');
       li.className = 'result';
@@ -589,6 +684,14 @@
       img.className = 'r-favi r-monogram r-monogram-' + identity.paletteIndex;
       img.textContent = identity.monogram;
       img.setAttribute('aria-hidden', 'true');
+      const favicon = document.createElement('img');
+      favicon.className = 'r-favi-real';
+      favicon.alt = '';
+      favicon.loading = 'lazy';
+      favicon.referrerPolicy = 'no-referrer';
+      favicon.src = 'https://' + identity.hostname + '/favicon.ico';
+      favicon.addEventListener('error', () => favicon.remove(), { once: true });
+      img.prepend(favicon);
 
       const c = crumbFor(r.url);
       const wrap = document.createElement('div');
@@ -614,7 +717,31 @@
       snip.className = 'r-snippet';
       snip.textContent = r.description || '';
 
-      wrap.append(head, a, snip);
+      const hoverBar = document.createElement('span');
+      hoverBar.className = 'r-hover-bar';
+      hoverBar.setAttribute('aria-hidden', 'true');
+      const hoverFill = document.createElement('span');
+      hoverFill.className = 'r-hover-fill';
+      hoverBar.appendChild(hoverFill);
+
+      a.addEventListener('mouseenter', () => {
+        if (!canShowLinkPreview()) return;
+        clearTimeout(hoverTimer);
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        hoverFill.style.transition = reduced ? 'none' : 'width 340ms linear';
+        hoverFill.style.width = '0%';
+        requestAnimationFrame(() => requestAnimationFrame(() => { hoverFill.style.width = '100%'; }));
+        hoverTimer = setTimeout(() => openLinkPreview(r), 340);
+      });
+      a.addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimer);
+        hoverFill.style.transition = 'none';
+        hoverFill.style.width = '0%';
+        // the dock itself stays open once shown — closing it is handled by the
+        // click-outside listener and the #lp-close button (see wireup near top)
+      });
+
+      wrap.append(head, a, hoverBar, snip);
       li.append(img, wrap);
       if (sentinel) list.insertBefore(li, sentinel); else list.appendChild(li);
     });

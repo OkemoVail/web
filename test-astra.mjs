@@ -140,6 +140,17 @@ test('results use local identities and never request Google favicons', () => {
   assert.match(js, /r-monogram/);
 });
 
+test('isLikelyFrameBlocked flags curated domains and their subdomains, not arbitrary sites', () => {
+  assert.equal(AstraHelpers.isLikelyFrameBlocked('https://www.google.com/search?q=x'), true);
+  assert.equal(AstraHelpers.isLikelyFrameBlocked('github.com'), true);
+  assert.equal(AstraHelpers.isLikelyFrameBlocked('https://example.com/some/blog/post'), false);
+});
+
+test('link preview dock exists and gates iframe embedding through isLikelyFrameBlocked', () => {
+  assert.match(html, /id="link-preview"[^>]*class="link-preview"/);
+  assert.match(js, /AstraHelpers\.isLikelyFrameBlocked\(r\.url\)/);
+});
+
 test('long result URLs cannot widen the results page', () => {
   assert.match(css, /\.result > div\s*\{[^}]*min-width:\s*0[^}]*max-width:\s*100%/);
   assert.match(css, /\.r-crumb\s*\{[^}]*max-width:\s*100%[^}]*overflow:\s*hidden[^}]*text-overflow:\s*ellipsis[^}]*white-space:\s*nowrap/);

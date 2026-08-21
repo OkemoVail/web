@@ -25,7 +25,9 @@
       "Bash(git -C \"C:/Users/okemo/Desktop/Projects/web projects/web\" status --short)",
       "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"AI chat SaaS assistant\" --domain product)",
       "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"skeuomorphism soft ui claymorphism\" --domain style)",
-      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"animation micro-interaction motion\" --domain ux)"
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"animation micro-interaction motion\" --domain ux)",
+      "Bash(node *)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }
