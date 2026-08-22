@@ -72,6 +72,115 @@ test('renderAssistantHtml safely falls back to plain text when marked is absent'
   );
 });
 
+test('parsePerspectivesJSON renders complete perspectives data and accurate source counts', () => {
+  const perspectives = {
+    consensus: [
+      { claim: 'EVs produce fewer lifecycle emissions', citations: [1, 3, 5] },
+      { claim: 'Battery production is carbon-intensive', citations: [2, 4] },
+    ],
+    contradictions: [{
+      position_a: { claim: 'Lithium mining has severe impact', citations: [1, 3] },
+      position_b: { claim: 'Mining impact is overstated', citations: [5, 7] },
+    }],
+    outliers: [{ claim: 'EV tires produce more particulates', citation: 8 }],
+    source_map: {
+      ddg: 14,
+      bing: 11,
+      mojeek: 9,
+      overlap_all_three: 5,
+      domain_types: { academic: 30, news: 25, commercial: 20, personal: 15 },
+    },
+  };
+
+  const rendered = AstraHelpers.parsePerspectivesJSON(perspectives);
+
+  assert.match(rendered, /perspectives-consensus/);
+  assert.match(rendered, /EVs produce fewer lifecycle emissions/);
+  assert.match(rendered, /\[<a[^>]*>1<\/a>, <a[^>]*>3<\/a>, <a[^>]*>5<\/a>\]/);
+  assert.match(rendered, /perspectives-contradictions/);
+  assert.match(rendered, /position_a/);
+  assert.match(rendered, /position_b/);
+  assert.match(rendered, /perspectives-outliers/);
+  assert.match(rendered, /perspectives-sourcemap/);
+  assert.match(rendered, /DDG \(14\)/);
+  assert.match(rendered, /Bing \(11\)/);
+  assert.match(rendered, /Mojeek \(9\)/);
+  assert.match(rendered, /5 shared across all three/);
+  assert.match(rendered, /Academic 30%/);
+  assert.doesNotMatch(rendered, /unique results/);
+});
+
+test('parsePerspectivesJSON returns a fallback for null input', () => {
+  assert.match(AstraHelpers.parsePerspectivesJSON(null), /perspectives-fallback/);
+});
+
+test('parsePerspectivesJSON handles empty sections and omits absent optional sections', () => {
+  const empty = AstraHelpers.parsePerspectivesJSON({
+    consensus: [], contradictions: [], outliers: [], source_map: {},
+  });
+  assert.match(empty, /Sources overwhelmingly agree/);
+  assert.match(empty, /No uncorroborated outliers/);
+
+  const consensusOnly = AstraHelpers.parsePerspectivesJSON({
+    consensus: [{ claim: 'Only fact', citations: [1] }],
+    source_map: { ddg: 10 },
+  });
+  assert.match(consensusOnly, /perspectives-consensus/);
+  assert.match(consensusOnly, /\[<a[^>]*>1<\/a>\]/);
+  assert.doesNotMatch(consensusOnly, /perspectives-contradictions/);
+  assert.doesNotMatch(consensusOnly, /perspectives-outliers/);
+});
+
+test('parsePerspectivesJSON escapes claims and source-map domain labels', () => {
+  const rendered = AstraHelpers.parsePerspectivesJSON({
+    consensus: [{ claim: '<img src=x onerror=alert(1)>', citations: [1] }],
+    source_map: { domain_types: { '<script>alert(2)</script>': 10 } },
+  });
+
+  assert.match(rendered, /&lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.match(rendered, /&lt;script&gt;alert\(2\)&lt;\/script&gt; 10%/);
+  assert.doesNotMatch(rendered, /<img|<script/);
+});
+
+test('parsePerspectivesJSON leaves citations outside the supplied result count unlinked', () => {
+  const rendered = AstraHelpers.parsePerspectivesJSON({
+    consensus: [{ claim: 'Bounded citations', citations: [0, 1, 3, 4] }],
+    source_map: {},
+  }, 3);
+
+  assert.match(rendered, /\[0, <a[^>]*href="#result-1"[^>]*>1<\/a>, <a[^>]*href="#result-3"[^>]*>3<\/a>, 4\]/);
+  assert.doesNotMatch(rendered, /href="#result-(?:0|4)"/);
+});
+
+test('parsePerspectivesJSON omits malformed nested data without throwing', () => {
+  assert.doesNotThrow(() => AstraHelpers.parsePerspectivesJSON({
+    consensus: [null, {}, { claim: 42 }, { claim: 'Valid consensus', citations: 'bad' }],
+    contradictions: [
+      null,
+      {},
+      { position_a: { claim: 'Only one side', citations: [1] } },
+      { position_a: { claim: 'Valid A' }, position_b: { claim: 'Valid B', citations: [2] } },
+    ],
+    outliers: 'not-an-array',
+    source_map: { ddg: 'many', domain_types: null },
+  }, 2));
+
+  const rendered = AstraHelpers.parsePerspectivesJSON({
+    consensus: [null, {}, { claim: 'Valid consensus', citations: 'bad' }],
+    contradictions: [
+      { position_a: { claim: 'Only one side' } },
+      { position_a: { claim: 'Valid A' }, position_b: { claim: 'Valid B' } },
+    ],
+    outliers: [null, { claim: '' }, { claim: 'Valid outlier', citation: 'bad' }],
+    source_map: [],
+  }, 2);
+  assert.match(rendered, /Valid consensus/);
+  assert.match(rendered, /Valid A/);
+  assert.match(rendered, /Valid B/);
+  assert.match(rendered, /Valid outlier/);
+  assert.doesNotMatch(rendered, /Only one side|undefined|NaN/);
+});
+
 test('search inputs and suggestion popups expose a combobox/listbox contract', () => {
   for (const prefix of ['hero', 'results']) {
     assert.match(html, new RegExp(`id="${prefix}-input"[^>]*role="combobox"[^>]*aria-autocomplete="list"[^>]*aria-controls="${prefix}-suggest"[^>]*aria-expanded="false"`));
