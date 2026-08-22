@@ -317,6 +317,7 @@
       $('ai-panel').hidden = !getAiMode();
       if (q !== lastAllQuery) { lastAllQuery = q; runSearch(q); }
     } else {
+      cancelPerspectives();
       $('ai-panel').hidden = true;               // AI panel lives on All; the thread survives
       closeLinkPreview();                        // Images tab has no result rows — never leave the dock open
       if (q !== lastImgQuery) { lastImgQuery = q; runImages(q); }
@@ -681,7 +682,7 @@
       );
       if (!res.ok) throw new Error('perspectives ' + res.status);
       const data = await res.json();
-      if (token !== perspectivesToken || getAiPanelMode() !== 'perspectives' || readRoute().q !== q) return;
+      if (token !== perspectivesToken || getAiPanelMode() !== 'perspectives' || readRoute().q !== q || readRoute().tab !== 'all') return;
       if (!data || !Array.isArray(data.results)) throw new Error('invalid perspectives response');
       const results = data.results.map((r) => ({
         url: r.url,
@@ -703,7 +704,7 @@
       }
     } catch (e) {
       if (e.name === 'AbortError') return;
-      if (token !== perspectivesToken || getAiPanelMode() !== 'perspectives' || readRoute().q !== q) return;
+      if (token !== perspectivesToken || getAiPanelMode() !== 'perspectives' || readRoute().q !== q || readRoute().tab !== 'all') return;
       console.error('Perspectives error:', e);
       showPerspectivesFallback(q, 'Perspectives analysis failed.');
     } finally {

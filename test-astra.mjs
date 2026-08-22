@@ -381,7 +381,8 @@ test('Perspectives requests are aborted and stale responses cannot repaint the p
   assert.match(js, /let perspectivesToken = 0/);
   assert.match(js, /perspectivesAbort\.abort\(\)/);
   assert.match(js, /signal: perspectivesAbort\.signal/);
-  assert.match(js, /if \(token !== perspectivesToken \|\| getAiPanelMode\(\) !== 'perspectives' \|\| readRoute\(\)\.q !== q\) return/);
+  assert.match(js, /if \(token !== perspectivesToken \|\| getAiPanelMode\(\) !== 'perspectives' \|\| readRoute\(\)\.q !== q \|\| readRoute\(\)\.tab !== 'all'\) return/);
+  assert.match(js, /else \{\s*cancelPerspectives\(\);\s*\$\('ai-panel'\)\.hidden = true/);
 });
 
 test('citation targets receive an orientation highlight', () => {
