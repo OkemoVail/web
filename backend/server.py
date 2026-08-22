@@ -611,10 +611,13 @@ def api_perspectives(q: str = "", n: int = 15):
         mojeek_r = f_mojeek.result()
 
     all_results = []
+    missing_sources = []
     for source, (results, reason) in [("ddg", ddg_r), ("bing", bing_r), ("mojeek", mojeek_r)]:
-        if results is not None:
-            for r in results:
-                all_results.append((r, source))
+        if results is None:
+            missing_sources.append(source)
+            continue
+        for r in results:
+            all_results.append((r, source))
 
     if not all_results:
         return JSONResponse({"error": "upstream", "query": q}, status_code=502)
@@ -673,7 +676,6 @@ def api_perspectives(q: str = "", n: int = 15):
     user_message = f"Query: {q}\n\n{results_text}"
 
     body_dict = {
-        "model": "saga-0.7b",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message},
@@ -711,6 +713,13 @@ def api_perspectives(q: str = "", n: int = 15):
         perspectives = json.loads(raw_text)
     except json.JSONDecodeError:
         perspectives = None
+
+    if isinstance(perspectives, dict):
+        source_map = perspectives.get("source_map")
+        if not isinstance(source_map, dict):
+            source_map = {}
+            perspectives["source_map"] = source_map
+        source_map["missing"] = missing_sources
 
     resp = {"query": q, "results": results, "perspectives": perspectives}
     _cache_set(_perspectives_cache, qk, resp)

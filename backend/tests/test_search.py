@@ -1,5 +1,26 @@
+import sys
+import types
+
 import httpx
 import pytest
+
+try:
+    import mlx.core  # noqa: F401
+except ModuleNotFoundError:
+    mlx = types.ModuleType("mlx")
+    mlx_core = types.ModuleType("mlx.core")
+    mlx.core = mlx_core
+    mlx_lm = types.ModuleType("mlx_lm")
+    sample_utils = types.ModuleType("mlx_lm.sample_utils")
+    sample_utils.make_sampler = lambda **kwargs: None
+    sample_utils.make_logits_processors = lambda **kwargs: None
+    mlx_lm.sample_utils = sample_utils
+    sys.modules.update({
+        "mlx": mlx,
+        "mlx.core": mlx_core,
+        "mlx_lm": mlx_lm,
+        "mlx_lm.sample_utils": sample_utils,
+    })
 
 import server
 
@@ -182,6 +203,7 @@ def clear_caches():
     server._search_cache.clear()
     server._suggest_cache.clear()
     server._images_cache.clear()
+    server._perspectives_cache.clear()
     yield
 
 
@@ -607,3 +629,141 @@ def test_chain_dedups_across_sources(monkeypatch):
     urls = [x["url"] for x in r2.json()["results"]]
     assert "https://example.com/ozone" in urls
     assert "https://example.com/blue" not in urls
+
+
+def _perspectives_model_response(perspectives=None):
+    if perspectives is None:
+        perspectives = {
+            "consensus": [],
+            "contradictions": [],
+            "outliers": [],
+            "source_map": {},
+        }
+    return {
+        "id": "chatcmpl-test",
+        "object": "chat.completion",
+        "created": 0,
+        "model": "test-model",
+        "choices": [{
+            "index": 0,
+            "message": {"role": "assistant", "content": server.json.dumps(perspectives)},
+            "finish_reason": "stop",
+        }],
+        "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+    }
+
+
+def test_api_perspectives_aggregates_sources_and_uses_model_contract(monkeypatch):
+    shared = {"title": "Shared", "url": "https://www.example.com/shared/",
+              "description": "Shared description"}
+    monkeypatch.setattr(server, "_fetch_ddg", lambda q, s: ([shared], None))
+    monkeypatch.setattr(server, "_fetch_bing", lambda q, s: ([shared, {
+        "title": "Bing only", "url": "https://bing.example/item",
+        "description": "Bing description"}], None))
+    monkeypatch.setattr(server, "_fetch_mojeek", lambda q, s: ([shared], None))
+    captured = {}
+
+    def fake_chat(body):
+        captured.update(body)
+        return _perspectives_model_response()
+
+    monkeypatch.setattr(server, "chat_completions", fake_chat)
+    from fastapi.testclient import TestClient
+    response = TestClient(server.app).get("/api/perspectives", params={"q": "sky"})
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["results"] == [
+        {"title": "Shared", "url": "https://www.example.com/shared",
+         "snippet": "Shared description", "sources": ["bing", "ddg", "mojeek"],
+         "domain": "example.com"},
+        {"title": "Bing only", "url": "https://bing.example/item",
+         "snippet": "Bing description", "sources": ["bing"],
+         "domain": "bing.example"},
+    ]
+    assert captured["temperature"] == 0.3
+    assert captured["max_tokens"] == 1500
+    assert captured["stream"] is False
+    assert captured["use_thought"] is False
+    assert "model" not in captured
+
+
+def test_api_perspectives_cache_hit_skips_sources_and_model(monkeypatch):
+    calls = {"sources": 0, "model": 0}
+
+    def fake_fetch(q, s):
+        calls["sources"] += 1
+        return ([{"title": "One", "url": "https://example.com/one",
+                  "description": "Description"}], None)
+
+    def fake_chat(body):
+        calls["model"] += 1
+        return _perspectives_model_response()
+
+    for name in ("_fetch_ddg", "_fetch_bing", "_fetch_mojeek"):
+        monkeypatch.setattr(server, name, fake_fetch)
+    monkeypatch.setattr(server, "chat_completions", fake_chat)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+
+    first = client.get("/api/perspectives", params={"q": "sky"})
+    second = client.get("/api/perspectives", params={"q": "SKY"})
+
+    assert first.status_code == second.status_code == 200
+    assert second.json() == first.json()
+    assert calls == {"sources": 3, "model": 1}
+
+
+def test_api_perspectives_partial_failure_records_missing_source(monkeypatch):
+    result = [{"title": "One", "url": "https://example.com/one",
+               "description": "Description"}]
+    monkeypatch.setattr(server, "_fetch_ddg", lambda q, s: (result, None))
+    monkeypatch.setattr(server, "_fetch_bing", lambda q, s: (None, "upstream"))
+    monkeypatch.setattr(server, "_fetch_mojeek", lambda q, s: (result, None))
+    model_data = {
+        "consensus": [], "contradictions": [], "outliers": [],
+        "source_map": {"missing": ["ddg"]},
+    }
+    monkeypatch.setattr(server, "chat_completions",
+                        lambda body: _perspectives_model_response(model_data))
+    from fastapi.testclient import TestClient
+    response = TestClient(server.app).get("/api/perspectives", params={"q": "sky"})
+
+    assert response.status_code == 200
+    assert response.json()["perspectives"]["source_map"]["missing"] == ["bing"]
+
+
+def test_api_perspectives_model_failure_returns_results_without_analysis(monkeypatch):
+    result = [{"title": "One", "url": "https://example.com/one",
+               "description": "Description"}]
+    for name in ("_fetch_ddg", "_fetch_bing", "_fetch_mojeek"):
+        monkeypatch.setattr(server, name, lambda q, s: (result, None))
+
+    def fail_model(body):
+        raise RuntimeError("model unavailable")
+
+    monkeypatch.setattr(server, "chat_completions", fail_model)
+    from fastapi.testclient import TestClient
+    response = TestClient(server.app).get("/api/perspectives", params={"q": "sky"})
+
+    assert response.status_code == 200
+    assert len(response.json()["results"]) == 1
+    assert response.json()["perspectives"] is None
+
+
+def test_api_perspectives_all_source_failures_return_502(monkeypatch):
+    model_called = {"value": False}
+    for name in ("_fetch_ddg", "_fetch_bing", "_fetch_mojeek"):
+        monkeypatch.setattr(server, name, lambda q, s: (None, "upstream"))
+
+    def fake_chat(body):
+        model_called["value"] = True
+        return _perspectives_model_response()
+
+    monkeypatch.setattr(server, "chat_completions", fake_chat)
+    from fastapi.testclient import TestClient
+    response = TestClient(server.app).get("/api/perspectives", params={"q": "sky"})
+
+    assert response.status_code == 502
+    assert response.json() == {"error": "upstream", "query": "sky"}
+    assert model_called["value"] is False
