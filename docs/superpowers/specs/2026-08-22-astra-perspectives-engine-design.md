@@ -1,7 +1,7 @@
 # Astra Perspectives Engine Design
 
 **Date:** 2026-08-22
-**Status:** Draft
+**Status:** Approved
 **Builds on:** Astra v2.3 (multi-source, AI panel, cosmic clarity)
 
 ## Goal

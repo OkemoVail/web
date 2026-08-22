@@ -597,8 +597,9 @@ def api_perspectives(q: str = "", n: int = 15):
         return {"query": q, "results": [], "perspectives": None}
     n = max(5, min(n, 30))
     qk = q.lower()
+    cache_key = (qk, n)
 
-    cached = _cache_get(_perspectives_cache, qk)
+    cached = _cache_get(_perspectives_cache, cache_key)
     if cached is not None:
         return cached
 
@@ -690,14 +691,14 @@ def api_perspectives(q: str = "", n: int = 15):
         resp_dict = chat_completions(body_dict)
     except Exception:
         resp = {"query": q, "results": results, "perspectives": None}
-        _cache_set(_perspectives_cache, qk, resp)
+        _cache_set(_perspectives_cache, cache_key, resp)
         return resp
 
     try:
         raw_text = resp_dict["choices"][0]["message"]["content"]
     except (KeyError, IndexError):
         resp = {"query": q, "results": results, "perspectives": None}
-        _cache_set(_perspectives_cache, qk, resp)
+        _cache_set(_perspectives_cache, cache_key, resp)
         return resp
 
     raw_text = raw_text.strip()
@@ -719,10 +720,18 @@ def api_perspectives(q: str = "", n: int = 15):
         if not isinstance(source_map, dict):
             source_map = {}
             perspectives["source_map"] = source_map
-        source_map["missing"] = missing_sources
+        source_map.update({
+            "ddg": sum("ddg" in result["sources"] for result in results),
+            "bing": sum("bing" in result["sources"] for result in results),
+            "mojeek": sum("mojeek" in result["sources"] for result in results),
+            "overlap_all_three": sum(len(result["sources"]) == 3 for result in results),
+            "missing": missing_sources,
+        })
+    else:
+        perspectives = None
 
     resp = {"query": q, "results": results, "perspectives": perspectives}
-    _cache_set(_perspectives_cache, qk, resp)
+    _cache_set(_perspectives_cache, cache_key, resp)
     return resp
 
 

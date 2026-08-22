@@ -686,6 +686,10 @@ def test_api_perspectives_aggregates_sources_and_uses_model_contract(monkeypatch
     assert captured["stream"] is False
     assert captured["use_thought"] is False
     assert "model" not in captured
+    assert data["perspectives"]["source_map"] == {
+        "ddg": 1, "bing": 2, "mojeek": 1,
+        "overlap_all_three": 1, "missing": [],
+    }
 
 
 def test_api_perspectives_cache_hit_skips_sources_and_model(monkeypatch):
@@ -712,6 +716,29 @@ def test_api_perspectives_cache_hit_skips_sources_and_model(monkeypatch):
     assert first.status_code == second.status_code == 200
     assert second.json() == first.json()
     assert calls == {"sources": 3, "model": 1}
+
+
+def test_api_perspectives_cache_varies_by_result_limit(monkeypatch):
+    calls = {"sources": 0, "model": 0}
+
+    def fake_fetch(q, s):
+        calls["sources"] += 1
+        return ([{"title": str(i), "url": f"https://example.com/{i}",
+                  "description": "Description"} for i in range(10)], None)
+
+    def fake_chat(body):
+        calls["model"] += 1
+        return _perspectives_model_response()
+
+    for name in ("_fetch_ddg", "_fetch_bing", "_fetch_mojeek"):
+        monkeypatch.setattr(server, name, fake_fetch)
+    monkeypatch.setattr(server, "chat_completions", fake_chat)
+    from fastapi.testclient import TestClient
+    client = TestClient(server.app)
+
+    assert len(client.get("/api/perspectives", params={"q": "sky", "n": 5}).json()["results"]) == 5
+    assert len(client.get("/api/perspectives", params={"q": "sky", "n": 10}).json()["results"]) == 10
+    assert calls == {"sources": 6, "model": 2}
 
 
 def test_api_perspectives_partial_failure_records_missing_source(monkeypatch):
