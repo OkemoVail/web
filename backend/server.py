@@ -6,6 +6,7 @@ docs/superpowers/specs/2026-08-11-temp-mlx-backend-design.md
 """
 
 import base64
+import concurrent.futures
 import json
 import os
 import queue
@@ -141,6 +142,7 @@ CACHE_TTL = 600  # seconds
 _search_cache = {}
 _suggest_cache = {}
 _images_cache = {}
+_perspectives_cache = {}
 _preview_cache = {}
 
 # ── OG meta extraction patterns ──
@@ -502,6 +504,14 @@ def _extract_vqd(html):
     return m.group(1) if m else ""
 
 
+def _extract_domain(url: str) -> str:
+    try:
+        host = urlparse(url).hostname or ""
+        return host.removeprefix("www.")
+    except Exception:
+        return ""
+
+
 def _map_image(r):
     return {
         "image": r.get("image") or "",
@@ -578,6 +588,133 @@ def api_preview(url: str = ""):
             out["title"] = m.group(1).strip()
     _cache_set(_preview_cache, key, out)
     return out
+
+
+@app.get("/api/perspectives")
+def api_perspectives(q: str = "", n: int = 15):
+    q = (q or "").strip()
+    if not q:
+        return {"query": q, "results": [], "perspectives": None}
+    n = max(5, min(n, 30))
+    qk = q.lower()
+
+    cached = _cache_get(_perspectives_cache, qk)
+    if cached is not None:
+        return cached
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        f_ddg = executor.submit(_fetch_ddg, q, 0)
+        f_bing = executor.submit(_fetch_bing, q, 0)
+        f_mojeek = executor.submit(_fetch_mojeek, q, 0)
+        ddg_r = f_ddg.result()
+        bing_r = f_bing.result()
+        mojeek_r = f_mojeek.result()
+
+    all_results = []
+    for source, (results, reason) in [("ddg", ddg_r), ("bing", bing_r), ("mojeek", mojeek_r)]:
+        if results is not None:
+            for r in results:
+                all_results.append((r, source))
+
+    if not all_results:
+        return JSONResponse({"error": "upstream", "query": q}, status_code=502)
+
+    deduped = {}
+    for r, source in all_results:
+        url = r.get("url", "").rstrip("/")
+        if url not in deduped:
+            deduped[url] = {
+                "title": r.get("title", ""),
+                "url": url,
+                "snippet": r.get("description", ""),
+                "sources": {source},
+                "domain": _extract_domain(url),
+            }
+        else:
+            deduped[url]["sources"].add(source)
+
+    results = []
+    for i, (url, r) in enumerate(deduped.items()):
+        if i >= n:
+            break
+        results.append({
+            "title": r["title"],
+            "url": r["url"],
+            "snippet": r["snippet"],
+            "sources": sorted(r["sources"]),
+            "domain": r["domain"],
+        })
+
+    lines = []
+    for i, r in enumerate(results):
+        sources_str = ", ".join(s.title() for s in r["sources"])
+        lines.append(f"[{i + 1}] {r['title']} | {r['domain']} | found by: {sources_str}")
+        lines.append(f"    {r['snippet'][:300]}")
+    results_text = "\n".join(lines)
+
+    system_prompt = (
+        "You are Astra's Perspectives Engine. Analyze search results and identify where "
+        "sources agree, disagree, and diverge.\n\n"
+        "You receive results as: [N] Title | domain | found by: DDG, Bing, Mojeek\n"
+        "followed by a snippet.\n\n"
+        "Rules:\n"
+        "1. CONSENSUS: claims backed by 3+ results. Be specific — \"climate change is "
+        "real\" is too vague; \"Global temperatures have risen 1.1C since pre-industrial "
+        "levels\" is a claim. Cite result numbers.\n"
+        "2. CONTRADICTIONS: genuine disagreements where two groups of sources say "
+        "opposite things about the same question. Different wording of the same "
+        "fact is NOT a contradiction. Show both sides with citations.\n"
+        "3. OUTLIERS: interesting claims from 1-2 results only, uncorroborated.\n"
+        "4. If sources overwhelmingly agree, say so honestly. Never fabricate disagreement.\n"
+        "5. Sparse or low-quality results? Signal that rather than hallucinate.\n"
+        "6. Claims: 1-2 sentences. Max 5 entries per section.\n"
+        "7. Output ONLY valid JSON. No markdown, no preamble, no trailing text."
+    )
+    user_message = f"Query: {q}\n\n{results_text}"
+
+    body_dict = {
+        "model": "saga-0.7b",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message},
+        ],
+        "max_tokens": 1500,
+        "temperature": 0.3,
+        "stream": False,
+        "use_thought": False,
+    }
+
+    try:
+        resp_dict = chat_completions(body_dict)
+    except Exception:
+        resp = {"query": q, "results": results, "perspectives": None}
+        _cache_set(_perspectives_cache, qk, resp)
+        return resp
+
+    try:
+        raw_text = resp_dict["choices"][0]["message"]["content"]
+    except (KeyError, IndexError):
+        resp = {"query": q, "results": results, "perspectives": None}
+        _cache_set(_perspectives_cache, qk, resp)
+        return resp
+
+    raw_text = raw_text.strip()
+    if raw_text.startswith("```"):
+        raw_text = raw_text.split("\n", 1)[-1]
+        if raw_text.endswith("```"):
+            raw_text = raw_text[:-3]
+        raw_text = raw_text.strip()
+    if raw_text.startswith("json"):
+        raw_text = raw_text[4:].strip()
+
+    try:
+        perspectives = json.loads(raw_text)
+    except json.JSONDecodeError:
+        perspectives = None
+
+    resp = {"query": q, "results": results, "perspectives": perspectives}
+    _cache_set(_perspectives_cache, qk, resp)
+    return resp
 
 
 model = None
