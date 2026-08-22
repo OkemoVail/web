@@ -322,6 +322,55 @@ test('Perspective result rows construct compact badges for known source engines'
   assert.doesNotMatch(js, /r-source-tags[^\n]*innerHTML|r-source-tag[^\n]*innerHTML/);
 });
 
+test('Perspectives styles stay search-scoped and keep resting surfaces flat', () => {
+  const perspectiveRules = css.match(/[^{}]+\{[^{}]*\}/g).filter((rule) => /\.(?:ai-mode-(?:toggle|btn)|perspectives-[\w-]+|r-source-tags?)(?![\w-])/.test(rule));
+  assert(perspectiveRules.length > 0, 'Perspectives selectors should exist in site.css');
+  perspectiveRules.forEach((rule) => {
+    const selector = rule.slice(0, rule.indexOf('{'));
+    selector.split(',').forEach((part) => assert.match(part, /\[data-page="search"\]/));
+    if (!selector.includes(':focus-visible')) {
+      const shadow = rule.match(/box-shadow:\s*([^;}]+)/);
+      if (shadow) assert.equal(shadow[1].trim(), 'none');
+    }
+    assert.doesNotMatch(rule, /backdrop-filter|filter:\s*blur|linear-gradient|conic-gradient/);
+  });
+  assert.match(css, /\[data-page="search"\] \.perspectives-section\s*\{[^}]*border:\s*1px solid[^}]*box-shadow:\s*none/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-toggle\s*\{(?=[^}]*background-color:\s*var\(--bg-elevated\))(?=[^}]*border:\s*1px solid)[^}]*\}/);
+});
+
+test('Perspectives mode controls expose flat interaction, focus, and mobile touch contracts', () => {
+  assert.match(css, /\[data-page="search"\] \.ai-mode-btn:hover\s*\{[^}]*background-color:/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-btn:active\s*\{[^}]*transform:\s*scale\(0\.97\)[^}]*transition:[^}]*var\(--dur-1\)[^}]*var\(--ease-soft\)/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-btn:focus-visible\s*\{[^}]*outline:\s*none[^}]*box-shadow:\s*0 0 0 3px color-mix/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-btn\.on\s*\{[^}]*background-color:\s*var\(--accent\)[^}]*color:\s*#fff/);
+  assert.match(css, /@media \(max-width: 768px\)[\s\S]*?\[data-page="search"\] \.ai-mode-btn\s*\{[^}]*min-height:\s*44px/);
+});
+
+test('Perspectives preserve semantic labels and subdued section tints without color-only meaning', () => {
+  assert.match(html, /id="ai-head-label"/);
+  assert.match(js, /sourceTag\.textContent = label/);
+  assert.match(css, /\[data-page="search"\] \.perspectives-consensus\s*\{[^}]*background-color:\s*color-mix/);
+  assert.match(css, /\[data-page="search"\] \.perspectives-contradictions\s*\{[^}]*background-color:\s*color-mix/);
+  assert.match(css, /\[data-page="search"\] \.perspectives-outliers\s*\{[^}]*background-color:\s*color-mix/);
+  assert.match(css, /\[data-page="search"\] \.perspectives-pos-label\s*\{[^}]*display:\s*block/);
+});
+
+test('Perspectives source bars are static and source badges wrap as neutral pills', () => {
+  const perspectiveRules = css.match(/[^{}]+\{[^{}]*\}/g).filter((rule) => /\.perspectives-[\w-]+/.test(rule));
+  perspectiveRules.forEach((rule) => assert.doesNotMatch(rule, /transition\s*:[^;}]*(?:^|\s)width\b/im));
+  assert.match(css, /\[data-page="search"\] \.perspectives-source-row\s*\{[^}]*display:\s*grid/);
+  assert.match(css, /\[data-page="search"\] \.perspectives-source-bar\s*\{[^}]*max-width:\s*100%[^}]*transition:\s*none/);
+  assert.match(css, /\[data-page="search"\] \.r-source-tags\s*\{[^}]*display:\s*flex[^}]*flex-wrap:\s*wrap/);
+  assert.match(css, /\[data-page="search"\] \.r-source-tag\s*\{[^}]*border:\s*1px solid[^}]*border-radius:\s*999px[^}]*background-color:\s*var\(--bg-elevated\)/);
+});
+
+test('Perspectives layout wraps safely, stacks contradictions, and disables skeleton motion', () => {
+  assert.match(css, /\[data-page="search"\] \.ai-head\s*\{[^}]*flex-wrap:\s*wrap/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-toggle\s*\{[^}]*min-width:\s*0/);
+  assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\[data-page="search"\] \.perspectives-dual\s*\{[^}]*grid-template-columns:\s*1fr/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\[data-page="search"\] \.perspectives-skel span[^}]*animation:\s*none/);
+});
+
 test('Perspectives reuses the delegated AI-body citation listener', () => {
   assert.equal((js.match(/\$\('ai-body'\)\.addEventListener\('click'/g) || []).length, 1);
   assert.doesNotMatch(js, /wirePerspectivesCitations/);
