@@ -279,6 +279,62 @@ test('AI panel exposes provenance and grounding sources', () => {
   assert.match(js, /AstraHelpers\.renderAssistantHtml/);
 });
 
+test('AI panel mode toggle exposes an accessible two-option radiogroup', () => {
+  assert.match(html, /id="ai-mode-toggle"[^>]*role="radiogroup"[^>]*aria-label="AI panel mode"/);
+  assert.match(html, /id="ai-mode-answer"[^>]*role="radio"[^>]*aria-checked="true"/);
+  assert.match(html, /id="ai-mode-perspectives"[^>]*role="radio"[^>]*aria-checked="false"/);
+  assert.match(js, /\$\('ai-mode-toggle'\)\.addEventListener\('keydown'/);
+  assert.match(js, /\['ArrowLeft', 'ArrowRight', 'Home', 'End'\]/);
+});
+
+test('AI panel mode persists safely and defaults invalid storage to answer', () => {
+  assert.match(js, /function getAiPanelMode\(\)[\s\S]*?localStorage\.getItem\('astra_perspectives_mode'\)[\s\S]*?return mode === 'perspectives' \? mode : 'answer'/);
+  assert.match(js, /function setAiPanelMode\(mode\)[\s\S]*?localStorage\.setItem\('astra_perspectives_mode', mode\)/);
+  assert.match(js, /catch \(_\) \{\}/);
+});
+
+test('standard search runs once then dispatches the saved AI panel mode', () => {
+  assert.match(js, /lastStandardResults = results/);
+  assert.match(js, /if \(aiOn\) \{\s*if \(getAiPanelMode\(\) === 'perspectives'\) runPerspectives\(q\);\s*else askAstra\(q, results\);\s*\}/);
+  assert.doesNotMatch(js, /setAiPanelMode\('perspectives'\)[\s\S]{0,300}runSearch\(q\)/);
+});
+
+test('Perspectives fetch renders its exact source rows and bounds citations to them', () => {
+  assert.match(js, /\/api\/perspectives\?q=' \+ encodeURIComponent\(q\) \+ '&n=30'/);
+  assert.match(js, /ngrok-skip-browser-warning/);
+  assert.match(js, /bypass-tunnel-reminder/);
+  assert.match(js, /const results = data\.results\.map\(\(r\) => \(\{[\s\S]*?url: r\.url,[\s\S]*?title: r\.title,[\s\S]*?domain: r\.domain,[\s\S]*?sources: r\.sources,[\s\S]*?description: r\.description \|\| r\.snippet \|\| '',[\s\S]*?\}\)\)/);
+  assert.match(js, /lastResults = results/);
+  assert.match(js, /renderResults\(results, 0, false\)/);
+  assert.match(js, /AstraHelpers\.parsePerspectivesJSON\(data\.perspectives, results\.length\)/);
+  assert.match(js, /if \(scrollObserver\) scrollObserver\.disconnect\(\)/);
+});
+
+test('Perspective result rows construct compact badges for known source engines', () => {
+  assert.match(js, /if \(Array\.isArray\(r\.sources\) && r\.sources\.length\)/);
+  assert.match(js, /duckduckgo:\s*'DDG'/);
+  assert.match(js, /ddg:\s*'DDG'/);
+  assert.match(js, /bing:\s*'Bing'/);
+  assert.match(js, /mojeek:\s*'Mojeek'/);
+  assert.match(js, /sourceTags\.className = 'r-source-tags'/);
+  assert.match(js, /sourceTag\.className = 'r-source-tag'/);
+  assert.match(js, /sourceTag\.textContent = label/);
+  assert.doesNotMatch(js, /r-source-tags[^\n]*innerHTML|r-source-tag[^\n]*innerHTML/);
+});
+
+test('Perspectives reuses the delegated AI-body citation listener', () => {
+  assert.equal((js.match(/\$\('ai-body'\)\.addEventListener\('click'/g) || []).length, 1);
+  assert.doesNotMatch(js, /wirePerspectivesCitations/);
+});
+
+test('Perspectives requests are aborted and stale responses cannot repaint the panel', () => {
+  assert.match(js, /let perspectivesAbort = null/);
+  assert.match(js, /let perspectivesToken = 0/);
+  assert.match(js, /perspectivesAbort\.abort\(\)/);
+  assert.match(js, /signal: perspectivesAbort\.signal/);
+  assert.match(js, /if \(token !== perspectivesToken \|\| getAiPanelMode\(\) !== 'perspectives' \|\| readRoute\(\)\.q !== q\) return/);
+});
+
 test('citation targets receive an orientation highlight', () => {
   assert.match(js, /citation-target/);
 });

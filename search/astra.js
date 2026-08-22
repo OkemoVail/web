@@ -90,6 +90,27 @@
     t.setAttribute('aria-label', on ? 'Hide AI answer' : 'Show AI answer');
     t.classList.toggle('skuo-accent', on);
     if (!on && aiAbort) aiAbort.abort();
+    if (!on) cancelPerspectives();
+  }
+
+  function getAiPanelMode() {
+    try {
+      const mode = localStorage.getItem('astra_perspectives_mode');
+      return mode === 'perspectives' ? mode : 'answer';
+    } catch (_) { return 'answer'; }
+  }
+
+  function setAiPanelMode(mode) {
+    mode = mode === 'perspectives' ? mode : 'answer';
+    const answer = $('ai-mode-answer');
+    const perspectives = $('ai-mode-perspectives');
+    [answer, perspectives].forEach((button) => {
+      const selected = button === (mode === 'perspectives' ? perspectives : answer);
+      button.classList.toggle('on', selected);
+      button.setAttribute('aria-checked', selected ? 'true' : 'false');
+      button.tabIndex = selected ? 0 : -1;
+    });
+    try { localStorage.setItem('astra_perspectives_mode', mode); } catch (_) {}
   }
 
   // ── twinkling stars (Perplexity-style sparse dots) ──
@@ -181,6 +202,10 @@
   let totalResults = 0;
   let lastSecs = '0.00';
   let lastResults = [];         // first-page results (citation lookups)
+  let lastStandardResults = [];
+  let lastStandardQuery = '';
+  let perspectivesAbort = null;
+  let perspectivesToken = 0;
   let scrollObserver = null;
   let fullscreenTitle = '';
   const modalStack = [];
@@ -258,6 +283,7 @@
     closeLinkPreview();
     exitAiFullscreen();
     if (aiAbort) aiAbort.abort();
+    cancelPerspectives();
     searchToken++;
     $('results').hidden = true;
     $('hero').hidden = false;
@@ -350,12 +376,29 @@
   wireBar('hero-input', 'hero-search', 'hero-suggest');
   wireBar('results-input', 'results-search', 'results-suggest');
   setAiMode(getAiMode());   // paint the persisted state
+  setAiPanelMode(getAiPanelMode());
   $('ai-toggle').addEventListener('click', () => {
     const on = !getAiMode();
     setAiMode(on);
     const { q } = readRoute();
-    if (on && q) { lastAllQuery = q; runSearch(q); }  // toggling on from results answers immediately
+    if (on && q) {
+      $('ai-panel').hidden = false;
+      if (lastStandardQuery === q) dispatchAiPanel(q, lastStandardResults);
+      else { lastAllQuery = q; runSearch(q); }
+    }
     if (!on) $('ai-panel').hidden = true;             // toggling off hides the panel
+  });
+  $('ai-mode-answer').addEventListener('click', () => switchAiPanelMode('answer'));
+  $('ai-mode-perspectives').addEventListener('click', () => switchAiPanelMode('perspectives'));
+  $('ai-mode-toggle').addEventListener('keydown', (e) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const buttons = [$('ai-mode-answer'), $('ai-mode-perspectives')];
+    const current = Math.max(0, buttons.indexOf(document.activeElement));
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? buttons.length - 1
+      : (current + (e.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length;
+    buttons[next].focus();
+    buttons[next].click();
   });
   $('tab-all').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'all') go(r.q, 'all'); });
   $('tab-images').addEventListener('click', () => { const r = readRoute(); if (r.q && r.tab !== 'images') go(r.q, 'images'); });
@@ -549,6 +592,126 @@
     return (data && Array.isArray(data.results)) ? data.results : [];
   }
 
+  function cancelPerspectives() {
+    perspectivesToken++;
+    if (perspectivesAbort) perspectivesAbort.abort();
+    perspectivesAbort = null;
+  }
+
+  function restoreStandardResults(q) {
+    if (lastStandardQuery !== q) return false;
+    lastResults = lastStandardResults;
+    totalResults = lastStandardResults.length;
+    nextOffset = PAGE_STEP;
+    resultsDone = false;
+    renderResults(lastStandardResults, 0, false);
+    if (lastStandardResults.length) watchSentinel(q);
+    else renderEmptyResults(q);
+    $('r-meta').textContent = lastStandardResults.length ? COPY.metaLine(totalResults, lastSecs) : '';
+    return true;
+  }
+
+  function dispatchAiPanel(q, results) {
+    if (getAiPanelMode() === 'perspectives') runPerspectives(q);
+    else askAstra(q, results);
+  }
+
+  function switchAiPanelMode(mode) {
+    const q = readRoute().q;
+    setAiPanelMode(mode);
+    if (!q || !getAiMode()) return;
+    if (mode === 'perspectives') {
+      if (aiAbort) aiAbort.abort();
+      runPerspectives(q);
+      return;
+    }
+    cancelPerspectives();
+    if (restoreStandardResults(q)) askAstra(q, lastStandardResults);
+    else runSearch(q);
+  }
+
+  function showPerspectivesFallback(q, message) {
+    const body = $('ai-body');
+    body.innerHTML = '';
+    const fallback = document.createElement('div');
+    fallback.className = 'perspectives-fallback';
+    fallback.appendChild(document.createTextNode(message + ' '));
+    const button = document.createElement('button');
+    button.className = 'skuo skuo-neutral';
+    button.id = 'perspectives-fallback-answer';
+    button.type = 'button';
+    button.textContent = 'Try standard answer';
+    button.addEventListener('click', () => {
+      setAiPanelMode('answer');
+      cancelPerspectives();
+      if (restoreStandardResults(q)) askAstra(q, lastStandardResults);
+      else runSearch(q);
+    });
+    fallback.appendChild(button);
+    body.appendChild(fallback);
+  }
+
+  async function runPerspectives(q) {
+    cancelPerspectives();
+    const token = ++perspectivesToken;
+    perspectivesAbort = new AbortController();
+    const panel = $('ai-panel');
+    panel.hidden = false;
+    panel.classList.remove('done');
+    panel.setAttribute('aria-busy', 'true');
+    $('ai-head-label').textContent = '✦ Perspectives';
+    $('ai-provenance').hidden = true;
+    $('ai-sources').hidden = true;
+    hideThinking();
+    $('ai-follow').hidden = true;
+    $('ai-error').hidden = true;
+    $('ai-body').innerHTML = '<div class="perspectives-loading">' +
+      '<div class="perspectives-skel"><span></span><span></span><span></span></div>' +
+      '<div class="perspectives-skel"><span></span><span></span></div>' +
+      '<div class="perspectives-skel"><span></span><span></span><span></span></div></div>';
+
+    const t0 = performance.now();
+    try {
+      const res = await fetch(
+        backendBase() + '/api/perspectives?q=' + encodeURIComponent(q) + '&n=30',
+        {
+          signal: perspectivesAbort.signal,
+          headers: { 'ngrok-skip-browser-warning': 'true', 'bypass-tunnel-reminder': 'true' },
+        }
+      );
+      if (!res.ok) throw new Error('perspectives ' + res.status);
+      const data = await res.json();
+      if (token !== perspectivesToken || getAiPanelMode() !== 'perspectives' || readRoute().q !== q) return;
+      if (!data || !Array.isArray(data.results)) throw new Error('invalid perspectives response');
+      const results = data.results.map((r) => ({
+        url: r.url,
+        title: r.title,
+        domain: r.domain,
+        sources: r.sources,
+        description: r.description || r.snippet || '',
+      }));
+      lastResults = results;
+      renderResults(results, 0, false);
+      if (scrollObserver) scrollObserver.disconnect();
+      const secs = ((performance.now() - t0) / 1000).toFixed(2);
+      $('r-meta').textContent = results.length ? COPY.metaLine(results.length, secs) : '';
+      if (data.perspectives === null) {
+        showPerspectivesFallback(q, 'Perspectives analysis unavailable for this query.');
+      } else {
+        $('ai-body').innerHTML = AstraHelpers.parsePerspectivesJSON(data.perspectives, results.length);
+        panel.classList.add('done');
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      if (token !== perspectivesToken || getAiPanelMode() !== 'perspectives' || readRoute().q !== q) return;
+      console.error('Perspectives error:', e);
+      showPerspectivesFallback(q, 'Perspectives analysis failed.');
+    } finally {
+      if (token === perspectivesToken) panel.setAttribute('aria-busy', 'false');
+    }
+  }
+  window.runPerspectives = runPerspectives;
+
   // google-style breadcrumb: host + up to 2 path segments, chevron-separated
   function crumbFor(url) {
     try {
@@ -723,6 +886,20 @@
       const snip = document.createElement('p');
       snip.className = 'r-snippet';
       snip.textContent = r.description || '';
+      let sourceTags = null;
+      if (Array.isArray(r.sources) && r.sources.length) {
+        const sourceLabels = { duckduckgo: 'DDG', ddg: 'DDG', bing: 'Bing', mojeek: 'Mojeek' };
+        sourceTags = document.createElement('div');
+        sourceTags.className = 'r-source-tags';
+        r.sources.forEach((source) => {
+          const label = sourceLabels[String(source).toLowerCase()];
+          if (!label) return;
+          const sourceTag = document.createElement('span');
+          sourceTag.className = 'r-source-tag';
+          sourceTag.textContent = label;
+          sourceTags.appendChild(sourceTag);
+        });
+      }
 
       const hoverBar = document.createElement('span');
       hoverBar.className = 'r-hover-bar';
@@ -749,6 +926,7 @@
       });
 
       wrap.append(head, a, hoverBar, snip);
+      if (sourceTags) wrap.appendChild(sourceTags);
       li.append(img, wrap);
       if (sentinel) list.insertBefore(li, sentinel); else list.appendChild(li);
     });
@@ -990,6 +1168,7 @@
   async function runSearch(q) {
     exitAiFullscreen();                         // a new search always lands inline
     if (aiAbort) aiAbort.abort();
+    cancelPerspectives();
     const token = ++searchToken;
     const panel = $('ai-panel');
     const aiOn = getAiMode();
@@ -1025,6 +1204,8 @@
     if (token !== searchToken) return;
 
     lastResults = results;
+    lastStandardResults = results;
+    lastStandardQuery = q;
     nextOffset = PAGE_STEP;
     totalResults = results.length;
     const secs = ((performance.now() - t0) / 1000).toFixed(2);
@@ -1034,7 +1215,10 @@
     else renderEmptyResults(q);   // AI still answers from knowledge
     $('result-list').setAttribute('aria-busy', 'false');
 
-    if (aiOn) askAstra(q, results);
+    if (aiOn) {
+      if (getAiPanelMode() === 'perspectives') runPerspectives(q);
+      else askAstra(q, results);
+    }
   }
 
   // ── AI answer: scraped-results-grounded Saga, streamed over SSE ──
@@ -1280,11 +1464,14 @@
   }
 
   async function askAstra(q, results) {
+    cancelPerspectives();
     seedThread(q, results);
     renderAiSources(results);
     const panel = $('ai-panel');
     panel.hidden = false;
     panel.classList.remove('done');
+    $('ai-provenance').hidden = false;
+    $('ai-sources').hidden = false;
     $('ai-head-label').textContent = COPY.aiHeaders[Math.floor(Math.random() * COPY.aiHeaders.length)];
     const body = $('ai-body');
     body.innerHTML = '';

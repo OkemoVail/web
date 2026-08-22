@@ -18,7 +18,11 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
 <link rel="stylesheet" href="../src/site.css">
-    
+<style>
+  .r-source-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .r-source-tag { padding: 1px 5px; border: 1px solid var(--border-strong); border-radius: 999px; color: var(--text-secondary); font-size: .62rem; line-height: 1.35; }
+</style>
+
 </head>
 <body data-page="search">
 <div id="stars" aria-hidden="true"></div>
@@ -63,7 +67,14 @@
     <button class="r-tab" id="tab-images" type="button" role="tab" aria-controls="image-grid" aria-selected="false" tabindex="-1">✦ Images</button>
   </nav>
   <section id="ai-panel" class="ai-panel" aria-busy="false" hidden>
-    <div class="ai-head"><span id="ai-head-label">✦ Astra Answer</span><button class="skuo skuo-icon" id="ai-expand" aria-label="fullscreen" aria-expanded="false" aria-controls="ai-panel" title="fullscreen">⤢</button></div>
+    <div class="ai-head">
+      <span id="ai-head-label">✦ Astra Answer</span>
+      <div class="ai-mode-toggle" id="ai-mode-toggle" role="radiogroup" aria-label="AI panel mode">
+        <button class="ai-mode-btn on" id="ai-mode-answer" role="radio" aria-checked="true" tabindex="0" type="button">Answer</button>
+        <button class="ai-mode-btn" id="ai-mode-perspectives" role="radio" aria-checked="false" tabindex="-1" type="button">⚖ Perspectives</button>
+      </div>
+      <button class="skuo skuo-icon" id="ai-expand" aria-label="fullscreen" aria-expanded="false" aria-controls="ai-panel" title="fullscreen">⤢</button>
+    </div>
     <p class="ai-provenance" id="ai-provenance">AI-generated, grounded in the first five results. It can still be confidently wrong.</p>
     <div class="ai-sources" id="ai-sources" aria-label="Grounding sources"></div>
     <div class="ai-thinking" id="ai-thinking" role="status" aria-live="polite" hidden><span class="ai-orb"></span><span class="ai-thinking-line" id="ai-thinking-line"></span></div>
