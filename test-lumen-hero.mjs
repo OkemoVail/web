@@ -466,6 +466,15 @@ assert.match(controllerSource, /window\.LumenHero\s*=/, 'controller publishes th
 assert.match(controllerSource, /var base = ['"]assets\/lumen\/['"]/, 'controller resolves scene textures within the AI app');
 assert.match(controllerSource, /fallBack\(['"]runtime['"],\s*attempt\)/, 'runtime render failures use the shared fallback');
 
+const carouselSource = html.slice(html.indexOf("const scroller = document.getElementById('hero-scroll')"), html.indexOf('<!-- Based AI: Core Pillars'));
+assert.match(carouselSource, /var lumenCard = cards\[0\];/, 'carousel names the Lumen card at index 0');
+assert.match(carouselSource, /var labsVideoCard = cards\[1\];/, 'carousel names the Labs21 video card at index 1');
+assert.match(carouselSource, /var productVideoCard = cards\[2\];/, 'carousel names the product video card at index 2');
+assert.match(carouselSource, /cards\[i\]\.offsetLeft\s*-\s*scroller\.offsetLeft/, 'carousel scrolls to each card offset including gaps');
+assert.doesNotMatch(carouselSource, /i\s*\*\s*scroller\.clientWidth/, 'carousel has no two-card width multiplication assumption');
+assert.doesNotMatch(carouselSource, /var card\d?\s*=\s*cards\[[012]\]/, 'card-specific initializers use named card references');
+assert.doesNotMatch(carouselSource, /cards\[[12]\]\.querySelector/, 'video initialization does not reach through positional card indices');
+
 const context = { window: {} };
 vm.runInNewContext(
   readFileSync(new URL('./AI/js/lumen-hero-policy.js', import.meta.url), 'utf8'),

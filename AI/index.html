@@ -191,6 +191,11 @@
             const nextBtn = document.getElementById('hero-next');
             if (!scroller || !cards.length) return;
 
+            var lumenCard = cards[0];
+            var labsVideoCard = cards[1];
+            var productVideoCard = cards[2];
+            if (!lumenCard) return;
+
             let active = 0;
             var MOBILE = 768;
 
@@ -214,12 +219,11 @@
                 return m + ':' + (sec < 10 ? '0' : '') + sec;
             }
 
-            /* ── Card 1: simple ── */
+            /* ── Labs21 video ── */
             (function () {
-                var card = cards[1];
-                if (!card) return;
-                var vid = card.querySelector('.hero-video');
-                var replay = card.querySelector('.hero-replay');
+                if (!labsVideoCard) return;
+                var vid = labsVideoCard.querySelector('.hero-video');
+                var replay = labsVideoCard.querySelector('.hero-replay');
                 if (!vid) return;
                 applySrc(vid);
                 vid.addEventListener('canplay', function () {
@@ -233,12 +237,11 @@
                 });
             })();
 
-            /* ── Card 2: full player ── */
+            /* ── Product video player ── */
             var pVideo, pPlay, pPauseIc, pPlayIc, pSeek, pSeekFill, pTime, pMute, pMuteIc, pOnIc, pReplay, pPlayer;
             (function () {
-                var card = cards[2];
-                if (!card) return;
-                pVideo = card.querySelector('.hero-video');
+                if (!productVideoCard) return;
+                pVideo = productVideoCard.querySelector('.hero-video');
                 pPlay = document.getElementById('hp-play');
                 pPauseIc = pPlay ? pPlay.querySelector('.ic-pause') : null;
                 pPlayIc = pPlay ? pPlay.querySelector('.ic-play') : null;
@@ -268,10 +271,9 @@
                         if (pPlayer && !pVideo.paused) pPlayer.classList.remove('show');
                     }, 500);
                 }
-                var card2 = cards[2];
-                if (card2) {
-                    card2.addEventListener('mousemove', showPlayer);
-                    card2.addEventListener('touchstart', showPlayer, { passive: true });
+                if (productVideoCard) {
+                    productVideoCard.addEventListener('mousemove', showPlayer);
+                    productVideoCard.addEventListener('touchstart', showPlayer, { passive: true });
                 }
                 if (pPlayer) {
                     pPlayer.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
@@ -282,11 +284,11 @@
                 pVideo.addEventListener('canplay', function () {
                     if (active === 2) { pVideo.classList.add('loaded'); pVideo.play().catch(function () {}); }
                 });
-                pVideo.addEventListener('play', function () { setPlayIcon(true); card2.classList.remove('is-paused'); });
-                pVideo.addEventListener('pause', function () { setPlayIcon(false); card2.classList.add('is-paused'); });
+                pVideo.addEventListener('play', function () { setPlayIcon(true); productVideoCard.classList.remove('is-paused'); });
+                pVideo.addEventListener('pause', function () { setPlayIcon(false); productVideoCard.classList.add('is-paused'); });
                 pVideo.addEventListener('ended', function () {
                     setPlayIcon(false);
-                    card2.classList.add('is-paused');
+                    productVideoCard.classList.add('is-paused');
                 });
 
                 pVideo.addEventListener('timeupdate', function () {
@@ -330,21 +332,23 @@
             })();
 
             /* ── Carousel ── */
-            function playCard(i) {
-                var vid = cards[i] && cards[i].querySelector('.hero-video');
-                if (vid) { vid.classList.add('loaded'); vid.play().catch(function () {}); }
-            }
-            function pauseCard(i) {
-                var vid = cards[i] && cards[i].querySelector('.hero-video');
-                if (vid) vid.pause();
+            function notifyLumen() {
+                var controller = window.LumenHero;
+                if (!controller) return;
+                controller.setActive(active === 0);
             }
             function setActive(i) {
-                if (i === active) return;
-                pauseCard(active);
                 active = i;
-                if (window.LumenHero) window.LumenHero.setActive(i === 0);
+                notifyLumen();
                 dots.forEach(function (d, j) { d.classList.toggle('active', j === i); });
-                playCard(i);
+                cards.forEach(function (card, j) {
+                    var vid = card.querySelector('.hero-video');
+                    if (!vid) return;
+                    if (j !== i) { vid.pause(); return; }
+                    applySrc(vid);
+                    vid.classList.add('loaded');
+                    vid.play().catch(function () {});
+                });
                 updateArrows();
             }
             function updateArrows() {
@@ -352,11 +356,15 @@
                 if (nextBtn) nextBtn.classList.toggle('hide', active === cards.length - 1);
             }
             function scrollToCard(i) {
-                scroller.scrollTo({ left: i * scroller.clientWidth, behavior: 'smooth' });
+                if (!cards[i]) return;
+                scroller.scrollTo({ left: cards[i].offsetLeft - scroller.offsetLeft, behavior: 'smooth' });
             }
 
             scroller.addEventListener('scroll', function () {
-                var i = Math.round(scroller.scrollLeft / scroller.clientWidth);
+                var i = Array.from(cards).reduce(function (closest, card, index) {
+                    var distance = Math.abs(scroller.scrollLeft - (card.offsetLeft - scroller.offsetLeft));
+                    return distance < closest.distance ? { index: index, distance: distance } : closest;
+                }, { index: 0, distance: Infinity }).index;
                 if (i !== active) setActive(i);
             }, { passive: true });
 
@@ -367,7 +375,8 @@
             });
             if (prevBtn) prevBtn.addEventListener('click', function () { scrollToCard(active - 1); });
             if (nextBtn) nextBtn.addEventListener('click', function () { scrollToCard(active + 1); });
-            updateArrows();
+            setActive(0);
+            window.addEventListener('load', notifyLumen, { once: true });
 
             var rt;
             window.addEventListener('resize', function () {

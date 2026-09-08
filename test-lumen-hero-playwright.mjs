@@ -54,8 +54,11 @@ try {
   assert.equal(await earliestPage.locator('#lumen-poster').isVisible(), true);
   assert.equal(await earliestPage.locator('#lumen-copy').isVisible(), true);
   assert.equal(await earliestPage.locator('#lumen-playback').isHidden(), true, 'initial markup hides playback before controller execution');
+  await earliestPage.locator('#hero-next').click();
+  await earliestPage.locator('.hero-dot[data-index="1"].active').waitFor();
   releaseController();
   await earliestPage.locator('#lumen-hero[data-state="held"]').waitFor();
+  assert.equal((await earliestPage.evaluate(() => window.LumenHero.getState())).active, false, 'late Lumen initialization receives the current inactive carousel state');
   await earliest.close();
 
   const automated = await browser.newContext();
@@ -258,6 +261,49 @@ try {
   assert.equal(await weakPage.locator('#lumen-fallback').getAttribute('src'), null, 'destroy clears fallback source');
   await weak.close();
 
+  const carousel = await browser.newContext();
+  await carousel.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 2 });
+    HTMLMediaElement.prototype.load = function () {};
+    HTMLMediaElement.prototype.play = function () { this.__playing = true; return Promise.resolve(); };
+    HTMLMediaElement.prototype.pause = function () { this.__playing = false; };
+  });
+  const carouselPage = await carousel.newPage();
+  await carouselPage.goto(`${baseUrl}/AI/index.html`);
+  await carouselPage.evaluate(() => window.LumenHero.ready);
+  await carouselPage.evaluate(() => window.LumenHero.skip());
+  assert.equal(await carouselPage.locator('.hero-dot[data-index="0"]').getAttribute('class'), 'hero-dot active', 'dot 0 is active initially');
+
+  await carouselPage.locator('#hero-next').click();
+  await carouselPage.locator('.hero-dot[data-index="1"].active').waitFor();
+  assert.equal((await carouselPage.evaluate(() => window.LumenHero.getState())).active, false, 'leaving card 0 deactivates Lumen');
+  assert.equal((await carouselPage.evaluate(() => window.LumenHero.getState())).state, 'held', 'leaving Lumen holds its final frame');
+  assert.deepEqual(await carouselPage.evaluate(() => Array.from(document.querySelectorAll('.hero-card video')).map((video) => Boolean(video.__playing))), [false, true, false], 'only the active Labs21 card video plays');
+
+  await carouselPage.locator('#hero-next').click();
+  await carouselPage.locator('.hero-dot[data-index="2"].active').waitFor();
+  assert.deepEqual(await carouselPage.evaluate(() => Array.from(document.querySelectorAll('.hero-card video')).map((video) => Boolean(video.__playing))), [false, false, true], 'only the active product card video plays');
+  await carouselPage.waitForFunction(() => {
+    const scroller = document.querySelector('#hero-scroll');
+    const card = document.querySelectorAll('.hero-card')[2];
+    return Math.abs(scroller.scrollLeft - (card.offsetLeft - scroller.offsetLeft)) < 2;
+  });
+
+  await carouselPage.locator('#hero-prev').click();
+  await carouselPage.locator('.hero-dot[data-index="1"].active').waitFor();
+  await carouselPage.locator('#hero-prev').click();
+  await carouselPage.locator('.hero-dot[data-index="0"].active').waitFor();
+  assert.deepEqual(await carouselPage.evaluate(() => window.LumenHero.getState()), {
+    mode: 'video', state: 'held', active: true, elapsedMs: 8000, phase: 'held',
+  }, 'returning to Lumen preserves the held frame without replay');
+  assert.equal(await carouselPage.evaluate(() => document.querySelector('#lumen-fallback').__playing), false, 'Lumen remains paused until Replay is deliberate');
+  await carouselPage.locator('#lumen-playback').click();
+  assert.equal((await carouselPage.evaluate(() => window.LumenHero.getState())).state, 'playing', 'Replay deliberately starts Lumen');
+  assert.equal(await carouselPage.evaluate(() => document.querySelector('#lumen-fallback').__playing), true, 'Replay resumes the Lumen video');
+  await carousel.close();
+
   const keyboard = await browser.newContext();
   await keyboard.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => true }); });
   const keyboardPage = await keyboard.newPage();
@@ -269,7 +315,8 @@ try {
     await keyboardPage.waitForFunction((selected) => document.querySelectorAll('.hero-dot')[selected].classList.contains('active'), index);
     await keyboardPage.waitForFunction((selected) => {
       const scroller = document.querySelector('#hero-scroll');
-      return Math.abs(scroller.scrollLeft - selected * scroller.clientWidth) < 2;
+      const card = document.querySelectorAll('.hero-card')[selected];
+      return Math.abs(scroller.scrollLeft - (card.offsetLeft - scroller.offsetLeft)) < 2;
     }, index);
     assert.equal((await keyboardPage.evaluate(() => window.LumenHero.getState())).active, index === 0, 'dot navigation updates Lumen lifecycle');
   }
