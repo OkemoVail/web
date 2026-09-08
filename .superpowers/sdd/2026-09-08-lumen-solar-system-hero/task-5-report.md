@@ -29,3 +29,18 @@
 - Poster policy bypasses scene and video initialization and hides playback controls.
 - Runtime scene errors use the shared fallback; video failures terminate at the poster.
 - Changes are limited to Task 5 files plus this required report.
+
+## Review Fixes
+
+- Replaced the permanent fallback latch with generation-scoped scene and video attempts. Import, scene creation, context-loss, warm-up, play, replay, resume, error, and ended callbacks now reject stale work; stale resolved scenes are disposed.
+- Replaced the synchronous render timing with a capped 12-sample, 500 ms multi-RAF warm-up. The controller still owns one RAF slot across warm-up, playback, held rendering, deactivation, and reactivation.
+- Deferred fallback source selection and autoplay whenever the Lumen card, document, or viewport is inactive. Lifecycle pause/resume now keeps video, scene, timeline, and held state aligned without auto-replaying a finalized introduction.
+- `destroy()` now settles pending `ready`, invalidates attempts, removes named media listeners, aborts/disposes scene work, clears media sources, and guards later callbacks.
+- Initial markup hides playback while retaining poster and held copy presentation before the controller executes. Carousel changes remain limited to the Task 5 lifecycle hook.
+
+## Review RED/GREEN Evidence
+
+- RED: `node test-lumen-hero-playwright.mjs` failed because destroying an unresolved scene returned `{ mode: 'webgl' }` instead of settling `{ mode: 'poster' }`; GREEN after generation checks, stale-scene disposal, and terminal ready settlement.
+- RED: strengthened browser contracts initially exposed the missing early hidden playback state and the absence of stale/inactive attempt handling; GREEN after the markup and controller lifecycle changes.
+- GREEN coverage now proves WebGL requests six texture families and no fallback video; known-weak video requests no textures; measured warm-up fallback completes texture-backed warm-up before selecting video; inactive failures neither source nor play video; stale video callbacks cannot revive destroyed media.
+- GREEN lifecycle coverage tracks one pending controller RAF through skip/deactivate/reactivate, verifies video pause/held/replay behavior, validates card position and Lumen active state, and exercises both Enter and Space dot activation.

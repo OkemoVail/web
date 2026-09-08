@@ -424,7 +424,7 @@ assert.match(cards[0], /assets\/lumen\/poster-desktop\.webp/);
 assert.match(cards[0], /assets\/lumen\/journey-mobile\.mp4/);
 assert.match(cards[0], /assets\/lumen\/journey-desktop\.mp4/);
 assert.match(cards[0], /id="lumen-location"[^>]*aria-hidden="true"/);
-assert.match(cards[0], /id="lumen-playback"[^>]*>\s*Skip intro\s*</);
+assert.match(cards[0], /id="lumen-playback"[^>]*hidden[^>]*>\s*Skip intro\s*</);
 assert.match(cards[0], /href="chat\.html"[^>]*>[^<]*Start here/s);
 assert.match(cards[0], /Lumen 1\.9/);
 assert.match(cards[0], /solar limb, Earth, and Moon/i);
@@ -464,7 +464,7 @@ const dependencyOrder = [
 assert.deepEqual(scriptSources.slice(-dependencyOrder.length), dependencyOrder, 'Lumen policy, controller, motion, and nav load in dependency order');
 assert.match(controllerSource, /window\.LumenHero\s*=/, 'controller publishes the LumenHero API');
 assert.match(controllerSource, /var base = ['"]assets\/lumen\/['"]/, 'controller resolves scene textures within the AI app');
-assert.match(controllerSource, /catch\s*\([^)]*\)\s*\{[^}]*fallBack\(['"]runtime['"]\)/, 'runtime render failures use the shared fallback');
+assert.match(controllerSource, /fallBack\(['"]runtime['"],\s*attempt\)/, 'runtime render failures use the shared fallback');
 
 const context = { window: {} };
 vm.runInNewContext(
