@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build:lumen-assets": "node tools/lumen-assets.mjs"
+  },
   "dependencies": {
     "@tailwindcss/cli": "^4.1.16",
     "jsdom": "^29.1.1",
@@ -11,6 +14,8 @@
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",
     "postcss": "^8.5.26",
-    "postcss-selector-parser": "^7.1.5"
+    "postcss-selector-parser": "^7.1.5",
+    "sharp": "^0.34.3",
+    "three": "^0.180.0"
   }
 }

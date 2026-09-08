@@ -1,0 +1,64 @@
+{
+  "sources": [
+    {
+      "id": "earthDay",
+      "title": "Blue Marble land, ocean, and ice",
+      "page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
+      "url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57730/land_ocean_ice_2048.png",
+      "sha256": "b5e0139834c638d10c2c747f4bac63df5f9387680c00d87e5a2a9ed9a3dfea71",
+      "credit": "NASA Earth Observatory"
+    },
+    {
+      "id": "earthNight",
+      "title": "Earth at Night 2012",
+      "page": "https://science.nasa.gov/resource/blue-marble/",
+      "url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/79000/79765/dnb_land_ocean_ice.2012.3600x1800.jpg",
+      "sha256": "373e5a08c9f378a2ce6320214a613148e4b1e3946b3f39a516c9093b76cb7124",
+      "credit": "NASA Earth Observatory/NOAA NGDC"
+    },
+    {
+      "id": "earthClouds",
+      "title": "Blue Marble cloud layer",
+      "page": "https://science.nasa.gov/resource/blue-marble/",
+      "url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+      "sha256": "daddaad84d7a33bbbc86cdda3f591099f57cee8607b7bcf3b67eb7e4f7a1c793",
+      "credit": "NASA Earth Observatory"
+    },
+    {
+      "id": "earthElevation",
+      "title": "Blue Marble Next Generation topography and bathymetry",
+      "page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
+      "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/bmng/bmng-topography-bathymetry/august/world.topo.bathy.200408.3x5400x2700.jpg?w=5400&h=2700&fit=clip&crop=faces%2Cfocalpoint",
+      "sha256": "594d132b6110756214ac1927abca0048a8b88f03677e9e3ed1fe4097474ba89f",
+      "credit": "NASA Earth Observatory"
+    },
+    {
+      "id": "moonNear",
+      "title": "NASA LRO Moon mosaic",
+      "page": "https://science.nasa.gov/resource/moon-mosaic/",
+      "url": "https://assets.science.nasa.gov/content/dam/science/psd/earths-moon/outreach-materials/NASA-LRO-Moon-mosaic.png",
+      "sha256": "7d0b642c84f2d6fd2f017ee729c29f333438c469afba53b241f801b122e37271",
+      "credit": "NASA/GSFC/Arizona State University"
+    },
+    {
+      "id": "moonFar",
+      "title": "The Far Side of the Moon - And All the Way Around",
+      "page": "https://images.nasa.gov/details/GSFC_20171208_Archive_e001939",
+      "url": "https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001939/GSFC_20171208_Archive_e001939~orig.jpg",
+      "sha256": "4ea44621e567d733f4e8fff5aec7d99e498137fbb6dea45b299f89042cf6aaa3",
+      "credit": "NASA/Goddard/Arizona State University"
+    }
+  ],
+  "textures": {
+    "earthDay": { "mobile": "assets/lumen/earth-day-mobile.webp", "desktop": "assets/lumen/earth-day-desktop.webp" },
+    "earthNight": { "mobile": "assets/lumen/earth-night-mobile.webp", "desktop": "assets/lumen/earth-night-desktop.webp" },
+    "earthClouds": { "mobile": "assets/lumen/earth-clouds-mobile.webp", "desktop": "assets/lumen/earth-clouds-desktop.webp" },
+    "earthNormal": { "mobile": "assets/lumen/earth-normal-mobile.webp", "desktop": "assets/lumen/earth-normal-desktop.webp" },
+    "moonAlbedo": { "mobile": "assets/lumen/moon-albedo-mobile.webp", "desktop": "assets/lumen/moon-albedo-desktop.webp" },
+    "moonNormal": { "mobile": "assets/lumen/moon-normal-mobile.webp", "desktop": "assets/lumen/moon-normal-desktop.webp" }
+  },
+  "media": {
+    "poster": { "mobile": "assets/lumen/poster-mobile.webp", "desktop": "assets/lumen/poster-desktop.webp" },
+    "journey": { "mobile": "assets/lumen/journey-mobile.mp4", "desktop": "assets/lumen/journey-desktop.mp4" }
+  }
+}

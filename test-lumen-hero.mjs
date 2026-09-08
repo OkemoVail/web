@@ -1,9 +1,69 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import vm from 'node:vm';
 
 const html = readFileSync(new URL('./AI/index.html', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
+
+const requiredAssetFiles = [
+  './tools/lumen-assets.json',
+  './tools/lumen-assets.mjs',
+  './docs/assets/lumen-hero-provenance.md',
+  './AI/vendor/three.module.min.js',
+  './AI/vendor/three-LICENSE.txt',
+  './AI/assets/lumen/manifest.json',
+];
+for (const path of requiredAssetFiles) {
+  assert.ok(existsSync(new URL(path, import.meta.url)), `missing Lumen asset pipeline file: ${path}`);
+}
+
+const sourceAssets = JSON.parse(readFileSync(new URL('./tools/lumen-assets.json', import.meta.url), 'utf8'));
+const runtimeAssets = JSON.parse(readFileSync(new URL('./AI/assets/lumen/manifest.json', import.meta.url), 'utf8'));
+assert.ok(Array.isArray(sourceAssets.sources) && sourceAssets.sources.length >= 6, 'source manifest records NASA inputs');
+for (const source of sourceAssets.sources) {
+  assert.match(source.page, /^https:\/\//, `${source.id} source page uses HTTPS`);
+  assert.match(source.url, /^https:\/\//, `${source.id} direct file uses HTTPS`);
+  assert.match(source.sha256, /^[a-f0-9]{64}$/, `${source.id} pins a SHA-256 checksum`);
+}
+
+const textureFamilies = ['earthDay', 'earthNight', 'earthClouds', 'earthNormal', 'moonAlbedo', 'moonNormal'];
+for (const family of textureFamilies) {
+  for (const tier of ['mobile', 'desktop']) {
+    const runtimePath = sourceAssets.textures[family][tier];
+    assert.match(runtimePath, /^assets\/lumen\//, `${family}.${tier} is local to the AI app`);
+    const outputName = runtimePath.slice('assets/lumen/'.length);
+    assert.ok(runtimeAssets.files[outputName], `${family}.${tier} is in the runtime manifest`);
+  }
+}
+
+const mediaBudgets = {
+  'poster-mobile.webp': 180_000,
+  'poster-desktop.webp': 350_000,
+  'journey-mobile.mp4': 2_500_000,
+  'journey-desktop.mp4': 5_000_000,
+};
+for (const variants of Object.values(sourceAssets.media)) {
+  for (const runtimePath of Object.values(variants)) {
+    assert.match(runtimePath, /^assets\/lumen\//, `${runtimePath} is local to the AI app`);
+  }
+}
+for (const [name, budget] of Object.entries(mediaBudgets)) {
+  const entry = runtimeAssets.files[name];
+  assert.ok(entry, `${name} is in the runtime manifest`);
+  assert.ok(existsSync(new URL(`./AI/assets/lumen/${name}`, import.meta.url)), `${name} exists`);
+  assert.equal(entry.bytes, statSync(new URL(`./AI/assets/lumen/${name}`, import.meta.url)).size, `${name} byte count is current`);
+  assert.ok(entry.bytes <= budget, `${name} remains within its byte budget`);
+}
+
+for (const [name, entry] of Object.entries(runtimeAssets.files)) {
+  assert.match(entry.source, /^https:\/\//, `${name} has an HTTPS provenance source`);
+  assert.match(entry.sha256, /^[a-f0-9]{64}$/, `${name} has a SHA-256 checksum`);
+}
+
+assert.equal(runtimeAssets.media.fps, 30, 'fallback video is 30 FPS');
+assert.equal(runtimeAssets.media.duration, 8, 'fallback video is eight seconds');
+assert.deepEqual(runtimeAssets.media.desktop, { width: 1600, height: 900 }, 'desktop fallback dimensions are exact');
+assert.deepEqual(runtimeAssets.media.mobile, { width: 900, height: 1200 }, 'mobile fallback dimensions are exact');
 
 function extractElement(source, openingMatch, tagName) {
   const tagPattern = new RegExp(`<\\/?${tagName}\\b[^>]*>`, 'gi');
@@ -66,6 +126,10 @@ for (const state of stateHooks) {
 assert.match(cards[0], /id="lumen-stage"/);
 assert.match(cards[0], /id="lumen-poster"[^>]*aria-hidden="true"/);
 assert.match(cards[0], /id="lumen-fallback"[^>]*muted[^>]*playsinline[^>]*aria-hidden="true"/s);
+assert.match(cards[0], /assets\/lumen\/poster-mobile\.webp/);
+assert.match(cards[0], /assets\/lumen\/poster-desktop\.webp/);
+assert.match(cards[0], /assets\/lumen\/journey-mobile\.mp4/);
+assert.match(cards[0], /assets\/lumen\/journey-desktop\.mp4/);
 assert.match(cards[0], /id="lumen-location"[^>]*aria-hidden="true"/);
 assert.match(cards[0], /id="lumen-playback"[^>]*>\s*Skip intro\s*</);
 assert.match(cards[0], /href="chat\.html"[^>]*>[^<]*Start here/s);
