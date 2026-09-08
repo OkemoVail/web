@@ -29,15 +29,32 @@ assert.equal(desktopQuality.antialias, true);
 
 const omittedQualityHints = policy.chooseQuality({});
 const nullQualityHints = policy.chooseQuality({ width: null, dpr: null, deviceMemory: null, warmupFps: null });
-assert.equal(omittedQualityHints.textureTier, nullQualityHints.textureTier);
-assert.equal(omittedQualityHints.pixelRatio, nullQualityHints.pixelRatio);
-assert.equal(omittedQualityHints.antialias, nullQualityHints.antialias);
+assert.equal(omittedQualityHints.textureTier, 'desktop');
+assert.equal(omittedQualityHints.pixelRatio, 1);
+assert.equal(omittedQualityHints.antialias, true);
+assert.equal(nullQualityHints.textureTier, 'desktop');
+assert.equal(nullQualityHints.pixelRatio, 1);
+assert.equal(nullQualityHints.antialias, true);
 
-assert.equal(policy.timelineAt(0).phase, 'solar');
-assert.equal(policy.timelineAt(2000).phase, 'terra');
-assert.equal(policy.timelineAt(5000).phase, 'luna');
-assert.equal(policy.timelineAt(6500).phase, 'reveal');
-assert.equal(policy.timelineAt(8000).phase, 'held');
-assert.equal(policy.timelineAt(6500).copyVisible, true);
+const timelineCases = [
+  { ms: -1, phase: 'solar', progress: 0, label: 'SOLAR', copyVisible: false },
+  { ms: 0, phase: 'solar', progress: 0, label: 'SOLAR', copyVisible: false },
+  { ms: 1999, phase: 'solar', progress: 1999 / 2000, label: 'SOLAR', copyVisible: false },
+  { ms: 2000, phase: 'terra', progress: 0, label: 'TERRA', copyVisible: false },
+  { ms: 4999, phase: 'terra', progress: 2999 / 3000, label: 'TERRA', copyVisible: false },
+  { ms: 5000, phase: 'luna', progress: 0, label: 'LUNA', copyVisible: false },
+  { ms: 6499, phase: 'luna', progress: 1499 / 1500, label: 'LUNA', copyVisible: false },
+  { ms: 6500, phase: 'reveal', progress: 0, label: '', copyVisible: true },
+  { ms: 7999, phase: 'reveal', progress: 1499 / 1500, label: '', copyVisible: true },
+  { ms: 8000, phase: 'held', progress: 1, label: '', copyVisible: true },
+];
+
+for (const expected of timelineCases) {
+  const actual = policy.timelineAt(expected.ms);
+  assert.equal(actual.phase, expected.phase, `phase at ${expected.ms}ms`);
+  assert.equal(actual.progress, expected.progress, `progress at ${expected.ms}ms`);
+  assert.equal(actual.label, expected.label, `label at ${expected.ms}ms`);
+  assert.equal(actual.copyVisible, expected.copyVisible, `copy visibility at ${expected.ms}ms`);
+}
 
 console.log('Lumen hero policy assertions passed.');

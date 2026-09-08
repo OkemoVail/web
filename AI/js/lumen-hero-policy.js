@@ -13,8 +13,7 @@
   }
 
   function chooseQuality(s) {
-    var width = s.width == null ? null : s.width;
-    var mobile = width <= 768 || (s.deviceMemory != null && s.deviceMemory < 8);
+    var mobile = (s.width != null && s.width <= 768) || (s.deviceMemory != null && s.deviceMemory < 8);
     return {
       textureTier: mobile ? 'mobile' : 'desktop',
       pixelRatio: Math.min(s.dpr || 1, mobile ? 1 : 1.5),

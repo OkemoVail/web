@@ -36,3 +36,33 @@ DONE
 ## Concerns
 
 None.
+
+## Review Fix (2026-09-08)
+
+### Findings Addressed
+
+- Guarded `width` before the mobile breakpoint comparison, so omitted and `null` width hints remain neutral instead of coercing to zero.
+- Replaced the tautological omitted-versus-null quality comparison with literal assertions that both unknown-width cases select desktop textures, pixel ratio `1`, and antialiasing.
+- Expanded timeline coverage to assert phase, progress, label, and copy visibility for negative time and immediately before and at every phase boundary.
+
+### Covering Tests
+
+- `test-lumen-hero.mjs`
+
+### TDD Evidence
+
+- RED command: `node test-lumen-hero.mjs`
+- RED output: `AssertionError [ERR_ASSERTION]: Expected values to be strictly equal: actual 'mobile', expected 'desktop'` at `test-lumen-hero.mjs:32`.
+- GREEN command: `node test-lumen-hero.mjs`
+- GREEN output: `Lumen hero policy assertions passed.`
+
+### Self-Review
+
+- The width check now follows the same explicit nullish-guard pattern as the other optional numeric hints.
+- Literal quality expectations catch both omitted and explicit-null width regressions independently.
+- Timeline cases cover negative clamping and both sides of the `2000`, `5000`, `6500`, and `8000` millisecond boundaries without changing the specified API.
+- Only Task 1 implementation, test, and report files were changed for this fix.
+
+### Concerns
+
+None.
