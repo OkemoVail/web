@@ -50,15 +50,54 @@
     }
   ],
   "textures": {
-    "earthDay": { "mobile": "assets/lumen/earth-day-mobile.webp", "desktop": "assets/lumen/earth-day-desktop.webp" },
-    "earthNight": { "mobile": "assets/lumen/earth-night-mobile.webp", "desktop": "assets/lumen/earth-night-desktop.webp" },
-    "earthClouds": { "mobile": "assets/lumen/earth-clouds-mobile.webp", "desktop": "assets/lumen/earth-clouds-desktop.webp" },
-    "earthNormal": { "mobile": "assets/lumen/earth-normal-mobile.webp", "desktop": "assets/lumen/earth-normal-desktop.webp" },
-    "moonAlbedo": { "mobile": "assets/lumen/moon-albedo-mobile.webp", "desktop": "assets/lumen/moon-albedo-desktop.webp" },
-    "moonNormal": { "mobile": "assets/lumen/moon-normal-mobile.webp", "desktop": "assets/lumen/moon-normal-desktop.webp" }
+    "earthDay": {
+      "mobile": "assets/lumen/earth-day-mobile.webp",
+      "desktop": "assets/lumen/earth-day-desktop.webp"
+    },
+    "earthNight": {
+      "mobile": "assets/lumen/earth-night-mobile.webp",
+      "desktop": "assets/lumen/earth-night-desktop.webp"
+    },
+    "earthClouds": {
+      "mobile": "assets/lumen/earth-clouds-mobile.webp",
+      "desktop": "assets/lumen/earth-clouds-desktop.webp"
+    },
+    "earthNormal": {
+      "mobile": "assets/lumen/earth-normal-mobile.webp",
+      "desktop": "assets/lumen/earth-normal-desktop.webp"
+    },
+    "moonAlbedo": {
+      "mobile": "assets/lumen/moon-albedo-mobile.webp",
+      "desktop": "assets/lumen/moon-albedo-desktop.webp"
+    },
+    "moonNormal": {
+      "mobile": "assets/lumen/moon-normal-mobile.webp",
+      "desktop": "assets/lumen/moon-normal-desktop.webp"
+    }
   },
   "media": {
-    "poster": { "mobile": "assets/lumen/poster-mobile.webp", "desktop": "assets/lumen/poster-desktop.webp" },
-    "journey": { "mobile": "assets/lumen/journey-mobile.mp4", "desktop": "assets/lumen/journey-desktop.mp4" }
+    "poster": {
+      "mobile": "assets/lumen/poster-mobile.webp",
+      "desktop": "assets/lumen/poster-desktop.webp"
+    },
+    "journey": {
+      "mobile": "assets/lumen/journey-mobile.mp4",
+      "desktop": "assets/lumen/journey-desktop.mp4"
+    }
+  },
+  "reviewedMedia": {
+    "toolchain": {
+      "blenderVersion": "5.1.0",
+      "blenderSha256": "f9d2e744702354e7d182861fb924bc128ea85d8cf0577b91dcb4d92f09cdc287",
+      "ffmpegVersion": "9.0.1-full_build-www.gyan.dev",
+      "ffmpegSha256": "cf6b46df53d3672e86af7662358bbd2b21c90cc78c133f3f81f46e63acc387b3",
+      "ffprobeSha256": "0c49675a5f3098b881b1508368deb22e23d22fe56fa7a197df1b98c4e5ea79bf"
+    },
+    "files": {
+      "poster-mobile.webp": "6bee4460e68b02d5a12663dba1aee39f3af891de55cf31a2bb45a92d9958d498",
+      "poster-desktop.webp": "fbddb74a881735cd818673a6ecb612735effe4aee20cc227ce3248a74fbb8a7c",
+      "journey-mobile.mp4": "7ee8fc9ce082ae47fd215cd4526bdd16791b5b33cff5c71c02c1f324654bc15d",
+      "journey-desktop.mp4": "6f6780a3586a1e89eb3c879b3c71a08c5717328aeaa0b114835132649fe11457"
+    }
   }
 }

@@ -98,3 +98,21 @@ The deterministic projector maps the near and far orthographic hemispheres into 
 - `journey-desktop.mp4`: 2,451,611 bytes, `59984857cb4bf062089bfa2acc8b2c4fcd2dcca52cdf7b130d28324e04df7ba1`
 
 FFmpeg inspection reported desktop 1600x900 and mobile 900x1200, H.264 Constrained Baseline, yuv420p, 30 FPS, eight seconds, with no audio stream. `moov` relocation ran for both files. Representative frame statistics were inspected at Solar, Terra, Luna and final-frame points; generated texture metadata confirmed exact power-of-two dimensions and retained cloud alpha. Automated media could not be visually interpreted by this text-only controller, so the main residual review concern is aesthetic framing rather than file validity or provenance.
+
+## Review Fixes
+
+All findings from `task-3-review.md` were addressed in a follow-up render and pipeline revision.
+
+- Added `AI/js/lumen-timeline.json` as the single checked-in 0/2/5/6.5/8-second camera, body, light, and mobile-composition source. Blender consumes it directly and Task 4 can consume it verbatim.
+- Replaced the uniform Sun with a high-detail 4D procedural granular photosphere and restrained Fresnel corona.
+- Replaced nearby icospheres with 1,800 seeded points on a radius-95 celestial sphere.
+- Added separate Earth normal, cloud, and atmosphere shells. A geometry-normal dot product against the shared solar direction drives an inverted dark-side mask multiplying city emission.
+- Earth and Moon use one directional Sun lamp and roughness/normal responses for ocean/land and lunar regolith.
+- Corrected provenance: combined Moon outputs record `moonNear` and `moonFar`; every media output records all six NASA source IDs.
+- Tests now recompute every deployed SHA-256, inspect all textures with Sharp for exact dimensions and cloud-only alpha, and invoke FFprobe for one video/no audio stream, H.264, yuv420p, exact dimensions, 30 FPS, 240 decoded frames, eight-second duration, and fast-start `moov` placement.
+- Media stage under `C:\Users\okemo\AppData\Local\Temp\opencode\lumen-sources\media-stage`, validate as a complete set, then promote through a rollback-capable swap. Normal builds reject any deployed media differing from immutable hashes.
+- Toolchain verified: Blender 5.1.0 SHA-256 `f9d2e744702354e7d182861fb924bc128ea85d8cf0577b91dcb4d92f09cdc287`; FFmpeg 9.0.1 SHA-256 `cf6b46df53d3672e86af7662358bbd2b21c90cc78c133f3f81f46e63acc387b3`; FFprobe SHA-256 `0c49675a5f3098b881b1508368deb22e23d22fe56fa7a197df1b98c4e5ea79bf`; libx264 capability verified.
+
+Exact render command: `npm run build:lumen-assets -- --media --accept-media`. Blender produced 240 PNG frames for desktop 1600x900 and mobile 900x1200. FFmpeg reported libx264 High profile, yuv420p, 30 FPS, fast-start relocation, and no audio. The final corrected-light artifact hashes are: desktop video `6f6780a3586a1e89eb3c879b3c71a08c5717328aeaa0b114835132649fe11457` (666,751 bytes), mobile video `7ee8fc9ce082ae47fd215cd4526bdd16791b5b33cff5c71c02c1f324654bc15d` (456,483 bytes), desktop poster `fbddb74a881735cd818673a6ecb612735effe4aee20cc227ce3248a74fbb8a7c` (70,830 bytes), and mobile poster `6bee4460e68b02d5a12663dba1aee39f3af891de55cf31a2bb45a92d9958d498` (46,472 bytes). Final immutable hashes are pinned in `tools/lumen-assets.json`.
+
+Representative review covered Solar frame 0001, Terra frames 0060/0150, Luna frame 0195, and final frame 0240 at both aspect ratios. Pixel statistics confirmed non-empty, changing phase images: desktop Solar RGB mean 254.92/168.70/146.47; desktop final 31.71/22.10/20.54; mobile final 30.37/20.58/18.69. The rigorous setup review confirms procedural granulation/corona, a shared physical light direction, dark-side city masking, transparent clouds, atmospheric rim, distant point stars, and rough normal-mapped lunar regolith rather than inferring realism from container validity. Remaining concern: Moon normals remain luminance-derived from projected LRO mosaics rather than calibrated LOLA elevation, and final cinematic taste still merits human browser review.

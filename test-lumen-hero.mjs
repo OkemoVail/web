@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import sharp from 'sharp';
 import vm from 'node:vm';
 
 const html = readFileSync(new URL('./AI/index.html', import.meta.url), 'utf8');
@@ -8,10 +12,12 @@ const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
 const requiredAssetFiles = [
   './tools/lumen-assets.json',
   './tools/lumen-assets.mjs',
+  './tools/lumen-render.py',
   './docs/assets/lumen-hero-provenance.md',
   './AI/vendor/three.module.min.js',
   './AI/vendor/three-LICENSE.txt',
   './AI/assets/lumen/manifest.json',
+  './AI/js/lumen-timeline.json',
 ];
 for (const path of requiredAssetFiles) {
   assert.ok(existsSync(new URL(path, import.meta.url)), `missing Lumen asset pipeline file: ${path}`);
@@ -58,12 +64,74 @@ for (const [name, budget] of Object.entries(mediaBudgets)) {
 for (const [name, entry] of Object.entries(runtimeAssets.files)) {
   assert.match(entry.source, /^https:\/\//, `${name} has an HTTPS provenance source`);
   assert.match(entry.sha256, /^[a-f0-9]{64}$/, `${name} has a SHA-256 checksum`);
+  const bytes = readFileSync(new URL(`./AI/assets/lumen/${name}`, import.meta.url));
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), entry.sha256, `${name} deployed bytes match manifest SHA-256`);
+}
+
+const renderSource = readFileSync(new URL('./tools/lumen-render.py', import.meta.url), 'utf8');
+assert.match(renderSource, /lumen-timeline\.json/, 'Blender consumes the checked-in shared timeline');
+assert.match(renderSource, /Procedural granular solar photosphere/);
+assert.match(renderSource, /Restrained solar corona/);
+assert.match(renderSource, /Distant star field points/);
+assert.match(renderSource, /Rayleigh-like atmosphere rim/);
+assert.match(renderSource, /Earth surface: day plus night-side cities/);
+assert.match(renderSource, /DOT_PRODUCT[\s\S]*dark[\s\S]*Emission Strength/, 'city emission is masked by light-facing normal');
+assert.match(renderSource, /-Vector\(light_direction\).*to_track_quat/, 'lamp rays oppose the shared surface-to-Sun vector');
+assert.doesNotMatch(renderSource, /primitive_ico_sphere_add/, 'stars are not nearby low-poly spheres');
+
+for (const name of ['moon-albedo-mobile.webp', 'moon-albedo-desktop.webp', 'moon-normal-mobile.webp', 'moon-normal-desktop.webp']) {
+  assert.deepEqual(runtimeAssets.files[name].sources, ['moonNear', 'moonFar'], `${name} records both lunar inputs`);
+}
+for (const name of Object.keys(mediaBudgets)) {
+  assert.deepEqual(runtimeAssets.files[name].sources, sourceAssets.sources.map(({ id }) => id), `${name} records every NASA input`);
 }
 
 assert.equal(runtimeAssets.media.fps, 30, 'fallback video is 30 FPS');
 assert.equal(runtimeAssets.media.duration, 8, 'fallback video is eight seconds');
 assert.deepEqual(runtimeAssets.media.desktop, { width: 1600, height: 900 }, 'desktop fallback dimensions are exact');
 assert.deepEqual(runtimeAssets.media.mobile, { width: 900, height: 1200 }, 'mobile fallback dimensions are exact');
+
+const timeline = JSON.parse(readFileSync(new URL('./AI/js/lumen-timeline.json', import.meta.url), 'utf8'));
+assert.equal(timeline.fps, 30, 'shared timeline runs at 30 FPS');
+assert.equal(timeline.durationMs, 8000, 'shared timeline is eight seconds');
+assert.deepEqual(timeline.phases.map(({ name, startMs, endMs }) => [name, startMs, endMs]), [
+  ['solar', 0, 2000],
+  ['terra', 2000, 5000],
+  ['luna', 5000, 6500],
+  ['reveal', 6500, 8000],
+]);
+assert.deepEqual(timeline.light.direction, [-0.72, -0.35, -0.6], 'one light direction drives Earth, Moon, and city masking');
+
+for (const [family, variants] of Object.entries(sourceAssets.textures)) {
+  for (const [tier, runtimePath] of Object.entries(variants)) {
+    const metadata = await sharp(readFileSync(new URL(`./AI/${runtimePath}`, import.meta.url))).metadata();
+    const width = tier === 'mobile' ? 1024 : 2048;
+    assert.deepEqual([metadata.width, metadata.height], [width, width / 2], `${family}.${tier} has exact equirectangular dimensions`);
+    assert.equal(metadata.hasAlpha, family === 'earthClouds', `${family}.${tier} alpha contract`);
+  }
+}
+
+const ffprobePath = process.env.FFPROBE_PATH || 'C:\\Users\\okemo\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg.Shared_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-9.0.1-full_build-shared\\bin\\ffprobe.exe';
+assert.equal(createHash('sha256').update(readFileSync(ffprobePath)).digest('hex'), sourceAssets.reviewedMedia.toolchain.ffprobeSha256, 'FFprobe executable matches pinned reviewed toolchain');
+for (const tier of ['mobile', 'desktop']) {
+  const expected = runtimeAssets.media[tier];
+  const probe = JSON.parse(execFileSync(ffprobePath, [
+    '-v', 'error', '-count_frames', '-show_entries',
+    'format=duration:stream=index,codec_type,codec_name,pix_fmt,width,height,avg_frame_rate,nb_read_frames',
+    '-of', 'json', fileURLToPath(new URL(`./AI/assets/lumen/journey-${tier}.mp4`, import.meta.url)),
+  ], { encoding: 'utf8' }));
+  assert.equal(probe.streams.length, 1, `${tier} fallback has one stream and no audio`);
+  const stream = probe.streams[0];
+  assert.equal(stream.codec_type, 'video', `${tier} fallback stream is video`);
+  assert.equal(stream.codec_name, 'h264', `${tier} fallback uses H.264`);
+  assert.equal(stream.pix_fmt, 'yuv420p', `${tier} fallback uses yuv420p`);
+  assert.deepEqual([stream.width, stream.height], [expected.width, expected.height], `${tier} fallback dimensions`);
+  assert.equal(stream.avg_frame_rate, '30/1', `${tier} fallback frame rate`);
+  assert.equal(Number(stream.nb_read_frames), 240, `${tier} fallback contains 240 frames`);
+  assert.ok(Math.abs(Number(probe.format.duration) - 8) < 0.01, `${tier} fallback duration is eight seconds`);
+  const mp4 = readFileSync(new URL(`./AI/assets/lumen/journey-${tier}.mp4`, import.meta.url));
+  assert.ok(mp4.indexOf(Buffer.from('moov')) < mp4.indexOf(Buffer.from('mdat')), `${tier} fallback has fast-start metadata`);
+}
 
 function extractElement(source, openingMatch, tagName) {
   const tagPattern = new RegExp(`<\\/?${tagName}\\b[^>]*>`, 'gi');

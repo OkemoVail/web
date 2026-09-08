@@ -3,82 +3,158 @@
     "earth-day-mobile.webp": {
       "bytes": 60950,
       "sha256": "0f8692af60b010d40d3044bf2755b930bdd2b64fac61ca43c244d24b31537fcf",
+      "sources": [
+        "earthDay"
+      ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/"
     },
     "earth-day-desktop.webp": {
       "bytes": 190464,
       "sha256": "88f0a5a9573dab7f1f17e587e8443cc23b691b47be68b4320b31898095dc400b",
+      "sources": [
+        "earthDay"
+      ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/"
     },
     "earth-night-mobile.webp": {
       "bytes": 29296,
       "sha256": "3b36b697f7cae5c67b0ff82b35a80f8de129a8f81a46831787facb739ae51445",
+      "sources": [
+        "earthNight"
+      ],
       "source": "https://science.nasa.gov/resource/blue-marble/"
     },
     "earth-night-desktop.webp": {
       "bytes": 112790,
       "sha256": "f5c8f4dfcfcd387e91d8bcc9d278fbcfc3cd6c5bf91151f3818aa33fece4a50e",
+      "sources": [
+        "earthNight"
+      ],
       "source": "https://science.nasa.gov/resource/blue-marble/"
     },
     "earth-clouds-mobile.webp": {
       "bytes": 503670,
       "sha256": "df673e2a2b95a60f8b35ed874bde2a0415581b4a4db4793bdd60652cc61dd854",
+      "sources": [
+        "earthClouds"
+      ],
       "source": "https://science.nasa.gov/resource/blue-marble/"
     },
     "earth-clouds-desktop.webp": {
       "bytes": 1799648,
       "sha256": "692f018f840d9afeace6bf190a6f95b9b5adcbd79249170e3325a539c4da16be",
+      "sources": [
+        "earthClouds"
+      ],
       "source": "https://science.nasa.gov/resource/blue-marble/"
     },
     "earth-normal-mobile.webp": {
       "bytes": 15200,
       "sha256": "a8a84e5fd39117d52f46ae9630ff6fb6498e9ecc8e559d7a4f08b8046f441376",
+      "sources": [
+        "earthElevation"
+      ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/"
     },
     "earth-normal-desktop.webp": {
       "bytes": 37458,
       "sha256": "ab70c36dad78ea326fce550303a1250fed975e9df9e228ba5c5784cad150da0a",
+      "sources": [
+        "earthElevation"
+      ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/"
     },
     "moon-albedo-mobile.webp": {
       "bytes": 143882,
       "sha256": "ed7596b436f5927f738afb814b56a969b1ec5e79637cdee6e7ebfb2850675336",
+      "sources": [
+        "moonNear",
+        "moonFar"
+      ],
       "source": "https://science.nasa.gov/resource/moon-mosaic/"
     },
     "moon-albedo-desktop.webp": {
       "bytes": 612028,
       "sha256": "6ce761b28878356558f091026d6f02b09a760dc8da5df669949bc73bc3b27a05",
+      "sources": [
+        "moonNear",
+        "moonFar"
+      ],
       "source": "https://science.nasa.gov/resource/moon-mosaic/"
     },
     "moon-normal-mobile.webp": {
       "bytes": 59566,
       "sha256": "2c173986cd675711080221c876f0392dfdbdf51b7a3f859cd23487d97a567e11",
-      "source": "https://images.nasa.gov/details/GSFC_20171208_Archive_e001939"
+      "sources": [
+        "moonNear",
+        "moonFar"
+      ],
+      "source": "https://science.nasa.gov/resource/moon-mosaic/"
     },
     "moon-normal-desktop.webp": {
       "bytes": 277276,
       "sha256": "229067bacaf2aaf20acd23c1e8b85decef1373b16bfc5bdb68fe8d10750fdaad",
-      "source": "https://images.nasa.gov/details/GSFC_20171208_Archive_e001939"
+      "sources": [
+        "moonNear",
+        "moonFar"
+      ],
+      "source": "https://science.nasa.gov/resource/moon-mosaic/"
     },
     "poster-mobile.webp": {
-      "bytes": 10542,
-      "sha256": "1db8efd12ddfcd9558fef17f1dbbb4cfc101d70b7ad4c5bec10eac54bcf9847e",
-      "source": "https://science.nasa.gov/resource/moon-mosaic/"
+      "bytes": 46472,
+      "sha256": "6bee4460e68b02d5a12663dba1aee39f3af891de55cf31a2bb45a92d9958d498",
+      "sources": [
+        "earthDay",
+        "earthNight",
+        "earthClouds",
+        "earthElevation",
+        "moonNear",
+        "moonFar"
+      ],
+      "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
+      "immutable": true
     },
     "poster-desktop.webp": {
-      "bytes": 12882,
-      "sha256": "067b01c3badba90b1994f905bf838e516aafc3aa85763c267e45c50cc8fa5909",
-      "source": "https://science.nasa.gov/resource/moon-mosaic/"
+      "bytes": 70830,
+      "sha256": "fbddb74a881735cd818673a6ecb612735effe4aee20cc227ce3248a74fbb8a7c",
+      "sources": [
+        "earthDay",
+        "earthNight",
+        "earthClouds",
+        "earthElevation",
+        "moonNear",
+        "moonFar"
+      ],
+      "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
+      "immutable": true
     },
     "journey-mobile.mp4": {
-      "bytes": 1365947,
-      "sha256": "a99028c664d154d193311da0520c0cbe46a8dd3903147e2004393ae4221e94f0",
-      "source": "https://science.nasa.gov/resource/moon-mosaic/"
+      "bytes": 456483,
+      "sha256": "7ee8fc9ce082ae47fd215cd4526bdd16791b5b33cff5c71c02c1f324654bc15d",
+      "sources": [
+        "earthDay",
+        "earthNight",
+        "earthClouds",
+        "earthElevation",
+        "moonNear",
+        "moonFar"
+      ],
+      "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
+      "immutable": true
     },
     "journey-desktop.mp4": {
-      "bytes": 2451611,
-      "sha256": "59984857cb4bf062089bfa2acc8b2c4fcd2dcca52cdf7b130d28324e04df7ba1",
-      "source": "https://science.nasa.gov/resource/moon-mosaic/"
+      "bytes": 666751,
+      "sha256": "6f6780a3586a1e89eb3c879b3c71a08c5717328aeaa0b114835132649fe11457",
+      "sources": [
+        "earthDay",
+        "earthNight",
+        "earthClouds",
+        "earthElevation",
+        "moonNear",
+        "moonFar"
+      ],
+      "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
+      "immutable": true
     }
   },
   "media": {
@@ -91,6 +167,13 @@
     "mobile": {
       "width": 900,
       "height": 1200
+    },
+    "toolchain": {
+      "blenderVersion": "5.1.0",
+      "blenderSha256": "f9d2e744702354e7d182861fb924bc128ea85d8cf0577b91dcb4d92f09cdc287",
+      "ffmpegVersion": "9.0.1-full_build-www.gyan.dev",
+      "ffmpegSha256": "cf6b46df53d3672e86af7662358bbd2b21c90cc78c133f3f81f46e63acc387b3",
+      "ffprobeSha256": "0c49675a5f3098b881b1508368deb22e23d22fe56fa7a197df1b98c4e5ea79bf"
     }
   }
 }

@@ -1,0 +1,24 @@
+{
+  "fps": 30,
+  "durationMs": 8000,
+  "phases": [
+    { "name": "solar", "startMs": 0, "endMs": 2000 },
+    { "name": "terra", "startMs": 2000, "endMs": 5000 },
+    { "name": "luna", "startMs": 5000, "endMs": 6500 },
+    { "name": "reveal", "startMs": 6500, "endMs": 8000 }
+  ],
+  "light": { "direction": [-0.72, -0.35, -0.6], "angularDiameter": 0.0093 },
+  "camera": [
+    { "ms": 0, "position": [-7.8, -9.5, 0.5], "target": [-7.2, 0, 0.2], "lens": 52 },
+    { "ms": 2000, "position": [-2.0, -16.0, 0.4], "target": [2.6, 0, 0.4], "lens": 48 },
+    { "ms": 5000, "position": [0.0, -18.0, 0.2], "target": [2.0, 0, 0.2], "lens": 52 },
+    { "ms": 6500, "position": [0.2, -20.0, 0.6], "target": [2.5, 0, 0.7], "lens": 55 },
+    { "ms": 8000, "position": [0.0, -21.0, 0.4], "target": [3.2, 0, 1.2], "lens": 58 }
+  ],
+  "bodies": {
+    "sun": { "position": [-7.2, 0, 0.2], "radius": 5.8 },
+    "earth": { "position": [4.2, 0, 1.2], "radius": 2.35 },
+    "moon": { "position": [0.7, -1.1, -0.45], "radius": 0.72 }
+  },
+  "mobile": { "cameraShiftX": -0.14, "earthX": 2.5, "moonX": 0.25 }
+}
