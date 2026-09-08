@@ -25,6 +25,8 @@ Run `npm run build:lumen-assets -- --media` only to reproduce an already pinned 
 
 The manifest pins executable SHA-256 values and the pipeline verifies Blender version, FFmpeg version, libx264 capability, FFprobe checksum, staged stream metadata, and immutable media hashes. Media bytes are reviewed immutable artifacts, not claimed to be cross-host deterministic.
 
+Acceptance is transactional: the complete staged set is copied and validated, deployed media are moved behind rollback backups, the promoted set is validated again, and only then is the updated source manifest written through a temporary file and rename. Any promotion, validation, or config-commit failure restores both the prior deployed media and prior manifest bytes.
+
 ## Quality Limitations
 
 NASA SVS remained unreachable, so the source set uses reachable official NASA Science and NASA Images LRO products. These are orthographic near-side and far-side mosaics rather than a native global equirectangular albedo/elevation pair. Their deterministic projection provides complete spherical coverage, but the limb regions stretch and the normal map is a relief cue derived from mosaic luminance, not calibrated LOLA elevation. This is suitable for the small, moving Moon in the hero and is explicitly not scientific topography.

@@ -1,18 +1,57 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, statSync } from 'node:fs';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import sharp from 'sharp';
 import vm from 'node:vm';
 
 const html = readFileSync(new URL('./AI/index.html', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
 
+const { acceptMediaTransaction } = await import('./tools/lumen-media-transaction.mjs');
+const transactionRoot = await mkdtemp('C:\\Users\\okemo\\AppData\\Local\\Temp\\opencode\\lumen-transaction-test-');
+try {
+  const stagedDir = join(transactionRoot, 'staged');
+  const deployedDir = join(transactionRoot, 'deployed');
+  const configPath = join(transactionRoot, 'lumen-assets.json');
+  const names = ['poster.webp', 'journey.mp4'];
+  await mkdir(stagedDir);
+  await mkdir(deployedDir);
+  await writeFile(join(stagedDir, names[0]), 'new poster');
+  await writeFile(join(stagedDir, names[1]), 'new video');
+  await writeFile(join(deployedDir, names[0]), 'reviewed poster');
+  await writeFile(join(deployedDir, names[1]), 'reviewed video');
+  const oldConfig = { reviewedMedia: { files: { 'poster.webp': 'old-poster-hash', 'journey.mp4': 'old-video-hash' } } };
+  const nextConfig = { reviewedMedia: { files: { 'poster.webp': 'new-poster-hash', 'journey.mp4': 'new-video-hash' } } };
+  await writeFile(configPath, `${JSON.stringify(oldConfig)}\n`);
+
+  await assert.rejects(
+    acceptMediaTransaction({
+      mediaNames: names,
+      stagedDir,
+      deployedDir,
+      configPath,
+      nextConfig,
+      validate: async () => {},
+      beforeConfigCommit: async () => { throw new Error('simulated config failure'); },
+    }),
+    /simulated config failure/,
+  );
+  assert.equal(await readFile(join(deployedDir, names[0]), 'utf8'), 'reviewed poster', 'failed acceptance restores reviewed poster');
+  assert.equal(await readFile(join(deployedDir, names[1]), 'utf8'), 'reviewed video', 'failed acceptance restores reviewed video');
+  assert.deepEqual(JSON.parse(await readFile(configPath, 'utf8')), oldConfig, 'failed acceptance preserves reviewed hashes');
+} finally {
+  await rm(transactionRoot, { recursive: true, force: true });
+}
+
 const requiredAssetFiles = [
   './tools/lumen-assets.json',
   './tools/lumen-assets.mjs',
   './tools/lumen-render.py',
+  './tools/lumen-media-transaction.mjs',
   './docs/assets/lumen-hero-provenance.md',
   './AI/vendor/three.module.min.js',
   './AI/vendor/three-LICENSE.txt',

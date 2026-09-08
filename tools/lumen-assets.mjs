@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
-import { copyFile, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import sharp from 'sharp';
+import { acceptMediaTransaction } from './lumen-media-transaction.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const config = JSON.parse(await readFile(join(root, 'tools/lumen-assets.json'), 'utf8'));
@@ -155,28 +156,22 @@ async function renderMedia() {
     if (!acceptMedia && config.reviewedMedia.files[name] !== hash) throw new Error(`${name} staged hash ${hash} is not approved; visually review then run --media --accept-media and pin it`);
     if (acceptMedia) config.reviewedMedia.files[name] = hash;
   }
-  if (acceptMedia) await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
-  const promoteDir = join(cacheDir, 'media-promote');
-  await rm(promoteDir, { recursive: true, force: true });
-  await mkdir(promoteDir, { recursive: true });
-  for (const name of mediaNames) await copyFile(join(stageDir, name), join(promoteDir, name));
-  const backups = [];
-  try {
-    for (const name of mediaNames) {
-      const deployed = join(outputDir, name);
-      const backup = join(promoteDir, `${name}.previous`);
-      await rename(deployed, backup);
-      backups.push([deployed, backup]);
-    }
-    for (const name of mediaNames) await rename(join(promoteDir, name), join(outputDir, name));
-  } catch (error) {
-    for (const [deployed, backup] of backups.reverse()) {
-      await rm(deployed, { force: true });
-      await rename(backup, deployed);
-    }
-    throw error;
-  }
-  await rm(promoteDir, { recursive: true, force: true });
+  await acceptMediaTransaction({
+    mediaNames,
+    stagedDir: stageDir,
+    deployedDir: outputDir,
+    configPath,
+    nextConfig: config,
+    validate: async (directory) => {
+      for (const target of [{ tier: 'desktop', width: 1600, height: 900 }, { tier: 'mobile', width: 900, height: 1200 }]) {
+        const videoName = directory === outputDir ? `journey-${target.tier}.mp4` : `journey-${target.tier}.mp4.new`;
+        probeMedia(join(directory, videoName), target);
+        const posterName = directory === outputDir ? `poster-${target.tier}.webp` : `poster-${target.tier}.webp.new`;
+        const metadata = await sharp(join(directory, posterName)).metadata();
+        if (metadata.width !== target.width || metadata.height !== target.height) throw new Error(`${posterName} dimensions failed`);
+      }
+    },
+  });
 }
 
 const sources = Object.fromEntries(config.sources.map((source) => [source.id, source]));
