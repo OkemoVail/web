@@ -1,0 +1,561 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-08T18:59:55.382Z",
+  "provenance": {
+    "chromeExecutable": "Google Chrome",
+    "profileDirectory": "[temporary-profile]",
+    "connection": "External installed Chrome spawned with remote debugging; Playwright chromium.connectOverCDP used only after launch.",
+    "webdriverExpected": false,
+    "journey": "Natural production policy, complete 8-second timeline; no policy or navigator overrides.",
+    "chromeVersion": "152.0.0.0"
+  },
+  "runs": [
+    {
+      "name": "desktop-natural",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "video",
+      "finalPhase": "held",
+      "dpr": 1,
+      "hardwareConcurrency": 24,
+      "deviceMemory": 32,
+      "webgl": {
+        "vendor": "Google Inc. (NVIDIA)",
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5080 (0x00002C02) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "framePacing": {
+        "sampleCount": 454,
+        "medianMs": 17.8,
+        "p95Ms": 18.4,
+        "maxMs": 18.8,
+        "effectiveFps": 56.85,
+        "over33_4ms": 0,
+        "over50ms": 0,
+        "phases": {
+          "solar": {
+            "sampleCount": 115,
+            "medianMs": 17.9,
+            "p95Ms": 18.5,
+            "maxMs": 18.6,
+            "effectiveFps": 57.5,
+            "over33_4ms": 0,
+            "over50ms": 0
+          },
+          "terra": {
+            "sampleCount": 168,
+            "medianMs": 17.7,
+            "p95Ms": 18.4,
+            "maxMs": 18.7,
+            "effectiveFps": 56.31,
+            "over33_4ms": 0,
+            "over50ms": 0
+          },
+          "luna": {
+            "sampleCount": 86,
+            "medianMs": 17.8,
+            "p95Ms": 18.3,
+            "maxMs": 18.6,
+            "effectiveFps": 56.85,
+            "over33_4ms": 0,
+            "over50ms": 0
+          },
+          "reveal": {
+            "sampleCount": 84,
+            "medianMs": 17.7,
+            "p95Ms": 18.3,
+            "maxMs": 18.8,
+            "effectiveFps": 57.07,
+            "over33_4ms": 0,
+            "over50ms": 0
+          },
+          "held": {
+            "sampleCount": 1,
+            "medianMs": 17.4,
+            "p95Ms": 17.4,
+            "maxMs": 17.4,
+            "effectiveFps": 57.47,
+            "over33_4ms": 0,
+            "over50ms": 0
+          }
+        }
+      },
+      "network": {
+        "cdpEncodedBytes": 6048289,
+        "resourceTiming": {
+          "transferSize": 5823446,
+          "encodedBodySize": 5816846,
+          "decodedBodySize": 5821130
+        },
+        "resources": [
+          {
+            "path": "/",
+            "cdpEncodedBytes": 0,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/3.4.17",
+            "cdpEncodedBytes": 126857,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/AI/assets/lumen/earth-clouds-desktop.webp",
+            "cdpEncodedBytes": 1800086,
+            "transferSize": 1799948,
+            "encodedBodySize": 1799648,
+            "decodedBodySize": 1799648
+          },
+          {
+            "path": "/AI/assets/lumen/earth-day-desktop.webp",
+            "cdpEncodedBytes": 190677,
+            "transferSize": 190764,
+            "encodedBodySize": 190464,
+            "decodedBodySize": 190464
+          },
+          {
+            "path": "/AI/assets/lumen/earth-night-desktop.webp",
+            "cdpEncodedBytes": 112994,
+            "transferSize": 113090,
+            "encodedBodySize": 112790,
+            "decodedBodySize": 112790
+          },
+          {
+            "path": "/AI/assets/lumen/earth-normal-desktop.webp",
+            "cdpEncodedBytes": 37653,
+            "transferSize": 37758,
+            "encodedBodySize": 37458,
+            "decodedBodySize": 37458
+          },
+          {
+            "path": "/AI/assets/lumen/journey-desktop.mp4",
+            "cdpEncodedBytes": 667035,
+            "transferSize": 667051,
+            "encodedBodySize": 666751,
+            "decodedBodySize": 666751
+          },
+          {
+            "path": "/AI/assets/lumen/moon-albedo-desktop.webp",
+            "cdpEncodedBytes": 612304,
+            "transferSize": 612328,
+            "encodedBodySize": 612028,
+            "decodedBodySize": 612028
+          },
+          {
+            "path": "/AI/assets/lumen/moon-normal-desktop.webp",
+            "cdpEncodedBytes": 277507,
+            "transferSize": 277576,
+            "encodedBodySize": 277276,
+            "decodedBodySize": 277276
+          },
+          {
+            "path": "/AI/assets/lumen/poster-desktop.webp",
+            "cdpEncodedBytes": 71034,
+            "transferSize": 71130,
+            "encodedBodySize": 70830,
+            "decodedBodySize": 70830
+          },
+          {
+            "path": "/AI/index.html",
+            "cdpEncodedBytes": 30107,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/AI/js/lumen-hero-policy.js",
+            "cdpEncodedBytes": 1698,
+            "transferSize": 1799,
+            "encodedBodySize": 1499,
+            "decodedBodySize": 1499
+          },
+          {
+            "path": "/AI/js/lumen-hero.js",
+            "cdpEncodedBytes": 15183,
+            "transferSize": 15283,
+            "encodedBodySize": 14983,
+            "decodedBodySize": 14983
+          },
+          {
+            "path": "/AI/js/lumen-scene.js",
+            "cdpEncodedBytes": 15100,
+            "transferSize": 15200,
+            "encodedBodySize": 14900,
+            "decodedBodySize": 14900
+          },
+          {
+            "path": "/AI/js/lumen-timeline.json",
+            "cdpEncodedBytes": 1284,
+            "transferSize": 1384,
+            "encodedBodySize": 1084,
+            "decodedBodySize": 1084
+          },
+          {
+            "path": "/AI/vendor/three.core.min.js",
+            "cdpEncodedBytes": 381369,
+            "transferSize": 381424,
+            "encodedBodySize": 381124,
+            "decodedBodySize": 381124
+          },
+          {
+            "path": "/AI/vendor/three.module.min.js",
+            "cdpEncodedBytes": 339153,
+            "transferSize": 339208,
+            "encodedBodySize": 338908,
+            "decodedBodySize": 338908
+          },
+          {
+            "path": "/AI/video/comp1.mp4",
+            "cdpEncodedBytes": 0,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/AI/video/labs21-hero-poster.jpg",
+            "cdpEncodedBytes": 45131,
+            "transferSize": 45222,
+            "encodedBodySize": 44922,
+            "decodedBodySize": 44922
+          },
+          {
+            "path": "/AI/video/labs21-hero.mp4",
+            "cdpEncodedBytes": 559125,
+            "transferSize": 559159,
+            "encodedBodySize": 558859,
+            "decodedBodySize": 558859
+          },
+          {
+            "path": "/css2",
+            "cdpEncodedBytes": 1161,
+            "transferSize": 988,
+            "encodedBodySize": 688,
+            "decodedBodySize": 4972
+          },
+          {
+            "path": "/Fonts/Satoshi-Variable.ttf",
+            "cdpEncodedBytes": 127638,
+            "transferSize": 127720,
+            "encodedBodySize": 127420,
+            "decodedBodySize": 127420
+          },
+          {
+            "path": "/Fonts/Satoshi-VariableItalic.ttf",
+            "cdpEncodedBytes": 129966,
+            "transferSize": 130048,
+            "encodedBodySize": 129748,
+            "decodedBodySize": 129748
+          },
+          {
+            "path": "/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2",
+            "cdpEncodedBytes": 31974,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/src/motion.js",
+            "cdpEncodedBytes": 6657,
+            "transferSize": 6757,
+            "encodedBodySize": 6457,
+            "decodedBodySize": 6457
+          },
+          {
+            "path": "/src/nav.js",
+            "cdpEncodedBytes": 10708,
+            "transferSize": 10808,
+            "encodedBodySize": 10508,
+            "decodedBodySize": 10508
+          },
+          {
+            "path": "/src/site.css",
+            "cdpEncodedBytes": 418748,
+            "transferSize": 418801,
+            "encodedBodySize": 418501,
+            "decodedBodySize": 418501
+          },
+          {
+            "path": "/u/179893130",
+            "cdpEncodedBytes": 37140,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "mobile-natural",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "webgl",
+      "finalPhase": "held",
+      "dpr": 1,
+      "hardwareConcurrency": 24,
+      "deviceMemory": 32,
+      "webgl": {
+        "vendor": "Google Inc. (NVIDIA)",
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5080 (0x00002C02) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "framePacing": {
+        "sampleCount": 449,
+        "medianMs": 17.8,
+        "p95Ms": 18.3,
+        "maxMs": 52.6,
+        "effectiveFps": 56.01,
+        "over33_4ms": 1,
+        "over50ms": 1,
+        "phases": {
+          "solar": {
+            "sampleCount": 110,
+            "medianMs": 17.75,
+            "p95Ms": 18.2,
+            "maxMs": 52.6,
+            "effectiveFps": 55.41,
+            "over33_4ms": 1,
+            "over50ms": 1
+          },
+          "terra": {
+            "sampleCount": 169,
+            "medianMs": 17.8,
+            "p95Ms": 18.2,
+            "maxMs": 18.6,
+            "effectiveFps": 56.24,
+            "over33_4ms": 0,
+            "over50ms": 0
+          },
+          "luna": {
+            "sampleCount": 84,
+            "medianMs": 17.8,
+            "p95Ms": 18.2,
+            "maxMs": 19.4,
+            "effectiveFps": 56.23,
+            "over33_4ms": 0,
+            "over50ms": 0
+          },
+          "reveal": {
+            "sampleCount": 85,
+            "medianMs": 17.8,
+            "p95Ms": 18.4,
+            "maxMs": 19.1,
+            "effectiveFps": 56.11,
+            "over33_4ms": 0,
+            "over50ms": 0
+          },
+          "held": {
+            "sampleCount": 1,
+            "medianMs": 17.5,
+            "p95Ms": 17.5,
+            "maxMs": 17.5,
+            "effectiveFps": 57.14,
+            "over33_4ms": 0,
+            "over50ms": 0
+          }
+        }
+      },
+      "network": {
+        "cdpEncodedBytes": 2942349,
+        "resourceTiming": {
+          "transferSize": 2913949,
+          "encodedBodySize": 2908637,
+          "decodedBodySize": 2912921
+        },
+        "resources": [
+          {
+            "path": "/",
+            "cdpEncodedBytes": 0,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/3.4.17",
+            "cdpEncodedBytes": 0,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/AI/assets/lumen/earth-clouds-mobile.webp",
+            "cdpEncodedBytes": 503928,
+            "transferSize": 503970,
+            "encodedBodySize": 503670,
+            "decodedBodySize": 503670
+          },
+          {
+            "path": "/AI/assets/lumen/earth-day-mobile.webp",
+            "cdpEncodedBytes": 61145,
+            "transferSize": 61250,
+            "encodedBodySize": 60950,
+            "decodedBodySize": 60950
+          },
+          {
+            "path": "/AI/assets/lumen/earth-night-mobile.webp",
+            "cdpEncodedBytes": 29491,
+            "transferSize": 29596,
+            "encodedBodySize": 29296,
+            "decodedBodySize": 29296
+          },
+          {
+            "path": "/AI/assets/lumen/earth-normal-mobile.webp",
+            "cdpEncodedBytes": 15395,
+            "transferSize": 15500,
+            "encodedBodySize": 15200,
+            "decodedBodySize": 15200
+          },
+          {
+            "path": "/AI/assets/lumen/moon-albedo-mobile.webp",
+            "cdpEncodedBytes": 144095,
+            "transferSize": 144182,
+            "encodedBodySize": 143882,
+            "decodedBodySize": 143882
+          },
+          {
+            "path": "/AI/assets/lumen/moon-normal-mobile.webp",
+            "cdpEncodedBytes": 59761,
+            "transferSize": 59866,
+            "encodedBodySize": 59566,
+            "decodedBodySize": 59566
+          },
+          {
+            "path": "/AI/assets/lumen/poster-mobile.webp",
+            "cdpEncodedBytes": 46667,
+            "transferSize": 46772,
+            "encodedBodySize": 46472,
+            "decodedBodySize": 46472
+          },
+          {
+            "path": "/AI/index.html",
+            "cdpEncodedBytes": 30107,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/AI/js/lumen-hero-policy.js",
+            "cdpEncodedBytes": 1698,
+            "transferSize": 1799,
+            "encodedBodySize": 1499,
+            "decodedBodySize": 1499
+          },
+          {
+            "path": "/AI/js/lumen-hero.js",
+            "cdpEncodedBytes": 15183,
+            "transferSize": 15283,
+            "encodedBodySize": 14983,
+            "decodedBodySize": 14983
+          },
+          {
+            "path": "/AI/js/lumen-scene.js",
+            "cdpEncodedBytes": 15100,
+            "transferSize": 15200,
+            "encodedBodySize": 14900,
+            "decodedBodySize": 14900
+          },
+          {
+            "path": "/AI/js/lumen-timeline.json",
+            "cdpEncodedBytes": 1284,
+            "transferSize": 1384,
+            "encodedBodySize": 1084,
+            "decodedBodySize": 1084
+          },
+          {
+            "path": "/AI/vendor/three.core.min.js",
+            "cdpEncodedBytes": 381369,
+            "transferSize": 381424,
+            "encodedBodySize": 381124,
+            "decodedBodySize": 381124
+          },
+          {
+            "path": "/AI/vendor/three.module.min.js",
+            "cdpEncodedBytes": 339153,
+            "transferSize": 339208,
+            "encodedBodySize": 338908,
+            "decodedBodySize": 338908
+          },
+          {
+            "path": "/AI/video/comp1-mobile.mp4",
+            "cdpEncodedBytes": 0,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/AI/video/labs21-hero-poster.jpg",
+            "cdpEncodedBytes": 45131,
+            "transferSize": 45222,
+            "encodedBodySize": 44922,
+            "decodedBodySize": 44922
+          },
+          {
+            "path": "/AI/video/labs21-hero.mp4",
+            "cdpEncodedBytes": 559125,
+            "transferSize": 559159,
+            "encodedBodySize": 558859,
+            "decodedBodySize": 558859
+          },
+          {
+            "path": "/css2",
+            "cdpEncodedBytes": 0,
+            "transferSize": 0,
+            "encodedBodySize": 688,
+            "decodedBodySize": 4972
+          },
+          {
+            "path": "/Fonts/Satoshi-Variable.ttf",
+            "cdpEncodedBytes": 127638,
+            "transferSize": 127720,
+            "encodedBodySize": 127420,
+            "decodedBodySize": 127420
+          },
+          {
+            "path": "/Fonts/Satoshi-VariableItalic.ttf",
+            "cdpEncodedBytes": 129966,
+            "transferSize": 130048,
+            "encodedBodySize": 129748,
+            "decodedBodySize": 129748
+          },
+          {
+            "path": "/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2",
+            "cdpEncodedBytes": 0,
+            "transferSize": 0,
+            "encodedBodySize": 0,
+            "decodedBodySize": 0
+          },
+          {
+            "path": "/src/motion.js",
+            "cdpEncodedBytes": 6657,
+            "transferSize": 6757,
+            "encodedBodySize": 6457,
+            "decodedBodySize": 6457
+          },
+          {
+            "path": "/src/nav.js",
+            "cdpEncodedBytes": 10708,
+            "transferSize": 10808,
+            "encodedBodySize": 10508,
+            "decodedBodySize": 10508
+          },
+          {
+            "path": "/src/site.css",
+            "cdpEncodedBytes": 418748,
+            "transferSize": 418801,
+            "encodedBodySize": 418501,
+            "decodedBodySize": 418501
+          }
+        ]
+      }
+    }
+  ],
+  "observations": [
+    "Desktop natural mode selected fallback video after WebGL assets loaded, while the following mobile natural run retained WebGL. Repeated fresh-profile runs reproduced this order-specific warm-up anomaly on the same Chrome/GPU.",
+    "The desktop fallback journey remained smooth, but its network record includes both desktop WebGL textures and the fallback video because fallback occurred after warm-up. This is reported as measured; production policy was not changed without isolated threshold evidence.",
+    "The mobile WebGL journey exceeded 33.4 ms once during Solar (also above 50 ms); all later phases stayed below 33.4 ms and effective full-journey pacing remained above 30 FPS."
+  ]
+}
