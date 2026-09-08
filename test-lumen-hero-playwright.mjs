@@ -271,6 +271,8 @@ try {
     HTMLMediaElement.prototype.pause = function () { this.__playing = false; };
   });
   const carouselPage = await carousel.newPage();
+  const carouselErrors = [];
+  carouselPage.on('pageerror', (error) => carouselErrors.push(error.message));
   await carouselPage.goto(`${baseUrl}/AI/index.html`);
   await carouselPage.evaluate(() => window.LumenHero.ready);
   await carouselPage.evaluate(() => window.LumenHero.skip());
@@ -296,12 +298,36 @@ try {
     return Math.abs(scroller.scrollLeft - (card.offsetLeft - scroller.offsetLeft)) < 2;
   });
 
-  await carouselPage.locator('#hp-play').focus();
+  const productControlState = await carouselPage.evaluate(() => {
+    const video = document.querySelector('.hero-card[data-card="2"] video');
+    const seek = document.querySelector('#hp-seek');
+    Object.defineProperty(video, 'duration', { configurable: true, get: () => 100 });
+    video.currentTime = 10;
+    video.muted = false;
+    const rect = seek.getBoundingClientRect();
+    seek.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: rect.left + rect.width * 0.2 }));
+    return { currentTime: video.currentTime, muted: video.muted, moveX: rect.left + rect.width * 0.8 };
+  });
+  await carouselPage.locator('#hp-mute').focus();
   await carouselPage.evaluate(() => {
     document.querySelector('#hero-prev').click();
     document.querySelector('#hero-prev').click();
   });
   await carouselPage.locator('.hero-dot[data-index="0"].active').waitFor();
+  await carouselPage.evaluate((moveX) => window.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: moveX })), productControlState.moveX);
+  await carouselPage.keyboard.press('Space');
+  assert.equal(await carouselPage.evaluate(() => document.querySelector('.hero-card[data-card="2"] video').muted), productControlState.muted, 'retained keyboard focus cannot mute inactive product video');
+  await carouselPage.evaluate(() => {
+    const seek = document.querySelector('#hp-seek');
+    const rect = seek.getBoundingClientRect();
+    seek.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: rect.left + rect.width * 0.6 }));
+    document.querySelector('#hp-mute').click();
+  });
+  assert.deepEqual(await carouselPage.evaluate(() => {
+    const video = document.querySelector('.hero-card[data-card="2"] video');
+    return { currentTime: video.currentTime, muted: video.muted };
+  }), { currentTime: productControlState.currentTime, muted: productControlState.muted }, 'inactive pointer drag, click seek, and programmatic mute preserve product media state');
+  await carouselPage.locator('#hp-play').focus();
   await carouselPage.keyboard.press('Space');
   assert.deepEqual(await playbackVector(), [false, false, false], 'retained keyboard focus cannot play inactive product video');
   await carouselPage.evaluate(() => document.querySelector('#hp-replay').click());
@@ -359,6 +385,7 @@ try {
     mode: 'video', state: 'held', active: true, elapsedMs: 8000, phase: 'held',
   }, 'final carousel state reactivates held Lumen without replay');
   assert.deepEqual(await playbackVector(), [false, false, false], 'final held Lumen state leaves every video paused');
+  assert.deepEqual(carouselErrors, [], 'carousel interactions produce no page errors');
   await carousel.close();
 
   const keyboard = await browser.newContext();

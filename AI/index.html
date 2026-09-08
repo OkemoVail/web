@@ -310,18 +310,27 @@
 
                 if (pSeek) {
                     function seekFromX(clientX) {
+                        if (active !== 2) return;
                         var rect = pSeek.getBoundingClientRect();
                         var ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
                         if (pVideo.duration) pVideo.currentTime = ratio * pVideo.duration;
                     }
                     pSeek.addEventListener('click', function (e) { seekFromX(e.clientX); });
                     var dragging = false;
-                    pSeek.addEventListener('pointerdown', function (e) { dragging = true; seekFromX(e.clientX); });
-                    window.addEventListener('pointermove', function (e) { if (dragging) seekFromX(e.clientX); });
+                    pSeek.addEventListener('pointerdown', function (e) {
+                        if (active !== 2) return;
+                        dragging = true;
+                        seekFromX(e.clientX);
+                    });
+                    window.addEventListener('pointermove', function (e) {
+                        if (active !== 2) { dragging = false; return; }
+                        if (dragging) seekFromX(e.clientX);
+                    });
                     window.addEventListener('pointerup', function () { dragging = false; });
                 }
 
                 if (pMute) pMute.addEventListener('click', function () {
+                    if (active !== 2) return;
                     pVideo.muted = !pVideo.muted;
                     if (pMuteIc) pMuteIc.classList.toggle('hide', !pVideo.muted);
                     if (pOnIc) pOnIc.classList.toggle('hide', pVideo.muted);
@@ -343,6 +352,7 @@
             }
             function setActive(i) {
                 active = i;
+                if (active !== 2) dragging = false;
                 notifyLumen();
                 dots.forEach(function (d, j) { d.classList.toggle('active', j === i); });
                 cards.forEach(function (card, j) {
