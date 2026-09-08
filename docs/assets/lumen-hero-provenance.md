@@ -34,3 +34,22 @@ The transaction accepts an injectable filesystem adapter. Contract tests reject 
 NASA SVS remained unreachable, so the source set uses reachable official NASA Science and NASA Images LRO products. These are orthographic near-side and far-side mosaics rather than a native global equirectangular albedo/elevation pair. Their deterministic projection provides complete spherical coverage, but the limb regions stretch and the normal map is a relief cue derived from mosaic luminance, not calibrated LOLA elevation. This is suitable for the small, moving Moon in the hero and is explicitly not scientific topography.
 
 The fallback render uses a procedural granular photosphere and corona, a distant point-based star sphere, separate Earth surface/city-light/cloud/normal/atmosphere layers, and projected LRO Moon albedo/normal layers. City emission is multiplied by a normal-to-solar-direction dark-side mask, and one checked-in direction drives that mask and the Sun light shared by Earth and Moon. It contains no baked title copy because the accessible HTML overlay remains authoritative.
+
+## Task 7 Verification (2026-09-08)
+
+Measurements used headed Playwright Chromium with `navigator.webdriver` overridden to `false`, local HTTP delivery, and the real Three.js scene. `LUMEN_PROFILE=1 node test-lumen-hero-playwright.mjs` runs the desktop profile; add `LUMEN_PROFILE_TIER=mobile` for the mobile tier. The diagnostic records the natural policy result before forcing WebGL only when necessary to measure the active scene.
+
+| Metric | Desktop, 1440x900 at 1.5 DPR | Mobile, 390x844 at 3 device DPR |
+| --- | ---: | ---: |
+| Poster response end | 18.9 ms | 12.7 ms |
+| Scene ready after navigation | 974.6 ms | 683.8 ms |
+| Natural warm-up FPS / policy | 22.5 / video | 55.4 / WebGL |
+| Forced/active real-scene FPS | 60.0 | 58.0 |
+| Effective renderer DPR | 1.500 | 0.999 |
+| Texture transfer bytes | 3,029,664 | 812,564 |
+| Total Lumen/Three transfer bytes | 3,851,316 | 1,609,858 |
+| Estimated texture + color/depth GPU bytes | 71,316,885 (68.0 MiB) | 14,554,981 (13.9 MiB) |
+
+The poster completed before scene readiness in both profiles. The naturally eligible mobile real-time path stayed above 30 FPS. Desktop correctly rejected its sub-40-FPS warm-up; forced continuation was diagnostic only and stayed above 30 FPS. Instrumentation confirmed that deactivation stops real scene draws, effective DPR does not exceed 1.5, fallback paths do not request Three.js textures, and successful WebGL does not request fallback video.
+
+Deterministic poster snapshots are generated in ignored `tools/snapshots/after/` at 1440x900, 768x1024, and 390x844. Automated layout inspection confirms the hero starts below the floating navigation, title copy and CTA remain inside the card, and no horizontal clipping occurs. Representative fallback frames were extracted at 0.5 s, 3.5 s, 5.75 s, and 7.9 s; decoded entropy ranged from 3.05 to 4.47 and every channel exercised a broad range, excluding empty/black frame failures.

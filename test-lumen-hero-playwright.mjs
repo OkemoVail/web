@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const types = { '.css': 'text/css', '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.mp4': 'video/mp4', '.webp': 'image/webp' };
@@ -20,6 +21,42 @@ const server = createServer((request, response) => {
 await new Promise((resolveListen, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolveListen); });
 const baseUrl = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true });
+const snapshotDirectory = join(root, 'tools', 'snapshots', 'after');
+mkdirSync(snapshotDirectory, { recursive: true });
+
+async function assertReadableFrame(page, message, requireCopy = true) {
+  const frame = await page.locator('#lumen-hero').screenshot();
+  const stats = await sharp(frame).stats();
+  const visibleChannels = stats.channels.slice(0, 3);
+  assert.ok(frame.length > 10_000 && stats.entropy > 1 && visibleChannels.some(({ max }) => max > 96), `${message}: rendered card is not empty black output`);
+  if (requireCopy) assert.equal(await page.locator('#lumen-copy').isVisible(), true, `${message}: final copy remains readable`);
+  else assert.equal(await page.locator('#lumen-fallback').isVisible(), true, `${message}: active fallback remains visible`);
+}
+
+async function assertPosterComposition(page, viewport, name) {
+  await page.setViewportSize(viewport);
+  await assertHeldPoster(page);
+  const layout = await page.evaluate(() => {
+    const rect = (selector) => {
+      const value = document.querySelector(selector).getBoundingClientRect();
+      return { left: value.left, top: value.top, right: value.right, bottom: value.bottom, width: value.width, height: value.height };
+    };
+    return {
+      viewport: { width: innerWidth, height: innerHeight },
+      hero: rect('#lumen-hero'),
+      copy: rect('#lumen-copy'),
+      nav: rect('.ov-nav__bar'),
+      start: rect('.lumen-start'),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  assert.ok(layout.hero.top >= layout.nav.bottom, `${name}: hero does not collide with floating navigation`);
+  assert.ok(layout.copy.left >= layout.hero.left && layout.copy.bottom <= layout.hero.bottom, `${name}: copy remains within hero bounds`);
+  assert.ok(layout.start.left >= layout.hero.left && layout.start.right <= layout.hero.right, `${name}: CTA remains within hero bounds`);
+  assert.equal(layout.overflow, 0, `${name}: page has no horizontal clipping`);
+  await page.screenshot({ path: join(snapshotDirectory, `lumen-poster-${name}.png`), fullPage: true });
+  await assertReadableFrame(page, name);
+}
 
 async function assertHeldPoster(page) {
   const errors = [];
@@ -71,6 +108,18 @@ try {
   await automatedPage.waitForURL(/\/AI\/chat\.html$/);
   await automated.close();
 
+  for (const snapshot of [
+    { name: 'desktop-1440x900', viewport: { width: 1440, height: 900 } },
+    { name: 'tablet-768x1024', viewport: { width: 768, height: 1024 } },
+    { name: 'mobile-390x844', viewport: { width: 390, height: 844 } },
+  ]) {
+    const context = await browser.newContext({ viewport: snapshot.viewport });
+    await context.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => true }); });
+    const page = await context.newPage();
+    await assertPosterComposition(page, snapshot.viewport, snapshot.name);
+    await context.close();
+  }
+
   const reduced = await browser.newContext();
   await reduced.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => false });
@@ -82,6 +131,238 @@ try {
   const reducedPage = await reduced.newPage();
   await assertHeldPoster(reducedPage);
   await reduced.close();
+
+  const posterFirst = await browser.newContext();
+  await posterFirst.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+  });
+  const posterFirstPage = await posterFirst.newPage();
+  let releaseTextures;
+  const textureGate = new Promise((resolve) => { releaseTextures = resolve; });
+  await posterFirstPage.route(/earth-|moon-/, async (route) => { await textureGate; await route.continue(); });
+  await posterFirstPage.goto(`${baseUrl}/AI/index.html`, { waitUntil: 'domcontentloaded' });
+  assert.equal(await posterFirstPage.locator('#lumen-poster').isVisible(), true, 'poster paints while WebGL textures are pending');
+  assert.equal(await posterFirstPage.locator('#lumen-hero').getAttribute('data-mode'), 'poster', 'pending textures cannot expose an empty WebGL layer');
+  releaseTextures();
+  await posterFirstPage.evaluate(() => window.LumenHero.ready);
+  await posterFirst.close();
+
+  const saveData = await browser.newContext();
+  await saveData.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+    Object.defineProperty(navigator, 'connection', { configurable: true, value: { saveData: true } });
+    HTMLMediaElement.prototype.load = function () {};
+    HTMLMediaElement.prototype.pause = function () { this.__playing = false; };
+    HTMLMediaElement.prototype.play = function () { this.__playing = true; return Promise.resolve(); };
+  });
+  const saveDataPage = await saveData.newPage();
+  const saveDataRequests = [];
+  saveDataPage.on('request', (request) => { if (/three|earth-|moon-/.test(request.url())) saveDataRequests.push(request.url()); });
+  await saveDataPage.goto(`${baseUrl}/AI/index.html`);
+  assert.deepEqual(await saveDataPage.evaluate(() => window.LumenHero.ready), { mode: 'video' });
+  assert.deepEqual(saveDataRequests, [], 'Save-Data users do not download Three.js or textures');
+  await assertReadableFrame(saveDataPage, 'Save-Data fallback', false);
+  await saveData.close();
+
+  const probeFailure = await browser.newContext();
+  await probeFailure.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+    HTMLCanvasElement.prototype.getContext = function () { return null; };
+    HTMLMediaElement.prototype.load = function () {};
+    HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
+    HTMLMediaElement.prototype.pause = function () {};
+  });
+  const probePage = await probeFailure.newPage();
+  let probeTextureRequests = 0;
+  probePage.on('request', (request) => { if (/earth-|moon-/.test(request.url())) probeTextureRequests += 1; });
+  await probePage.goto(`${baseUrl}/AI/index.html`);
+  assert.deepEqual(await probePage.evaluate(() => window.LumenHero.ready), { mode: 'video' });
+  assert.equal(probeTextureRequests, 0, 'WebGL probe failure bypasses texture downloads');
+  await assertReadableFrame(probePage, 'WebGL probe fallback', false);
+  await probeFailure.close();
+
+  const importFailure = await browser.newContext();
+  await importFailure.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+    HTMLMediaElement.prototype.load = function () {};
+    HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
+    HTMLMediaElement.prototype.pause = function () {};
+  });
+  const importPage = await importFailure.newPage();
+  await importPage.route('**/AI/js/lumen-scene.js', (route) => route.abort('failed'));
+  await importPage.goto(`${baseUrl}/AI/index.html`);
+  assert.deepEqual(await importPage.evaluate(() => window.LumenHero.ready), { mode: 'video' });
+  await assertReadableFrame(importPage, 'dynamic import fallback', false);
+  await importFailure.close();
+
+  const rejectedAutoplay = await browser.newContext();
+  await rejectedAutoplay.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 2 });
+    HTMLMediaElement.prototype.load = function () {};
+    HTMLMediaElement.prototype.play = function () { return Promise.reject(new DOMException('blocked', 'NotAllowedError')); };
+    HTMLMediaElement.prototype.pause = function () {};
+  });
+  const rejectedPage = await rejectedAutoplay.newPage();
+  await rejectedPage.goto(`${baseUrl}/AI/index.html`);
+  assert.deepEqual(await rejectedPage.evaluate(() => window.LumenHero.ready), { mode: 'poster' });
+  await assertReadableFrame(rejectedPage, 'autoplay rejection poster');
+  await rejectedAutoplay.close();
+
+  const videoError = await browser.newContext();
+  await videoError.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 2 });
+    HTMLMediaElement.prototype.load = function () {};
+    HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
+    HTMLMediaElement.prototype.pause = function () {};
+  });
+  const videoErrorPage = await videoError.newPage();
+  await videoErrorPage.goto(`${baseUrl}/AI/index.html`);
+  await videoErrorPage.evaluate(() => document.querySelector('#lumen-fallback').dispatchEvent(new Event('error')));
+  await videoErrorPage.locator('#lumen-hero[data-mode="poster"][data-state="held"]').waitFor();
+  await assertReadableFrame(videoErrorPage, 'video error poster');
+  await videoError.close();
+
+  const contextLoss = await browser.newContext();
+  await contextLoss.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+    HTMLMediaElement.prototype.load = function () {};
+    HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
+    HTMLMediaElement.prototype.pause = function () {};
+  });
+  const contextLossPage = await contextLoss.newPage();
+  await contextLossPage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({
+    contentType: 'text/javascript',
+    body: `async function createLumenScene(options){window.__loseLumenContext=options.onContextLost;return{render(){},resize(){},pause(){},resume(){},dispose(){}}}window.createLumenScene=createLumenScene;export{createLumenScene};`,
+  }));
+  await contextLossPage.goto(`${baseUrl}/AI/index.html`);
+  assert.deepEqual(await contextLossPage.evaluate(() => window.LumenHero.ready), { mode: 'webgl' });
+  await contextLossPage.evaluate(() => window.__loseLumenContext());
+  await contextLossPage.locator('#lumen-hero[data-mode="video"]').waitFor();
+  await assertReadableFrame(contextLossPage, 'context loss fallback', false);
+  await contextLoss.close();
+
+  const lifecycle = await browser.newContext();
+  await lifecycle.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => window.__documentHidden || false });
+  });
+  const lifecyclePage = await lifecycle.newPage();
+  await lifecyclePage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({
+    contentType: 'text/javascript',
+    body: `const counts={pause:0,resume:0,resize:[]};window.__lumenCounts=counts;const scene={render(){},resize(w,h){counts.resize.push([Math.round(w),Math.round(h)])},pause(){counts.pause++},resume(){counts.resume++},dispose(){}};async function createLumenScene(){return scene}window.createLumenScene=createLumenScene;export{createLumenScene};`,
+  }));
+  await lifecyclePage.goto(`${baseUrl}/AI/index.html`);
+  assert.deepEqual(await lifecyclePage.evaluate(() => window.LumenHero.ready), { mode: 'webgl' });
+  await lifecyclePage.evaluate(() => { window.__documentHidden = true; document.dispatchEvent(new Event('visibilitychange')); });
+  const hiddenState = await lifecyclePage.evaluate(() => ({ state: window.LumenHero.getState(), counts: window.__lumenCounts }));
+  assert.equal(hiddenState.state.state, 'playing', 'tab hiding pauses rather than finalizing the journey');
+  assert.ok(hiddenState.counts.pause >= 1, 'tab hiding pauses scene work');
+  await lifecyclePage.evaluate(() => { window.__documentHidden = false; document.dispatchEvent(new Event('visibilitychange')); });
+  assert.ok((await lifecyclePage.evaluate(() => window.__lumenCounts.resume)) >= 1, 'tab visibility restoration resumes scene work');
+  await lifecyclePage.evaluate(() => window.LumenHero.skip());
+  const beforeResize = await lifecyclePage.evaluate(() => window.__lumenCounts.resize.length);
+  await lifecyclePage.setViewportSize({ width: 390, height: 844 });
+  await lifecyclePage.waitForFunction((count) => window.__lumenCounts.resize.length > count, beforeResize);
+  assert.deepEqual(await lifecyclePage.evaluate(() => window.LumenHero.getState()), {
+    mode: 'webgl', state: 'held', active: true, elapsedMs: 8000, phase: 'held',
+  }, 'orientation-sized resize preserves the held final composition');
+  await assertReadableFrame(lifecyclePage, 'resized held WebGL');
+  await lifecycle.close();
+
+  if (process.env.LUMEN_PROFILE === '1') {
+    const profileBrowser = await chromium.launch({ headless: false });
+    const profileTier = process.env.LUMEN_PROFILE_TIER === 'mobile' ? 'mobile' : 'desktop';
+    const profileViewport = profileTier === 'mobile' ? { width: 390, height: 844 } : { width: 1440, height: 900 };
+    const profileBrowserContext = await profileBrowser.newContext({ viewport: profileViewport, deviceScaleFactor: profileTier === 'mobile' ? 3 : 1.5 });
+    await profileBrowserContext.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+      Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+      let policy;
+      Object.defineProperty(window, 'LumenHeroPolicy', {
+        configurable: true,
+        get: () => policy,
+        set: (value) => {
+          const naturalChooseMode = value.chooseMode;
+          value.chooseMode = (signals) => {
+            const result = naturalChooseMode(signals);
+            if (signals.warmupFps != null) window.__lumenNaturalProfile = { result, warmupFps: signals.warmupFps };
+            return signals.warmupFps != null && window.__forceLumenProfile ? 'webgl' : result;
+          };
+          policy = value;
+        },
+      });
+      window.__forceLumenProfile = true;
+      window.__lumenDrawSamples = [];
+      for (const constructorName of ['WebGLRenderingContext', 'WebGL2RenderingContext']) {
+        const prototype = window[constructorName]?.prototype;
+        if (!prototype?.drawElements) continue;
+        const nativeDraw = prototype.drawElements;
+        prototype.drawElements = function (...args) {
+          window.__lumenDrawSamples.push(performance.now());
+          return nativeDraw.apply(this, args);
+        };
+      }
+    });
+    const profilePage = await profileBrowserContext.newPage();
+    const requested = [];
+    profilePage.on('response', async (response) => {
+      const url = response.url();
+      if (/lumen|three\.(module|core)/.test(url)) requested.push({ url, bytes: Number((await response.allHeaders())['content-length']) || 0 });
+    });
+    const started = performance.now();
+    await profilePage.goto(`${baseUrl}/AI/index.html`);
+    const posterPaintMs = await profilePage.evaluate(() => performance.getEntriesByName(document.querySelector('#lumen-poster img').currentSrc)[0]?.responseEnd || 0);
+    assert.equal(await profilePage.evaluate(() => navigator.webdriver), false, 'profiling session exposes the non-webdriver policy signal');
+    assert.deepEqual(await profilePage.evaluate(() => window.LumenHero.ready), { mode: 'webgl' }, 'forced diagnostic exercises the real Three.js scene after natural classification is recorded');
+    const warmReadyMs = performance.now() - started;
+    await profilePage.waitForTimeout(2200);
+    const metrics = await profilePage.evaluate(() => {
+      const samples = window.__lumenDrawSamples.filter((time, index, values) => index === 0 || time - values[index - 1] > 5);
+      const recent = samples.filter((time) => time >= samples.at(-1) - 2000);
+      const duration = recent.at(-1) - recent[0];
+      return {
+        fps: duration > 0 ? (recent.length - 1) * 1000 / duration : 0,
+        dpr: document.querySelector('#lumen-stage canvas').width / document.querySelector('#lumen-stage').getBoundingClientRect().width,
+        state: window.LumenHero.getState(),
+        natural: window.__lumenNaturalProfile,
+      };
+    });
+    assert.ok(metrics.fps >= 30, `real-time profile remains at least 30 FPS (measured ${metrics.fps.toFixed(1)})`);
+    assert.ok(metrics.dpr <= 1.5, `real-time profile caps DPR at 1.5 (measured ${metrics.dpr})`);
+    await profilePage.evaluate(() => window.LumenHero.setActive(false));
+    const samplesAtPause = await profilePage.evaluate(() => window.__lumenDrawSamples.length);
+    await profilePage.waitForTimeout(350);
+    assert.equal(await profilePage.evaluate(() => window.__lumenDrawSamples.length), samplesAtPause, 'leaving Lumen stops real scene draws');
+    const uniqueRequests = [...new Map(requested.map((entry) => [entry.url, entry])).values()];
+    for (const entry of uniqueRequests) {
+      const pathname = decodeURIComponent(new URL(entry.url).pathname);
+      const localPath = normalize(join(root, pathname));
+      if (existsSync(localPath)) entry.bytes = statSync(localPath).size;
+    }
+    const textureBytes = uniqueRequests.filter(({ url }) => /earth-|moon-/.test(url)).reduce((sum, entry) => sum + entry.bytes, 0);
+    const textureWidth = profileTier === 'mobile' ? 1024 : 2048;
+    const gpuBytesEstimate = 6 * textureWidth * (textureWidth / 2) * 4 + Math.round(profileViewport.width * (profileTier === 'mobile' ? profileViewport.height * .75 : profileViewport.width * 9 / 16) * metrics.dpr * metrics.dpr * 8);
+    console.log(`Lumen profile: ${JSON.stringify({ tier: profileTier, posterPaintMs, warmReadyMs, fps: metrics.fps, dpr: metrics.dpr, natural: metrics.natural, textureBytes, gpuBytesEstimate, bytes: uniqueRequests.reduce((sum, entry) => sum + entry.bytes, 0), requests: uniqueRequests })}`);
+    await profileBrowserContext.close();
+    await profileBrowser.close();
+  }
 
   const webgl = await browser.newContext();
   await webgl.addInitScript(() => {
