@@ -93,7 +93,29 @@
             </button>
 
             <div class="hero-scroll" id="hero-scroll">
-                <div class="hero-card" data-card="0">
+                <div class="hero-card lumen-hero" id="lumen-hero" data-card="0" data-mode="poster" data-state="loading">
+                    <picture id="lumen-poster" class="lumen-media lumen-poster" aria-hidden="true">
+                        <source media="(max-width: 640px)" srcset="assets/lumen/lumen-poster-mobile.webp">
+                        <img src="assets/lumen/lumen-poster-desktop.webp" alt="" width="1600" height="900">
+                    </picture>
+                    <video id="lumen-fallback" class="lumen-media lumen-fallback" muted playsinline preload="none" aria-hidden="true">
+                        <source media="(max-width: 640px)" data-src="assets/lumen/lumen-journey-mobile.mp4" type="video/mp4">
+                        <source data-src="assets/lumen/lumen-journey-desktop.mp4" type="video/mp4">
+                    </video>
+                    <div id="lumen-stage" class="lumen-stage" aria-hidden="true"></div>
+                    <p class="sr-only">A cinematic journey past the solar limb, Earth, and Moon, ending with Earth above Lumen 1.9.</p>
+                    <p id="lumen-location" class="lumen-location" aria-hidden="true">SOLAR</p>
+                    <div id="lumen-copy" class="lumen-copy">
+                        <p class="lumen-eyebrow">Labs21 model</p>
+                        <h1>Lumen 1.9</h1>
+                        <p class="lumen-deck">A small model built to keep going when the question gets difficult.</p>
+                        <a href="chat.html" class="skuo skuo-accent skuo-pill lumen-start">Start here</a>
+                    </div>
+                    <button id="lumen-playback" class="skuo skuo-neutral skuo-pill" type="button">Skip intro</button>
+                    <p id="lumen-status" class="sr-only" aria-live="polite"></p>
+                </div>
+
+                <div class="hero-card" data-card="1">
                     <video class="hero-video"
                            src="video/labs21-hero.mp4"
                            poster="video/labs21-hero-poster.jpg"
@@ -120,7 +142,7 @@
                     </button>
                 </div>
 
-                <div class="hero-card hero-card--player" data-card="1">
+                <div class="hero-card hero-card--player" data-card="2">
                     <video class="hero-video"
                            data-src-desktop="video/comp1.mp4"
                            data-src-mobile="video/comp1-mobile.mp4"
@@ -154,8 +176,9 @@
         </div>
 
         <div class="hero-dots">
-            <button class="hero-dot active" data-index="0" aria-label="Labs21 logo"></button>
-            <button class="hero-dot" data-index="1" aria-label="Product video"></button>
+            <button class="hero-dot active" data-index="0" aria-label="Lumen 1.9"></button>
+            <button class="hero-dot" data-index="1" aria-label="Labs21 video"></button>
+            <button class="hero-dot" data-index="2" aria-label="Product video"></button>
         </div>
     </section>
 
@@ -191,16 +214,16 @@
                 return m + ':' + (sec < 10 ? '0' : '') + sec;
             }
 
-            /* ── Card 0: simple ── */
+            /* ── Card 1: simple ── */
             (function () {
-                var card = cards[0];
+                var card = cards[1];
                 if (!card) return;
                 var vid = card.querySelector('.hero-video');
                 var replay = card.querySelector('.hero-replay');
                 if (!vid) return;
                 applySrc(vid);
                 vid.addEventListener('canplay', function () {
-                    if (active === 0) { vid.classList.add('loaded'); vid.play().catch(function () {}); }
+                    if (active === 1) { vid.classList.add('loaded'); vid.play().catch(function () {}); }
                 });
                 vid.addEventListener('ended', function () { if (replay) replay.classList.add('show'); });
                 if (replay) replay.addEventListener('click', function () {
@@ -210,10 +233,10 @@
                 });
             })();
 
-            /* ── Card 1: full player ── */
+            /* ── Card 2: full player ── */
             var pVideo, pPlay, pPauseIc, pPlayIc, pSeek, pSeekFill, pTime, pMute, pMuteIc, pOnIc, pReplay, pPlayer;
             (function () {
-                var card = cards[1];
+                var card = cards[2];
                 if (!card) return;
                 pVideo = card.querySelector('.hero-video');
                 pPlay = document.getElementById('hp-play');
@@ -245,7 +268,7 @@
                         if (pPlayer && !pVideo.paused) pPlayer.classList.remove('show');
                     }, 500);
                 }
-                var card2 = cards[1];
+                var card2 = cards[2];
                 if (card2) {
                     card2.addEventListener('mousemove', showPlayer);
                     card2.addEventListener('touchstart', showPlayer, { passive: true });
@@ -257,7 +280,7 @@
                 showPlayer();
 
                 pVideo.addEventListener('canplay', function () {
-                    if (active === 1) { pVideo.classList.add('loaded'); pVideo.play().catch(function () {}); }
+                    if (active === 2) { pVideo.classList.add('loaded'); pVideo.play().catch(function () {}); }
                 });
                 pVideo.addEventListener('play', function () { setPlayIcon(true); card2.classList.remove('is-paused'); });
                 pVideo.addEventListener('pause', function () { setPlayIcon(false); card2.classList.add('is-paused'); });
@@ -448,8 +471,10 @@
       primary: { label: 'Home', href: '/AI/index.html' }
     };
   </script>
-  <script src="../src/motion.js"></script>
-  <script src="../src/nav.js"></script>
+   <script src="js/lumen-hero-policy.js"></script>
+   <script src="js/lumen-hero.js"></script>
+   <script src="../src/motion.js"></script>
+   <script src="../src/nav.js"></script>
 </body>
 
 </html>

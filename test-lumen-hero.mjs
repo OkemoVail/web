@@ -2,6 +2,23 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
+const html = readFileSync(new URL('./AI/index.html', import.meta.url), 'utf8');
+const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
+
+assert.equal((html.match(/class="hero-card(?:\s|\")/g) || []).length, 3);
+assert.match(html, /id="lumen-hero"[^>]*data-card="0"/);
+assert.match(html, /id="lumen-stage"/);
+assert.match(html, /id="lumen-poster"[^>]*aria-hidden="true"/);
+assert.match(html, /id="lumen-fallback"[^>]*muted[^>]*playsinline[^>]*aria-hidden="true"/s);
+assert.match(html, /id="lumen-location"[^>]*aria-hidden="true"/);
+assert.match(html, /id="lumen-playback"[^>]*>\s*Skip intro\s*</);
+assert.match(html, /href="chat\.html"[^>]*>[^<]*Start here/s);
+assert.match(html, /Lumen 1\.9/);
+assert.match(html, /solar limb, Earth, and Moon/i);
+assert.doesNotMatch(html, /aria-live="assertive"/);
+assert.match(css, /\[data-page="ai-home"\] \.lumen-copy/s);
+assert.match(css, /z-index:\s*var\(--z-chrome\)/);
+
 const context = { window: {} };
 vm.runInNewContext(
   readFileSync(new URL('./AI/js/lumen-hero-policy.js', import.meta.url), 'utf8'),
