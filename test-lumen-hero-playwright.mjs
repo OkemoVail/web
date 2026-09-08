@@ -373,6 +373,12 @@ try {
     Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
     Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => window.__lumenDocumentHidden || false });
+    const nativeRequestAnimationFrame = window.requestAnimationFrame.bind(window);
+    let syntheticFrameTime = 0;
+    window.requestAnimationFrame = (callback) => nativeRequestAnimationFrame(() => {
+      syntheticFrameTime += 100;
+      callback(syntheticFrameTime);
+    });
     let actualDrawCount = 0;
     let instrumentedDrawMethods = 0;
     for (const constructorName of ['WebGLRenderingContext', 'WebGL2RenderingContext']) {
@@ -411,23 +417,57 @@ try {
     return { status: 'tested', canvas: { width: canvas.width, height: canvas.height } };
   });
   if (realWebglResult.status === 'tested') {
-    const playingStart = await contextLossPage.evaluate(() => ({ draws: window.__lumenActualDrawCount(), state: window.LumenHero.getState() }));
-    assert.equal(playingStart.state.state, 'playing', 'actual WebGL visibility test starts during the journey');
-    await contextLossPage.waitForFunction((draws) => window.__lumenActualDrawCount() > draws, playingStart.draws);
+    await contextLossPage.waitForFunction(() => {
+      const state = window.LumenHero.getState();
+      return state.state === 'playing' && state.elapsedMs >= 2200 && state.phase === 'terra';
+    });
+    const playingCheckpoint = await contextLossPage.evaluate(() => ({
+      draws: window.__lumenActualDrawCount(),
+      state: window.LumenHero.getState(),
+      identity: window.LumenHeroTest.getLifecycleIdentity(),
+    }));
+    assert.equal(playingCheckpoint.state.phase, 'terra', 'actual WebGL visibility test reaches a substantial Terra checkpoint');
+    assert.equal(typeof playingCheckpoint.identity.replayCount, 'number', 'test identity records explicit replay count');
     await contextLossPage.evaluate(() => { window.__lumenDocumentHidden = true; document.dispatchEvent(new Event('visibilitychange')); });
-    const hidden = await contextLossPage.evaluate(() => ({ draws: window.__lumenActualDrawCount(), state: window.LumenHero.getState() }));
+    const hidden = await contextLossPage.evaluate(() => ({
+      draws: window.__lumenActualDrawCount(),
+      state: window.LumenHero.getState(),
+      identity: window.LumenHeroTest.getLifecycleIdentity(),
+    }));
     await contextLossPage.waitForTimeout(350);
     const hiddenAfterWait = await contextLossPage.evaluate(() => ({ draws: window.__lumenActualDrawCount(), state: window.LumenHero.getState() }));
     assert.equal(hiddenAfterWait.draws, hidden.draws, 'hidden document stops actual WebGL draw calls');
     assert.equal(hiddenAfterWait.state.elapsedMs, hidden.state.elapsedMs, 'hidden document freezes the playing timeline');
-    await contextLossPage.evaluate(() => { window.__lumenDocumentHidden = false; document.dispatchEvent(new Event('visibilitychange')); });
-    await contextLossPage.waitForFunction(({ draws, elapsedMs }) => window.__lumenActualDrawCount() > draws && window.LumenHero.getState().elapsedMs > elapsedMs, {
+    assert.deepEqual(hidden.identity, playingCheckpoint.identity, 'hiding preserves generation and replay identity');
+    await contextLossPage.evaluate(() => {
+      window.__lumenFirstResumedSample = null;
+      const before = window.__lumenActualDrawCount();
+      const capture = window.setInterval(() => {
+        if (window.__lumenActualDrawCount() <= before) return;
+        window.__lumenFirstResumedSample = {
+          state: window.LumenHero.getState(),
+          identity: window.LumenHeroTest.getLifecycleIdentity(),
+        };
+        clearInterval(capture);
+      }, 0);
+      window.__lumenDocumentHidden = false;
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await contextLossPage.waitForFunction(({ draws, elapsedMs }) => window.__lumenFirstResumedSample && window.__lumenActualDrawCount() > draws && window.LumenHero.getState().elapsedMs > elapsedMs, {
       draws: hidden.draws,
       elapsedMs: hidden.state.elapsedMs,
     });
-    const resumed = await contextLossPage.evaluate(() => ({ draws: window.__lumenActualDrawCount(), state: window.LumenHero.getState() }));
+    const resumed = await contextLossPage.evaluate(() => ({
+      draws: window.__lumenActualDrawCount(),
+      state: window.LumenHero.getState(),
+      first: window.__lumenFirstResumedSample,
+      identity: window.LumenHeroTest.getLifecycleIdentity(),
+    }));
     assert.equal(resumed.state.state, 'playing', 'visibility restoration resumes the existing journey without replay');
-    assert.ok(resumed.state.elapsedMs >= hidden.state.elapsedMs, 'visibility restoration does not reset the timeline');
+    assert.ok(resumed.first.state.elapsedMs >= hidden.state.elapsedMs - 100, 'first resumed draw cannot fall materially below the Terra checkpoint');
+    assert.notEqual(resumed.first.state.phase, 'solar', 'first resumed draw does not return to Solar');
+    assert.deepEqual(resumed.first.identity, hidden.identity, 'first resumed draw preserves generation and replay identity');
+    assert.deepEqual(resumed.identity, hidden.identity, 'continued progression preserves generation and replay identity');
     await contextLossPage.evaluate(() => window.LumenHero.skip());
     const heldWebgl = await contextLossPage.locator('#lumen-hero').screenshot({ path: join(snapshotDirectory, 'lumen-webgl-held-desktop.png') });
     await assertHeldPathMatch(heldWebgl, 'desktop', 'actual WebGL held path', 0.38);

@@ -24,6 +24,7 @@
   var heldMotionMs = 0;
   var rafId = 0;
   var generation = 0;
+  var replayCount = 0;
   var scene = null;
   var sceneAbort = null;
   var pendingVideo = false;
@@ -328,6 +329,7 @@
 
   function replay() {
     if (mode === 'poster' || destroyed || !canRun()) return;
+    replayCount += 1;
     var attempt = generation;
     stopLoop();
     elapsedMs = 0;
@@ -430,7 +432,10 @@
     },
   };
   if (new URLSearchParams(window.location.search).get('lumen-test') === '1') {
-    window.LumenHeroTest = { getProjections: heldProjections };
+    window.LumenHeroTest = {
+      getProjections: heldProjections,
+      getLifecycleIdentity: function () { return { generation: generation, replayCount: replayCount }; },
+    };
   }
 
   if (signals.reduceMotion || signals.automated) showPoster('motion-policy');
