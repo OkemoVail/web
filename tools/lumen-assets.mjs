@@ -191,6 +191,7 @@ for (const [tier, width] of Object.entries({ mobile: 1024, desktop: 2048 })) {
   await normalMap(moonBuffer, `moon-normal-${tier}.webp`, width, 0.7);
 }
 await copyFile(join(root, 'node_modules/three/build/three.module.min.js'), join(root, 'AI/vendor/three.module.min.js'));
+await copyFile(join(root, 'node_modules/three/build/three.core.min.js'), join(root, 'AI/vendor/three.core.min.js'));
 await copyFile(join(root, 'node_modules/three/LICENSE'), join(root, 'AI/vendor/three-LICENSE.txt'));
 if (allowMedia) await renderMedia();
 
@@ -203,6 +204,10 @@ for (const [family, sourceIds] of Object.entries(outputSources)) for (const tier
   const name = `${family}-${tier}.webp`;
   const data = await readFile(join(outputDir, name));
   files[name] = { bytes: data.length, sha256: digest(data), sources: sourceIds, source: sources[sourceIds[0]].page };
+}
+for (const name of ['three.module.min.js', 'three.core.min.js']) {
+  const data = await readFile(join(root, 'AI/vendor', name));
+  files[name] = { bytes: data.length, sha256: digest(data), source: 'https://www.npmjs.com/package/three' };
 }
 for (const name of mediaNames) {
   const data = await readFile(join(outputDir, name));

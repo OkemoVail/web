@@ -155,6 +155,16 @@
       ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
       "immutable": true
+    },
+    "three.module.min.js": {
+      "bytes": 338908,
+      "sha256": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6",
+      "source": "https://www.npmjs.com/package/three"
+    },
+    "three.core.min.js": {
+      "bytes": 381124,
+      "sha256": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de",
+      "source": "https://www.npmjs.com/package/three"
     }
   },
   "media": {

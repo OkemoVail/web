@@ -19,15 +19,48 @@ function assetPath(assets, name, tier) {
   return typeof value === 'string' ? value : value[tier];
 }
 
-async function createLumenScene({ mount, quality, assets, onContextLost = function () {} }) {
-  if (!mount || !quality || !assets) throw new TypeError('Lumen scene requires mount, quality, and assets');
+const defaultDependencies = {
+  createRenderer: (options) => new THREE.WebGLRenderer(options),
+  loadTimeline: async (signal) => {
+    const response = await fetch(new URL('./lumen-timeline.json', import.meta.url), { signal });
+    if (!response.ok) throw new Error('Unable to load the Lumen timeline');
+    return response.json();
+  },
+  loadTexture: (loader, path) => loader.loadAsync(path),
+};
 
-  const timelineResponse = await fetch(new URL('./lumen-timeline.json', import.meta.url));
-  if (!timelineResponse.ok) throw new Error('Unable to load the Lumen timeline');
-  const timeline = await timelineResponse.json();
+function abortError(message = 'Lumen scene initialization aborted') {
+  return new DOMException(message, 'AbortError');
+}
+
+function patchEarthShader(shader, earthNight, lightDirection) {
+  shader.uniforms.earthNight = { value: earthNight };
+  shader.uniforms.lightDirection = { value: lightDirection };
+  shader.vertexShader = shader.vertexShader
+    .replace('#include <common>', '#include <common>\nvarying vec3 lumenWorldNormal;')
+    .replace('#include <defaultnormal_vertex>', `#include <defaultnormal_vertex>
+lumenWorldNormal = normalize(vec3(
+  dot(transformedNormal, viewMatrix[0].xyz),
+  dot(transformedNormal, viewMatrix[1].xyz),
+  dot(transformedNormal, viewMatrix[2].xyz)
+));`);
+  shader.fragmentShader = shader.fragmentShader
+    .replace('#include <common>', '#include <common>\nuniform sampler2D earthNight;\nuniform vec3 lightDirection;\nvarying vec3 lumenWorldNormal;')
+    .replace('#include <opaque_fragment>', `
+      float lumenDark = 1.0 - smoothstep(-0.12, 0.16, dot(normalize(lumenWorldNormal), normalize(lightDirection)));
+      outgoingLight += texture2D(earthNight, vMapUv).rgb * lumenDark * 1.6;
+      #include <opaque_fragment>
+    `);
+}
+
+async function createLumenSceneWithDependencies(
+  { mount, quality, assets, onContextLost = function () {}, signal },
+  dependencies = defaultDependencies,
+) {
+  if (!mount || !quality || !assets) throw new TypeError('Lumen scene requires mount, quality, and assets');
   const tier = quality.textureTier === 'mobile' ? 'mobile' : 'desktop';
   const segments = tier === 'mobile' ? 64 : 128;
-  const renderer = new THREE.WebGLRenderer({ alpha: false, antialias: Boolean(quality.antialias) });
+  const renderer = dependencies.createRenderer({ alpha: false, antialias: Boolean(quality.antialias) });
   renderer.setPixelRatio(Math.min(quality.pixelRatio, 1.5));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
@@ -35,17 +68,72 @@ async function createLumenScene({ mount, quality, assets, onContextLost = functi
   renderer.domElement.setAttribute('aria-hidden', 'true');
   mount.appendChild(renderer.domElement);
 
+  let active = true;
+  let disposed = false;
+  let contextLost = false;
+  let initializing = true;
+  let rejectInitialization;
+  const initializationInterrupted = new Promise((resolve, reject) => { rejectInitialization = reject; });
+  const textures = [];
+  const geometries = [];
+  const materials = [];
+
+  function disposeResources() {
+    if (disposed) return;
+    disposed = true;
+    active = false;
+    renderer.domElement.removeEventListener('webglcontextlost', handleContextLost, false);
+    signal?.removeEventListener('abort', handleAbort);
+    geometries.forEach((geometry) => geometry.dispose());
+    materials.forEach((material) => material.dispose());
+    textures.forEach((texture) => texture.dispose());
+    renderer.dispose();
+    renderer.domElement.remove();
+  }
+
+  function interrupt(error) {
+    if (disposed) return;
+    disposeResources();
+    if (initializing) rejectInitialization(error);
+  }
+
+  function handleAbort() {
+    interrupt(abortError());
+  }
+
+  function handleContextLost(event) {
+    event.preventDefault();
+    if (contextLost) return;
+    contextLost = true;
+    active = false;
+    interrupt(new Error('WebGL context lost during Lumen scene initialization'));
+    onContextLost();
+  }
+
+  renderer.domElement.addEventListener('webglcontextlost', handleContextLost, false);
+  signal?.addEventListener('abort', handleAbort, { once: true });
+  if (signal?.aborted) handleAbort();
+
+  let timeline;
+  try {
+    timeline = await Promise.race([dependencies.loadTimeline(signal), initializationInterrupted]);
+  } catch (error) {
+    interrupt(error);
+    throw error;
+  }
+
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x010207);
   const camera = new THREE.PerspectiveCamera(52, 1, 0.05, 180);
   camera.up.set(0, 0, 1);
   const textureLoader = new THREE.TextureLoader();
-  const textures = [];
-  const geometries = [];
-  const materials = [];
 
   async function loadTexture(name, colorTexture) {
-    const texture = await textureLoader.loadAsync(assetPath(assets, name, tier));
+    const texture = await dependencies.loadTexture(textureLoader, assetPath(assets, name, tier), signal);
+    if (disposed || signal?.aborted) {
+      texture.dispose();
+      throw abortError();
+    }
     texture.colorSpace = colorTexture ? THREE.SRGBColorSpace : THREE.NoColorSpace;
     texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     textures.push(texture);
@@ -59,19 +147,32 @@ async function createLumenScene({ mount, quality, assets, onContextLost = functi
   let moonAlbedo;
   let moonNormal;
   try {
-    [earthDay, earthNight, earthClouds, earthNormal, moonAlbedo, moonNormal] = await Promise.all([
+    [earthDay, earthNight, earthClouds, earthNormal, moonAlbedo, moonNormal] = await Promise.race([Promise.all([
       loadTexture('earthDay', true),
       loadTexture('earthNight', true),
       loadTexture('earthClouds', true),
       loadTexture('earthNormal', false),
       loadTexture('moonAlbedo', true),
       loadTexture('moonNormal', false),
-    ]);
+    ]), initializationInterrupted]);
   } catch (error) {
-    textures.forEach((texture) => texture.dispose());
-    renderer.dispose();
-    renderer.domElement.remove();
+    interrupt(error);
     throw error;
+  }
+
+  if (dependencies.buildScene) {
+    const built = dependencies.buildScene({ renderer, resources: { geometries, materials, textures }, timeline });
+    initializing = false;
+    function render(state, deltaMs) {
+      if (active && !disposed) built.render(state, deltaMs);
+    }
+    function resize(width, height) {
+      if (!disposed && width > 0 && height > 0) built.resize(width, height);
+    }
+    function pause() { active = false; }
+    function resume() { if (!disposed && !contextLost) active = true; }
+    function dispose() { disposeResources(); }
+    return { render, resize, pause, resume, dispose };
   }
 
   function sphere(radius, multiplier = 1) {
@@ -95,20 +196,7 @@ async function createLumenScene({ mount, quality, assets, onContextLost = functi
     roughness: 0.72,
     metalness: 0,
   });
-  earthMaterial.onBeforeCompile = (shader) => {
-    shader.uniforms.earthNight = { value: earthNight };
-    shader.uniforms.lightDirection = { value: lightDirection };
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 lumenWorldNormal;')
-      .replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\nlumenWorldNormal = normalize(mat3(modelMatrix) * objectNormal);');
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform sampler2D earthNight;\nuniform vec3 lightDirection;\nvarying vec3 lumenWorldNormal;')
-      .replace('#include <opaque_fragment>', `
-        float lumenDark = 1.0 - smoothstep(-0.12, 0.16, dot(normalize(lumenWorldNormal), normalize(lightDirection)));
-        outgoingLight += texture2D(earthNight, vMapUv).rgb * lumenDark * 1.6;
-        #include <opaque_fragment>
-      `);
-  };
+  earthMaterial.onBeforeCompile = (shader) => patchEarthShader(shader, earthNight, lightDirection);
   earthMaterial.customProgramCacheKey = () => 'lumen-earth-day-night-v1';
   materials.push(earthMaterial);
   const earth = new THREE.Mesh(sphere(timeline.bodies.earth.radius), earthMaterial); // Earth surface
@@ -217,10 +305,6 @@ async function createLumenScene({ mount, quality, assets, onContextLost = functi
 
   const cameraTarget = new THREE.Vector3();
   let latestState = { phase: 'solar', progress: 0, label: 'SOLAR', copyVisible: false, elapsedMs: 0 };
-  let running = true;
-  let frameId = 0;
-  let disposed = false;
-  let contextLost = false;
   let viewportWidth = 1;
   let viewportHeight = 1;
 
@@ -253,15 +337,9 @@ async function createLumenScene({ mount, quality, assets, onContextLost = functi
     renderer.render(scene, camera);
   }
 
-  function loop() {
-    if (!running || disposed) return;
-    draw(latestState);
-    frameId = requestAnimationFrame(loop);
-  }
-
   function render(state, deltaMs) {
     latestState = { ...state, elapsedMs: Number.isFinite(state.elapsedMs) ? state.elapsedMs : 0, deltaMs };
-    if (!running) return;
+    if (!active || disposed) return;
     draw(latestState);
   }
 
@@ -272,46 +350,28 @@ async function createLumenScene({ mount, quality, assets, onContextLost = functi
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
-    if (running) draw(latestState);
+    if (active) draw(latestState);
   }
 
   function pause() {
-    running = false;
-    if (frameId) cancelAnimationFrame(frameId);
-    frameId = 0;
+    active = false;
   }
 
   function resume() {
-    if (disposed || running) return;
-    running = true;
-    frameId = requestAnimationFrame(loop);
+    if (!disposed && !contextLost) active = true;
   }
-
-  function handleContextLost(event) {
-    event.preventDefault();
-    pause();
-    if (contextLost) return;
-    contextLost = true;
-    onContextLost();
-  }
-
-  renderer.domElement.addEventListener('webglcontextlost', handleContextLost, false);
 
   function dispose() {
-    if (disposed) return;
-    disposed = true;
-    pause();
-    renderer.domElement.removeEventListener('webglcontextlost', handleContextLost, false);
-    geometries.forEach((geometry) => geometry.dispose());
-    materials.forEach((material) => material.dispose());
-    textures.forEach((texture) => texture.dispose());
-    renderer.dispose();
-    renderer.domElement.remove();
+    disposeResources();
   }
 
-  frameId = requestAnimationFrame(loop);
+  initializing = false;
   return { render, resize, pause, resume, dispose };
 }
 
+function createLumenScene(options) {
+  return createLumenSceneWithDependencies(options);
+}
+
 window.createLumenScene = createLumenScene;
-export { createLumenScene };
+export { createLumenScene, createLumenSceneWithDependencies, patchEarthShader };

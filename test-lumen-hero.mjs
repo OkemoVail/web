@@ -75,6 +75,7 @@ const requiredAssetFiles = [
   './tools/lumen-media-transaction.mjs',
   './docs/assets/lumen-hero-provenance.md',
   './AI/vendor/three.module.min.js',
+  './AI/vendor/three.core.min.js',
   './AI/vendor/three-LICENSE.txt',
   './AI/assets/lumen/manifest.json',
   './AI/js/lumen-timeline.json',
@@ -124,7 +125,8 @@ for (const [name, budget] of Object.entries(mediaBudgets)) {
 for (const [name, entry] of Object.entries(runtimeAssets.files)) {
   assert.match(entry.source, /^https:\/\//, `${name} has an HTTPS provenance source`);
   assert.match(entry.sha256, /^[a-f0-9]{64}$/, `${name} has a SHA-256 checksum`);
-  const bytes = readFileSync(new URL(`./AI/assets/lumen/${name}`, import.meta.url));
+  const runtimeDirectory = name.startsWith('three.') ? './AI/vendor/' : './AI/assets/lumen/';
+  const bytes = readFileSync(new URL(`${runtimeDirectory}${name}`, import.meta.url));
   assert.equal(createHash('sha256').update(bytes).digest('hex'), entry.sha256, `${name} deployed bytes match manifest SHA-256`);
 }
 
@@ -166,9 +168,9 @@ const sceneSource = readFileSync(new URL('./AI/js/lumen-scene.js', import.meta.u
 const sceneImports = [...sceneSource.matchAll(/^import\s+[\s\S]*?from\s+['"]([^'"]+)['"];?$/gm)].map((match) => match[1]);
 assert.deepEqual(sceneImports, ['../vendor/three.module.min.js'], 'scene imports only the local Three.js build');
 assert.doesNotMatch(sceneSource, /https?:\/\//, 'scene contains no network URLs');
-assert.match(sceneSource, /fetch\(new URL\(['"]\.\/lumen-timeline\.json['"],\s*import\.meta\.url\)\)/, 'scene consumes the checked-in shared timeline');
+assert.match(sceneSource, /fetch\(new URL\(['"]\.\/lumen-timeline\.json['"],\s*import\.meta\.url\)/, 'scene consumes the checked-in shared timeline');
 assert.match(sceneSource, /window\.createLumenScene\s*=\s*createLumenScene/, 'scene explicitly publishes its browser global');
-assert.match(sceneSource, /export\s*\{\s*createLumenScene\s*\}/, 'scene also exports its factory');
+assert.match(sceneSource, /export\s*\{[^}]*createLumenScene[^}]*\}/, 'scene also exports its factory');
 for (const component of ['Earth surface', 'Earth cloud shell', 'Earth atmosphere', 'Moon surface', 'Procedural solar limb', 'Seeded distant stars']) {
   assert.ok(sceneSource.includes(component), `scene creates ${component}`);
 }
@@ -177,7 +179,7 @@ assert.match(sceneSource, /earthNight[\s\S]*dot\([\s\S]*lightDirection[\s\S]*smo
 assert.match(sceneSource, /earthClouds[\s\S]*transparent:\s*true/, 'Earth clouds remain a separate transparent shell');
 assert.match(sceneSource, /moonNormal[\s\S]*roughness:/, 'Moon is rough and normal mapped');
 assert.match(sceneSource, /webglcontextlost/, 'scene listens for WebGL context loss');
-assert.match(sceneSource, /preventDefault\(\)[\s\S]*pause\(\)[\s\S]*onContextLost/, 'context loss is prevented, paused, and reported');
+assert.match(sceneSource, /preventDefault\(\)[\s\S]*active\s*=\s*false[\s\S]*onContextLost/, 'context loss is prevented, paused, and reported');
 assert.match(sceneSource, /setPixelRatio\(Math\.min\(quality\.pixelRatio,\s*1\.5\)\)/, 'renderer caps the quality profile pixel ratio');
 assert.match(sceneSource, /ACESFilmicToneMapping/, 'scene uses ACES filmic tone mapping');
 assert.match(sceneSource, /SRGBColorSpace/, 'scene uses sRGB output');
@@ -186,6 +188,140 @@ for (const resource of ['geometry', 'material', 'texture', 'renderer']) {
   assert.match(sceneSource, new RegExp(`${resource}\\.dispose\\(\\)`), `scene disposes ${resource} resources`);
 }
 assert.doesNotMatch(sceneSource, /EffectComposer|Bloom|Lensflare|OrbitControls|Cannon|Ammo|anime/, 'scene has no postprocessing, controls, physics, or animation library');
+
+const originalWarnings = process.emitWarning;
+process.emitWarning = (warning, ...args) => {
+  if (args[0]?.code !== 'MODULE_TYPELESS_PACKAGE_JSON') originalWarnings.call(process, warning, ...args);
+};
+const threeModule = await import('./AI/vendor/three.module.min.js');
+process.emitWarning = originalWarnings;
+assert.equal(typeof threeModule.WebGLRenderer, 'function', 'the complete local Three.js module graph imports');
+globalThis.window = {};
+const { createLumenSceneWithDependencies, patchEarthShader } = await import('./AI/js/lumen-scene.js');
+delete globalThis.window;
+
+{
+  const shader = {
+    uniforms: {},
+    vertexShader: '#include <common>\n#include <defaultnormal_vertex>',
+    fragmentShader: '#include <common>\n#include <opaque_fragment>',
+  };
+  patchEarthShader(shader, { id: 'night' }, { id: 'light' });
+  assert.match(shader.vertexShader, /transformedNormal[\s\S]*viewMatrix/, 'Earth shader derives world normal from Three inverse-transpose normal result');
+  assert.doesNotMatch(shader.vertexShader, /mat3\(modelMatrix\)\s*\*\s*objectNormal/, 'Earth shader does not use a scale-unsafe world normal transform');
+  assert.equal(shader.uniforms.earthNight.value.id, 'night', 'Earth shader binds its night texture');
+  assert.equal(shader.uniforms.lightDirection.value.id, 'light', 'Earth shader binds the shared world-space light direction');
+}
+
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+  return { promise, resolve, reject };
+}
+
+function sceneHarness(texturePromises = []) {
+  const listeners = new Map();
+  const canvas = {
+    removed: 0,
+    setAttribute() {},
+    addEventListener(type, listener) { listeners.set(type, listener); },
+    removeEventListener(type, listener) { if (listeners.get(type) === listener) listeners.delete(type); },
+    remove() { this.removed += 1; },
+  };
+  const renderer = {
+    domElement: canvas,
+    capabilities: { getMaxAnisotropy: () => 4 },
+    renders: 0,
+    disposed: 0,
+    setPixelRatio() {},
+    setSize() {},
+    render() { this.renders += 1; },
+    dispose() { this.disposed += 1; },
+  };
+  const mount = { appendChild() {} };
+  let textureIndex = 0;
+  const dependencies = {
+    createRenderer: () => renderer,
+    loadTimeline: async () => timeline,
+    loadTexture: () => texturePromises[textureIndex++] || Promise.resolve({ dispose() {} }),
+    buildScene: ({ renderer: activeRenderer, resources }) => ({
+      render: () => activeRenderer.render(),
+      resize: () => activeRenderer.setSize(),
+      resources,
+    }),
+  };
+  return { canvas, dependencies, listeners, mount, renderer };
+}
+
+{
+  const harness = sceneHarness();
+  const sceneBoundary = await createLumenSceneWithDependencies({
+    mount: harness.mount,
+    quality: { textureTier: 'mobile', pixelRatio: 1, antialias: false },
+    assets: Object.fromEntries(textureFamilies.map((name) => [name, { mobile: name, desktop: name }])),
+  }, harness.dependencies);
+  assert.equal(harness.listeners.has('webglcontextlost'), true, 'context loss is registered during initialization');
+  assert.equal(typeof globalThis.requestAnimationFrame, 'undefined', 'Node test has no RAF scheduler');
+  sceneBoundary.render({ phase: 'solar', progress: 0, label: 'SOLAR', copyVisible: false, elapsedMs: 0 }, 0);
+  assert.equal(harness.renderer.renders, 1, 'render draws exactly once without scheduling RAF');
+  sceneBoundary.pause();
+  sceneBoundary.render({ phase: 'solar', progress: 0.05, label: 'SOLAR', copyVisible: false, elapsedMs: 100 }, 100);
+  assert.equal(harness.renderer.renders, 1, 'pause gates controller-driven draws');
+  sceneBoundary.resume();
+  sceneBoundary.render({ phase: 'solar', progress: 0.05, label: 'SOLAR', copyVisible: false, elapsedMs: 100 }, 0);
+  assert.equal(harness.renderer.renders, 2, 'resume permits the next controller-driven draw');
+  const contextEvent = { prevented: 0, preventDefault() { this.prevented += 1; } };
+  harness.listeners.get('webglcontextlost')(contextEvent);
+  assert.equal(contextEvent.prevented, 1, 'context loss remains handled after initialization');
+  assert.equal(harness.renderer.disposed, 1, 'context loss after initialization disposes resources without an unhandled initialization rejection');
+  sceneBoundary.dispose();
+  sceneBoundary.dispose();
+  assert.equal(harness.renderer.disposed, 1, 'dispose is idempotent');
+  assert.equal(harness.canvas.removed, 1, 'dispose removes the canvas once');
+}
+
+{
+  const loads = textureFamilies.map(() => deferred());
+  const harness = sceneHarness(loads.map(({ promise }) => promise));
+  const abortController = new AbortController();
+  const creation = createLumenSceneWithDependencies({
+    mount: harness.mount,
+    quality: { textureTier: 'mobile', pixelRatio: 1, antialias: false },
+    assets: Object.fromEntries(textureFamilies.map((name) => [name, { mobile: name, desktop: name }])),
+    signal: abortController.signal,
+  }, harness.dependencies);
+  assert.equal(harness.listeners.has('webglcontextlost'), true, 'context loss listener exists before textures settle');
+  abortController.abort();
+  await assert.rejects(creation, { name: 'AbortError' });
+  const lateTextures = loads.map(() => ({ disposed: 0, dispose() { this.disposed += 1; } }));
+  loads.forEach((load, index) => load.resolve(lateTextures[index]));
+  await Promise.all(loads.map(({ promise }) => promise));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(lateTextures.map(({ disposed }) => disposed), [1, 1, 1, 1, 1, 1], 'late sibling texture resolutions are disposed after abort');
+  assert.equal(harness.renderer.disposed, 1, 'abort disposes the renderer');
+  assert.equal(harness.canvas.removed, 1, 'abort removes the canvas');
+}
+
+{
+  const firstLoad = deferred();
+  const harness = sceneHarness([firstLoad.promise, ...textureFamilies.slice(1).map(() => new Promise(() => {}))]);
+  let losses = 0;
+  const creation = createLumenSceneWithDependencies({
+    mount: harness.mount,
+    quality: { textureTier: 'mobile', pixelRatio: 1, antialias: false },
+    assets: Object.fromEntries(textureFamilies.map((name) => [name, { mobile: name, desktop: name }])),
+    onContextLost: () => { losses += 1; },
+  }, harness.dependencies);
+  const event = { prevented: 0, preventDefault() { this.prevented += 1; } };
+  harness.listeners.get('webglcontextlost')(event);
+  harness.listeners.get('webglcontextlost')?.(event);
+  await assert.rejects(creation, /WebGL context lost/);
+  firstLoad.resolve({ disposed: 0, dispose() { this.disposed += 1; } });
+  assert.equal(event.prevented, 1, 'context loss is handled once');
+  assert.equal(losses, 1, 'context loss callback fires once through initialization');
+  assert.equal(harness.renderer.disposed, 1, 'context loss during initialization cleans the renderer');
+}
 
 for (const [family, variants] of Object.entries(sourceAssets.textures)) {
   for (const [tier, runtimePath] of Object.entries(variants)) {
