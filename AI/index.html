@@ -392,6 +392,22 @@
             });
             if (prevBtn) prevBtn.addEventListener('click', function () { scrollToCard(target - 1); });
             if (nextBtn) nextBtn.addEventListener('click', function () { scrollToCard(target + 1); });
+            var swipeStartX = null;
+            var swipeStartY = null;
+            scroller.addEventListener('touchstart', function (event) {
+                if (event.touches.length !== 1) return;
+                swipeStartX = event.touches[0].clientX;
+                swipeStartY = event.touches[0].clientY;
+            }, { passive: true });
+            scroller.addEventListener('touchend', function (event) {
+                if (swipeStartX == null || !event.changedTouches.length) return;
+                var deltaX = event.changedTouches[0].clientX - swipeStartX;
+                var deltaY = event.changedTouches[0].clientY - swipeStartY;
+                swipeStartX = null;
+                swipeStartY = null;
+                if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+                scrollToCard(target + (deltaX < 0 ? 1 : -1));
+            }, { passive: true });
             setActive(0);
             window.addEventListener('load', notifyLumen, { once: true });
 

@@ -5,6 +5,8 @@ import { extname, join, normalize, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
+import pixelmatch from 'pixelmatch';
+import { PNG } from 'pngjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const types = { '.css': 'text/css', '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.mp4': 'video/mp4', '.webp': 'image/webp' };
@@ -23,6 +25,88 @@ const baseUrl = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true });
 const snapshotDirectory = join(root, 'tools', 'snapshots', 'after');
 mkdirSync(snapshotDirectory, { recursive: true });
+
+function relativeRect(rect, parent) {
+  return {
+    left: (rect.left - parent.left) / parent.width,
+    top: (rect.top - parent.top) / parent.height,
+    right: (rect.right - parent.left) / parent.width,
+    bottom: (rect.bottom - parent.top) / parent.height,
+    width: rect.width / parent.width,
+    height: rect.height / parent.height,
+  };
+}
+
+function luminance([red, green, blue]) {
+  const linear = [red, green, blue].map((value) => {
+    const channel = value / 255;
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+
+function contrast(foreground, background) {
+  const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  return (values[0] + 0.05) / (values[1] + 0.05);
+}
+
+async function dominantRegionColor(image, region) {
+  const { data, info } = await sharp(image).extract(region).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const channels = [[], [], []];
+  for (let index = 0; index < data.length; index += info.channels) {
+    channels[0].push(data[index]); channels[1].push(data[index + 1]); channels[2].push(data[index + 2]);
+  }
+  return channels.map((values) => values.sort((a, b) => a - b)[Math.floor(values.length / 2)]);
+}
+
+async function normalizedDifference(first, second) {
+  const options = { width: 400, height: 300, fit: 'cover', position: 'center' };
+  const [a, b] = await Promise.all([
+    sharp(first).resize(options).png().toBuffer(),
+    sharp(second).resize(options).png().toBuffer(),
+  ]);
+  const imageA = PNG.sync.read(a);
+  const imageB = PNG.sync.read(b);
+  const diff = new PNG({ width: imageA.width, height: imageA.height });
+  const mismatched = pixelmatch(imageA.data, imageB.data, diff.data, imageA.width, imageA.height, { threshold: 0.18, includeAA: false });
+  return mismatched / (imageA.width * imageA.height);
+}
+
+async function assertHeldPathMatch(actual, tier, label, tolerance) {
+  const poster = join(root, 'AI', 'assets', 'lumen', `poster-${tier}.webp`);
+  const fallback = join(snapshotDirectory, `lumen-${tier}-held-7900ms.png`);
+  const posterDifference = await normalizedDifference(poster, fallback);
+  assert.ok(posterDifference <= 0.025, `${tier}: poster and extracted held video differ by ${(posterDifference * 100).toFixed(2)}%, within the 2.5% encoded-frame tolerance`);
+  const actualDifference = await normalizedDifference(actual, fallback);
+  assert.ok(actualDifference <= tolerance, `${label}: registered held frame differs by ${(actualDifference * 100).toFixed(2)}%, within ${(tolerance * 100).toFixed(0)}% cross-renderer tolerance`);
+  return { posterDifference, actualDifference };
+}
+
+async function assertThemeContrast(page, theme) {
+  await page.evaluate((nextTheme) => document.documentElement.classList.toggle('dark', nextTheme === 'dark'), theme);
+  const hero = page.locator('#lumen-hero');
+  const screenshot = await hero.screenshot();
+  const geometry = await page.evaluate(() => {
+    const heroRect = document.querySelector('#lumen-hero').getBoundingClientRect();
+    const region = (selector) => {
+      const element = document.querySelector(selector);
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        rect: { left: Math.round(rect.left - heroRect.left), top: Math.round(rect.top - heroRect.top), width: Math.max(1, Math.round(rect.width)), height: Math.max(1, Math.round(rect.height)) },
+        color: style.color.match(/[\d.]+/g).slice(0, 3).map(Number),
+        background: style.backgroundColor.match(/[\d.]+/g).slice(0, 3).map(Number),
+      };
+    };
+    return { eyebrow: region('.lumen-eyebrow'), deck: region('.lumen-deck'), start: region('.lumen-start') };
+  });
+  for (const name of ['eyebrow', 'deck']) {
+    const item = geometry[name];
+    const background = await dominantRegionColor(screenshot, item.rect);
+    assert.ok(contrast(item.color, background) >= 4.5, `${theme} ${name} contrast meets WCAG AA against sampled rendered pixels`);
+  }
+  assert.ok(contrast(geometry.start.color, geometry.start.background) >= 4.5, `${theme} Start control contrast meets WCAG AA`);
+}
 
 async function assertReadableFrame(page, message, requireCopy = true) {
   const frame = await page.locator('#lumen-hero').screenshot();
@@ -47,22 +131,37 @@ async function assertPosterComposition(page, viewport, name) {
       copy: rect('#lumen-copy'),
       nav: rect('.ov-nav__bar'),
       start: rect('.lumen-start'),
+      earth: window.LumenHeroTest?.getProjections().earth,
+      moon: window.LumenHeroTest?.getProjections().moon,
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     };
   });
   assert.ok(layout.hero.top >= layout.nav.bottom, `${name}: hero does not collide with floating navigation`);
   assert.ok(layout.copy.left >= layout.hero.left && layout.copy.bottom <= layout.hero.bottom, `${name}: copy remains within hero bounds`);
+  assert.ok(layout.copy.top >= layout.hero.top && layout.copy.right <= layout.hero.right, `${name}: copy is unclipped on every edge`);
+  const copy = relativeRect(layout.copy, layout.hero);
+  assert.ok(copy.left < 0.2 && copy.bottom > 0.7, `${name}: copy occupies the lower-left composition`);
+  assert.ok(layout.earth.x + layout.earth.radius > 0.6 && layout.earth.y - layout.earth.radius < 0.45 && layout.earth.radius > 0.08, `${name}: Earth visibly occupies the upper-right composition`);
+  assert.ok(layout.moon.x > 0 && layout.moon.x < 1 && layout.moon.y > 0 && layout.moon.y < 1 && layout.moon.radius > 0.015, `${name}: Moon is visibly projected within the frame`);
   assert.ok(layout.start.left >= layout.hero.left && layout.start.right <= layout.hero.right, `${name}: CTA remains within hero bounds`);
   assert.equal(layout.overflow, 0, `${name}: page has no horizontal clipping`);
-  await page.screenshot({ path: join(snapshotDirectory, `lumen-poster-${name}.png`), fullPage: true });
+  const snapshotPath = join(snapshotDirectory, `lumen-poster-${name}.png`);
+  await page.screenshot({ path: snapshotPath });
+  const metadata = await sharp(snapshotPath).metadata();
+  assert.deepEqual([metadata.width, metadata.height], [viewport.width, viewport.height], `${name}: snapshot exists at exact viewport dimensions`);
   await assertReadableFrame(page, name);
+  if (name === 'desktop-1440x900') {
+    await assertThemeContrast(page, 'light');
+    await assertThemeContrast(page, 'dark');
+    await assertHeldPathMatch(await page.locator('#lumen-hero').screenshot(), 'desktop', 'desktop poster path', 0.08);
+  }
 }
 
 async function assertHeldPoster(page) {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
-  await page.goto(`${baseUrl}/AI/index.html`);
+  await page.goto(`${baseUrl}/AI/index.html?lumen-test=1`);
   try {
     await page.locator('#lumen-hero[data-state="held"]').waitFor();
   } catch (error) {
@@ -234,25 +333,94 @@ try {
   await assertReadableFrame(videoErrorPage, 'video error poster');
   await videoError.close();
 
-  const contextLoss = await browser.newContext();
+  const missingMedia = await browser.newContext();
+  await missingMedia.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 2 });
+    HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
+  });
+  const missingMediaPage = await missingMedia.newPage();
+  await missingMediaPage.route(/journey-(mobile|desktop)\.mp4/, (route) => route.fulfill({ status: 404, body: 'missing' }));
+  await missingMediaPage.goto(`${baseUrl}/AI/index.html`);
+  await missingMediaPage.locator('#lumen-fallback').dispatchEvent('error');
+  await missingMediaPage.locator('#lumen-hero[data-mode="poster"][data-state="held"]').waitFor();
+  await assertReadableFrame(missingMediaPage, 'missing fallback media poster');
+  await missingMedia.close();
+
+  for (const failure of ['texture', 'renderer']) {
+    const failureContext = await browser.newContext();
+    await failureContext.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+      Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+      HTMLMediaElement.prototype.load = function () {};
+      HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
+      HTMLMediaElement.prototype.pause = function () {};
+    });
+    const failurePage = await failureContext.newPage();
+    if (failure === 'texture') await failurePage.route(/earth-day-desktop\.webp/, (route) => route.abort('failed'));
+    else await failurePage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({ contentType: 'text/javascript', body: `function createLumenScene(){throw new Error('renderer creation failed')}window.createLumenScene=createLumenScene;export{createLumenScene};` }));
+    await failurePage.goto(`${baseUrl}/AI/index.html`);
+    assert.deepEqual(await failurePage.evaluate(() => window.LumenHero.ready), { mode: 'video' }, `${failure} failure falls back after a successful WebGL probe`);
+    await assertReadableFrame(failurePage, `${failure} failure fallback`, false);
+    await failureContext.close();
+  }
+
+  const contextLoss = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await contextLoss.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => false });
     Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
     Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
-    HTMLMediaElement.prototype.load = function () {};
-    HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
-    HTMLMediaElement.prototype.pause = function () {};
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => window.__lumenDocumentHidden || false });
+    let policy;
+    Object.defineProperty(window, 'LumenHeroPolicy', {
+      configurable: true,
+      get: () => policy,
+      set: (value) => {
+        const naturalChooseMode = value.chooseMode;
+        value.chooseMode = (signals) => signals.warmupFps == null ? naturalChooseMode(signals) : 'webgl';
+        policy = value;
+      },
+    });
   });
   const contextLossPage = await contextLoss.newPage();
-  await contextLossPage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({
-    contentType: 'text/javascript',
-    body: `async function createLumenScene(options){window.__loseLumenContext=options.onContextLost;return{render(){},resize(){},pause(){},resume(){},dispose(){}}}window.createLumenScene=createLumenScene;export{createLumenScene};`,
-  }));
-  await contextLossPage.goto(`${baseUrl}/AI/index.html`);
-  assert.deepEqual(await contextLossPage.evaluate(() => window.LumenHero.ready), { mode: 'webgl' });
-  await contextLossPage.evaluate(() => window.__loseLumenContext());
-  await contextLossPage.locator('#lumen-hero[data-mode="video"]').waitFor();
-  await assertReadableFrame(contextLossPage, 'context loss fallback', false);
+  await contextLossPage.goto(`${baseUrl}/AI/index.html?lumen-test=1`);
+  const realWebglResult = await contextLossPage.evaluate(async () => {
+    const result = await window.LumenHero.ready;
+    const canvas = document.querySelector('#lumen-stage canvas');
+    if (result.mode !== 'webgl' || !canvas) return { status: 'unsupported', mode: result.mode, reason: 'Chromium could not initialize the actual Three.js WebGL scene' };
+    window.LumenHero.skip();
+    return { status: 'tested', canvas: { width: canvas.width, height: canvas.height } };
+  });
+  if (realWebglResult.status === 'tested') {
+    const heldWebgl = await contextLossPage.locator('#lumen-hero').screenshot({ path: join(snapshotDirectory, 'lumen-webgl-held-desktop.png') });
+    await assertHeldPathMatch(heldWebgl, 'desktop', 'actual WebGL held path', 0.38);
+    await contextLossPage.evaluate(() => { window.__lumenDocumentHidden = true; document.dispatchEvent(new Event('visibilitychange')); });
+    assert.equal((await contextLossPage.evaluate(() => window.LumenHero.getState())).state, 'held', 'real WebGL visibility pause preserves held state');
+    await contextLossPage.evaluate(() => { window.__lumenDocumentHidden = false; document.dispatchEvent(new Event('visibilitychange')); });
+    await contextLossPage.setViewportSize({ width: 390, height: 844 });
+    await contextLossPage.waitForFunction(() => {
+      const canvas = document.querySelector('#lumen-stage canvas');
+      const stage = document.querySelector('#lumen-stage').getBoundingClientRect();
+      return canvas && Math.abs(canvas.width / devicePixelRatio - stage.width) < 2 && Math.abs(canvas.height / devicePixelRatio - stage.height) < 2;
+    });
+    assert.deepEqual(await contextLossPage.evaluate(() => window.LumenHero.getState()), {
+      mode: 'webgl', state: 'held', active: true, elapsedMs: 8000, phase: 'held',
+    }, 'real WebGL resize preserves the held composition');
+    const contextLossResult = await contextLossPage.evaluate(() => {
+      const canvas = document.querySelector('#lumen-stage canvas');
+      const event = new Event('webglcontextlost', { cancelable: true });
+      canvas.dispatchEvent(event);
+      return { prevented: event.defaultPrevented };
+    });
+    assert.equal(contextLossResult.prevented, true, 'actual Three.js canvas prevents the WebGL context-loss event');
+    await contextLossPage.locator('#lumen-hero[data-mode="video"]').waitFor();
+    await assertReadableFrame(contextLossPage, 'real canvas context loss fallback', false);
+  } else {
+    assert.equal(realWebglResult.status, 'unsupported');
+    console.log(`Lumen actual-WebGL lifecycle tests SKIPPED: ${realWebglResult.reason} (mode=${realWebglResult.mode})`);
+  }
   await contextLoss.close();
 
   const lifecycle = await browser.newContext();
@@ -542,7 +710,7 @@ try {
   assert.equal(await weakPage.locator('#lumen-fallback').getAttribute('src'), null, 'destroy clears fallback source');
   await weak.close();
 
-  const carousel = await browser.newContext();
+  const carousel = await browser.newContext({ hasTouch: true });
   await carousel.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => false });
     Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 });
@@ -559,6 +727,24 @@ try {
   await carouselPage.evaluate(() => window.LumenHero.skip());
   const playbackVector = () => carouselPage.evaluate(() => Array.from(document.querySelectorAll('.hero-card video')).map((video) => Boolean(video.__playing)));
   assert.equal(await carouselPage.locator('.hero-dot[data-index="0"]').getAttribute('class'), 'hero-dot active', 'dot 0 is active initially');
+
+  const swipe = async (fromX, toX) => {
+    const box = await carouselPage.locator('#hero-scroll').boundingBox();
+    const y = box.y + box.height / 2;
+    await carouselPage.evaluate(({ fromX, toX, y }) => {
+      const scroller = document.querySelector('#hero-scroll');
+      scroller.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [new Touch({ identifier: 1, target: scroller, clientX: fromX, clientY: y })] }));
+      scroller.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [new Touch({ identifier: 1, target: scroller, clientX: toX, clientY: y })] }));
+      scroller.dispatchEvent(new TouchEvent('touchend', { bubbles: true, changedTouches: [new Touch({ identifier: 1, target: scroller, clientX: toX, clientY: y })] }));
+    }, { fromX, toX, y });
+  };
+  const carouselBox = await carouselPage.locator('#hero-scroll').boundingBox();
+  await swipe(carouselBox.x + carouselBox.width * 0.8, carouselBox.x + carouselBox.width * 0.2);
+  await carouselPage.locator('.hero-dot[data-index="1"].active').waitFor();
+  assert.equal((await carouselPage.evaluate(() => window.LumenHero.getState())).active, false, 'left touch swipe advances and deactivates Lumen');
+  await swipe(carouselBox.x + carouselBox.width * 0.2, carouselBox.x + carouselBox.width * 0.8);
+  await carouselPage.locator('.hero-dot[data-index="0"].active').waitFor();
+  assert.equal((await carouselPage.evaluate(() => window.LumenHero.getState())).active, true, 'right touch swipe returns to Lumen');
 
   await carouselPage.locator('#hero-next').click();
   await carouselPage.locator('.hero-dot[data-index="1"].active').waitFor();

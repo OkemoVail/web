@@ -79,6 +79,7 @@ const requiredAssetFiles = [
   './AI/vendor/three-LICENSE.txt',
   './AI/assets/lumen/manifest.json',
   './AI/js/lumen-timeline.json',
+  './tools/lumen-extract-frames.mjs',
 ];
 for (const path of requiredAssetFiles) {
   assert.ok(existsSync(new URL(path, import.meta.url)), `missing Lumen asset pipeline file: ${path}`);
@@ -355,6 +356,36 @@ for (const tier of ['mobile', 'desktop']) {
   assert.ok(Math.abs(Number(probe.format.duration) - 8) < 0.01, `${tier} fallback duration is eight seconds`);
   const mp4 = readFileSync(new URL(`./AI/assets/lumen/journey-${tier}.mp4`, import.meta.url));
   assert.ok(mp4.indexOf(Buffer.from('moov')) < mp4.indexOf(Buffer.from('mdat')), `${tier} fallback has fast-start metadata`);
+}
+
+const representativeFrames = [
+  ['solar', 500],
+  ['terra', 3500],
+  ['luna', 5750],
+  ['held', 7900],
+];
+execFileSync(process.execPath, [fileURLToPath(new URL('./tools/lumen-extract-frames.mjs', import.meta.url))], { stdio: 'inherit' });
+const extractionManifest = JSON.parse(readFileSync(new URL('./tools/snapshots/after/lumen-frame-extraction.json', import.meta.url), 'utf8'));
+assert.equal(extractionManifest.command, 'ffmpeg -v info -y -i <video> -ss <seconds> -frames:v 1 -vf showinfo -f image2 -c:v png <snapshot>', 'frame extraction records its reproducible command template');
+assert.match(extractionManifest.ffmpegVersion, /^ffmpeg version 9\.0\.1\b/, 'frame extraction records the FFmpeg version');
+assert.deepEqual(extractionManifest.frames.map(({ phase, timestampMs }) => [phase, timestampMs]), representativeFrames, 'frame extraction records the reviewed timestamps');
+for (const tier of ['mobile', 'desktop']) {
+  const expected = runtimeAssets.media[tier];
+  for (const [phase, timestampMs] of representativeFrames) {
+    const path = new URL(`./tools/snapshots/after/lumen-${tier}-${phase}-${timestampMs}ms.png`, import.meta.url);
+    assert.ok(existsSync(path), `${tier} ${phase} representative frame exists`);
+    const frameBytes = readFileSync(path);
+    const metadata = await sharp(frameBytes).metadata();
+    assert.deepEqual([metadata.width, metadata.height], [expected.width, expected.height], `${tier} ${phase} frame dimensions`);
+    const stats = await sharp(frameBytes).stats();
+    assert.ok(stats.entropy > 2, `${tier} ${phase} frame has non-empty image entropy`);
+    const manifestFrame = extractionManifest.outputs.find((entry) => entry.tier === tier && entry.phase === phase);
+    assert.ok(manifestFrame, `${tier} ${phase} extraction is recorded`);
+    assert.equal(manifestFrame.timestampMs, timestampMs, `${tier} ${phase} extraction timestamp is exact`);
+    assert.deepEqual([manifestFrame.width, manifestFrame.height], [expected.width, expected.height], `${tier} ${phase} recorded dimensions are exact`);
+    assert.ok(Math.abs(manifestFrame.sourceFrameTimestampMs - timestampMs) <= 2 * 1000 / runtimeAssets.media.fps, `${tier} ${phase} source frame is within two frames of requested timestamp`);
+    assert.ok(manifestFrame.entropy > 2, `${tier} ${phase} recorded entropy rejects blank output`);
+  }
 }
 
 function extractElement(source, openingMatch, tagName) {

@@ -64,6 +64,36 @@
     };
   }
 
+  function heldProjections() {
+    var mobile = window.innerWidth <= 640;
+    var aspect = stage.clientWidth / stage.clientHeight;
+    var camera = [0, -21, 0.4];
+    var target = [3.2, 0, 1.2];
+    var forward = normalize(target.map(function (value, index) { return value - camera[index]; }));
+    var right = normalize(cross(forward, [0, 0, 1]));
+    var up = cross(right, forward);
+    var tan = Math.tan(58 * Math.PI / 360);
+    function normalize(vector) {
+      var length = Math.hypot.apply(Math, vector);
+      return vector.map(function (value) { return value / length; });
+    }
+    function cross(a, b) {
+      return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    }
+    function dot(a, b) { return a.reduce(function (sum, value, index) { return sum + value * b[index]; }, 0); }
+    function project(position, radius) {
+      var relative = position.map(function (value, index) { return value - camera[index]; });
+      var depth = dot(relative, forward);
+      var x = 0.5 + dot(relative, right) / (2 * depth * tan * aspect);
+      if (mobile) x -= -0.14;
+      return { x: x, y: 0.5 - dot(relative, up) / (2 * depth * tan), radius: radius / (2 * depth * tan) };
+    }
+    return {
+      earth: project([mobile ? 2.5 : 4.2, 0, 1.2], 2.35),
+      moon: project([mobile ? 0.25 : 0.7, -1.1, -0.45], 0.72),
+    };
+  }
+
   function current(attempt) { return !destroyed && attempt === generation; }
 
   function settleReady(result) {
@@ -399,6 +429,9 @@
       return { mode: mode, state: state, active: active, elapsedMs: elapsedMs, phase: policy.timelineAt(elapsedMs).phase };
     },
   };
+  if (new URLSearchParams(window.location.search).get('lumen-test') === '1') {
+    window.LumenHeroTest = { getProjections: heldProjections };
+  }
 
   if (signals.reduceMotion || signals.automated) showPoster('motion-policy');
   else if (policy.chooseMode(signals) === 'video') startVideo(++generation);

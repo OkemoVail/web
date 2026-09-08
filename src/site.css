@@ -1343,6 +1343,11 @@ html.motion-ready [data-reveal].revealed {
             display: inline-flex;
             padding: 0.7rem 1.2rem;
             text-decoration: none;
+            --skuo-surface: #a83f55;
+        }
+
+        .dark [data-page="ai-home"] .lumen-start {
+            --skuo-surface: #b94d67;
         }
 
         [data-page="ai-home"] .lumen-location {

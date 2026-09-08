@@ -35,21 +35,16 @@ NASA SVS remained unreachable, so the source set uses reachable official NASA Sc
 
 The fallback render uses a procedural granular photosphere and corona, a distant point-based star sphere, separate Earth surface/city-light/cloud/normal/atmosphere layers, and projected LRO Moon albedo/normal layers. City emission is multiplied by a normal-to-solar-direction dark-side mask, and one checked-in direction drives that mask and the Sun light shared by Earth and Moon. It contains no baked title copy because the accessible HTML overlay remains authoritative.
 
-## Task 7 Verification (2026-09-08)
+## Task 7 Deterministic Verification (2026-09-09)
 
-Measurements used headed Playwright Chromium with `navigator.webdriver` overridden to `false`, local HTTP delivery, and the real Three.js scene. `LUMEN_PROFILE=1 node test-lumen-hero-playwright.mjs` runs the desktop profile; add `LUMEN_PROFILE_TIER=mobile` for the mobile tier. The diagnostic records the natural policy result before forcing WebGL only when necessary to measure the active scene.
+Run `node tools/lumen-extract-frames.mjs` to extract Solar (0.500 s), Terra (3.500 s), Luna (5.750 s), and held (7.900 s) PNGs from both fallback videos into ignored `tools/snapshots/after/`. The adjacent ignored `lumen-frame-extraction.json` records the exact FFmpeg command template and version, requested and decoded timestamps, dimensions, and entropy. Tests require each decoded timestamp to be within two 30 FPS frames of its request; the two-frame allowance accounts for half-frame requests such as 5.750 s and FFmpeg's output timestamp rounding.
 
-| Metric | Desktop, 1440x900 at 1.5 DPR | Mobile, 390x844 at 3 device DPR |
-| --- | ---: | ---: |
-| Poster response end | 18.9 ms | 12.7 ms |
-| Scene ready after navigation | 974.6 ms | 683.8 ms |
-| Natural warm-up FPS / policy | 22.5 / video | 55.4 / WebGL |
-| Forced/active real-scene FPS | 60.0 | 58.0 |
-| Effective renderer DPR | 1.500 | 0.999 |
-| Texture transfer bytes | 3,029,664 | 812,564 |
-| Total Lumen/Three transfer bytes | 3,851,316 | 1,609,858 |
-| Estimated texture + color/depth GPU bytes | 71,316,885 (68.0 MiB) | 14,554,981 (13.9 MiB) |
+The browser suite generates ignored poster screenshots at 1440x900, 768x1024, and 390x844 and then verifies exact dimensions, four-edge containment, lower-left copy placement, upper-right Earth projection, visible in-frame Moon projection, navigation clearance, and zero horizontal overflow. The stable body projections are exposed only when the page has `?lumen-test=1`.
 
-The poster completed before scene readiness in both profiles. The naturally eligible mobile real-time path stayed above 30 FPS. Desktop correctly rejected its sub-40-FPS warm-up; forced continuation was diagnostic only and stayed above 30 FPS. Instrumentation confirmed that deactivation stops real scene draws, effective DPR does not exceed 1.5, fallback paths do not request Three.js textures, and successful WebGL does not request fallback video.
+Rendered copy regions are sampled from the held screenshot in light and dark themes. WCAG relative luminance checks require 4.5:1 for eyebrow, deck, and Start control foregrounds against their sampled or computed backgrounds. This check required a darker page-local Lumen Start fill; it does not change the shared accent token.
 
-Deterministic poster snapshots are generated in ignored `tools/snapshots/after/` at 1440x900, 768x1024, and 390x844. Automated layout inspection confirms the hero starts below the floating navigation, title copy and CTA remain inside the card, and no horizontal clipping occurs. Representative fallback frames were extracted at 0.5 s, 3.5 s, 5.75 s, and 7.9 s; decoded entropy ranged from 3.05 to 4.47 and every channel exercised a broad range, excluding empty/black frame failures.
+Poster and fallback-held frames are center-cropped and normalized to 400x300 before `pixelmatch`. Their mismatch must remain at or below 2.5%, allowing H.264/WebP encoding differences without accepting composition drift. An actual Three.js held screenshot is compared through the same registration with a 38% tolerance; this intentionally broader cross-renderer threshold accommodates Blender Eevee versus browser Three.js shading while still catching wrong framing, missing bodies, or a different final composition.
+
+Failure coverage includes missing fallback media, texture-load failure after a successful probe, renderer-creation failure, autoplay rejection, video error, and scene import failure. Chromium's actual Three.js canvas receives a cancelable `webglcontextlost` event; the suite also verifies actual-scene held resize and visibility behavior. If Chromium cannot initialize WebGL, these cases report an explicit `SKIPPED/unsupported` result instead of substituting a stub.
+
+These deterministic checks do not establish representative hardware performance, full-journey frame pacing, GPU memory, transfer-byte measurements, or subjective visual realism. The earlier Playwright diagnostic numbers were removed because an automated browser with overridden policy signals is not an external hardware profile.
