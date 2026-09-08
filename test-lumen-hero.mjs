@@ -162,6 +162,31 @@ assert.deepEqual(timeline.phases.map(({ name, startMs, endMs }) => [name, startM
 ]);
 assert.deepEqual(timeline.light.direction, [-0.72, -0.35, -0.6], 'one light direction drives Earth, Moon, and city masking');
 
+const sceneSource = readFileSync(new URL('./AI/js/lumen-scene.js', import.meta.url), 'utf8');
+const sceneImports = [...sceneSource.matchAll(/^import\s+[\s\S]*?from\s+['"]([^'"]+)['"];?$/gm)].map((match) => match[1]);
+assert.deepEqual(sceneImports, ['../vendor/three.module.min.js'], 'scene imports only the local Three.js build');
+assert.doesNotMatch(sceneSource, /https?:\/\//, 'scene contains no network URLs');
+assert.match(sceneSource, /fetch\(new URL\(['"]\.\/lumen-timeline\.json['"],\s*import\.meta\.url\)\)/, 'scene consumes the checked-in shared timeline');
+assert.match(sceneSource, /window\.createLumenScene\s*=\s*createLumenScene/, 'scene explicitly publishes its browser global');
+assert.match(sceneSource, /export\s*\{\s*createLumenScene\s*\}/, 'scene also exports its factory');
+for (const component of ['Earth surface', 'Earth cloud shell', 'Earth atmosphere', 'Moon surface', 'Procedural solar limb', 'Seeded distant stars']) {
+  assert.ok(sceneSource.includes(component), `scene creates ${component}`);
+}
+assert.match(sceneSource, /MeshStandardMaterial[\s\S]*earthDay[\s\S]*earthNight/, 'Earth uses separate day and night textures');
+assert.match(sceneSource, /earthNight[\s\S]*dot\([\s\S]*lightDirection[\s\S]*smoothstep/, 'night lights are physically masked to the dark side');
+assert.match(sceneSource, /earthClouds[\s\S]*transparent:\s*true/, 'Earth clouds remain a separate transparent shell');
+assert.match(sceneSource, /moonNormal[\s\S]*roughness:/, 'Moon is rough and normal mapped');
+assert.match(sceneSource, /webglcontextlost/, 'scene listens for WebGL context loss');
+assert.match(sceneSource, /preventDefault\(\)[\s\S]*pause\(\)[\s\S]*onContextLost/, 'context loss is prevented, paused, and reported');
+assert.match(sceneSource, /setPixelRatio\(Math\.min\(quality\.pixelRatio,\s*1\.5\)\)/, 'renderer caps the quality profile pixel ratio');
+assert.match(sceneSource, /ACESFilmicToneMapping/, 'scene uses ACES filmic tone mapping');
+assert.match(sceneSource, /SRGBColorSpace/, 'scene uses sRGB output');
+assert.match(sceneSource, /function dispose\(\)/, 'scene defines disposal');
+for (const resource of ['geometry', 'material', 'texture', 'renderer']) {
+  assert.match(sceneSource, new RegExp(`${resource}\\.dispose\\(\\)`), `scene disposes ${resource} resources`);
+}
+assert.doesNotMatch(sceneSource, /EffectComposer|Bloom|Lensflare|OrbitControls|Cannon|Ammo|anime/, 'scene has no postprocessing, controls, physics, or animation library');
+
 for (const [family, variants] of Object.entries(sourceAssets.textures)) {
   for (const [tier, runtimePath] of Object.entries(variants)) {
     const metadata = await sharp(readFileSync(new URL(`./AI/${runtimePath}`, import.meta.url))).metadata();
