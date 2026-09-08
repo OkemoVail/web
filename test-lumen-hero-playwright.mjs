@@ -373,6 +373,23 @@ try {
     Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
     Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => window.__lumenDocumentHidden || false });
+    let actualDrawCount = 0;
+    let instrumentedDrawMethods = 0;
+    for (const constructorName of ['WebGLRenderingContext', 'WebGL2RenderingContext']) {
+      const prototype = window[constructorName]?.prototype;
+      if (!prototype) continue;
+      for (const methodName of ['drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced']) {
+        const nativeDraw = prototype[methodName];
+        if (!nativeDraw) continue;
+        instrumentedDrawMethods += 1;
+        prototype[methodName] = function (...args) {
+          actualDrawCount += 1;
+          return nativeDraw.apply(this, args);
+        };
+      }
+    }
+    window.__lumenActualDrawCount = () => actualDrawCount;
+    window.__lumenActualDrawSupported = () => instrumentedDrawMethods > 0;
     let policy;
     Object.defineProperty(window, 'LumenHeroPolicy', {
       configurable: true,
@@ -390,15 +407,30 @@ try {
     const result = await window.LumenHero.ready;
     const canvas = document.querySelector('#lumen-stage canvas');
     if (result.mode !== 'webgl' || !canvas) return { status: 'unsupported', mode: result.mode, reason: 'Chromium could not initialize the actual Three.js WebGL scene' };
-    window.LumenHero.skip();
+    if (!window.__lumenActualDrawSupported()) return { status: 'unsupported', mode: result.mode, reason: 'Chromium exposed no instrumentable WebGL draw methods' };
     return { status: 'tested', canvas: { width: canvas.width, height: canvas.height } };
   });
   if (realWebglResult.status === 'tested') {
+    const playingStart = await contextLossPage.evaluate(() => ({ draws: window.__lumenActualDrawCount(), state: window.LumenHero.getState() }));
+    assert.equal(playingStart.state.state, 'playing', 'actual WebGL visibility test starts during the journey');
+    await contextLossPage.waitForFunction((draws) => window.__lumenActualDrawCount() > draws, playingStart.draws);
+    await contextLossPage.evaluate(() => { window.__lumenDocumentHidden = true; document.dispatchEvent(new Event('visibilitychange')); });
+    const hidden = await contextLossPage.evaluate(() => ({ draws: window.__lumenActualDrawCount(), state: window.LumenHero.getState() }));
+    await contextLossPage.waitForTimeout(350);
+    const hiddenAfterWait = await contextLossPage.evaluate(() => ({ draws: window.__lumenActualDrawCount(), state: window.LumenHero.getState() }));
+    assert.equal(hiddenAfterWait.draws, hidden.draws, 'hidden document stops actual WebGL draw calls');
+    assert.equal(hiddenAfterWait.state.elapsedMs, hidden.state.elapsedMs, 'hidden document freezes the playing timeline');
+    await contextLossPage.evaluate(() => { window.__lumenDocumentHidden = false; document.dispatchEvent(new Event('visibilitychange')); });
+    await contextLossPage.waitForFunction(({ draws, elapsedMs }) => window.__lumenActualDrawCount() > draws && window.LumenHero.getState().elapsedMs > elapsedMs, {
+      draws: hidden.draws,
+      elapsedMs: hidden.state.elapsedMs,
+    });
+    const resumed = await contextLossPage.evaluate(() => ({ draws: window.__lumenActualDrawCount(), state: window.LumenHero.getState() }));
+    assert.equal(resumed.state.state, 'playing', 'visibility restoration resumes the existing journey without replay');
+    assert.ok(resumed.state.elapsedMs >= hidden.state.elapsedMs, 'visibility restoration does not reset the timeline');
+    await contextLossPage.evaluate(() => window.LumenHero.skip());
     const heldWebgl = await contextLossPage.locator('#lumen-hero').screenshot({ path: join(snapshotDirectory, 'lumen-webgl-held-desktop.png') });
     await assertHeldPathMatch(heldWebgl, 'desktop', 'actual WebGL held path', 0.38);
-    await contextLossPage.evaluate(() => { window.__lumenDocumentHidden = true; document.dispatchEvent(new Event('visibilitychange')); });
-    assert.equal((await contextLossPage.evaluate(() => window.LumenHero.getState())).state, 'held', 'real WebGL visibility pause preserves held state');
-    await contextLossPage.evaluate(() => { window.__lumenDocumentHidden = false; document.dispatchEvent(new Event('visibilitychange')); });
     await contextLossPage.setViewportSize({ width: 390, height: 844 });
     await contextLossPage.waitForFunction(() => {
       const canvas = document.querySelector('#lumen-stage canvas');

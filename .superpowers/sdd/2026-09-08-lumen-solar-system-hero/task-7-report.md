@@ -18,7 +18,7 @@ The test asserts exact screenshot dimensions, navigation clearance, four-edge co
 
 ## Failure Matrix
 
-The Playwright suite covers reduced motion, Save-Data, WebGL probe failure, scene import failure, texture-load failure, renderer-creation failure, missing fallback media, autoplay rejection, video error, touch swipes, rapid carousel/dot navigation, and held-state viewport resize. The actual Three.js canvas receives `webglcontextlost`, and its visibility/resize behavior is exercised when Chromium exposes WebGL; otherwise the suite reports the case as explicitly unsupported rather than passing a stub.
+The Playwright suite covers reduced motion, Save-Data, WebGL probe failure, scene import failure, texture-load failure, renderer-creation failure, missing fallback media, autoplay rejection, video error, touch swipes, rapid carousel/dot navigation, and held-state viewport resize. On the actual Three.js playing path, native WebGL draw instrumentation proves draws advance before hiding, stop while hidden alongside frozen elapsed time, and resume from the paused timeline value after visibility restoration without replay. The actual canvas then receives `webglcontextlost`; if Chromium cannot expose this path, the suite reports it as unsupported rather than passing a stub.
 
 ## Objective Visual Checks
 
@@ -46,6 +46,7 @@ Residual concern: only a human image review can conclusively reject subjective i
 - Added geometry, contrast, registered cross-path pixel, touch/swipe, failure, and actual-WebGL lifecycle coverage.
 - Darkened the page-local Lumen Start fill to meet 4.5:1 contrast and added a test-only projection hook.
 - Removed unsupported profiling claims from provenance.
+- Round 2 replaced the held-state-only visibility assertion with actual playing-path draw and timeline pause/resume evidence.
 
 ## Evidence (2026-09-09)
 
@@ -55,3 +56,10 @@ Residual concern: only a human image review can conclusively reject subjective i
 - `node test-ai-home-bdh.mjs`: PASS.
 - `node test-z-index.mjs`: PASS.
 - `git diff --check`: PASS (line-ending conversion warnings only; no whitespace errors).
+
+## Round 2 Evidence (2026-09-09)
+
+- TDD red: `node test-lumen-hero-playwright.mjs` failed because `window.__lumenActualDrawCount` did not exist before native WebGL instrumentation was installed.
+- TDD green: `node test-lumen-hero-playwright.mjs` passed with actual WebGL playing-state draws stopping while hidden and resuming without timeline reset.
+- Final verification: `node test-lumen-hero.mjs`, `node test-lumen-hero-playwright.mjs`, `node test-ai-home-theme.mjs`, `node test-ai-home-bdh.mjs`, and `node test-z-index.mjs` all PASS.
+- Final `git diff --check`: PASS (line-ending conversion warnings only; no whitespace errors).
