@@ -11,40 +11,61 @@ import vm from 'node:vm';
 const html = readFileSync(new URL('./AI/index.html', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
 
-const { acceptMediaTransaction } = await import('./tools/lumen-media-transaction.mjs');
-const transactionRoot = await mkdtemp('C:\\Users\\okemo\\AppData\\Local\\Temp\\opencode\\lumen-transaction-test-');
-try {
-  const stagedDir = join(transactionRoot, 'staged');
-  const deployedDir = join(transactionRoot, 'deployed');
-  const configPath = join(transactionRoot, 'lumen-assets.json');
-  const names = ['poster.webp', 'journey.mp4'];
-  await mkdir(stagedDir);
-  await mkdir(deployedDir);
-  await writeFile(join(stagedDir, names[0]), 'new poster');
-  await writeFile(join(stagedDir, names[1]), 'new video');
-  await writeFile(join(deployedDir, names[0]), 'reviewed poster');
-  await writeFile(join(deployedDir, names[1]), 'reviewed video');
-  const oldConfig = { reviewedMedia: { files: { 'poster.webp': 'old-poster-hash', 'journey.mp4': 'old-video-hash' } } };
-  const nextConfig = { reviewedMedia: { files: { 'poster.webp': 'new-poster-hash', 'journey.mp4': 'new-video-hash' } } };
-  await writeFile(configPath, `${JSON.stringify(oldConfig)}\n`);
+const { acceptMediaTransaction, nodeFs } = await import('./tools/lumen-media-transaction.mjs');
+for (const failure of ['write', 'rename']) {
+  const transactionRoot = await mkdtemp('C:\\Users\\okemo\\AppData\\Local\\Temp\\opencode\\lumen-transaction-test-');
+  try {
+    const stagedDir = join(transactionRoot, 'staged');
+    const deployedDir = join(transactionRoot, 'deployed');
+    const configPath = join(transactionRoot, 'lumen-assets.json');
+    const names = ['poster.webp', 'journey.mp4'];
+    await mkdir(stagedDir);
+    await mkdir(deployedDir);
+    await writeFile(join(stagedDir, names[0]), 'new poster');
+    await writeFile(join(stagedDir, names[1]), 'new video');
+    await writeFile(join(deployedDir, names[0]), 'reviewed poster');
+    await writeFile(join(deployedDir, names[1]), 'reviewed video');
+    const originalConfig = Buffer.from('{\n  "reviewedMedia": { "files": { "poster.webp": "old-poster-hash", "journey.mp4": "old-video-hash" } }\n}\n');
+    const nextConfig = { reviewedMedia: { files: { 'poster.webp': 'new-poster-hash', 'journey.mp4': 'new-video-hash' } } };
+    await writeFile(configPath, originalConfig);
+    let postPromotionValidated = false;
+    const fs = {
+      ...nodeFs,
+      writeFile: async (path, data) => {
+        if (failure === 'write' && path === `${configPath}.tmp`) throw new Error('simulated config temp write failure');
+        return nodeFs.writeFile(path, data);
+      },
+      rename: async (from, to) => {
+        if (failure === 'rename' && from === `${configPath}.tmp` && to === configPath) throw new Error('simulated final config rename failure');
+        return nodeFs.rename(from, to);
+      },
+    };
 
-  await assert.rejects(
-    acceptMediaTransaction({
-      mediaNames: names,
-      stagedDir,
-      deployedDir,
-      configPath,
-      nextConfig,
-      validate: async () => {},
-      beforeConfigCommit: async () => { throw new Error('simulated config failure'); },
-    }),
-    /simulated config failure/,
-  );
-  assert.equal(await readFile(join(deployedDir, names[0]), 'utf8'), 'reviewed poster', 'failed acceptance restores reviewed poster');
-  assert.equal(await readFile(join(deployedDir, names[1]), 'utf8'), 'reviewed video', 'failed acceptance restores reviewed video');
-  assert.deepEqual(JSON.parse(await readFile(configPath, 'utf8')), oldConfig, 'failed acceptance preserves reviewed hashes');
-} finally {
-  await rm(transactionRoot, { recursive: true, force: true });
+    await assert.rejects(
+      acceptMediaTransaction({
+        mediaNames: names,
+        stagedDir,
+        deployedDir,
+        configPath,
+        nextConfig,
+        fs,
+        validate: async (directory) => {
+          if (directory === deployedDir) {
+            assert.equal(await readFile(join(deployedDir, names[0]), 'utf8'), 'new poster');
+            assert.equal(await readFile(join(deployedDir, names[1]), 'utf8'), 'new video');
+            postPromotionValidated = true;
+          }
+        },
+      }),
+      new RegExp(`simulated .*config .*${failure} failure`),
+    );
+    assert.ok(postPromotionValidated, `${failure} failure occurs after media promotion and validation`);
+    assert.equal(await readFile(join(deployedDir, names[0]), 'utf8'), 'reviewed poster', `${failure} failure restores reviewed poster`);
+    assert.equal(await readFile(join(deployedDir, names[1]), 'utf8'), 'reviewed video', `${failure} failure restores reviewed video`);
+    assert.deepEqual(await readFile(configPath), originalConfig, `${failure} failure preserves original config bytes`);
+  } finally {
+    await rm(transactionRoot, { recursive: true, force: true });
+  }
 }
 
 const requiredAssetFiles = [

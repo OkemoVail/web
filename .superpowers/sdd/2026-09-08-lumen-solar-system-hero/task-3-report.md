@@ -126,3 +126,11 @@ The review found that `--accept-media` mutated `tools/lumen-assets.json` before 
 The focused failure-path contract in `test-lumen-hero.mjs` uses an isolated directory under `C:\Users\okemo\AppData\Local\Temp\opencode`, two synthetic media files, and synthetic old/new reviewed hashes. Its `beforeConfigCommit` hook throws `simulated config failure` after promotion and validation. `assert.rejects` proves the failure occurs, then byte-for-byte assertions prove both deployed files are the old reviewed files and a parsed config assertion proves both old reviewed hashes remain. Real deployed assets are never touched.
 
 RED command: `node test-lumen-hero.mjs`. Output before implementation: `ERR_MODULE_NOT_FOUND: Cannot find module ... tools/lumen-media-transaction.mjs`. GREEN command: `node test-lumen-hero.mjs`. Output: `Lumen hero policy assertions passed.` Full Task 3 verification command: `npm run build:lumen-assets; node test-lumen-hero.mjs; node test-ai-home-theme.mjs; node test-ai-home-bdh.mjs; node test-z-index.mjs`.
+
+## Fix Round 3: Config Operation Coverage
+
+The round-2 production ordering was transactional, but its test hook failed before either real config filesystem operation. `acceptMediaTransaction` now accepts an injectable filesystem adapter and exports the production Node adapter used by default.
+
+The focused contract runs two isolated transactions. In both cases post-promotion validation first reads `new poster` and `new video` from deployed paths, proving promotion completed. Case one injects a rejection from the actual `${configPath}.tmp` write. Case two permits that write and rejects the actual `${configPath}.tmp` to `${configPath}` rename. After each rejection, assertions compare the config as a `Buffer` against the deliberately formatted original bytes and verify every old deployed media file's exact text. No real assets or production config are touched.
+
+RED command: `node test-lumen-hero.mjs`. Output: `AssertionError [ERR_ASSERTION]: Missing expected rejection.` This proved the then-current transaction ignored injected config filesystem failures. GREEN command: `node test-lumen-hero.mjs`. Output: `Lumen hero policy assertions passed.` The final suite command remains `npm run build:lumen-assets; node test-lumen-hero.mjs; node test-ai-home-theme.mjs; node test-ai-home-bdh.mjs; node test-z-index.mjs`.
