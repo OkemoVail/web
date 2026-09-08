@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { aggregateResources, removeTemporaryProfile, sanitizeReport, summarizeFrames } from './tools/lumen-profile.mjs';
+import { aggregateResources, deriveObservations, removeTemporaryProfile, sanitizeReport, summarizeFrames } from './tools/lumen-profile.mjs';
 
 test('summarizeFrames reports pacing only while the journey clock advances', () => {
   const summary = summarizeFrames([
@@ -33,9 +33,10 @@ test('aggregateResources keeps CDP transfer bytes separate from decoded Resource
     cdpEncodedBytes: 200,
     resourceTiming: { transferSize: 100, encodedBodySize: 90, decodedBodySize: 300 },
     resources: [
-      { path: '/a.webp', cdpEncodedBytes: 80, transferSize: 0, encodedBodySize: 0, decodedBodySize: 0 },
-      { path: '/app.js', cdpEncodedBytes: 120, transferSize: 100, encodedBodySize: 90, decodedBodySize: 300 },
+      { originCategory: 'local', path: '/a.webp', cdpEncodedBytes: 80, transferSize: 0, encodedBodySize: 0, decodedBodySize: 0 },
+      { originCategory: 'local', path: '/app.js', cdpEncodedBytes: 120, transferSize: 100, encodedBodySize: 90, decodedBodySize: 300 },
     ],
+    pathAudit: { webglBytes: 0, videoBytes: 0 },
   });
 });
 
@@ -48,11 +49,32 @@ test('sanitizeReport removes machine paths and loopback origins', () => {
   });
 
   assert.deepEqual(sanitized, {
-    chromeExecutable: 'Google Chrome',
+    chromeExecutable: 'chrome.exe',
     profileDirectory: '[temporary-profile]',
     pageUrl: '[local-origin]/AI/index.html',
     nested: { url: '[local-origin]/AI/assets/lumen/poster.webp' },
   });
+});
+
+test('deriveObservations reports measured modes and path separation', () => {
+  assert.deepEqual(deriveObservations([
+    { name: 'desktop-cold-1', mode: 'webgl', network: { pathAudit: { webglBytes: 10, videoBytes: 0 } } },
+    { name: 'mobile-cold-1', mode: 'video', network: { pathAudit: { webglBytes: 0, videoBytes: 20 } } },
+  ]), [
+    'Modes: desktop-cold-1=webgl; mobile-cold-1=video.',
+    'Selected-path audit: all 2 trials avoided combined WebGL assets and Lumen fallback video.',
+  ]);
+});
+
+test('aggregateResources distinguishes external and local resources with the same pathname', () => {
+  const result = aggregateResources([
+    { url: 'http://127.0.0.1:8000/css2?private=one', encodedBytes: 10 },
+    { url: 'https://fonts.example/css2?private=two', encodedBytes: 20 },
+  ], []);
+  assert.deepEqual(result.resources, [
+    { originCategory: 'external', path: '/css2', cdpEncodedBytes: 20, transferSize: 0, encodedBodySize: 0, decodedBodySize: 0 },
+    { originCategory: 'local', path: '/css2', cdpEncodedBytes: 10, transferSize: 0, encodedBodySize: 0, decodedBodySize: 0 },
+  ]);
 });
 
 test('removeTemporaryProfile retries transient Windows profile locks', async () => {

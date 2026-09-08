@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build:lumen-assets": "node tools/lumen-assets.mjs",
-    "profile:lumen": "node tools/lumen-profile.mjs"
+    "profile:lumen": "node tools/lumen-profile.mjs --output docs/assets/lumen-profile-2026-09-09.json"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.1.16",

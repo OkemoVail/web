@@ -495,7 +495,9 @@ const dependencyOrder = [
 assert.deepEqual(scriptSources.slice(-dependencyOrder.length), dependencyOrder, 'Lumen policy, controller, motion, and nav load in dependency order');
 assert.match(controllerSource, /window\.LumenHero\s*=/, 'controller publishes the LumenHero API');
 assert.match(controllerSource, /var base = ['"]assets\/lumen\/['"]/, 'controller resolves scene textures within the AI app');
-assert.match(controllerSource, /fallBack\(['"]runtime['"],\s*attempt\)/, 'runtime render failures use the shared fallback');
+assert.match(controllerSource, /showPoster\(['"]runtime['"],\s*attempt\)/, 'committed WebGL runtime failures settle to poster without buying video');
+assert.doesNotMatch(controllerSource, /function warmUp\s*\(/, 'production does not reject WebGL after full-scene warm-up');
+assert.doesNotMatch(controllerSource, /signals\.warmupFps\s*=/, 'full-scene creation cannot feed a late mode rejection');
 
 const carouselSource = html.slice(html.indexOf("const scroller = document.getElementById('hero-scroll')"), html.indexOf('<!-- Based AI: Core Pillars'));
 assert.match(carouselSource, /var lumenCard = cards\[0\];/, 'carousel names the Lumen card at index 0');

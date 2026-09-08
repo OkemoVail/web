@@ -298,8 +298,8 @@ try {
   const importPage = await importFailure.newPage();
   await importPage.route('**/AI/js/lumen-scene.js', (route) => route.abort('failed'));
   await importPage.goto(`${baseUrl}/AI/index.html`);
-  assert.deepEqual(await importPage.evaluate(() => window.LumenHero.ready), { mode: 'video' });
-  await assertReadableFrame(importPage, 'dynamic import fallback', false);
+  assert.deepEqual(await importPage.evaluate(() => window.LumenHero.ready), { mode: 'poster' });
+  await assertReadableFrame(importPage, 'dynamic import poster');
   await importFailure.close();
 
   const rejectedAutoplay = await browser.newContext();
@@ -362,8 +362,8 @@ try {
     if (failure === 'texture') await failurePage.route(/earth-day-desktop\.webp/, (route) => route.abort('failed'));
     else await failurePage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({ contentType: 'text/javascript', body: `function createLumenScene(){throw new Error('renderer creation failed')}window.createLumenScene=createLumenScene;export{createLumenScene};` }));
     await failurePage.goto(`${baseUrl}/AI/index.html`);
-    assert.deepEqual(await failurePage.evaluate(() => window.LumenHero.ready), { mode: 'video' }, `${failure} failure falls back after a successful WebGL probe`);
-    await assertReadableFrame(failurePage, `${failure} failure fallback`, false);
+    assert.deepEqual(await failurePage.evaluate(() => window.LumenHero.ready), { mode: 'poster' }, `${failure} failure settles to poster after WebGL commitment`);
+    await assertReadableFrame(failurePage, `${failure} failure poster`);
     await failureContext.close();
   }
 
@@ -401,8 +401,6 @@ try {
       configurable: true,
       get: () => policy,
       set: (value) => {
-        const naturalChooseMode = value.chooseMode;
-        value.chooseMode = (signals) => signals.warmupFps == null ? naturalChooseMode(signals) : 'webgl';
         policy = value;
       },
     });
@@ -487,8 +485,8 @@ try {
       return { prevented: event.defaultPrevented };
     });
     assert.equal(contextLossResult.prevented, true, 'actual Three.js canvas prevents the WebGL context-loss event');
-    await contextLossPage.locator('#lumen-hero[data-mode="video"]').waitFor();
-    await assertReadableFrame(contextLossPage, 'real canvas context loss fallback', false);
+    await contextLossPage.locator('#lumen-hero[data-mode="poster"]').waitFor();
+    await assertReadableFrame(contextLossPage, 'real canvas context loss poster');
   } else {
     assert.equal(realWebglResult.status, 'unsupported');
     console.log(`Lumen actual-WebGL lifecycle tests SKIPPED: ${realWebglResult.reason} (mode=${realWebglResult.mode})`);
@@ -705,12 +703,12 @@ try {
   assert.equal(await inactivePage.evaluate(() => window.__inactivePlays || 0), 0, 'failed initialization cannot autoplay fallback while inactive');
   assert.equal(await inactivePage.locator('#lumen-fallback').getAttribute('src'), null, 'failed initialization cannot download fallback while inactive');
   await inactivePage.evaluate(() => window.LumenHero.setActive(true));
-  assert.deepEqual(await inactivePage.evaluate(() => window.LumenHero.ready), { mode: 'video' });
-  assert.equal(await inactivePage.evaluate(() => window.__inactivePlays), 1, 'reactivation starts the deferred fallback once');
+  assert.deepEqual(await inactivePage.evaluate(() => window.LumenHero.ready), { mode: 'poster' });
+  assert.equal(await inactivePage.evaluate(() => window.__inactivePlays || 0), 0, 'reactivation does not purchase video after WebGL commitment');
   await inactiveFailure.close();
 
-  const warmFallback = await browser.newContext();
-  await warmFallback.addInitScript(() => {
+  const committedWebgl = await browser.newContext();
+  await committedWebgl.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => false });
     Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
     Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
@@ -721,7 +719,7 @@ try {
     HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
     HTMLMediaElement.prototype.pause = function () {};
   });
-  const warmPage = await warmFallback.newPage();
+  const warmPage = await committedWebgl.newPage();
   const warmRequests = [];
   warmPage.on('request', (request) => { if (/earth-|moon-|journey-/.test(request.url())) warmRequests.push(request.url()); });
   await warmPage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({
@@ -731,10 +729,10 @@ try {
       window.createLumenScene=createLumenScene; export {createLumenScene};`,
   }));
   await warmPage.goto(`${baseUrl}/AI/index.html`);
-  assert.deepEqual(await warmPage.evaluate(() => window.LumenHero.ready), { mode: 'video' });
-  assert.equal(warmRequests.filter((url) => /earth-|moon-/.test(url)).length, 6, 'warm-up attempt requests all texture families');
-  assert.equal(await warmPage.locator('#lumen-fallback').getAttribute('src'), 'assets/lumen/journey-desktop.mp4', 'warm-up failure selects video only after scene warm-up');
-  await warmFallback.close();
+  assert.deepEqual(await warmPage.evaluate(() => window.LumenHero.ready), { mode: 'webgl' });
+  assert.equal(warmRequests.filter((url) => /earth-|moon-/.test(url)).length, 6, 'committed WebGL requests its texture family');
+  assert.equal(warmRequests.filter((url) => /journey-/.test(url)).length, 0, 'frame cadence cannot reject a committed scene into video');
+  await committedWebgl.close();
 
   const staleVideo = await browser.newContext();
   await staleVideo.addInitScript(() => {

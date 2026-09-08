@@ -182,7 +182,7 @@
       }
       if (mode === 'video' && Math.abs(video.currentTime * 1000 - elapsedMs) > 180) video.currentTime = elapsedMs / 1000;
     } catch (_) {
-      if (mode === 'webgl') fallBack('runtime', attempt);
+      if (mode === 'webgl') showPoster('runtime', attempt);
       else showPoster('runtime', attempt);
       return;
     }
@@ -249,46 +249,6 @@
     });
   }
 
-  function fallBack(reason, attempt) {
-    if (!current(attempt)) return;
-    generation += 1;
-    var nextAttempt = generation;
-    stopLoop();
-    sceneAbort?.abort();
-    scene?.dispose();
-    scene = null;
-    startVideo(nextAttempt);
-  }
-
-  function warmUp(candidate, attempt) {
-    return new Promise(function (resolve) {
-      var samples = [];
-      var previous = 0;
-      var started = performance.now();
-
-      function warmFrame(now) {
-        rafId = 0;
-        if (!current(attempt)) { resolve(null); return; }
-        if (!canRun()) {
-          rafId = requestAnimationFrame(warmFrame);
-          return;
-        }
-        try { candidate.render({ ...policy.timelineAt(0), elapsedMs: 0 }, previous ? now - previous : 0); }
-        catch (_) { resolve(0); return; }
-        if (previous) samples.push(now - previous);
-        previous = now;
-        if (samples.length >= 12 || now - started >= 500) {
-          var total = samples.reduce(function (sum, value) { return sum + value; }, 0);
-          resolve(total > 0 ? samples.length * 1000 / total : 0);
-          return;
-        }
-        rafId = requestAnimationFrame(warmFrame);
-      }
-
-      rafId = requestAnimationFrame(warmFrame);
-    });
-  }
-
   async function startWebgl() {
     var attempt = ++generation;
     sceneAbort = new AbortController();
@@ -300,16 +260,12 @@
         quality: policy.chooseQuality(signals),
         assets: assets(),
         signal: sceneAbort.signal,
-        onContextLost: function () { fallBack('context-loss', attempt); },
+        onContextLost: function () { showPoster('context-loss', attempt); },
       });
       if (!current(attempt)) { candidate.dispose(); return; }
       scene = candidate;
       var rect = stage.getBoundingClientRect();
       scene.resize(rect.width, rect.height);
-      signals.warmupFps = await warmUp(scene, attempt);
-      if (!current(attempt)) { candidate.dispose(); return; }
-      if (signals.warmupFps == null) return;
-      if (policy.chooseMode(signals) !== 'webgl') { fallBack('warm-up', attempt); return; }
       mode = 'webgl';
       elapsedMs = 0;
       setPresentation('webgl', 'playing');
@@ -317,7 +273,7 @@
       settleReady({ mode: 'webgl' });
       schedule(attempt);
     } catch (error) {
-      if (current(attempt) && error?.name !== 'AbortError') fallBack('scene', attempt);
+      if (current(attempt) && error?.name !== 'AbortError') showPoster('scene', attempt);
     }
   }
 
