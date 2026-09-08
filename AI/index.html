@@ -155,7 +155,7 @@
                             <svg class="ic-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M91.2 36.9c-12.4-6.8-27.4-6.5-39.6 .7S32 57.9 32 72l0 368c0 14.1 7.5 27.2 19.6 34.4s27.2 7.5 39.6 .7l336-184c12.8-7 20.8-20.5 20.8-35.1s-8-28.1-20.8-35.1l-336-184z"/></svg>
                             <svg class="ic-pause hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M48 32C21.5 32 0 53.5 0 80L0 432c0 26.5 21.5 48 48 48l64 0c26.5 0 48-21.5 48-48l0-352c0-26.5-21.5-48-48-48L48 32zm224 0c-26.5 0-48 21.5-48 48l0 352c0 26.5 21.5 48 48 48l64 0c26.5 0 48-21.5 48-48l0-352c0-26.5-21.5-48-48-48l-64 0z"/></svg>
                         </button>
-                        <div class="hp-seek" id="hp-seek" role="slider" aria-label="Seek" tabindex="0">
+                        <div class="hp-seek" id="hp-seek" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00 of 0:00" tabindex="0">
                             <div class="hp-seek-fill" id="hp-seek-fill"></div>
                         </div>
                         <span class="hp-time" id="hp-time">0:00 / 0:00</span>
@@ -264,6 +264,16 @@
                     if (pPlayIc) pPlayIc.classList.toggle('hide', playing);
                 }
 
+                function updateSeekState() {
+                    if (!pSeek) return;
+                    var duration = isFinite(pVideo.duration) ? Math.max(0, pVideo.duration) : 0;
+                    var currentTime = Math.max(0, Math.min(duration, pVideo.currentTime || 0));
+                    pSeek.setAttribute('aria-valuemin', '0');
+                    pSeek.setAttribute('aria-valuemax', String(Math.round(duration)));
+                    pSeek.setAttribute('aria-valuenow', String(Math.round(currentTime)));
+                    pSeek.setAttribute('aria-valuetext', fmt(currentTime) + ' of ' + fmt(duration));
+                }
+
                 /* ── Auto-hide player after 500ms ── */
                 var hideTimer;
                 function showPlayer() {
@@ -297,9 +307,11 @@
                     var pct = pVideo.duration ? (pVideo.currentTime / pVideo.duration) * 100 : 0;
                     if (pSeekFill) pSeekFill.style.width = pct + '%';
                     if (pTime) pTime.textContent = fmt(pVideo.currentTime) + ' / ' + fmt(pVideo.duration);
+                    updateSeekState();
                 });
                 pVideo.addEventListener('loadedmetadata', function () {
                     if (pTime) pTime.textContent = '0:00 / ' + fmt(pVideo.duration);
+                    updateSeekState();
                 });
 
                 if (pPlay) pPlay.addEventListener('click', function () {
@@ -316,6 +328,18 @@
                         if (pVideo.duration) pVideo.currentTime = ratio * pVideo.duration;
                     }
                     pSeek.addEventListener('click', function (e) { seekFromX(e.clientX); });
+                    pSeek.addEventListener('keydown', function (event) {
+                        if (active !== 2 || !pVideo.duration) return;
+                        var next = pVideo.currentTime;
+                        if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next -= 5;
+                        else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') next += 5;
+                        else if (event.key === 'Home') next = 0;
+                        else if (event.key === 'End') next = pVideo.duration;
+                        else return;
+                        event.preventDefault();
+                        pVideo.currentTime = Math.max(0, Math.min(pVideo.duration, next));
+                        updateSeekState();
+                    });
                     var dragging = false;
                     pSeek.addEventListener('pointerdown', function (e) {
                         if (active !== 2) return;
@@ -354,7 +378,11 @@
                 active = i;
                 if (active !== 2) dragging = false;
                 notifyLumen();
-                dots.forEach(function (d, j) { d.classList.toggle('active', j === i); });
+                dots.forEach(function (d, j) {
+                    d.classList.toggle('active', j === i);
+                    if (j === i) d.setAttribute('aria-current', 'true');
+                    else d.removeAttribute('aria-current');
+                });
                 cards.forEach(function (card, j) {
                     var vid = card.querySelector('.hero-video');
                     if (!vid) return;

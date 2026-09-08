@@ -211,7 +211,8 @@ delete globalThis.window;
     fragmentShader: '#include <common>\n#include <opaque_fragment>',
   };
   patchEarthShader(shader, { id: 'night' }, { id: 'light' });
-  assert.match(shader.vertexShader, /transformedNormal[\s\S]*viewMatrix/, 'Earth shader derives world normal from Three inverse-transpose normal result');
+  assert.match(shader.vertexShader, /inverseTransformDirection\(\s*transformedNormal,\s*viewMatrix\s*\)/, 'Earth shader converts the view-space normal back to world space');
+  assert.doesNotMatch(shader.vertexShader, /dot\(transformedNormal,\s*viewMatrix/, 'Earth shader does not apply the camera view transform twice');
   assert.doesNotMatch(shader.vertexShader, /mat3\(modelMatrix\)\s*\*\s*objectNormal/, 'Earth shader does not use a scale-unsafe world normal transform');
   assert.equal(shader.uniforms.earthNight.value.id, 'night', 'Earth shader binds its night texture');
   assert.equal(shader.uniforms.lightDirection.value.id, 'light', 'Earth shader binds the shared world-space light direction');
@@ -496,6 +497,7 @@ assert.deepEqual(scriptSources.slice(-dependencyOrder.length), dependencyOrder, 
 assert.match(controllerSource, /window\.LumenHero\s*=/, 'controller publishes the LumenHero API');
 assert.match(controllerSource, /var base = ['"]assets\/lumen\/['"]/, 'controller resolves scene textures within the AI app');
 assert.match(controllerSource, /showPoster\(['"]runtime['"],\s*attempt\)/, 'committed WebGL runtime failures settle to poster without buying video');
+assert.match(controllerSource, /SLOW_FRAME_WINDOW/, 'committed WebGL monitors a sustained frame window');
 assert.doesNotMatch(controllerSource, /function warmUp\s*\(/, 'production does not reject WebGL after full-scene warm-up');
 assert.doesNotMatch(controllerSource, /signals\.warmupFps\s*=/, 'full-scene creation cannot feed a late mode rejection');
 

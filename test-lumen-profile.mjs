@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { aggregateResources, deriveObservations, removeTemporaryProfile, sanitizeReport, summarizeFrames } from './tools/lumen-profile.mjs';
+import { aggregateResources, buildSourceIdentity, deriveObservations, parseOutput, removeTemporaryProfile, sanitizeReport, summarizeFrames } from './tools/lumen-profile.mjs';
 
 test('summarizeFrames reports pacing only while the journey clock advances', () => {
   const summary = summarizeFrames([
@@ -87,4 +87,21 @@ test('removeTemporaryProfile retries transient Windows profile locks', async () 
     wait: async () => {},
   });
   assert.equal(attempts, 3);
+});
+
+test('parseOutput requires explicit replacement for existing evidence', () => {
+  assert.throws(() => parseOutput(['--output', 'docs/assets/lumen-profile-2026-09-09.json'], { exists: () => true }), /Pass --replace/);
+  assert.equal(parseOutput(['--output', 'docs/assets/lumen-profile-2026-09-09.json', '--replace'], { exists: () => true }).replace, true);
+});
+
+test('source identity records the tree and dirty feature file hashes', () => {
+  const identity = buildSourceIdentity({
+    git: (args) => args.includes('write-tree') ? 'tree123\n' : args.includes('status') ? ' M AI/js/lumen-hero.js\n' : 'commit123\n',
+    read: () => Buffer.from('hero source'),
+    exists: () => true,
+  });
+  assert.equal(identity.gitCommit, 'commit123');
+  assert.equal(identity.gitTree, 'tree123');
+  assert.equal(identity.dirty, true);
+  assert.match(identity.sourceFiles['AI/js/lumen-hero.js'], /^[a-f0-9]{64}$/);
 });

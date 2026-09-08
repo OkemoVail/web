@@ -176,6 +176,65 @@ async function assertHeldPoster(page) {
 }
 
 try {
+  const shaderContext = await browser.newContext();
+  const shaderPage = await shaderContext.newPage();
+  await shaderPage.goto(`${baseUrl}/AI/index.html?lumen-test=1`);
+  const terminatorSamples = await shaderPage.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 1;
+    const gl = canvas.getContext('webgl');
+    if (!gl) return null;
+    const compile = (type, source) => {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+      return shader;
+    };
+    const program = gl.createProgram();
+    gl.attachShader(program, compile(gl.VERTEX_SHADER, `
+      attribute vec2 position;
+      uniform mat4 viewMatrix;
+      varying float lightMask;
+      vec3 inverseTransformDirection(in vec3 dir, in mat4 matrix) {
+        return normalize((vec4(dir, 0.0) * matrix).xyz);
+      }
+      void main() {
+        vec3 worldNormal = inverseTransformDirection(mat3(viewMatrix) * vec3(1.0, 0.0, 0.0), viewMatrix);
+        lightMask = dot(worldNormal, normalize(vec3(1.0, 0.0, 0.0)));
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `));
+    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, `
+      precision highp float;
+      varying float lightMask;
+      void main() { gl_FragColor = vec4(vec3(lightMask * 0.5 + 0.5), 1.0); }
+    `));
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+    gl.useProgram(program);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const position = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+    const view = gl.getUniformLocation(program, 'viewMatrix');
+    const sample = (matrix) => {
+      gl.uniformMatrix4fv(view, false, matrix);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      const pixel = new Uint8Array(4);
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+      return pixel[0];
+    };
+    const identity = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+    const rotatedCamera = new Float32Array([0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+    return [sample(identity), sample(rotatedCamera)];
+  });
+  if (terminatorSamples) assert.deepEqual(terminatorSamples, [255, 255], 'rendered city-light terminator stays world-light-locked across camera transforms');
+  else console.log('Lumen shader camera-space render test SKIPPED: WebGL unavailable');
+  await shaderContext.close();
+
   const earliest = await browser.newContext();
   await earliest.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => true }); });
   const earliestPage = await earliest.newPage();
@@ -633,7 +692,7 @@ try {
   const webglPage = await webgl.newPage();
   await webglPage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({
     contentType: 'text/javascript',
-    body: `const scene={render(){},resize(){},pause(){},resume(){},dispose(){}};
+    body: `const scene={render(){},resize(){},pause(){},resume(){},dispose(){window.__lumenDisposed=true}};
       async function createLumenScene(options){ await Promise.all(Object.values(options.assets).map(value=>fetch(value.desktop))); window.__lumenScene=scene; return scene; }
       window.createLumenScene=createLumenScene; export { createLumenScene };`,
   }));
@@ -724,15 +783,60 @@ try {
   warmPage.on('request', (request) => { if (/earth-|moon-|journey-/.test(request.url())) warmRequests.push(request.url()); });
   await warmPage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({
     contentType: 'text/javascript',
-    body: `const scene={render(){},resize(){},pause(){},resume(){},dispose(){}};
+    body: `const scene={render(){},resize(){},pause(){},resume(){},dispose(){window.__lumenDisposed=true}};
       async function createLumenScene(options){await Promise.all(Object.values(options.assets).map(value=>fetch(value.desktop)));return scene}
       window.createLumenScene=createLumenScene; export {createLumenScene};`,
   }));
   await warmPage.goto(`${baseUrl}/AI/index.html`);
   assert.deepEqual(await warmPage.evaluate(() => window.LumenHero.ready), { mode: 'webgl' });
+  await warmPage.locator('#lumen-hero[data-mode="poster"][data-state="held"]').waitFor();
   assert.equal(warmRequests.filter((url) => /earth-|moon-/.test(url)).length, 6, 'committed WebGL requests its texture family');
-  assert.equal(warmRequests.filter((url) => /journey-/.test(url)).length, 0, 'frame cadence cannot reject a committed scene into video');
+  assert.equal(warmRequests.filter((url) => /journey-/.test(url)).length, 0, 'sustained slow WebGL falls back to the loaded poster without video');
+  assert.equal(await warmPage.evaluate(() => window.__lumenDisposed), true, 'sustained slow WebGL disposes the scene');
   await committedWebgl.close();
+
+  const goodWebgl = await browser.newContext();
+  await goodWebgl.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+    const nativeRequest = window.requestAnimationFrame.bind(window);
+    let synthetic = 0;
+    let frameCount = 0;
+    window.requestAnimationFrame = (callback) => nativeRequest(() => { frameCount += 1; synthetic += frameCount === 12 ? 120 : 16; callback(synthetic); });
+  });
+  const goodPage = await goodWebgl.newPage();
+  await goodPage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({
+    contentType: 'text/javascript',
+    body: `const scene={render(){},resize(){},pause(){},resume(){},dispose(){window.__lumenDisposed=true}};
+      async function createLumenScene(){return scene} window.createLumenScene=createLumenScene; export {createLumenScene};`,
+  }));
+  await goodPage.goto(`${baseUrl}/AI/index.html`);
+  assert.deepEqual(await goodPage.evaluate(() => window.LumenHero.ready), { mode: 'webgl' });
+  await goodPage.waitForFunction(() => window.LumenHero.getState().elapsedMs >= 2500);
+  assert.equal((await goodPage.evaluate(() => window.LumenHero.getState())).mode, 'webgl', 'known-good cadence survives an isolated stall');
+  await goodWebgl.close();
+
+  const unknownSlow = await browser.newContext();
+  await unknownSlow.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => undefined });
+    Object.defineProperty(navigator, 'deviceMemory', { get: () => undefined });
+    const nativeRequest = window.requestAnimationFrame.bind(window);
+    let synthetic = 0;
+    window.requestAnimationFrame = (callback) => nativeRequest(() => { synthetic += 50; callback(synthetic); });
+  });
+  const unknownPage = await unknownSlow.newPage();
+  await unknownPage.route('**/AI/js/lumen-scene.js', (route) => route.fulfill({
+    contentType: 'text/javascript',
+    body: `const scene={render(){},resize(){},pause(){},resume(){},dispose(){window.__lumenDisposed=true}};
+      async function createLumenScene(){return scene} window.createLumenScene=createLumenScene; export {createLumenScene};`,
+  }));
+  await unknownPage.goto(`${baseUrl}/AI/index.html`);
+  assert.deepEqual(await unknownPage.evaluate(() => window.LumenHero.ready), { mode: 'webgl' }, 'unknown capability hints may conservatively attempt WebGL');
+  await unknownPage.locator('#lumen-hero[data-mode="poster"]').waitFor();
+  assert.equal(await unknownPage.evaluate(() => window.__lumenDisposed), true, 'unknown slow device escapes sustained choppy 3D');
+  await unknownSlow.close();
 
   const staleVideo = await browser.newContext();
   await staleVideo.addInitScript(() => {
@@ -797,6 +901,7 @@ try {
   await carouselPage.evaluate(() => window.LumenHero.skip());
   const playbackVector = () => carouselPage.evaluate(() => Array.from(document.querySelectorAll('.hero-card video')).map((video) => Boolean(video.__playing)));
   assert.equal(await carouselPage.locator('.hero-dot[data-index="0"]').getAttribute('class'), 'hero-dot active', 'dot 0 is active initially');
+  assert.equal(await carouselPage.locator('.hero-dot[data-index="0"]').getAttribute('aria-current'), 'true', 'dot 0 exposes initial current state');
 
   const swipe = async (fromX, toX) => {
     const box = await carouselPage.locator('#hero-scroll').boundingBox();
@@ -826,6 +931,7 @@ try {
 
   await carouselPage.locator('#hero-next').click();
   await carouselPage.locator('.hero-dot[data-index="2"].active').waitFor();
+  assert.deepEqual(await carouselPage.locator('.hero-dot').evaluateAll((items) => items.map((item) => item.getAttribute('aria-current'))), [null, null, 'true'], 'dot current state follows the active transition');
   assert.deepEqual(await playbackVector(), [false, false, true], 'only the active product card video plays');
   await carouselPage.keyboard.press('Enter');
   assert.deepEqual(await playbackVector(), [false, false, true], 'retained keyboard focus cannot replay inactive Labs21 video');
@@ -834,6 +940,20 @@ try {
     const card = document.querySelectorAll('.hero-card')[2];
     return Math.abs(scroller.scrollLeft - (card.offsetLeft - scroller.offsetLeft)) < 2;
   });
+  await carouselPage.evaluate(() => {
+    const video = document.querySelector('.hero-card[data-card="2"] video');
+    let seekTime = 10;
+    Object.defineProperty(video, 'duration', { configurable: true, get: () => 100 });
+    Object.defineProperty(video, 'currentTime', { configurable: true, get: () => seekTime, set: (value) => { seekTime = value; } });
+    video.dispatchEvent(new Event('timeupdate'));
+  });
+  await carouselPage.locator('#hp-seek').focus();
+  await carouselPage.keyboard.press('ArrowRight');
+  assert.deepEqual(await carouselPage.locator('#hp-seek').evaluate((seek) => ({ min: seek.getAttribute('aria-valuemin'), max: seek.getAttribute('aria-valuemax'), now: seek.getAttribute('aria-valuenow'), text: seek.getAttribute('aria-valuetext') })), { min: '0', max: '100', now: '15', text: '0:15 of 1:40' }, 'product seek exposes and updates complete slider value state');
+  await carouselPage.keyboard.press('End');
+  assert.equal(await carouselPage.evaluate(() => document.querySelector('.hero-card[data-card="2"] video').currentTime), 100, 'End seeks to duration');
+  await carouselPage.keyboard.press('Home');
+  assert.equal(await carouselPage.evaluate(() => document.querySelector('.hero-card[data-card="2"] video').currentTime), 0, 'Home seeks to start');
 
   const productControlState = await carouselPage.evaluate(() => {
     const video = document.querySelector('.hero-card[data-card="2"] video');

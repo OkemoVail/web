@@ -34,6 +34,9 @@
   var resolveReady;
   var readySettled = false;
   var ready = new Promise(function (resolve) { resolveReady = resolve; });
+  var SLOW_FRAME_WINDOW = 45;
+  var SLOW_FRAME_GRACE_MS = 1000;
+  var slowFrames = [];
 
   function collectSignals() {
     var canvas = document.createElement('canvas');
@@ -130,6 +133,7 @@
     if (rafId) cancelAnimationFrame(rafId);
     rafId = 0;
     lastFrame = 0;
+    slowFrames = [];
   }
 
   function canRun() { return !destroyed && active && visible && inViewport; }
@@ -170,6 +174,18 @@
     if (!current(attempt) || !canRun()) return;
     var delta = lastFrame ? Math.min(100, now - lastFrame) : 0;
     lastFrame = now;
+    if (mode === 'webgl' && state === 'playing' && elapsedMs >= SLOW_FRAME_GRACE_MS && delta > 0) {
+      slowFrames.push(delta);
+      if (slowFrames.length > SLOW_FRAME_WINDOW) slowFrames.shift();
+      if (slowFrames.length === SLOW_FRAME_WINDOW) {
+        var averageInterval = slowFrames.reduce(function (sum, value) { return sum + value; }, 0) / slowFrames.length;
+        var slowRatio = slowFrames.filter(function (value) { return value > 1000 / 30; }).length / slowFrames.length;
+        if (averageInterval > 1000 / 30 && slowRatio >= 0.8) {
+          showPoster('sustained-slow', attempt);
+          return;
+        }
+      }
+    }
     if (state === 'playing') elapsedMs = Math.min(policy.DURATION, elapsedMs + delta);
     var timeline = policy.timelineAt(elapsedMs);
     updateLayers(timeline);

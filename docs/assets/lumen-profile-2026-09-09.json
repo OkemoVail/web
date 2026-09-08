@@ -1,8 +1,18 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "capturedAt": "2026-09-08T20:00:49.391Z",
   "provenance": {
-    "gitCommit": "a9c4e08feaa38aba8ad5988a97c83f5b4b2fc800",
+    "gitCommit": "8bce8cac99139c077928f71cb55db553648748f5",
+    "gitTree": "c1192d5da9a3f17d384e82655376c4d8628c161d",
+    "dirty": false,
+    "sourceFiles": {
+      "AI/index.html": "a726104e492eba3817ac1ef36edee46ab03c656cb944f52839bcb42b24317f54",
+      "AI/js/lumen-hero-policy.js": "efc200688feacbfd2496cfabec0ea3d29274e88dc87394a23ee999469a3abd26",
+      "AI/js/lumen-hero.js": "688582d6bc30673e52c3710384a9634ee376d2799d7359cf6c0603da9945b372",
+      "AI/js/lumen-scene.js": "bbc633fab554a91a934de2b988b75af6678c189f00c76c1eb5f4a1ea01309e4d",
+      "AI/js/lumen-timeline.json": "5a4f71672e603040ce5849fa249c602d809ad5ff0f105d26c47ae7ebc3c5f885",
+      "src/site.css": "09f5ac9e5db6ea7fa5c6cbfa3439b121febf3fb76ea54384e25bea360d80f699"
+    },
     "operatingSystem": "Windows_NT 10.0.26200 (win32)",
     "command": "node tools/lumen-profile.mjs --output docs/assets/lumen-profile-2026-09-09.json",
     "configuration": "Natural production policy; four cold trials; each trial uses an independent Chrome process, context, and temporary profile.",

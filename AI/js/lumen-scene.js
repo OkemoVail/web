@@ -39,11 +39,7 @@ function patchEarthShader(shader, earthNight, lightDirection) {
   shader.vertexShader = shader.vertexShader
     .replace('#include <common>', '#include <common>\nvarying vec3 lumenWorldNormal;')
     .replace('#include <defaultnormal_vertex>', `#include <defaultnormal_vertex>
-lumenWorldNormal = normalize(vec3(
-  dot(transformedNormal, viewMatrix[0].xyz),
-  dot(transformedNormal, viewMatrix[1].xyz),
-  dot(transformedNormal, viewMatrix[2].xyz)
-));`);
+lumenWorldNormal = inverseTransformDirection(transformedNormal, viewMatrix);`);
   shader.fragmentShader = shader.fragmentShader
     .replace('#include <common>', '#include <common>\nuniform sampler2D earthNight;\nuniform vec3 lightDirection;\nvarying vec3 lumenWorldNormal;')
     .replace('#include <opaque_fragment>', `
@@ -197,7 +193,7 @@ async function createLumenSceneWithDependencies(
     metalness: 0,
   });
   earthMaterial.onBeforeCompile = (shader) => patchEarthShader(shader, earthNight, lightDirection);
-  earthMaterial.customProgramCacheKey = () => 'lumen-earth-day-night-v1';
+  earthMaterial.customProgramCacheKey = () => 'lumen-earth-day-night-v2';
   materials.push(earthMaterial);
   const earth = new THREE.Mesh(sphere(timeline.bodies.earth.radius), earthMaterial); // Earth surface
   const earthPosition = [...timeline.bodies.earth.position];

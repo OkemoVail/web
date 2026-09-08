@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { createReadStream, existsSync, mkdtempSync, rmSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { createReadStream, existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { basename, extname, join, normalize, relative, resolve } from 'node:path';
@@ -15,6 +16,7 @@ const trials = [
   { name: 'mobile-cold-2-reversed', tier: 'mobile', viewport: { width: 390, height: 844 } },
   { name: 'desktop-cold-2-reversed', tier: 'desktop', viewport: { width: 1440, height: 900 } },
 ];
+const sourceIdentityFiles = ['AI/index.html', 'AI/js/lumen-hero-policy.js', 'AI/js/lumen-hero.js', 'AI/js/lumen-scene.js', 'AI/js/lumen-timeline.json', 'src/site.css'];
 
 function round(value) { return Number(value.toFixed(2)); }
 function cleanDpr(value) { const integer = Math.round(value); return Math.abs(value - integer) < 0.001 ? integer : round(value); }
@@ -176,17 +178,34 @@ async function runTrial(trial, chromeExecutable, baseUrl) {
   }
 }
 
-function parseOutput() {
-  const index = process.argv.indexOf('--output'); if (index < 0 || !process.argv[index + 1]) throw new Error('Pass --output <path>; existing evidence is never overwritten implicitly.');
-  const output = resolve(root, process.argv[index + 1]); if (relative(root, output).startsWith('..')) throw new Error('Output must remain inside the repository.'); return output;
+export function parseOutput(args = process.argv.slice(2), adapters = {}) {
+  const exists = adapters.exists || existsSync;
+  const index = args.indexOf('--output'); if (index < 0 || !args[index + 1]) throw new Error('Pass --output <path>; existing evidence is never overwritten implicitly.');
+  const output = resolve(root, args[index + 1]); if (relative(root, output).startsWith('..')) throw new Error('Output must remain inside the repository.');
+  const replace = args.includes('--replace');
+  if (exists(output) && !replace) throw new Error('Output already exists. Pass --replace to replace reviewed evidence explicitly.');
+  return { output, replace };
+}
+
+export function buildSourceIdentity(adapters = {}) {
+  const git = adapters.git || ((args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }));
+  const read = adapters.read || ((path) => readFileSync(resolve(root, path)));
+  const exists = adapters.exists || ((path) => existsSync(resolve(root, path)));
+  const status = git(['status', '--porcelain', '--', ...sourceIdentityFiles]).trim();
+  return {
+    gitCommit: git(['rev-parse', 'HEAD']).trim(),
+    gitTree: git(['write-tree']).trim(),
+    dirty: Boolean(status),
+    sourceFiles: Object.fromEntries(sourceIdentityFiles.filter(exists).map((path) => [path, createHash('sha256').update(read(path)).digest('hex')])),
+  };
 }
 
 async function main() {
-  const outputPath = parseOutput(); const chromeExecutable = findChrome(); const server = staticServer();
+  const { output: outputPath, replace } = parseOutput(); const chromeExecutable = findChrome(); const server = staticServer();
   await new Promise((resolveListen, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolveListen); }); const baseUrl = `http://127.0.0.1:${server.address().port}`;
   try {
     const runs = []; for (const trial of trials) { console.log(`Profiling ${trial.name}...`); runs.push(await runTrial(trial, chromeExecutable, baseUrl)); }
-    const report = sanitizeReport({ schemaVersion: 2, capturedAt: new Date().toISOString(), provenance: { gitCommit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), operatingSystem: `${type()} ${release()} (${platform()})`, command: `node tools/lumen-profile.mjs --output ${relative(root, outputPath).replaceAll('\\', '/')}`, configuration: 'Natural production policy; four cold trials; each trial uses an independent Chrome process, context, and temporary profile.', chromeExecutable, chromeChannel: basename(chromeExecutable).toLowerCase().includes('canary') ? 'canary' : basename(chromeExecutable).toLowerCase().includes('beta') ? 'beta' : 'stable', trialCount: trials.length, trialOrder: trials.map(({ name }) => name), connection: 'Installed Chrome spawned directly with remote debugging; chromium.connectOverCDP used only for connection.', webdriverExpected: false }, runs, observations: deriveObservations(runs) });
+    const report = sanitizeReport({ schemaVersion: 3, capturedAt: new Date().toISOString(), provenance: { ...buildSourceIdentity(), operatingSystem: `${type()} ${release()} (${platform()})`, command: `node tools/lumen-profile.mjs --output ${relative(root, outputPath).replaceAll('\\', '/')}${replace ? ' --replace' : ''}`, configuration: 'Natural production policy; four cold trials; each trial uses an independent Chrome process, context, and temporary profile.', chromeExecutable, chromeChannel: basename(chromeExecutable).toLowerCase().includes('canary') ? 'canary' : basename(chromeExecutable).toLowerCase().includes('beta') ? 'beta' : 'stable', trialCount: trials.length, trialOrder: trials.map(({ name }) => name), connection: 'Installed Chrome spawned directly with remote debugging; chromium.connectOverCDP used only for connection.', webdriverExpected: false }, runs, observations: deriveObservations(runs) });
     const { writeFile } = await import('node:fs/promises'); await writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`); console.log(`Wrote ${relative(root, outputPath)}`);
   } finally { await new Promise((resolveClose) => server.close(resolveClose)); }
 }
