@@ -274,27 +274,38 @@ try {
   await carouselPage.goto(`${baseUrl}/AI/index.html`);
   await carouselPage.evaluate(() => window.LumenHero.ready);
   await carouselPage.evaluate(() => window.LumenHero.skip());
+  const playbackVector = () => carouselPage.evaluate(() => Array.from(document.querySelectorAll('.hero-card video')).map((video) => Boolean(video.__playing)));
   assert.equal(await carouselPage.locator('.hero-dot[data-index="0"]').getAttribute('class'), 'hero-dot active', 'dot 0 is active initially');
 
   await carouselPage.locator('#hero-next').click();
   await carouselPage.locator('.hero-dot[data-index="1"].active').waitFor();
   assert.equal((await carouselPage.evaluate(() => window.LumenHero.getState())).active, false, 'leaving card 0 deactivates Lumen');
   assert.equal((await carouselPage.evaluate(() => window.LumenHero.getState())).state, 'held', 'leaving Lumen holds its final frame');
-  assert.deepEqual(await carouselPage.evaluate(() => Array.from(document.querySelectorAll('.hero-card video')).map((video) => Boolean(video.__playing))), [false, true, false], 'only the active Labs21 card video plays');
+  assert.deepEqual(await playbackVector(), [false, true, false], 'only the active Labs21 card video plays');
+
+  await carouselPage.locator('.hero-card[data-card="1"] .hero-replay').focus();
 
   await carouselPage.locator('#hero-next').click();
   await carouselPage.locator('.hero-dot[data-index="2"].active').waitFor();
-  assert.deepEqual(await carouselPage.evaluate(() => Array.from(document.querySelectorAll('.hero-card video')).map((video) => Boolean(video.__playing))), [false, false, true], 'only the active product card video plays');
+  assert.deepEqual(await playbackVector(), [false, false, true], 'only the active product card video plays');
+  await carouselPage.keyboard.press('Enter');
+  assert.deepEqual(await playbackVector(), [false, false, true], 'retained keyboard focus cannot replay inactive Labs21 video');
   await carouselPage.waitForFunction(() => {
     const scroller = document.querySelector('#hero-scroll');
     const card = document.querySelectorAll('.hero-card')[2];
     return Math.abs(scroller.scrollLeft - (card.offsetLeft - scroller.offsetLeft)) < 2;
   });
 
-  await carouselPage.locator('#hero-prev').click();
-  await carouselPage.locator('.hero-dot[data-index="1"].active').waitFor();
-  await carouselPage.locator('#hero-prev').click();
+  await carouselPage.locator('#hp-play').focus();
+  await carouselPage.evaluate(() => {
+    document.querySelector('#hero-prev').click();
+    document.querySelector('#hero-prev').click();
+  });
   await carouselPage.locator('.hero-dot[data-index="0"].active').waitFor();
+  await carouselPage.keyboard.press('Space');
+  assert.deepEqual(await playbackVector(), [false, false, false], 'retained keyboard focus cannot play inactive product video');
+  await carouselPage.evaluate(() => document.querySelector('#hp-replay').click());
+  assert.deepEqual(await playbackVector(), [false, false, false], 'programmatic activation cannot replay inactive product video');
   assert.deepEqual(await carouselPage.evaluate(() => window.LumenHero.getState()), {
     mode: 'video', state: 'held', active: true, elapsedMs: 8000, phase: 'held',
   }, 'returning to Lumen preserves the held frame without replay');
@@ -302,6 +313,52 @@ try {
   await carouselPage.locator('#lumen-playback').click();
   assert.equal((await carouselPage.evaluate(() => window.LumenHero.getState())).state, 'playing', 'Replay deliberately starts Lumen');
   assert.equal(await carouselPage.evaluate(() => document.querySelector('#lumen-fallback').__playing), true, 'Replay resumes the Lumen video');
+
+  await carouselPage.evaluate(() => {
+    document.querySelector('#hero-next').click();
+    document.querySelector('#hero-next').click();
+  });
+  await carouselPage.locator('.hero-dot[data-index="2"].active').waitFor();
+  assert.deepEqual(await playbackVector(), [false, false, true], 'rapid Next twice reaches product video with active-only playback');
+  await carouselPage.evaluate(() => {
+    document.querySelector('#hero-prev').click();
+    document.querySelector('#hero-prev').click();
+  });
+  await carouselPage.locator('.hero-dot[data-index="0"].active').waitFor();
+  assert.deepEqual(await playbackVector(), [false, false, false], 'rapid Previous twice returns to held Lumen');
+
+  await carouselPage.evaluate(() => {
+    document.querySelector('#hero-next').click();
+    document.querySelector('#hero-next').click();
+    document.querySelector('#hero-prev').click();
+  });
+  await carouselPage.locator('.hero-dot[data-index="1"].active').waitFor();
+  assert.deepEqual(await playbackVector(), [false, true, false], 'rapid reversal settles predictably on Labs21');
+
+  await carouselPage.evaluate(() => {
+    const scroller = document.querySelector('#hero-scroll');
+    const card = document.querySelectorAll('.hero-card')[1];
+    scroller.scrollTo({ left: card.offsetLeft - scroller.offsetLeft, behavior: 'instant' });
+  });
+  await carouselPage.waitForTimeout(150);
+  await carouselPage.locator('#hero-next').click();
+  await carouselPage.locator('.hero-dot[data-index="2"].active').waitFor();
+  assert.deepEqual(await playbackVector(), [false, false, true], 'arrow navigation continues from a manually settled scroll target');
+  await carouselPage.evaluate(() => {
+    const scroller = document.querySelector('#hero-scroll');
+    const card = document.querySelectorAll('.hero-card')[0];
+    scroller.scrollTo({ left: card.offsetLeft - scroller.offsetLeft, behavior: 'instant' });
+  });
+  await carouselPage.locator('.hero-dot[data-index="0"].active').waitFor();
+  await carouselPage.waitForTimeout(150);
+  await carouselPage.locator('#hero-next').click();
+  await carouselPage.locator('.hero-dot[data-index="1"].active').waitFor();
+  await carouselPage.locator('#hero-prev').click();
+  await carouselPage.locator('.hero-dot[data-index="0"].active').waitFor();
+  assert.deepEqual(await carouselPage.evaluate(() => window.LumenHero.getState()), {
+    mode: 'video', state: 'held', active: true, elapsedMs: 8000, phase: 'held',
+  }, 'final carousel state reactivates held Lumen without replay');
+  assert.deepEqual(await playbackVector(), [false, false, false], 'final held Lumen state leaves every video paused');
   await carousel.close();
 
   const keyboard = await browser.newContext();

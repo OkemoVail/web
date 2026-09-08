@@ -197,6 +197,7 @@
             if (!lumenCard) return;
 
             let active = 0;
+            let target = 0;
             var MOBILE = 768;
 
             function isMobile() { return window.innerWidth <= MOBILE; }
@@ -231,6 +232,7 @@
                 });
                 vid.addEventListener('ended', function () { if (replay) replay.classList.add('show'); });
                 if (replay) replay.addEventListener('click', function () {
+                    if (active !== 1) return;
                     replay.classList.remove('show');
                     vid.currentTime = 0;
                     vid.play().catch(function () {});
@@ -301,6 +303,7 @@
                 });
 
                 if (pPlay) pPlay.addEventListener('click', function () {
+                    if (active !== 2) return;
                     if (pVideo.paused) pVideo.play().catch(function () {});
                     else pVideo.pause();
                 });
@@ -326,6 +329,7 @@
                 });
 
                 if (pReplay) pReplay.addEventListener('click', function () {
+                    if (active !== 2) return;
                     pVideo.currentTime = 0;
                     pVideo.play().catch(function () {});
                 });
@@ -356,16 +360,19 @@
                 if (nextBtn) nextBtn.classList.toggle('hide', active === cards.length - 1);
             }
             function scrollToCard(i) {
-                if (!cards[i]) return;
-                scroller.scrollTo({ left: cards[i].offsetLeft - scroller.offsetLeft, behavior: 'smooth' });
+                target = Math.max(0, Math.min(cards.length - 1, i));
+                scroller.scrollTo({ left: cards[target].offsetLeft - scroller.offsetLeft, behavior: 'smooth' });
             }
 
+            var scrollSettleTimer;
             scroller.addEventListener('scroll', function () {
                 var i = Array.from(cards).reduce(function (closest, card, index) {
                     var distance = Math.abs(scroller.scrollLeft - (card.offsetLeft - scroller.offsetLeft));
                     return distance < closest.distance ? { index: index, distance: distance } : closest;
                 }, { index: 0, distance: Infinity }).index;
                 if (i !== active) setActive(i);
+                clearTimeout(scrollSettleTimer);
+                scrollSettleTimer = setTimeout(function () { target = i; }, 120);
             }, { passive: true });
 
             dots.forEach(function (dot) {
@@ -373,8 +380,8 @@
                     scrollToCard(parseInt(dot.getAttribute('data-index')));
                 });
             });
-            if (prevBtn) prevBtn.addEventListener('click', function () { scrollToCard(active - 1); });
-            if (nextBtn) nextBtn.addEventListener('click', function () { scrollToCard(active + 1); });
+            if (prevBtn) prevBtn.addEventListener('click', function () { scrollToCard(target - 1); });
+            if (nextBtn) nextBtn.addEventListener('click', function () { scrollToCard(target + 1); });
             setActive(0);
             window.addEventListener('load', notifyLumen, { once: true });
 

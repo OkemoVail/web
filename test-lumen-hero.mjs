@@ -470,7 +470,7 @@ const carouselSource = html.slice(html.indexOf("const scroller = document.getEle
 assert.match(carouselSource, /var lumenCard = cards\[0\];/, 'carousel names the Lumen card at index 0');
 assert.match(carouselSource, /var labsVideoCard = cards\[1\];/, 'carousel names the Labs21 video card at index 1');
 assert.match(carouselSource, /var productVideoCard = cards\[2\];/, 'carousel names the product video card at index 2');
-assert.match(carouselSource, /cards\[i\]\.offsetLeft\s*-\s*scroller\.offsetLeft/, 'carousel scrolls to each card offset including gaps');
+assert.match(carouselSource, /cards\[target\]\.offsetLeft\s*-\s*scroller\.offsetLeft/, 'carousel scrolls to its clamped target offset including gaps');
 assert.doesNotMatch(carouselSource, /i\s*\*\s*scroller\.clientWidth/, 'carousel has no two-card width multiplication assumption');
 assert.doesNotMatch(carouselSource, /var card\d?\s*=\s*cards\[[012]\]/, 'card-specific initializers use named card references');
 assert.doesNotMatch(carouselSource, /cards\[[12]\]\.querySelector/, 'video initialization does not reach through positional card indices');
