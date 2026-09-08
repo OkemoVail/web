@@ -342,6 +342,7 @@
                 if (i === active) return;
                 pauseCard(active);
                 active = i;
+                if (window.LumenHero) window.LumenHero.setActive(i === 0);
                 dots.forEach(function (d, j) { d.classList.toggle('active', j === i); });
                 playCard(i);
                 updateArrows();

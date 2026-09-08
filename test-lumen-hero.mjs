@@ -165,6 +165,9 @@ assert.deepEqual(timeline.phases.map(({ name, startMs, endMs }) => [name, startM
 assert.deepEqual(timeline.light.direction, [-0.72, -0.35, -0.6], 'one light direction drives Earth, Moon, and city masking');
 
 const sceneSource = readFileSync(new URL('./AI/js/lumen-scene.js', import.meta.url), 'utf8');
+const controllerPath = new URL('./AI/js/lumen-hero.js', import.meta.url);
+assert.ok(existsSync(controllerPath), 'Lumen controller exists');
+const controllerSource = readFileSync(controllerPath, 'utf8');
 const sceneImports = [...sceneSource.matchAll(/^import\s+[\s\S]*?from\s+['"]([^'"]+)['"];?$/gm)].map((match) => match[1]);
 assert.deepEqual(sceneImports, ['../vendor/three.module.min.js'], 'scene imports only the local Three.js build');
 assert.doesNotMatch(sceneSource, /https?:\/\//, 'scene contains no network URLs');
@@ -415,6 +418,7 @@ for (const state of stateHooks) {
 assert.match(cards[0], /id="lumen-stage"/);
 assert.match(cards[0], /id="lumen-poster"[^>]*aria-hidden="true"/);
 assert.match(cards[0], /id="lumen-fallback"[^>]*muted[^>]*playsinline[^>]*aria-hidden="true"/s);
+assert.doesNotMatch(cards[0], /<video[^>]+\ssrc=/, 'Lumen fallback video has no eager src');
 assert.match(cards[0], /assets\/lumen\/poster-mobile\.webp/);
 assert.match(cards[0], /assets\/lumen\/poster-desktop\.webp/);
 assert.match(cards[0], /assets\/lumen\/journey-mobile\.mp4/);
@@ -458,6 +462,9 @@ const dependencyOrder = [
   '../src/nav.js',
 ];
 assert.deepEqual(scriptSources.slice(-dependencyOrder.length), dependencyOrder, 'Lumen policy, controller, motion, and nav load in dependency order');
+assert.match(controllerSource, /window\.LumenHero\s*=/, 'controller publishes the LumenHero API');
+assert.match(controllerSource, /var base = ['"]assets\/lumen\/['"]/, 'controller resolves scene textures within the AI app');
+assert.match(controllerSource, /catch\s*\([^)]*\)\s*\{[^}]*fallBack\(['"]runtime['"]\)/, 'runtime render failures use the shared fallback');
 
 const context = { window: {} };
 vm.runInNewContext(
