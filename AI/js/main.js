@@ -200,7 +200,10 @@ window.initChatUI = () => {
 
 // --- INITIALIZATION ---
 (async function boot() {
-    localStorage.removeItem('vail_custom_backend_url');
+    const savedBackendUrl = localStorage.getItem('vail_custom_backend_url') || '';
+    if (/cloudflare\.vc|trycloudflare\.com/i.test(savedBackendUrl)) {
+        localStorage.removeItem('vail_custom_backend_url');
+    }
 
     // Swap to cloud storage if the user is already signed in
     if (localStorage.getItem('vail_auth_token') && window.CloudStorageController) {

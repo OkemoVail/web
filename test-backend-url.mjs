@@ -9,5 +9,6 @@ assert.doesNotMatch(
   /localStorage\.setItem\(['"]vail_custom_backend_url['"]/,
   'chat boot must not overwrite the user-configured backend URL',
 );
+assert.match(main, /cloudflare\\\.vc\|trycloudflare\\\.com/, 'chat boot removes stale temporary tunnel hosts');
 
 console.log('Backend URL boot assertions passed.');
