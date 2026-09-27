@@ -200,6 +200,8 @@ window.initChatUI = () => {
 
 // --- INITIALIZATION ---
 (async function boot() {
+    localStorage.removeItem('vail_custom_backend_url');
+
     // Swap to cloud storage if the user is already signed in
     if (localStorage.getItem('vail_auth_token') && window.CloudStorageController) {
         window._OriginalStorageController = window.StorageController;
@@ -229,22 +231,6 @@ window.initChatUI = () => {
         } catch (e) {
             console.warn('Failed to load cloud profile on boot:', e);
         }
-    }
-
-    // Auto-detect tunnel URL
-    try {
-        const baseUrl = await window.getOpenAIClient();
-        const res = await fetch(baseUrl + '/tunnel_url', {
-            headers: window.settings.apiKey ? { "Authorization": `Bearer ${window.settings.apiKey.trim()}` } : {}
-        });
-        if (res.ok) {
-            const data = await res.json();
-            if (data.tunnel_url && data.tunnel_url !== baseUrl) {
-                localStorage.setItem('vail_custom_backend_url', data.tunnel_url);
-            }
-        }
-    } catch (e) {
-        console.warn('Failed to detect tunnel URL:', e);
     }
 
     try {

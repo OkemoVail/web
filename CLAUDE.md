@@ -79,7 +79,7 @@ Switch with `window.selectModel('SAGA')`. The id is sent as the `model` field to
 | Key | Purpose |
 |---|---|
 | `vail_settings_v4` | Main settings JSON (temp, top_p, rep_pen, max_tokens, apiKey, accent, userName, sidebarMode, customAccents, folders, systemPrompt, etc.) |
-| `vail_custom_backend_url` | Override backend URL |
+| `vail_custom_backend_url` | Manual backend URL override; chat boot clears stale tunnel values |
 | `vail_theme` | `'light'`, `'dark'`, or `'system'` |
 | `astra_ai_mode` | `'on'`/`'off'` — Astra AI answer panel visibility (default on) |
 | `google_access_token` | Google OAuth token |
@@ -109,7 +109,7 @@ While a response streams, `render.js` appends a `.book-flip-lane` under the last
 
 ### Backend
 
-The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemovail.com`. At boot, `main.js` fetches `/tunnel_url` to auto-detect a dynamic tunnel URL and stores it in `vail_custom_backend_url`. Override via `localStorage.setItem('vail_custom_backend_url', ...)` or the Settings panel.
+The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemovail.com`. Chat boot does not auto-discover or trust tunnel URLs and clears stale `vail_custom_backend_url` values left by the retired `/tunnel_url` flow. A deliberate backend override can still be entered through the Settings panel for the current session.
 
 **Temp local backend (2026-08-11):** `backend/server.py` is a single-file FastAPI + mlx-lm server (Gemma 3 4B QAT 4-bit by default, `MODEL_ID` env to swap) that implements `/v1/chat/completions` (SSE + non-stream), keyless web search `/api/search` (source chain with silent failover — DDG lite scrape → Bing SERP (with `/ck/a` base64 redirect unwrap) → Mojeek; `s` offset param mapped per-source, response carries `source`, cache keys are `(source, q, s)`, cross-page dedup across all sources) + autocomplete `/api/suggest` + image search `/api/images` (keyless DDG: scrape the `vqd` token from the SERP, then call `i.js`) — all proxied/scraped from DuckDuckGo with a 10-min TTL cache — plus stubs for `/tunnel_url`, `/api/system_prompts`, `/feedback`, `/api/tokens`, `/cancel_job`. Run `./backend/run.sh` → `127.0.0.1:8001`; the existing cloudflared named tunnel exposes it as `api.okemovail.com`. Tests: `cd backend && .venv/bin/python -m pytest tests/ -v` (fake model — no download). Spec: `docs/superpowers/specs/2026-08-11-temp-mlx-backend-design.md`. No accounts/cloud storage/voice — the real backend remains the separate `OkemoLLM` repo. (2026-08-14: search/suggest/images were ported into okemollm's `train.py`, and okemollm now serves the full frontend — chat at `/`, Astra at `/search/`, dashboard at `/dashboard`.)
 
@@ -134,6 +134,10 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 **Astra first-search tour (2026-08-29):** On the cookie-free hero, an inline prompt beneath Search/Cosmic offers `Sure`, `Next time`, and `No`. Sure and No set the one-year `astra_tour_seen` cookie; Next time hides only for the current page. Sure runs a random built-in query and starts a three-step accessible tour of the results bar, AI Answer/Perspectives, and result-row site summaries. The final Next stays disabled until the highlighted first result's real inline brief opens. After exit/completion, a small Replay tour control appears on the hero directly above the `made of stardust` footer; it ignores the cookie and starts with another random query. Desktop uses target-adjacent spotlight cards; mobile centers the hero prompt copy/actions, scrolls each target into view, and anchors a touch-sized guide sheet to the bottom. Movement respects reduced motion and webdriver. Contracts live in `test-astra.mjs`.
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
+
+### Lumen 1.9 AI landing hero (design approved 2026-09-08)
+
+The planned `AI/index.html` hero introduces one provisional model named **Lumen 1.9** through an eight-second NASA-cinematic Solar → Terra → Luna journey. Capable devices use adaptive Three.js with locally hosted NASA-derived textures; low-end devices use a matching pre-rendered fallback, while reduced-motion and webdriver receive the final poster immediately. The sequence ends on the asymmetric "Mission title" composition (Terra upper-right, Lumen copy lower-left), holds until the user deliberately selects one of the two existing video slides, and provides Skip intro followed by Replay. This is landing-page branding only and does not rename Saga in chat or backend data. Approved design: `docs/superpowers/specs/2026-09-08-lumen-solar-system-hero-design.md`.
 
 ## Stacking layers
 

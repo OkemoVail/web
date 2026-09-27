@@ -14,7 +14,7 @@
   var signals = collectSignals();
   var mode = 'poster';
   var state = 'loading';
-  var active = true;
+  var active = hero.getAttribute('data-carousel-active') !== 'false';
   var inViewport = true;
   var visible = !document.hidden;
   var destroyed = false;

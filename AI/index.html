@@ -370,6 +370,7 @@
 
             /* ── Carousel ── */
             function notifyLumen() {
+                lumenCard.setAttribute('data-carousel-active', active === 0 ? 'true' : 'false');
                 var controller = window.LumenHero;
                 if (!controller) return;
                 controller.setActive(active === 0);
