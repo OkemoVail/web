@@ -99,10 +99,10 @@ window.setTitleFeedback = async (chatId, type, btnEl) => {
         );
     }
     if (newFeedback) {
-        const originalHTML = btnEl.innerHTML;
+        const originalHTML = window.getButtonContent(btnEl).innerHTML;
         const originalWidth = btnEl.offsetWidth;
         btnEl.style.width = originalWidth + 'px';
-        btnEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-[12px]"></i>`;
+        window.getButtonContent(btnEl).innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-[12px]"></i>`;
         btnEl.disabled = true;
 
         try {
@@ -121,7 +121,7 @@ window.setTitleFeedback = async (chatId, type, btnEl) => {
 
             if (!res.ok) throw new Error("Feedback failed");
 
-            btnEl.innerHTML = `<i class="fa-solid fa-check text-[12px] text-white"></i>`;
+            window.getButtonContent(btnEl).innerHTML = `<i class="fa-solid fa-check text-[12px] text-white"></i>`;
             await new Promise(r => setTimeout(r, 600));
 
             window.showToast('Title feedback recorded');
@@ -129,7 +129,7 @@ window.setTitleFeedback = async (chatId, type, btnEl) => {
         } catch (e) {
             console.error("Error sending title feedback:", e);
         } finally {
-            btnEl.innerHTML = originalHTML;
+            window.getButtonContent(btnEl).innerHTML = originalHTML;
             btnEl.style.width = '';
             btnEl.disabled = false;
             feather.replace();

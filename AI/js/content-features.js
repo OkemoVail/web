@@ -97,10 +97,10 @@ window.applyContentFeatures = (el) => {
         copyBtn.title = 'Copy code';
         copyBtn.onclick = () => {
             navigator.clipboard.writeText(codeText);
-            copyBtn.innerHTML = feather.icons.check.toSvg({ class: 'w-4 h-4' });
+            window.getButtonContent(copyBtn).innerHTML = feather.icons.check.toSvg({ class: 'w-4 h-4' });
             copyBtn.classList.add('text-green-500');
             setTimeout(() => {
-                copyBtn.innerHTML = feather.icons.copy.toSvg({ class: 'w-4 h-4' });
+                window.getButtonContent(copyBtn).innerHTML = feather.icons.copy.toSvg({ class: 'w-4 h-4' });
                 copyBtn.classList.remove('text-green-500');
             }, 2000);
         };

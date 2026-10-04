@@ -38,7 +38,7 @@ window.toggleSettingsPanel = () => {
 
         const toggleBtn = document.getElementById('toggle-smart-sidebar');
         if (toggleBtn) {
-            const thumb = toggleBtn.querySelector('div');
+            const thumb = window.getButtonContent(toggleBtn).querySelector('div');
             if (window.settings.sidebarMode === 'smart') {
                 toggleBtn.classList.remove('bg-zinc-200', 'dark:bg-zinc-700');
                 toggleBtn.classList.add('bg-green-500');
@@ -87,7 +87,7 @@ window.toggleSmartSidebar = () => {
     window.saveSettings();
 
     const toggleBtn = document.getElementById('toggle-smart-sidebar');
-    const thumb = toggleBtn.querySelector('div');
+    const thumb = window.getButtonContent(toggleBtn).querySelector('div');
     if (window.settings.sidebarMode === 'smart') {
         toggleBtn.classList.remove('bg-zinc-200', 'dark:bg-zinc-700');
         toggleBtn.classList.add('bg-green-500');

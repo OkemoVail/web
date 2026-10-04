@@ -18,7 +18,7 @@ window.AccountModal = (() => {
 
     const setMode = (mode) => {
         _mode = mode;
-        $('email-submit').textContent = mode === 'login' ? 'Sign In' : 'Create Account';
+        window.getButtonContent($('email-submit')).textContent = mode === 'login' ? 'Sign In' : 'Create Account';
         $('mode-login').className = `flex-1 py-1 text-xs rounded ${
             mode === 'login'
             ? 'bg-gray-100 dark:bg-gray-700 dark:text-gray-200 font-medium'
@@ -98,7 +98,7 @@ window.AccountModal = (() => {
             if (errEl) errEl.textContent = 'Enter the 6-digit code from your email.';
             return;
         }
-        if (btn) { btn.disabled = true; btn.textContent = 'Verifying…'; }
+        if (btn) { btn.disabled = true; window.getButtonContent(btn).textContent = 'Verifying…'; }
         try {
             const resp = await fetch(`${base()}/api/accounts/verify-email`, {
                 method: 'POST',
@@ -114,7 +114,7 @@ window.AccountModal = (() => {
         } catch (e) {
             if (errEl) errEl.textContent = 'Network error. Please try again.';
         } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Verify Email'; }
+            if (btn) { btn.disabled = false; window.getButtonContent(btn).textContent = 'Verify Email'; }
         }
     };
 
@@ -148,7 +148,7 @@ window.AccountModal = (() => {
             if (errEl) errEl.textContent = 'Enter the 6-digit code from your email.';
             return;
         }
-        if (btn) { btn.disabled = true; btn.textContent = 'Verifying…'; }
+        if (btn) { btn.disabled = true; window.getButtonContent(btn).textContent = 'Verifying…'; }
         try {
             const resp = await fetch(`${base()}/api/accounts/verify-email`, {
                 method: 'POST',
@@ -167,7 +167,7 @@ window.AccountModal = (() => {
         } catch (e) {
             if (errEl) errEl.textContent = 'Network error. Please try again.';
         } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Verify Email'; }
+            if (btn) { btn.disabled = false; window.getButtonContent(btn).textContent = 'Verify Email'; }
         }
     };
 
@@ -286,14 +286,14 @@ window.AccountModal = (() => {
         if (mode === 'login') {
             loginBtn.className = 'flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm';
             regBtn.className = 'flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300';
-            if (submitBtn) submitBtn.querySelector('span').textContent = window.getT('ob_sign_in');
+            if (submitBtn) window.getButtonContent(submitBtn).querySelector('span').textContent = window.getT('ob_sign_in');
             if (perkEl) perkEl.classList.add('hidden');
             if (headingEl) headingEl.textContent = window.getT('ob_welcome_back');
             if (confirmPwSection) confirmPwSection.classList.add('hidden');
         } else {
             regBtn.className = 'flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm';
             loginBtn.className = 'flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300';
-            if (submitBtn) submitBtn.querySelector('span').textContent = window.getT('ob_create_account');
+            if (submitBtn) window.getButtonContent(submitBtn).querySelector('span').textContent = window.getT('ob_create_account');
             if (perkEl) {
                 perkEl.classList.remove('hidden');
                 if (window.feather) window.feather.replace();
@@ -324,12 +324,12 @@ window.AccountModal = (() => {
         let originalBtnContent = '';
         // Loading state
         if (submitBtn) {
-            originalBtnContent = submitBtn.innerHTML;
+            originalBtnContent = window.getButtonContent(submitBtn).innerHTML;
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.6';
             submitBtn.style.pointerEvents = 'none';
             const loadingText = _obMode === 'login' ? 'Signing in' : 'Creating account';
-            submitBtn.innerHTML = `<span>${loadingText}</span> <i data-feather="loader" class="w-4 h-4 animate-spin"></i>`;
+            window.getButtonContent(submitBtn).innerHTML = `<span>${loadingText}</span> <i data-feather="loader" class="w-4 h-4 animate-spin"></i>`;
             if (window.feather) window.feather.replace();
         }
 
@@ -363,7 +363,7 @@ window.AccountModal = (() => {
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '';
                 submitBtn.style.pointerEvents = '';
-                if (originalBtnContent) submitBtn.innerHTML = originalBtnContent;
+                if (originalBtnContent) window.getButtonContent(submitBtn).innerHTML = originalBtnContent;
                 if (window.feather) window.feather.replace();
             }
         }
@@ -415,12 +415,12 @@ window.AccountModal = (() => {
         if (mode === 'login') {
             loginBtn.className = 'flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm';
             regBtn.className = 'flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300';
-            if (submitBtn) submitBtn.querySelector('span').textContent = window.getT('ob_sign_in') || 'Sign In';
+            if (submitBtn) window.getButtonContent(submitBtn).querySelector('span').textContent = window.getT('ob_sign_in') || 'Sign In';
             if (confirmPwSection) confirmPwSection.classList.add('hidden');
         } else {
             regBtn.className = 'flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm';
             loginBtn.className = 'flex-1 flex items-center justify-center min-h-[36px] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300';
-            if (submitBtn) submitBtn.querySelector('span').textContent = window.getT('ob_create_account') || 'Create Account';
+            if (submitBtn) window.getButtonContent(submitBtn).querySelector('span').textContent = window.getT('ob_create_account') || 'Create Account';
             if (confirmPwSection) confirmPwSection.classList.remove('hidden');
         }
     };
@@ -457,7 +457,7 @@ window.AccountModal = (() => {
             if (errEl) errEl.textContent = 'Enter the 6-digit code from your email.';
             return;
         }
-        if (btn) { btn.disabled = true; btn.textContent = 'Verifying…'; }
+        if (btn) { btn.disabled = true; window.getButtonContent(btn).textContent = 'Verifying…'; }
         try {
             const resp = await fetch(`${base()}/api/accounts/verify-email`, {
                 method: 'POST',
@@ -480,7 +480,7 @@ window.AccountModal = (() => {
         } catch (e) {
             if (errEl) errEl.textContent = 'Network error. Please try again.';
         } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Verify Email'; }
+            if (btn) { btn.disabled = false; window.getButtonContent(btn).textContent = 'Verify Email'; }
         }
     };
 
@@ -504,12 +504,12 @@ window.AccountModal = (() => {
 
         let originalBtnContent = '';
         if (submitBtn) {
-            originalBtnContent = submitBtn.innerHTML;
+            originalBtnContent = window.getButtonContent(submitBtn).innerHTML;
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.6';
             submitBtn.style.pointerEvents = 'none';
             const loadingText = _stMode === 'login' ? 'Signing in' : 'Creating account';
-            submitBtn.innerHTML = `<span>${loadingText}</span> <i data-feather="loader" class="w-4 h-4 animate-spin"></i>`;
+            window.getButtonContent(submitBtn).innerHTML = `<span>${loadingText}</span> <i data-feather="loader" class="w-4 h-4 animate-spin"></i>`;
             if (window.feather) window.feather.replace();
         }
 
@@ -542,7 +542,7 @@ window.AccountModal = (() => {
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '';
                 submitBtn.style.pointerEvents = '';
-                if (originalBtnContent) submitBtn.innerHTML = originalBtnContent;
+                if (originalBtnContent) window.getButtonContent(submitBtn).innerHTML = originalBtnContent;
                 if (window.feather) window.feather.replace();
             }
         }

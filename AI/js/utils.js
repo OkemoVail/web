@@ -1,6 +1,10 @@
 // ─── Utility Helpers ───────────────────────────────────────────
 // Small, pure helper functions used across many modules.
 
+// Read native button content without snapshotting the glass plugin's decoration.
+// The original host and its handlers remain untouched when content is replaced.
+window.getButtonContent = (button) => button.querySelector(':scope > .lgp-content') || button;
+
 window.sanitizeText = (t) => (t || '').replace(/<\|im_(?:start|end)(?:[|>\s]*)/g, '')
     .replace(/<\|endoftext\|?>/g, '')
     .replace(/\ufffd/g, '')

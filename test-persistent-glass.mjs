@@ -1,0 +1,157 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import http from 'node:http';
+import path from 'node:path';
+import { chromium, webkit } from 'playwright';
+import { PNG } from 'pngjs';
+import vm from 'node:vm';
+
+const root = process.cwd();
+const motionContext = { window: {} };
+vm.runInNewContext(await fs.readFile(path.join(root, 'src/glass-shell-motion.js'), 'utf8'), motionContext);
+const motion = motionContext.window.GlassShellMotion;
+function response(hz) { const state = { x: 0, v: 0, target: 100 }; for (let i = 0; i < hz / 5; i++) motion.step(state, 1 / hz); return state; }
+assert.ok(Math.abs(response(30).x - response(120).x) < .001, 'slow frames cannot make chrome trail behind page motion');
+assert.ok(response(60).x > 90 && response(60).x < 100, 'geometry arrives promptly without overshoot');
+const reversed = response(60), velocity = reversed.v; reversed.target = 0;
+motion.step(reversed, 0);
+assert.equal(reversed.v, velocity, 'retargeting preserves incoming velocity');
+const server = http.createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url, 'http://localhost');
+    const file = path.resolve(root, '.' + (url.pathname.endsWith('/') ? url.pathname + 'index.html' : url.pathname));
+    if (!file.startsWith(root + path.sep)) throw new Error('outside');
+    res.setHeader('Content-Type', ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.mp4': 'video/mp4' })[path.extname(file)] || 'application/octet-stream');
+    res.end(await fs.readFile(file));
+  } catch { res.writeHead(404).end('Missing page'); }
+});
+await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+const origin = `http://127.0.0.1:${server.address().port}`;
+const browser = await (process.env.LIQUID_BROWSER === 'webkit' ? webkit : chromium).launch();
+try {
+  for (const width of [1280, 390]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    const errors = []; page.on('pageerror', error => errors.push(error.message));
+    await page.route('https://api.okemovail.com/**', route => {
+      const url = new URL(route.request().url());
+      const data = url.pathname === '/api/search' ? { results: [], source: 'fixture' } : url.pathname === '/api/suggest' ? [] : {};
+      return route.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(data) });
+    });
+    await page.route('https://cdn.tailwindcss.com/**', route => route.fulfill({ contentType: 'text/javascript', body:
+      "window.tailwind={};var css=document.createElement('link');css.rel='stylesheet';css.href='/src/output.css';document.head.append(css);" }));
+    await page.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => false }); localStorage.setItem('vail_theme', 'dark'); });
+    await page.goto(`${origin}/index.html`);
+    assert.equal(await page.evaluate(() => !!window.GlassShell), true, 'live shell starts on a real page');
+    await page.waitForFunction(() => GlassShell.ready);
+    await page.waitForTimeout(250);
+    assert.match(await page.locator('[data-glass-role="primary"]').evaluate(el => getComputedStyle(el).fontFamily), /Satoshi/, 'shell buttons use Satoshi');
+    const stationary = page.frameLocator('[data-glass-page]:not([aria-hidden])').locator('.hero-profile');
+    const stationaryBounds = await stationary.boundingBox();
+    await page.mouse.move(stationaryBounds.x + stationaryBounds.width / 2, stationaryBounds.y + stationaryBounds.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(stationaryBounds.x + stationaryBounds.width + 70, stationaryBounds.y + stationaryBounds.height / 2, { steps: 5 });
+    await page.waitForTimeout(120);
+    assert.ok(await stationary.locator('.lgp-content').evaluate(el => { const m = new DOMMatrix(getComputedStyle(el).transform); return Math.abs(m.a - 1) < .001 && Math.abs(m.d - 1) < .001 && Math.abs(m.e) < .001 && Math.abs(m.f) < .001; }), 'in-page buttons remain anchored during pointer pulls');
+    await page.mouse.up();
+    const menuButton = page.locator('[data-glass-role="menu"]');
+    await menuButton.evaluate(el => { window.menuMaterial = el.parentElement.querySelector('.lgc-material'); el.focus(); el.click(); });
+    await page.waitForTimeout(80); await page.keyboard.press('Escape'); await page.waitForTimeout(60);
+    await menuButton.evaluate(el => el.click());
+    await page.waitForFunction(() => document.querySelector('[data-glass-role="menu"]').parentElement.dataset.morphPhase === 'settled');
+    assert.equal(await menuButton.evaluate(el => window.menuMaterial === el.parentElement.querySelector('.lgc-material')), true, 'menu reversal retains live material');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => document.querySelector('[data-glass-role="menu"]').parentElement.dataset.morphPhase === 'settled');
+    if (process.env.GLASS_SCREENSHOTS) await page.screenshot({ path: `C:/Users/okemo/AppData/Local/Temp/opencode/persistent-home-${width}.png` });
+    const glass = page.locator('[data-glass-role="primary"] > .lgp-material');
+    await page.locator('[data-glass-page]').evaluate(frame => {
+      const stripe = frame.contentDocument.createElement('div'); stripe.id = 'blur-stripes';
+      stripe.style.cssText = 'position:fixed;inset:0;z-index:1000;pointer-events:none;background:repeating-linear-gradient(90deg,#000 0px,#000 3px,#fff 3px,#fff 6px)'; frame.contentDocument.body.append(stripe);
+    });
+    const materialRect = await glass.boundingBox();
+    const clip = { x: Math.round(materialRect.x + 18), y: Math.round(materialRect.y + materialRect.height - 15), width: 24, height: 4 };
+    const contrast = buffer => { const png = PNG.sync.read(buffer), values = []; for (let i = 0; i < png.data.length; i += 4) values.push(png.data[i]); return Math.max(...values) - Math.min(...values); };
+    const blurred = contrast(await page.screenshot({ clip }));
+    await glass.evaluate(el => { el.style.backdropFilter = 'none'; el.style.webkitBackdropFilter = 'none'; });
+    const sharp = contrast(await page.screenshot({ clip }));
+    if (process.env.LIQUID_BROWSER !== 'webkit') assert.ok(blurred < sharp * .6, `parent glass blurs actual child content (${blurred}/${sharp})`);
+    await glass.evaluate(el => { el.style.backdropFilter = ''; el.style.webkitBackdropFilter = ''; });
+    await page.locator('[data-glass-page]').evaluate(frame => frame.contentDocument.querySelector('#blur-stripes').remove());
+    await page.frameLocator('[data-glass-page]:not([aria-hidden])').locator('.hero-search input').fill('native search');
+    const primary = page.locator('[data-glass-role="primary"]');
+    await primary.evaluate(el => { window.originalPrimary = el; window.originalMaterial = el.querySelector('.lgp-material'); });
+    const bounds = await primary.boundingBox();
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + bounds.width + 70, bounds.y + bounds.height / 2, { steps: 6 });
+    await page.waitForTimeout(100);
+    const heldWidth = await primary.locator('.lgp-material').evaluate(el => el.getBoundingClientRect().width);
+    await page.evaluate(() => { window.navigationPromise = GlassShell.navigate('/AI/index.html'); });
+    await page.waitForFunction(() => GlassShell.currentURL.pathname === '/AI/index.html');
+    assert.equal(await page.evaluate(() => originalPrimary === document.querySelector('[data-glass-role="primary"]') && originalMaterial === originalPrimary.querySelector('.lgp-material')), true, 'original native node and material survive route commit');
+    assert.equal(await primary.evaluate(el => el.hasPointerCapture(1)), true, 'native held capture survives page commit');
+    await page.mouse.move(bounds.x + bounds.width + 130, bounds.y + bounds.height / 2, { steps: 6 });
+    await page.waitForTimeout(100);
+    const movedWidth = await primary.locator('.lgp-material').evaluate(el => el.getBoundingClientRect().width);
+    assert.ok(Math.abs(movedWidth - heldWidth) > 1, 'live material still responds after destination arrives');
+    await page.mouse.up();
+    await page.waitForFunction(() => document.querySelector('[data-glass-role="primary"]').textContent.includes('Chat'));
+    await page.waitForTimeout(1100);
+    if (process.env.GLASS_SCREENSHOTS) await page.screenshot({ path: `C:/Users/okemo/AppData/Local/Temp/opencode/persistent-ai-${width}.png` });
+    assert.equal(await primary.evaluate(el => el.hasPointerCapture(1)), false);
+    await page.waitForFunction(() => document.querySelectorAll('[data-glass-page]').length === 1, { timeout: 5000 });
+    assert.equal(await page.locator('[data-glass-page]').count(), 1, 'obsolete page frames disposed after spring settles');
+    assert.equal(await page.evaluate(() => originalPrimary === document.querySelector('[data-glass-role="primary"]')), true);
+    await page.evaluate(() => GlassShell.navigate('/index.html'));
+    await page.waitForFunction(() => GlassShell.currentURL.pathname === '/index.html');
+    assert.equal(await page.frameLocator('[data-glass-page]:not([aria-hidden])').locator('.hero-search').isVisible(), true, 'search returns as native page content');
+    await page.frameLocator('[data-glass-page]:not([aria-hidden])').locator('.hero-search input').fill('stars');
+    await page.frameLocator('[data-glass-page]:not([aria-hidden])').locator('.hero-search input').press('Enter');
+    await page.waitForFunction(() => GlassShell.currentURL.pathname === '/search/' && GlassShell.currentURL.searchParams.get('q') === 'stars');
+    assert.equal(await page.frameLocator('[data-glass-page]:not([aria-hidden])').locator('#results-input').inputValue(), 'stars', 'Home→Astra preserves the query through native submission');
+    await page.evaluate(() => GlassShell.navigate('/AI/index.html'));
+    await page.waitForFunction(() => GlassShell.currentURL.pathname === '/AI/index.html');
+    await page.evaluate(() => GlassShell.navigate('/index.html'));
+    await page.waitForFunction(() => GlassShell.currentURL.pathname === '/index.html');
+    await page.goBack();
+    await page.waitForFunction(() => GlassShell.currentURL.pathname === '/AI/index.html');
+    assert.equal(await page.evaluate(() => originalPrimary === document.querySelector('[data-glass-role="primary"]')), true, 'Back retains native glass');
+    await page.waitForTimeout(600);
+    await page.evaluate(() => { const frame = document.querySelector('[data-glass-page]:not([aria-hidden])'); frame.contentDocument.querySelector('.ov-nav__labs,.ov-nav__primary').setAttribute('data-glass-key', 'no-matching-primary'); GlassShellControls.update(GlassShellControls.descriptors(frame.contentWindow, frame.contentWindow.NAV_CONFIG)); });
+    await page.waitForTimeout(250);
+    assert.equal(await page.evaluate(() => originalPrimary.parentElement.hidden), true, 'unmatched control fades out rather than forced morph');
+    await page.route('**/AI/privacy.html?__glass_page=1', async route => { await new Promise(resolve => setTimeout(resolve, 600)); await route.continue(); });
+    await page.evaluate(() => { window.stale = GlassShell.navigate('/AI/privacy.html'); window.latest = GlassShell.navigate('/AI/goals.html'); });
+    await page.waitForFunction(() => GlassShell.currentURL.pathname === '/AI/goals.html');
+    await page.waitForTimeout(800);
+    assert.equal(await page.evaluate(() => GlassShell.currentURL.pathname), '/AI/goals.html', 'stale frame cannot commit over latest navigation');
+    assert.ok(await page.locator('[data-glass-page]').count() <= 2);
+    await page.evaluate(() => GlassShell.toggleTheme());
+    assert.equal(await page.evaluate(() => document.documentElement.classList.contains('dark') === document.querySelector('[data-glass-page]:not([aria-hidden])').contentDocument.documentElement.classList.contains('dark')), true, 'parent and child theme synchronized');
+    await page.route('**/AI/tos.html?__glass_page=1', route => route.fulfill({ status: 404, contentType: 'text/html', body: '<h1>Missing</h1>' }));
+    await page.evaluate(() => GlassShell.navigate('/AI/tos.html'));
+    assert.equal(await page.evaluate(() => GlassShell.currentURL.pathname), '/AI/goals.html', 'failed destination keeps current page');
+    assert.equal(await page.locator('.glass-shell-error').isVisible(), true);
+    assert.match(await page.locator('.glass-shell-error a').getAttribute('href'), /__glass_native/);
+    if (width === 1280) {
+      await page.evaluate(() => GlassShell.navigate('/AI/chat.html'));
+      await page.waitForFunction(() => GlassShell.currentURL.pathname === '/AI/chat.html');
+      const child = page.frameLocator('[data-glass-page]:not([aria-hidden])');
+      await child.locator('#user-input').waitFor();
+      assert.equal(await child.locator('#user-input').count(), 1, 'real chat initialized inside its isolated page document');
+    }
+    assert.deepEqual(errors, []);
+    console.log(`${width}px: real shell, same material, held pointer, continued drag/release, frame disposal, Back PASS`);
+    await page.close();
+  }
+  const reduced = await browser.newPage({ viewport: { width: 390, height: 900 }, reducedMotion: 'reduce' });
+  await reduced.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
+  await reduced.route('https://cdn.tailwindcss.com/**', route => route.fulfill({ contentType: 'text/javascript', body: "window.tailwind={}" }));
+  await reduced.goto(`${origin}/index.html`);
+  await reduced.waitForFunction(() => GlassShell.ready);
+  await reduced.evaluate(() => GlassShell.navigate('/AI/index.html'));
+  await reduced.waitForFunction(() => GlassShell.currentURL.pathname === '/AI/index.html');
+  assert.equal(await reduced.locator('[data-glass-page]').count(), 1, 'reduced-motion route settles immediately');
+  assert.equal(await reduced.evaluate(() => document.querySelector('[data-glass-page]').getAnimations().length), 0);
+  await reduced.close();
+  console.log('Reduced motion: live shell works with immediate page handoff PASS');
+} finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }

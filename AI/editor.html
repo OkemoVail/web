@@ -49,6 +49,11 @@
     </script>
 
     <link rel="stylesheet" href="../src/site.css">
+    <link rel="stylesheet" href="../liquid-design/liquid-design.css">
+    <script src="../src/glass-navigation.js"></script>
+    <link rel="expect" href="#site-navigation-ready" blocking="render">
+    <script defer src="../liquid-design/liquid-design.js"></script>
+    <script defer src="../src/liquid-design-site.js"></script>
     
 
     
@@ -153,6 +158,8 @@
 
             const colorMap = { blue: 'blue', red: 'red', green: 'emerald', yellow: 'amber' };
             const twColor = colorMap[color];
+            const glassColors = { blue: '59 130 246', red: '239 68 68', green: '16 185 129', yellow: '245 158 11' };
+            btn.style.setProperty('--lg-site-inline-tint', isActive ? 'transparent' : `rgb(${glassColors[color]} / .78)`);
 
             if (isActive) {
                 selectedTags = selectedTags.filter(t => t.name !== tag);
@@ -228,6 +235,7 @@
                 const btn = document.getElementById('connect-btn');
                 btn.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i><span>Connected</span>';
                 btn.className = "flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-full font-bold text-xs transition-all";
+                btn.style.setProperty('--lg-site-inline-tint', 'rgb(16 185 129 / .10)');
 
                 console.log("File handle acquired:", handle.name);
             } catch (err) {
@@ -242,6 +250,17 @@
 
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = editorContent;
+            // Image tools live inside the document; save their native markup,
+            // not the runtime glass layers or plugin-owned attributes/styles.
+            tempDiv.querySelectorAll('.image-controls button[data-lg-site]').forEach(btn => {
+                const content = btn.querySelector(':scope > .lgp-content');
+                if (content) content.replaceWith(...content.childNodes);
+                btn.querySelectorAll(':scope > .lgp-material, :scope > .lgp-outline, :scope > .lgp-highlights').forEach(layer => layer.remove());
+                [...btn.attributes].forEach(attr => {
+                    if (attr.name.startsWith('data-lg') || attr.name.startsWith('data-liquid-design')) btn.removeAttribute(attr.name);
+                });
+                btn.removeAttribute('style');
+            });
             const titleElem = tempDiv.querySelector('h1');
             const title = titleElem ? titleElem.innerText : 'Untitled';
 

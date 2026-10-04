@@ -1,4 +1,18 @@
 @import "tailwindcss";
+@theme inline {
+  --color-parchment: var(--bg);
+  --color-ivory: var(--bg-elevated);
+  --color-text-warm: var(--text-primary);
+  --color-olive-gray: var(--text-secondary);
+  --color-stone-gray: var(--text-tertiary);
+  --color-rosewood: var(--accent);
+  --color-rose-light: var(--accent-light);
+  --color-border-cream: var(--border);
+  --color-border-warm: var(--border-strong);
+  --font-sans: 'Satoshi', 'Inter', sans-serif;
+  --font-serif: 'Century', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

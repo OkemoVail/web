@@ -14,7 +14,10 @@ window.applyTranslations = () => {
     const dict = window.translations[langCode];
     document.querySelectorAll('[data-t]').forEach(el => {
         const key = el.getAttribute('data-t');
-        if (dict && dict[key]) el.innerText = dict[key];
+        if (dict && dict[key]) {
+            const content = el.tagName === 'BUTTON' ? window.getButtonContent(el) : el;
+            content.innerText = dict[key];
+        }
     });
     
     document.querySelectorAll('[data-t-placeholder]').forEach(el => {

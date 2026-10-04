@@ -5,9 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Labs21 | Stay Curious</title>
+    <meta name="description" content="Labs21 — small models, ongoing experiments, and a little curiosity. Meet Lumen 1.9, try Saga, and follow the research.">
+    <meta name="theme-color" content="#c96478">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://okemovail.com/AI/">
+    <meta property="og:title" content="Labs21 | Stay Curious">
+    <meta property="og:description" content="Small models, ongoing experiments, and a little curiosity.">
+    <meta property="og:image" content="https://okemovail.com/AI/assets/lumen/poster-desktop.webp">
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/output.css">
     <script>
         (function () {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -49,7 +56,7 @@
         })();
     </script>
     <script>
-        tailwind.config = {
+        window.tailwind = { config: {
             darkMode: 'class',
             theme: {
                 extend: {
@@ -74,19 +81,32 @@
                     }
                 }
             }
-        }
+        } };
     </script>
     <link rel="stylesheet" href="../src/site.css">
+    <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261003-white-glass">
+    <script src="../src/glass-navigation.js"></script>
+    <link rel="expect" href="#site-navigation-ready" blocking="render">
+    <script defer src="../liquid-design/liquid-design.js?v=20261004-rounded-material"></script>
+    <script defer src="../src/liquid-design-site.js?v=20261003-foreground-clip"></script>
     
 
     
 </head>
 
 <body data-page="ai-home"
-    class="bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
+    class="home-base font-sans antialiased">
+
+    <a href="#main-content" class="home-skip">Skip to content</a>
+    <main id="main-content" class="home-main">
 
     <!-- HERO -->
-    <section class="hero-section">
+    <section class="hero-section" aria-label="Labs21 films and models">
+        <div class="ai-intro" data-reveal>
+            <p class="ai-eyebrow">Labs21</p>
+            <h2 class="home-title">Stay curious<span class="home-title-dot">.</span></h2>
+            <p class="ai-intro-note">Small models. Questions worth following.</p>
+        </div>
         <div class="hero-scroll-wrap">
             <button class="hero-arrow hero-arrow--prev" id="hero-prev" aria-label="Previous">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" fill="currentColor" aria-hidden="true"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>
@@ -400,7 +420,8 @@
             }
             function scrollToCard(i) {
                 target = Math.max(0, Math.min(cards.length - 1, i));
-                scroller.scrollTo({ left: cards[target].offsetLeft - scroller.offsetLeft, behavior: 'smooth' });
+                var immediate = navigator.webdriver || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                scroller.scrollTo({ left: cards[target].offsetLeft - scroller.offsetLeft, behavior: immediate ? 'instant' : 'smooth' });
             }
 
             var scrollSettleTimer;
@@ -453,100 +474,77 @@
         })();
     </script>
 
-    <!-- Based AI: Core Pillars (Non-Bento) -->
-    <section class="py-24 px-6 max-w-7xl mx-auto border-t border-border-warm" data-reveal>
-        <div class="mb-16">
-            <h2 class="text-4xl md:text-5xl font-bold mb-6 italic tracking-tight dark:text-text-warm">Based AI</h2>
-            <p class="text-xl text-rosewood/80 dark:text-rose-light/80 max-w-2xl leading-relaxed">
-                Labs21 Software. I'm constantly updating the model in hopes of competing with giants along with zero
-                censorship.
-            </p>
+    <section id="work" class="home-work" aria-labelledby="explore-title" data-reveal>
+        <div class="home-section-heading">
+            <h2 id="explore-title">Explore Labs21</h2>
+            <span>04 places to start</span>
         </div>
+        <ul class="work-list" aria-label="Explore Labs21">
+            <li><a href="/AI/chat.html" class="work-row">
+                <span class="work-title">Chat with Saga</span><span class="work-detail">Try the model</span>
+                <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </a></li>
+            <li><a href="/AI/goals.html" class="work-row">
+                <span class="work-title">Goals</span><span class="work-detail">What's next</span>
+                <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </a></li>
+            <li><a href="/AI/research.html" class="work-row">
+                <span class="work-title">Research</span><span class="work-detail">Work in progress</span>
+                <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </a></li>
+            <li><a href="#architecture" class="work-row">
+                <span class="work-title">Behind the model</span><span class="work-detail">BDH architecture</span>
+                <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </a></li>
+        </ul>
+    </section>
 
-        <div class="space-y-12">
-            <!-- Pillar 1: RTX 5080 Architecture -->
-            <div class="flex flex-col md:flex-row gap-8 items-start pb-12 border-b border-border-cream">
-                <div
-                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
-                    <i class="fa-solid fa-bolt-lightning text-xl"></i>
-                </div>
-                <div class="flex-grow">
-                    <h3 class="text-2xl font-semibold mb-3 dark:text-text-warm">RTX 5080 High-Speed Architecture</h3>
-                    <p class="text-lg text-rosewood/70 dark:text-text-warm/60 leading-relaxed max-w-4xl">
-                        By leveraging the RTX 5080's massive VRAM bandwidth and specialized Tensor Cores, we
-                        achieve unprecedented throughput for large-scale models. This generational leap
-                        enables high-parameter execution on consumer workstations with server-class performance.
-                    </p>
-                </div>
+    <section id="architecture" class="home-words ai-about" aria-labelledby="about-title" data-reveal>
+        <h2 id="about-title" class="home-section-title">Built here. Still learning.</h2>
+        <div class="ai-about-grid">
+            <div class="ai-about-copy">
+                <p>I'm building and updating these models on an RTX 5080. The aim is simple: keep making them more useful, and make them affordable to run.</p>
+                <h3>Bounded Dynamic Highway</h3>
+                <p>Saga is moving to a looped network that replaces attention, RoPE, and large KV caches with bounded hidden dynamics. Each block keeps four recent hidden states, mixes them across grouped temporal branches, then repeats the same physical depth.</p>
             </div>
-
-            <!-- Pillar 2: 3-Phase Evolution -->
-            <div class="flex flex-col md:flex-row gap-8 items-start pb-12 border-b border-border-cream">
-                <div
-                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
-                    <i class="fa-solid fa-diagram-project text-xl"></i>
-                </div>
-                <div class="flex-grow">
-                    <h3 class="text-2xl font-semibold mb-3 dark:text-text-warm">3-Phase Strategic Evolution</h3>
-                    <p class="text-lg text-rosewood/70 dark:text-text-warm/60 leading-relaxed max-w-4xl">
-                        Intelligence isn't built in a day. Our structured methodology evolves models through distinct
-                        phases—from basic reasoning and logic foundations to deep, specialized domain knowledge
-                        and recursive self-improvement cycles.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Pillar 3: Sustainable AI -->
-            <div class="flex flex-col md:flex-row gap-8 items-start">
-                <div
-                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-rose-light/10 dark:bg-rose-light/5 text-rosewood dark:text-rose-light">
-                    <i class="fa-solid fa-leaf text-xl"></i>
-                </div>
-                <div class="flex-grow">
-                    <h3 class="text-2xl font-semibold mb-3 dark:text-text-warm">Scaling Sustainably</h3>
-                    <p class="text-lg text-rosewood/70 dark:text-text-warm/60 leading-relaxed max-w-4xl">
-                        Democratizing AI training means making it affordable. We focus on high-efficiency scaling
-                        that respects both your hardware budget and our planet's energy. Intelligence should
-                        be accessible without environmental compromise.
-                    </p>
-                </div>
-            </div>
-
-            <div class="bdh-architecture-row pt-12 border-t border-border-cream">
-                <div class="bdh-row-number" aria-hidden="true">04</div>
-                <div class="bdh-row-copy">
-                    <p class="bdh-row-label">Bounded Dynamic Highway</p>
-                    <h3 class="text-2xl font-semibold mb-3 dark:text-text-warm">BDH neural architecture</h3>
-                    <p class="text-lg text-rosewood/70 dark:text-text-warm/60 leading-relaxed">
-                        Saga is moving to a looped network that replaces attention, RoPE, and large KV caches with bounded hidden dynamics. Each block keeps four recent hidden states, mixes them across grouped temporal branches, then repeats the same physical depth.
-                    </p>
-                </div>
-                <dl class="bdh-specs">
-                    <div><dt>state</dt><dd>4 cached</dd></div>
-                    <div><dt>branches</dt><dd>12 temporal</dd></div>
-                    <div><dt>depth</dt><dd>28 x 2 passes</dd></div>
-                    <div><dt>target</dt><dd>RTX 5080</dd></div>
-                </dl>
-            </div>
+            <dl class="ai-model-specs" aria-label="BDH model specifications">
+                <div><dt>State</dt><dd>4 cached</dd></div>
+                <div><dt>Branches</dt><dd>12 temporal</dd></div>
+                <div><dt>Depth</dt><dd>28 × 2 passes</dd></div>
+                <div><dt>Target</dt><dd>RTX 5080</dd></div>
+            </dl>
         </div>
     </section>
+
+    <footer class="home-footer">
+        <p>© 2026 Labs21 by OkemoVail — made of stardust ✦</p>
+        <nav aria-label="Footer">
+            <a href="/index.html">OkemoVail</a>
+            <a href="/AI/privacy.html">Privacy</a>
+            <a href="/AI/tos.html">Terms</a>
+            <a href="https://github.com/ar12c" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+    </footer>
+    </main>
 
     
   <script>
     window.NAV_CONFIG = {
+      variant: 'pages',
+      back: { label: 'Back to OkemoVail', href: '/index.html' },
       links: [
         { label: 'Goals', href: '/AI/goals.html' },
         { label: 'Research', href: '/AI/research.html' },
         { label: 'Privacy', href: '/AI/privacy.html' },
-        { label: 'TOS', href: '/AI/tos.html' }
+        { label: 'Terms', href: '/AI/tos.html' }
       ],
-      primary: { label: 'Home', href: '/AI/index.html' }
+      primary: { label: 'Chat', href: '/AI/chat.html', icon: 'labs21' }
     };
   </script>
    <script src="js/lumen-hero-policy.js"></script>
    <script src="js/lumen-hero.js"></script>
    <script src="../src/motion.js"></script>
-   <script src="../src/nav.js"></script>
+    <script src="../src/nav.js"></script>
 </body>
 
 </html>

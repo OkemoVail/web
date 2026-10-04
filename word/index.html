@@ -41,6 +41,11 @@
     </script>
 
     <link rel="stylesheet" href="../src/site.css">
+    <link rel="stylesheet" href="../liquid-design/liquid-design.css">
+    <script src="../src/glass-navigation.js"></script>
+    <link rel="expect" href="#site-navigation-ready" blocking="render">
+    <script defer src="../liquid-design/liquid-design.js"></script>
+    <script defer src="../src/liquid-design-site.js"></script>
     
 </head>
 
@@ -200,7 +205,7 @@
                     <div class="ai-input-wrap">
                         <textarea id="ai-input" rows="1" onkeydown="handleAIKey(event)" aria-label="Ask Oaky"
                             oninput="autoResizeTA(this)"></textarea>
-                        <button id="ai-send-btn" onclick="handleSendAI()" aria-label="Send message">
+                        <button id="ai-send-btn" class="skuo-accent" onclick="handleSendAI()" aria-label="Send message">
                             <i class="fa-solid fa-arrow-up"></i>
                         </button>
                     </div>
@@ -222,7 +227,7 @@
         <div id="ow-toast"></div>
 
         <!-- Mobile AI FAB -->
-        <button id="ai-fab" class="hidden" onclick="toggleAIPanel(event)" title="Open Oaky AI"
+        <button id="ai-fab" class="hidden skuo-accent" onclick="toggleAIPanel(event)" title="Open Oaky AI"
             aria-label="Open Oaky writing assistant" aria-controls="ai-panel" aria-expanded="false">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
         </button>

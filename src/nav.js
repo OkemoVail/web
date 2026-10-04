@@ -73,26 +73,81 @@
     : '';
 
   var barHtml =
-    '<div class="ov-nav__bar">' +
+    '<div class="ov-nav__bar" data-liquid-design="surface">' +
       '<button type="button" class="ov-nav__chevron" aria-label="Toggle navigation links" ' +
         'aria-controls="ov-nav-links" aria-expanded="true">' + CHEVRON_SVG + '</button>' +
       '<div class="ov-nav__links" id="ov-nav-links">' + linksHtml + '</div>' +
       primaryHtml + themeHtml +
     '</div>';
 
+  // Opt-in landing navigation uses the portable Tools split/rejoin controller.
+  var toolsWork = cfg.toolsWork || { label: 'Selected work', href: '#work' };
+  var toolsSecondary = cfg.toolsSecondary || { label: 'Liquid Design', href: '/design.html' };
+  var secondaryIcon = toolsSecondary.icon === 'home'
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3Z"/><path d="M9 20v-7h6v7"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-7 7-7 12a7 7 0 0 0 14 0c0-5-7-12-7-12Z"/><path d="M8 15a4 4 0 0 0 4 4"/></svg>';
+  var socialsHtml = '<div class="ov-nav__socials" data-liquid-design-component="options">' +
+    '<button type="button" class="skuo skuo-icon ov-nav__socials-toggle" data-liquid-design ' +
+      'data-liquid-design-toggle="ov-nav-socials" aria-controls="ov-nav-socials" aria-expanded="false" aria-label="Socials" title="Socials">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg></button>' +
+    '<div id="ov-nav-socials" aria-label="Social links" hidden inert>' +
+      '<button type="button" data-liquid-design data-social-href="https://github.com/ar12c">' +
+        '<span>GitHub</span></button>' +
+      '<button type="button" data-liquid-design data-social-href="https://www.youtube.com/@SochiVail">' +
+        '<span>YouTube</span></button>' +
+    '</div></div>';
+  var toolsHtml = '<div class="ov-nav__toolkit" data-liquid-design-component="tools">' +
+    '<button type="button" class="skuo skuo-neutral skuo-pill ov-nav__tools-toggle" data-liquid-design ' +
+      'data-liquid-design-toggle="ov-nav-tools" aria-controls="ov-nav-tools" aria-expanded="false" aria-label="More"><svg class="ov-nav__tools-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>' +
+    '<div id="ov-nav-tools" hidden inert>' +
+      '<a href="' + esc(toolsWork.href) + '" class="skuo skuo-icon" data-liquid-design aria-label="' + esc(toolsWork.label) + '" title="' + esc(toolsWork.label) + '">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="3"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M4 12h16"/></svg></a>' +
+      '<a href="' + esc(toolsSecondary.href) + '" class="skuo skuo-icon" data-liquid-design aria-label="' + esc(toolsSecondary.label) + '" title="' + esc(toolsSecondary.label) + '">' +
+        secondaryIcon + '</a>' +
+      themeHtml + '</div></div>' +
+      (primary ? '<a href="' + esc(primary.href) + '" class="skuo skuo-accent skuo-pill ov-nav__labs" aria-label="' + esc(primary.label) + '"><span>' + esc(primary.label) + '</span>' + (primary.icon === 'labs21' ? LABS21_SVG : '') + '</a>' : '');
+
+  var pageMenuHtml = '<div class="ov-nav__page-menu" data-liquid-design-component="options">' +
+    '<button type="button" class="skuo skuo-icon ov-nav__tools-toggle" data-liquid-design data-liquid-design-toggle="ov-nav-pages" aria-controls="ov-nav-pages" aria-expanded="false" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>' +
+    '<div id="ov-nav-pages" aria-label="Labs21 pages" hidden inert>' +
+    links.map(function (link) { return '<button type="button" data-liquid-design data-page-href="' + esc(link.href) + '"><span>' + esc(link.label) + '</span></button>'; }).join('') +
+    '</div></div>' + themeHtml +
+    (primary ? '<a href="' + esc(primary.href) + '" class="skuo skuo-accent skuo-pill ov-nav__labs">' + LABS21_SVG + '<span>' + esc(primary.label) + '</span></a>' : '');
+
   function mount() {
     if (!document.body) return;
     var nav = document.createElement('nav');
+    nav.id = 'site-navigation-ready';
     nav.className = 'ov-nav';
     nav.setAttribute('aria-label', 'Primary');
-    nav.innerHTML = barHtml;
+    nav.innerHTML = cfg.variant === 'pages' ? pageMenuHtml : cfg.variant === 'tools' ? toolsHtml : barHtml;
+    if (cfg.variant === 'tools' || cfg.variant === 'pages') nav.classList.add('ov-nav--tools');
+    if (cfg.variant === 'pages') nav.classList.add('ov-nav--pages');
     document.body.insertBefore(nav, document.body.firstChild);
+    var socialsNav;
+    if (cfg.variant === 'tools') {
+      socialsNav = document.createElement('nav');
+      socialsNav.className = 'ov-social-nav';
+      if (navigator.webdriver || window.matchMedia('(prefers-reduced-motion: reduce)').matches) socialsNav.style.transition = 'none';
+      socialsNav.setAttribute('aria-label', 'Socials');
+      socialsNav.innerHTML = socialsHtml;
+      document.body.insertBefore(socialsNav, nav);
+    }
+    if (cfg.back) {
+      var backNav = document.createElement('nav');
+      backNav.className = 'ov-social-nav';
+      backNav.setAttribute('aria-label', 'Back');
+      backNav.innerHTML = '<a href="' + esc(cfg.back.href) + '" class="skuo skuo-icon ov-nav__back" data-liquid-design aria-label="' + esc(cfg.back.label) + '" title="' + esc(cfg.back.label) + '">' + CHEVRON_SVG + '</a>';
+      document.body.insertBefore(backNav, nav);
+    }
 
     var bar = nav.querySelector('.ov-nav__bar');
     var chevron = nav.querySelector('.ov-nav__chevron');
     var linkGroup = nav.querySelector('.ov-nav__links');
     var themeBtn = nav.querySelector('.ov-nav__theme');
     var mq = window.matchMedia('(max-width: 767px)');
+    if (cfg.variant === 'tools' && themeBtn) themeBtn.setAttribute('data-liquid-design', '');
+    if (bar && window.LiquidDesign) window.LiquidDesign.refresh(bar);
 
     // scroll morph
     window.addEventListener('scroll', function () {
@@ -126,6 +181,106 @@
       });
     }
 
+    if (cfg.variant === 'pages') {
+      if (window.LiquidDesign) window.LiquidDesign.refresh(nav);
+      nav.querySelectorAll('[data-page-href]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var href = button.getAttribute('data-page-href');
+          if (window.GlassPageBridge && window.parent.GlassShell) window.parent.GlassShell.navigate(new URL(href, location.href));
+          else window.location.href = href;
+        });
+      });
+      var pageToggle = nav.querySelector('.ov-nav__tools-toggle');
+      new MutationObserver(function () {
+        var open = pageToggle.getAttribute('aria-expanded') === 'true';
+        pageToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        pageToggle.querySelector('path').setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+      }).observe(pageToggle, { attributes: true, attributeFilter: ['aria-expanded'] });
+      return;
+    }
+
+    if (cfg.variant === 'tools') {
+      if (window.LiquidDesign) window.LiquidDesign.refresh(nav);
+      if (window.LiquidDesign) window.LiquidDesign.refresh(socialsNav);
+      var toolsToggle = nav.querySelector('.ov-nav__tools-toggle');
+      var toolsPanel = nav.querySelector('#ov-nav-tools');
+      var socialsToggle = socialsNav.querySelector('.ov-nav__socials-toggle');
+      socialsToggle.addEventListener('pointerdown', closeTools);
+      socialsToggle.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown' || event.key === 'ArrowUp') closeTools();
+      });
+      socialsNav.querySelectorAll('[data-social-href]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          window.open(button.getAttribute('data-social-href'), '_blank', 'noopener');
+        });
+      });
+      function arrangeNavigation(expanded, socialsExpanded) {
+        var toolkit = nav.querySelector('.ov-nav__toolkit');
+        var groupBounds = toolkit.getBoundingClientRect();
+        var anchor = toolsToggle.getBoundingClientRect();
+        var gap = parseFloat(getComputedStyle(toolkit).getPropertyValue('--liquid-design-tools-gap')) || 9;
+        var offset = gap;
+        toolsPanel.querySelectorAll('[data-liquid-button]').forEach(function (action) {
+          var width = parseFloat(getComputedStyle(action).width) || 52;
+          action.style.left = (anchor.left - groupBounds.left - offset - width) + 'px';
+          action.style.top = '0px';
+          offset += width + gap;
+        });
+        var socialLeft = parseFloat(getComputedStyle(socialsNav).left);
+        var socialSize = socialsToggle.offsetWidth;
+        var rowBottom = anchor.bottom;
+        var actionLeft = anchor.left - offset + gap;
+        var moveCircle = expanded && actionLeft < socialLeft + socialSize + 12;
+        socialsNav.style.transform = moveCircle ? 'translateX(-' + (socialLeft + socialSize + 12) + 'px)' : '';
+        socialsNav.querySelector('.ov-nav__socials').style.setProperty('--liquid-design-menu-offset-y', socialsExpanded && window.innerWidth < 430 ? (rowBottom + 12 - socialsToggle.getBoundingClientRect().top) + 'px' : '0px');
+      }
+      // Apply layout before the engine measures its opening trajectory.
+      socialsNav.addEventListener('pointerdown', function (event) {
+        if (event.target.closest('.ov-nav__socials-toggle')) {
+          closeTools();
+          arrangeNavigation(false, true);
+        }
+      }, true);
+      socialsNav.addEventListener('click', function (event) {
+        if (event.target.closest('.ov-nav__socials-toggle')) arrangeNavigation(false, socialsToggle.getAttribute('aria-expanded') !== 'true');
+      }, true);
+      socialsNav.addEventListener('keydown', function (event) {
+        if (event.target === socialsToggle && ['Enter', ' ', 'ArrowDown', 'ArrowUp'].indexOf(event.key) !== -1) arrangeNavigation(false, true);
+      }, true);
+      nav.addEventListener('click', function (event) {
+        if (event.target.closest('.ov-nav__tools-toggle')) arrangeNavigation(toolsToggle.getAttribute('aria-expanded') !== 'true', false);
+      }, true);
+      function updateToolsLabel() {
+        var expanded = toolsToggle.getAttribute('aria-expanded') === 'true';
+        var socialsExpanded = socialsToggle.getAttribute('aria-expanded') === 'true';
+        arrangeNavigation(expanded, socialsExpanded);
+        toolsToggle.setAttribute('aria-label', expanded ? 'Close' : 'More');
+        toolsToggle.querySelector('.ov-nav__tools-arrow path').setAttribute('d', expanded ? 'm9 6 6 6-6 6' : 'm15 6-6 6 6 6');
+      }
+      new MutationObserver(updateToolsLabel).observe(toolsToggle, { attributes: true, attributeFilter: ['aria-expanded'] });
+      updateToolsLabel();
+      window.addEventListener('resize', function () { requestAnimationFrame(updateToolsLabel); }, { passive: true });
+      new MutationObserver(function () {
+        if (socialsToggle.getAttribute('aria-expanded') === 'true') closeTools();
+        updateToolsLabel();
+      }).observe(socialsToggle, { attributes: true, attributeFilter: ['aria-expanded'] });
+      function closeTools() {
+        if (toolsToggle.getAttribute('aria-expanded') === 'true') toolsToggle.click();
+      }
+      nav.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !event.defaultPrevented) { closeTools(); toolsToggle.focus(); }
+      });
+      // Navigation captures the current glass shape. Do not retract the controls
+      // just before the browser snapshots them for the destination morph.
+      toolsPanel.querySelectorAll('a[href^="#"]').forEach(function (link) {
+        link.addEventListener('click', closeTools);
+      });
+      document.addEventListener('click', function (event) {
+        if (!nav.contains(event.target)) closeTools();
+      });
+      return;
+    }
+
     // pop origin: animate from click point if available
     function popFrom(e) {
       if (!e) return;
@@ -142,7 +297,8 @@
       var padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
       var gap = parseFloat(cs.columnGap) || parseFloat(cs.gap) || 0;
       var used = 0, n = 0;
-      Array.prototype.forEach.call(bar.children, function (ch) {
+      var content = bar.querySelector(':scope > .lgp-content') || bar;
+      Array.prototype.forEach.call(content.children, function (ch) {
         n++;
         if (ch !== linkGroup) used += ch.offsetWidth;
       });
@@ -204,14 +360,7 @@
       setCollapsed(!bar.classList.contains('collapsed'), { event: e });
     });
 
-    // Auto-collapse (tapping a link, or tapping anywhere outside the bar) closes
-    // silently — only the chevron toggle plays the pop/scale animation.
-    linkGroup.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () {
-        if (mq.matches) setCollapsed(true, { animate: false });
-      });
-    });
-
+    // Outside taps retract the capsule; page links retain its snapshot geometry.
     document.addEventListener('click', function (e) {
       if (mq.matches && !bar.contains(e.target)) setCollapsed(true, { animate: false });
     });
@@ -226,7 +375,7 @@
     window.addEventListener('orientationchange', recompute);
   }
 
-  if (document.readyState === 'loading') {
+  if (!document.body) {
     document.addEventListener('DOMContentLoaded', mount);
   } else {
     mount();

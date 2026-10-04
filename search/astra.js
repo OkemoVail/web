@@ -369,7 +369,7 @@
   // Bailed under reduced-motion/automation → instant swap.
   function renderRoute() {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!document.startViewTransition || reduce || navigator.webdriver) { renderRouteDom(); return; }
+    if (!document.startViewTransition || reduce || navigator.webdriver || window.GlassPageBridge) { renderRouteDom(); return; }
     const vt = document.startViewTransition(renderRouteDom);
     // skipped transitions reject — swallow, the DOM swap already happened
     vt.updateCallbackDone.catch(() => {}); vt.ready.catch(() => {}); vt.finished.catch(() => {});
@@ -882,7 +882,8 @@
     $('tour-step').textContent = (index + 1) + ' of ' + TOUR_STEPS.length;
     $('tour-title').textContent = step.title;
     $('tour-copy').textContent = step.copy;
-    $('tour-next').textContent = index === TOUR_STEPS.length - 1 ? 'Finish' : 'Next';
+    // Preserve the plugin's live content node while replacing the native label.
+    ($('tour-next').querySelector(':scope > .lgp-content') || $('tour-next')).textContent = index === TOUR_STEPS.length - 1 ? 'Finish' : 'Next';
     $('tour-next').disabled = !!step.requiresPreview;
     const spotlight = $('tour-spotlight');
     const targetAction = $('tour-target-action');
@@ -1459,7 +1460,7 @@
     const on = typeof force === 'boolean' ? force : !panel.classList.contains('ai-fullscreen');
     if (on) fullscreenTitle = document.title;
     panel.classList.toggle('ai-fullscreen', on);
-    $('ai-expand').textContent = on ? '✕' : '⤢';
+    ($('ai-expand').querySelector(':scope > .lgp-content') || $('ai-expand')).textContent = on ? '✕' : '⤢';
     $('ai-expand').setAttribute('aria-label', on ? 'exit fullscreen' : 'fullscreen');
     $('ai-expand').title = on ? 'exit fullscreen' : 'fullscreen';
     $('ai-expand').setAttribute('aria-expanded', on ? 'true' : 'false');

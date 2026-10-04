@@ -1,6 +1,12 @@
 (function () {
   'use strict';
 
+  // GPU capability probes and shader compilation must not block a page slide.
+  if (window.GlassPageBridge && !window.__glassPageSettled) {
+    addEventListener('glasspagesettled', initialize, { once: true });
+  } else initialize();
+  function initialize() {
+
   var policy = window.LumenHeroPolicy;
   var hero = document.getElementById('lumen-hero');
   var stage = document.getElementById('lumen-stage');
@@ -41,7 +47,11 @@
   function collectSignals() {
     var canvas = document.createElement('canvas');
     var context = null;
-    try { context = canvas.getContext('webgl2') || canvas.getContext('webgl'); } catch (_) {}
+    // The pre-rendered cinematic avoids synchronous GPU context/shader work
+    // competing with live backdrop glass in the persistent navigation shell.
+    if (!window.GlassPageBridge) {
+      try { context = canvas.getContext('webgl2') || canvas.getContext('webgl'); } catch (_) {}
+    }
     var webgl = Boolean(context);
     if (context) context.getExtension('WEBGL_lose_context')?.loseContext();
     return {
@@ -113,7 +123,10 @@
     hero.dataset.mode = mode;
     hero.dataset.state = state;
     playback.hidden = mode === 'poster';
-    playback.textContent = state === 'held' ? 'Replay' : 'Skip intro';
+    // Keep the glass-owned content wrapper attached when the label changes.
+    var playbackLabel = playback.querySelector(':scope > .lgp-content') || playback;
+    var nextLabel = state === 'held' ? 'Replay' : 'Skip intro';
+    if (playbackLabel.textContent !== nextLabel) playbackLabel.textContent = nextLabel;
   }
 
   function announceReady() {
@@ -413,4 +426,5 @@
   if (signals.reduceMotion || signals.automated) showPoster('motion-policy');
   else if (policy.chooseMode(signals) === 'video') startVideo(++generation);
   else startWebgl();
+  }
 })();

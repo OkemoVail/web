@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" data-liquid-design-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liquid Design — existing controls</title>
+  <link rel="stylesheet" href="liquid-design.css?v=20261004-port">
+  <script defer src="liquid-design.js?v=20261004-port"></script>
+  <style>
+    /* Ordinary host styling. The plugin does not own this page layout. */
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: #18232b; font: 16px/1.5 system-ui, sans-serif; background: #b7cbd2; }
+    main { max-width: 850px; margin: auto; padding: 60px 24px; }
+    h1 { font-size: clamp(30px,6vw,48px); line-height: 1.1; letter-spacing: -.04em; }
+    h2 { font-size: 18px; margin-top: 0; }
+    p { max-width: 65ch; }
+    .scene { padding: 36px 24px; margin-top: 28px; border-radius: 24px;
+      background: radial-gradient(ellipse at 15% 85%,#b985a0,transparent 50%),radial-gradient(ellipse at 80% 20%,#f4be8f,transparent 50%),#779aac; }
+    .row, .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+    button, a.action { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 20px; border: 1px solid #536976; border-radius: 999px; background: #e2e8eb;
+      color: #18232b; font: inherit; cursor: pointer; text-decoration: none; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #18455e; outline-offset: 4px; }
+    .toolbar { gap: 6px; width: max-content; max-width: 100%; }
+    .composer { width: 100%; padding: 14px; border: 1px solid #536976; border-radius: 24px; background: #e2e8eb; }
+    .composer textarea { display: block; width: 100%; padding: 6px; border: 0; outline: none; box-shadow: none; background: transparent; color: inherit; font: inherit; resize: vertical; }
+    .composer .actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+    .send { width: 36px; height: 36px; padding: 0; border-radius: 50%; --liquid-design-tint: rgb(155 75 105 / 55%); --liquid-design-rim: 1; --liquid-design-color: white; }
+    .send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    #status { min-height: 24px; font-weight: 600; }
+    code { font-size: .9em; }
+    .floating-demo { height: 180px; position: relative; }
+    .floating-demo .social-position { position: absolute; left: 0; top: 0; }
+    .floating-demo .tools-position { position: absolute; right: 16px; top: 0; }
+    .floating-demo [data-liquid-design-component] { width: 44px; height: 44px; min-height: 0; padding: 0; }
+    .floating-demo [data-liquid-design-toggle] { width: 44px; height: 44px; padding: 0; border-radius: 50%; }
+    .floating-demo [data-liquid-menu] { width: 200px; left: 0; }
+    .floating-demo .tools-position { --liquid-design-tools-gap: 6; }
+    .floating-demo .lgd-tools [data-liquid-button] { width: 44px; height: 44px; }
+    @media(max-width:500px) { main { padding: 32px 16px; } .scene { padding: 24px 16px; } }
+  </style>
+</head>
+<body>
+<main>
+  <p>Standalone plugin / no site stylesheet</p>
+  <h1>Your controls. Liquid Design.</h1>
+  <p>These are ordinary buttons, links, and a form. Each enhanced control has one
+    <code>data-liquid-design</code> attribute. Hold and pull to stretch; release to rebound.
+    Drag the colored objects in each box near the glass to tint its edge. Focus an object and use arrow keys to move it.</p>
+  <div class="row">
+    <button id="theme" type="button">Switch theme</button>
+    <button id="lifecycle" type="button">Remove enhancement</button>
+    <a href="README.md">Installation guide</a>
+  </div>
+  <section class="scene">
+    <h2>Existing buttons and links</h2>
+    <div class="row">
+      <button data-liquid-design data-action="Saved" type="button">Save</button>
+      <a class="action" data-liquid-design href="#composer">Go to composer</a>
+      <button data-liquid-design aria-disabled="true" type="button">Unavailable, still stretchy</button>
+    </div>
+  </section>
+  <section class="scene">
+    <h2>Options / morphing dropdown</h2>
+    <p>Click or hold for 260ms. Dragging stretches without opening.</p>
+    <div data-liquid-design-component="options">
+      <button type="button" data-liquid-design data-liquid-design-toggle="example-options">Options</button>
+      <div id="example-options" hidden inert>
+        <button type="button" data-liquid-design data-action="Duplicated">Duplicate</button>
+        <button type="button" data-liquid-design data-action="Archived">Archive</button>
+        <button type="button" data-liquid-design data-action="Shared">Share</button>
+      </div>
+    </div>
+  </section>
+  <section class="scene">
+    <h2>Tools / split and rejoin</h2>
+    <p>Click Tools to separate the actions. Click again to absorb them.</p>
+    <div data-liquid-design-component="tools">
+      <button type="button" data-liquid-design data-liquid-design-toggle="example-tools">Tools</button>
+      <div id="example-tools" hidden inert>
+        <button type="button" data-liquid-design data-action="Copied" aria-label="Copy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg></button>
+        <button type="button" data-liquid-design data-action="Favorited" aria-label="Favorite"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3L3.2 9.7l6.4-.9Z"/></svg></button>
+        <button type="button" data-liquid-design data-action="Downloaded" aria-label="Download"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg></button>
+      </div>
+    </div>
+  </section>
+  <section class="scene">
+    <h2>Coordinated floating controls</h2>
+    <p>Open or hold Socials. When space is tight its menu opens below Tools;
+      expanding Tools slides Socials left, then closing brings it back. Sizes stay fixed.</p>
+    <div class="floating-demo" data-liquid-design-navigation>
+      <div class="social-position" data-liquid-design-move>
+        <div data-liquid-design-component="options">
+          <button type="button" aria-label="Socials" data-liquid-design data-liquid-design-toggle="floating-socials"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg></button>
+          <div id="floating-socials" hidden inert>
+            <button type="button" data-liquid-design data-action="GitHub selected">GitHub</button>
+            <button type="button" data-liquid-design data-action="YouTube selected">YouTube</button>
+          </div>
+        </div>
+      </div>
+      <div class="tools-position" data-liquid-design-component="tools">
+        <button type="button" aria-label="More tools" data-liquid-design data-liquid-design-toggle="floating-tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+        <div id="floating-tools" hidden inert>
+          <button type="button" data-liquid-design data-action="Copied" aria-label="Copy">C</button>
+          <button type="button" data-liquid-design data-action="Favorited" aria-label="Favorite">F</button>
+          <button type="button" data-liquid-design data-action="Downloaded" aria-label="Download">D</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="scene">
+    <h2>Existing toolbar, shared glass</h2>
+    <div class="toolbar" data-liquid-design-group>
+      <button data-liquid-design data-action="Copied" type="button">Copy</button>
+      <button data-liquid-design data-action="Favorited" type="button">Favorite</button>
+      <button data-liquid-design data-action="Downloaded" type="button">Download</button>
+    </div>
+  </section>
+  <section class="scene" id="composer">
+    <h2>Existing form, native submission</h2>
+    <form class="composer" data-liquid-design="surface">
+      <textarea rows="2" aria-label="Message" placeholder="Write a message…"></textarea>
+      <div class="actions"><button class="send" type="submit" data-liquid-design aria-disabled="true" aria-label="Send message">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
+      </button></div>
+    </form>
+  </section>
+  <p id="status" role="status" aria-live="polite">Try an action.</p>
+</main>
+<script>
+  const status = document.querySelector('#status');
+  document.querySelectorAll('[data-action]').forEach(button => button.addEventListener('click', () => { status.textContent = button.dataset.action; }));
+  const form = document.querySelector('form'), message = form.querySelector('textarea'), send = form.querySelector('button');
+  message.addEventListener('input', () => send.setAttribute('aria-disabled', String(!message.value.trim())));
+  form.addEventListener('submit', event => {
+    event.preventDefault(); if (!message.value.trim()) return;
+    status.textContent = 'Sent: ' + message.value.trim(); message.value = ''; send.setAttribute('aria-disabled','true'); message.focus();
+  });
+  document.querySelector('#theme').addEventListener('click', () => {
+    const html = document.documentElement; html.dataset.liquidDesignTheme = html.dataset.liquidDesignTheme === 'light' ? 'dark' : 'light';
+  });
+  let enabled = true;
+  document.querySelector('#lifecycle').addEventListener('click', event => {
+    if (!window.LiquidDesign) return;
+    enabled = !enabled; if (enabled) LiquidDesign.refresh(); else LiquidDesign.destroy();
+    event.currentTarget.textContent = enabled ? 'Remove enhancement' : 'Restore enhancement';
+  });
+</script>
+<script src="playground.js"></script>
+</body>
+</html>

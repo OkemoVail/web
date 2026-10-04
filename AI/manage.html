@@ -45,12 +45,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="../src/site.css">
-    
+    <link rel="stylesheet" href="../liquid-design/liquid-design.css">
+    <script src="../src/glass-navigation.js"></script>
+    <link rel="expect" href="#site-navigation-ready" blocking="render">
+    <script defer src="../liquid-design/liquid-design.js"></script>
+    <script defer src="../src/liquid-design-site.js"></script>
 </head>
 
 <body data-page="manage" class="bg-parchment transition-colors duration-500 overflow-x-hidden">
 
-    <header class="fixed top-0 left-0 w-full z-[100] px-6 py-8 pointer-events-none">
+    <header class="fixed top-16 md:top-0 left-0 w-full z-[100] px-6 py-8 pointer-events-none">
         <div class="max-w-7xl mx-auto flex items-center justify-start">
             <div class="header-island pr-2">
                 <button id="connect-btn" onclick="connectStorage()"
@@ -103,7 +107,7 @@
 
                 const btn = document.getElementById('connect-btn');
                 btn.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i><span>Connected</span>';
-                btn.className = "flex items-center gap-2 px-3 py-1.5 bg-rosewood/10 text-rosewood rounded-full font-bold text-xs transition-all";
+                btn.className = "skuo skuo-accent skuo-pill flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-xs transition-all";
             } catch (err) {
                 console.error("Storage connection failed:", err);
             }
@@ -149,7 +153,7 @@
                             <h3 class="text-lg font-bold text-text-warm truncate">${blog.title}</h3>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="deletePost('${blog.id}')" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                            <button onclick="deletePost('${blog.id}')" data-action="delete" aria-label="Delete research paper" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-white hover:bg-red-500 transition-all">
                                 <i class="fa-solid fa-trash-can text-sm"></i>
                             </button>
                         </div>

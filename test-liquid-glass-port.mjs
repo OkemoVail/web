@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import http from 'node:http';
+import { fileURLToPath } from 'node:url';
+import { chromium, webkit } from 'playwright';
+const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '.worktrees/liquid-glass/liquid-design');
+const server = http.createServer(async (req, res) => {
+  try {
+    const name = new URL(req.url, 'http://localhost').pathname.slice(1) || 'example.html';
+    if (!['example.html', 'liquid-design.css', 'liquid-design.js', 'playground.js'].includes(name)) throw new Error('missing');
+    res.setHeader('Content-Type', name.endsWith('.js') ? 'text/javascript' : name.endsWith('.css') ? 'text/css' : 'text/html');
+    res.end(await fs.readFile(path.join(root, name)));
+  } catch { res.writeHead(404); res.end(); }
+});
+await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+const engine = process.env.LIQUID_BROWSER === 'webkit' ? webkit : chromium;
+const browser = await engine.launch();
+try {
+  const page = await browser.newPage({ viewport: { width: 320, height: 844 } });
+  await page.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  await page.goto(`http://127.0.0.1:${server.address().port}`);
+  const host = page.locator('.floating-demo');
+  await host.scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => document.querySelector('.floating-demo [data-lgp-component]'));
+  assert.equal(await page.evaluate(() => typeof LiquidDesign.refresh === 'function' && typeof LiquidDesign.destroy === 'function' && typeof window.LiquidGlass === 'undefined'), true, 'standalone exposes the renamed LiquidDesign API');
+  const options = host.locator('[data-lgp-component="options"]');
+  const trigger = options.locator('[data-liquid-design-toggle]');
+  const tools = host.locator('[data-lgp-component="tools"]');
+  const toolTrigger = tools.locator('[data-liquid-design-toggle]');
+  const material = host.locator('.lgc-material').first();
+  assert.equal(await material.evaluate(el => getComputedStyle(el).backgroundColor), 'rgba(240, 240, 240, 0.64)', 'portable light veil matches the approved material');
+  assert.match(await material.evaluate(el => getComputedStyle(el).backdropFilter || getComputedStyle(el).webkitBackdropFilter), /blur\(12px\)/);
+  const start = await trigger.boundingBox();
+  await page.mouse.move(start.x + 22, start.y + 22); await page.mouse.down();
+  await page.waitForFunction(() => document.querySelector('[data-liquid-design-toggle="floating-socials"]').getAttribute('aria-expanded') === 'true');
+  await page.waitForFunction(() => document.querySelector('.floating-demo [data-lgp-component="options"]').dataset.morphPhase === 'settled');
+  const menuBounds = await page.locator('#floating-socials').boundingBox();
+  const toolsBounds = await toolTrigger.boundingBox();
+  assert.ok(menuBounds.y >= toolsBounds.y + toolsBounds.height + 8, `portable hold-open menu avoids the opposite trigger: ${JSON.stringify({menuBounds, toolsBounds, offset: await options.evaluate(el => el.style.getPropertyValue('--liquid-design-menu-offset-y'))})}`);
+  assert.ok(Math.abs(menuBounds.width - 200) < 5, 'collision handling keeps menu size during held contact');
+  await page.mouse.up(); await page.keyboard.press('Escape');
+  await page.waitForFunction(() => document.querySelector('.floating-demo [data-lgp-component="options"]').dataset.morphPhase === 'settled');
+  await toolTrigger.click(); await page.waitForTimeout(100);
+  const moving = await trigger.boundingBox();
+  assert.ok(moving.x < start.x && moving.x + moving.width > 0, 'portable Socials visibly slides left');
+  await page.waitForTimeout(600);
+  assert.ok((await trigger.boundingBox()).x + 44 <= 0, 'portable Socials leaves the frame when Tools overlaps');
+  await toolTrigger.click(); await page.waitForTimeout(650);
+  assert.ok(Math.abs((await trigger.boundingBox()).x - start.x) < 1, 'portable Socials returns to its original position');
+  await page.locator('#theme').click();
+  await page.waitForFunction(() => document.querySelector('.floating-demo [data-lgp-component]').dataset.lgpTheme === 'dark');
+  assert.equal(await material.evaluate(el => getComputedStyle(el).backgroundColor), 'rgba(28, 30, 33, 0.18)', 'portable dark veil matches the approved material');
+  await page.evaluate(() => LiquidDesign.destroy());
+  assert.equal(await host.locator('.lgc-material').count(), 0, 'portable teardown removes material');
+  assert.equal(await host.locator('[data-liquid-design-component="options"]').evaluate(el => el.style.getPropertyValue('--liquid-design-menu-offset-y')), '', 'portable teardown restores collision styles');
+  await page.evaluate(() => LiquidDesign.refresh());
+  assert.equal(await host.locator('.lgc-material').count(), 2, 'portable setup is reusable after teardown');
+  assert.deepEqual(errors, [], 'portable example has no browser exceptions');
+  console.log(`${engine === webkit ? 'WebKit' : 'Chromium'} standalone port: approved light/dark material, hold placement, fixed sizes, animated collision/return, lifecycle PASS`);
+} finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }

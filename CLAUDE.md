@@ -135,6 +135,352 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
+Rounded AI button material (2026-10-04): user screenshot showed a rectangular
+pink fill behind the rounded Start here rim. Independent glass material now
+uses the same explicit local `path()` clip as its live foreground contour,
+avoiding a dependency on cross-layer SVG fragment resolution. The rendered
+corner regression in `test-ai-home-stretch.mjs` removes that fragment to verify
+transparent corners while retaining stretch/rebound in Chromium and WebKit.
+
+AI landing in-page stretch (2026-10-04): user requested stretching for buttons
+inside `/AI/index.html` content too. The independent plugin controls on
+`[data-page="ai-home"]` now bypass the shell-child static-motion restriction,
+including card CTAs, intro playback, carousel arrows and video-player buttons.
+Reduced motion and webdriver guards remain active. `node test-ai-home-stretch.mjs`
+(also `LIQUID_BROWSER=webkit`) verifies desktop/mobile pulls, rebound, real
+Chromium touch and ordinary CTA navigation.
+
+Rim-first nearby-color reflection (2026-10-04): user requested the stardust
+reflection primarily on the facing glass rim, with roughly 70% less supplemental
+color on the blurred interior. `liquid-design/source/liquid-design-colors.js`
+now paints source-local SVG radial-gradient strokes on the live material contour
+for both independent and compound controls, alongside the quieter face spill.
+Native backdrop blur is retained. `node test-glass-color-reflection.mjs` (also
+`LIQUID_BROWSER=webkit`) checks rendered rim/face balance, facing-edge preference,
+stretch contour alignment and removal when the source leaves its range.
+
+Native search scroll ownership (2026-10-04): supersedes the persistent-search
+replica/anchor approach below. User still observed lag because child compositor
+scrolling can precede parent JavaScript scroll-event synchronization. Search now
+renders in its actual child document (`.hero-search`, `#hero-bar`, `#results-bar`),
+with no fixed shell replica or cross-page morph. `glass-shell-search.js` only
+enables native search touch routing; the plugin permits stretch on these child
+search surfaces while other in-page buttons retain their static-motion behavior.
+Native Home GET submission carries the query to Astra; input DOM identity is no
+longer shared across documents. `test-native-search-scroll.mjs` (also exposed as
+`test-glass-search-scroll.mjs`) verifies scrolling without parent synchronization,
+stretch/release, centered labels, native submit and actual mobile touch gestures.
+Persistent navigation and recording regression suites use child search controls.
+
+Search navigation behavior (2026-10-04): user explicitly retained stretching
+but removed cross-page search morph animations. `glass-shell-search.js` snaps
+to the destination slot without geometry springs or entrance/exit fades, and
+includes the owning iframe's offset so the search travels with page slides.
+`glass-shell.js` updates that anchor on every page-slide frame. The retained
+native input still survives navigation; touch/stretch/rebound are unchanged.
+`test-glass-search-scroll.mjs` checks per-frame Home→Astra alignment and absence
+of independent search animations in Chromium/WebKit.
+
+Mobile search gestures and centering (2026-10-04): shell search/input use
+`touch-action: none` to retain the pointer stream. Quick vertical swipes forward
+scrolling, while horizontal pulls and holds of at least 180ms reserve liquid
+stretch (submit gestures always stretch). Search buttons declare centered flex
+layout on the host before plugin initialization, so its foreground wrapper
+inherits flex rather than inline-block baseline alignment (previously ~2px high).
+`test-glass-search-scroll.mjs` measures label centers in Chromium/WebKit and uses
+Chromium touch injection for horizontal/held vertical pulls, rebound and swipes.
+
+Search submit presentation (2026-10-04): user approved a Google-reference-inspired
+right-hand pink pill containing a magnifying glass followed by bold Search,
+without voice/image/AI controls. Native homepage and persistent shell use
+`.search-submit-label` (700 weight, 18px decorative SVG, 8px gap) in `src/site.css`.
+The icon is inside the submit button, not beside the input. Scroll anchoring,
+native editing and liquid stretch remain covered by `test-glass-search-scroll.mjs`.
+
+Search press-light release (2026-10-04): native input gestures do not capture
+the mouse until an outside pull. Scrolling under a held input can therefore
+deliver mouse release to the child page and leave the parent highlight active.
+`src/glass-navigation.js` forwards child pointer-up/cancel to
+`GlassShellSearch.releaseGesture()` so the original surface completes its
+release spring. `test-glass-search-scroll.mjs` covers release inside the input,
+outside pulls, and release in child content after scrolling, in Chromium/WebKit.
+
+Search content anchoring (2026-10-04): the persistent search is page content,
+not freely deformable floating chrome. Same-slot scroll/layout changes in
+`src/glass-shell-search.js` shift its geometry immediately rather than
+retargeting the navigation spring. Wheel and vertical touch gestures over the
+shell search forward to its owning child page; input text remains native.
+The search and submit retain their liquid pull/stretch appearance; only their
+layout anchor follows page scrolling immediately (user clarification).
+`node test-glass-search-scroll.mjs` (also `LIQUID_BROWSER=webkit`) checks live
+scroll/reversal alignment, wheel forwarding, touch forwarding and anchored stretch;
+`test-persistent-glass.mjs` verifies retained input/navigation continuity.
+
+Light-mode refresh icon correction (2026-10-04): `glass-shell.html` now sets
+`data-liquid-design-theme` alongside its early resolved `.dark` state, before
+the glass engine loads. Without that explicit theme, a saved light preference
+over OS dark mode rendered persistent Socials/Tools icons white after refresh.
+`node test-glass-theme-refresh.mjs` (also `LIQUID_BROWSER=webkit`) covers initial
+load and refresh for saved light/dark and system preferences in shell/native modes.
+
+Socials dropdown breakpoint (2026-10-04): below 430px, the top-left dropdown
+opens 12px below the Labs21 navigation row; at 430px and wider, its top edge
+aligns with Labs21's top inset. Native `src/nav.js` and persistent
+`src/glass-shell-controls.js` apply placement before click, keyboard and
+hold-to-open measurement. `test-glass-recording.mjs` covers both navigation
+modes at 429, 430, 768 and 1280px, including held material deformation.
+
+Return-navigation menu flash (2026-10-04, `Videos/2026-10-04 20-38-37.mp4`):
+Options/Tools controller teardown restores initialization-time inline styles,
+which displaced the hamburger by 49px on the return to Home before the spring
+animation began. `src/glass-shell-controls.js` reapplies live shell geometry
+immediately after teardown, before the incoming controller measures its layout.
+`test-glass-navigation-performance.mjs` checks first-frame handoff alignment in
+Chromium and WebKit alongside persistent button identity.
+
+Expanded Tools rim consistency (2026-10-04): user subsequently requested the
+same top reflection on the sun, Liquid Design and Selected work actions as on
+the chevron. Every dark expanded shell Tools lobe now has its own local contour
+reflection; collapsed controls and other navigation groups retain their settings.
+Rendered pixel regressions cover all four controls in `test-glass-recording.mjs`.
+
+Expanded Tools rim correction (2026-10-04): user clarified the missing top
+reflection affects only the expanded chevron; keep other controls' rim settings.
+The shell's dark expanded Tools trigger has a lobe-local top reflection path,
+following its live contour. Theme Tools action uses the full eight-ray sun.
+`test-glass-recording.mjs` checks the icon and rendered chevron top-edge pixels.
+
+Navigation latency and direction correction (2026-10-04): Home and AI landing
+use locally compiled `src/output.css`, with their palette aliases in
+`src/input.css`, removing the parser-blocking Tailwind Play CDN. Shell Lumen
+starts after `glasspagesettled` and uses the existing video cinematic to avoid
+synchronous WebGL probes/compilation stalling live glass; native pages retain
+adaptive WebGL. Page visit order controls in-page return direction (previous
+on the left, new on the right), alongside browser history direction. Tools
+chevrons and shared menu/leading identities use pop-first face morphs; changing
+Tools/Options controllers retains the button node. Regression:
+`node test-glass-navigation-performance.mjs` plus recording/persistent suites.
+
+Persistent button morph sequence (2026-10-04): user approved pop first with
+the old icon still sharp, then blur into the destination icon and settle.
+`src/glass-shell-controls.js` applies an 8% wrapper pop over 400ms, begins
+defocus at 120ms, swaps at 220ms, and sharpens over 180ms. Interrupted or
+retiring controls cancel stale swaps; reduced motion switches immediately.
+`test-glass-recording.mjs` verifies the ordered phases and latest-target wins.
+
+Recorded shell regressions (2026-10-04, `Videos/2026-10-04 19-40-40.mp4`):
+programmatic destination focus must not give `main`/`h1` a page-sized accent
+outline; persistent search needs its own focus reset and an enhanced accent
+submit button. Preserve homepage Tools (More/Close chevron, horizontal actions,
+logo after Labs21) separately from AI Options and Socials identities. Compound
+shell wrappers must remain absolutely positioned; plugin-relative positioning
+otherwise adds normal-flow offsets. Clamp Options menus before pointer/keyboard
+opening, slide Socials clear of overlapping Tools, and handle same-page hash
+links without replacing the child document. Regression: `node
+test-glass-recording.mjs` (also `LIQUID_BROWSER=webkit`), alongside
+`node test-persistent-glass.mjs` for held gestures and interrupted navigation.
+
+Persistent glass direction (2026-10-04): after comparing
+`Videos/2026-10-04 18-30-22.mp4` with the Apple Notes reference, the user approved
+a persistent live-material navigation layer. Snapshot pairing cannot preserve
+native pointer capture or controller spring velocity across document teardown.
+Design: `docs/superpowers/specs/2026-10-04-persistent-glass-navigation-design.md`.
+Acceptance must exercise held gestures and interrupted navigation, not just names
+or endpoint screenshots. Architecture details await written-spec review.
+
+Persistent glass matching (2026-10-04): user wants explicit correspondence,
+with fade-out when no matching destination glass exists rather than forced
+shrinking/merging. `data-glass-key` assigns a stable identity; `data-glass-to`
+on outgoing controls targets a destination identity. Shared navigation defaults
+to its semantic roles. New unmatched controls fade in; absent controls fade out.
+
+Persistent shell implementation (2026-10-04): live HTTP pages enter
+`glass-shell.html` before app initialization, restoring the public URL with
+History API. `__glass_page=1` is the explicit same-origin child bridge mode;
+`__glass_native=1` bypasses the shell for direct-page diagnostics. Webdriver uses
+direct pages unless its guard is explicitly disabled by live tests.
+`src/glass-shell.js` owns routing and spring-driven page slides;
+`src/glass-shell-controls.js` owns persistent keyed navigation nodes and menus;
+`src/glass-shell-search.js` owns one native search input across Home/Astra.
+Page globals initialize inside separate frames; outgoing Lumen is disposed.
+Run `node test-persistent-glass.mjs` (also `LIQUID_BROWSER=webkit`) for actual
+held pointer continuity, input identity, menu reversals, child-content blur,
+history, stale-load cancellation, theme and unmatched fade behavior.
+
+Persistent glass refinement (2026-10-04): shell controls, menus and search use
+Satoshi explicitly. In-page child controls keep their native glass appearance
+but disable drag/stretch physics; floating shell controls retain live gestures.
+Page slides, control geometry and search share `src/glass-shell-motion.js`, an
+analytic critically damped elapsed-time response, so slow frames cannot cause
+chrome to trail the page. Retargeting preserves current position/velocity.
+The Apple Notes recording is the visible timing reference; exact native physics
+cannot be established from the recording alone.
+
+Glass continuity (2026-10-04): navigation and search transition identities are
+assigned only during `pageswap`/`pagereveal` using `.glass-navigation-transition`.
+Permanent `view-transition-name` on a glass ancestor creates a backdrop root and
+blocks its descendants from blurring the page (verified with rendered stripe
+contrast). Navigation controls pair individually as `site-nav-primary`,
+`site-nav-menu`, `site-nav-theme`, and `site-nav-leading`; never name the entire
+navigation screenshot. Legacy nav capsules use the real native glass surface too.
+Cross-page links retain their current geometry for capture; in-page Tools links
+still retract. Regression: `node test-liquid-glass-continuity.mjs` (also
+`LIQUID_BROWSER=webkit`; Windows WebKit can lack native blur rasterization).
+
+Apple continuity reference (2026-10-04): user supplied
+`Downloads/ScreenRecording_10-04-2026 18-11-34_1.MP4` (6 seconds, iOS Notes).
+The bottom toolbar stretches into a search field while its contents briefly
+defocus; the separate compose control persists and the page slides beneath.
+Cross-page glass keeps the old snapshot visible under the incoming blurred-to-
+sharp face, avoiding a two-sided fade that thins out the material mid-transition.
+
+Recorded continuity correction (2026-10-04): user supplied
+`Videos/2026-10-04 18-19-12.mp4`, exposing an orphan homepage search snapshot,
+whole-nav scaling and replayed content reveals. `src/glass-navigation.js` must
+load synchronously in the head: deferred adapter initialization is too late for
+`pagereveal`. Navigation pages use `<link rel="expect" blocking="render"
+href="#site-navigation-ready">` to prevent capture before nav injection;
+`src/nav.js` mounts immediately once body exists. Pair search only between root
+home and Astra, and complete reveal states before destination capture. The
+continuity harness includes actual homepage↔AI navigation and midpoint frames.
+
+AI landing homepage-base adaptation (2026-10-04): `AI/index.html` shares the root
+homepage's `.home-base` typography, material appearance, compact inset lists,
+footer, and horizontal Liquid Design Tools/Socials navigation. Keep the complete
+Lumen intro and both video carousel slides. AI-specific layout stays in the
+`[data-page="ai-home"]` section of `src/site.css`. Tools supports optional
+`toolsWork` and `toolsSecondary` links; Labs21's primary action opens Chat,
+and its secondary Tools action returns to the root homepage.
+
+AI landing navigation correction (2026-10-04): top-left is a native glass back
+link to `/index.html`. More beside Chat uses the Liquid Design Options menu
+with Goals, Research, Privacy, Terms, and theme actions (`NAV_CONFIG.variant =
+'pages'`). Labeled menu rows keep all five actions accessible on narrow phones.
+
+AI landing navigation refinement (2026-10-04): the right-hand controls are
+hamburger menu, independent theme toggle, then Chat. The hamburger contains
+only Goals, Research, Privacy, and Terms; theme stays visible outside the menu.
+
+AI landing control details (2026-10-04): hamburger trigger is circular
+(`border-radius: 50%`); the Chat pill places the Labs21 logo before its text.
+The menu trigger retains its hamburger glyph when open and closed; the liquid
+surface morph returns to the circular hamburger button, never an X icon.
+
+Liquid Design naming (2026-10-04): the public plugin is now `liquid-design/`,
+with `liquid-design.css`, `liquid-design.js`, `data-liquid-design-*` attributes,
+`--liquid-design-*` appearance variables and `LiquidDesign.refresh()/destroy()`.
+The production adapter is `src/liquid-design-site.js` / `LiquidDesignSite`.
+Build/export using `node liquid-design/build.mjs --export-portable`; the original
+worktree retains its `.worktrees/liquid-glass` Git location but its portable folder
+is `liquid-design/` and builder is `tools/build-liquid-design-plugin.mjs`.
+Existing historical test filenames remain `test-liquid-glass-*.mjs`; their
+fixtures and asset references use the new public names.
+
+Portable glass update (2026-10-04): approved production engine sources and material
+defaults are exported into `.worktrees/liquid-glass/src/` and its standalone
+`liquid-glass/` folder using `node liquid-glass/build.mjs --export-portable`.
+The standalone bundle includes optional `data-liquid-glass-navigation` pairing
+and `data-liquid-glass-move` slide-away wrappers, collision-aware Options menu
+offsets including hold-open, and native surface/nested-control fixes. Runtime
+needs only plugin CSS/JS. Verify with `node test-liquid-glass-port.mjs` (also
+LIQUID_BROWSER=webkit) and the original worktree's `test-liquid-glass-plugin.mjs`.
+
+Homepage “stardust” lettering uses a purple deep-space texture clipped inside
+the native text (brighter lavender in dark mode), preserving the page palette.
+Homepage glass opts into restrained violet/blue prismatic perimeter reflections;
+the plugin ties intensity/orientation to existing touch and deformation springs.
+This is a stylized optical edge effect, not physical diffraction simulation.
+Stardust stars are dense, tiny and dim; the text span has .08em paint padding
+to prevent final-glyph clipping. The added synthetic interior light wash was
+removed at the user's request. Stardust is an explicit purple color source for
+the plugin's nearby-color spill; the search surface uses a 160px proximity range
+to softly reflect that nearby heading, with the default 80px elsewhere retained.
+
+### Homepage Liquid Design redesign (2026-10-03)
+
+The root `index.html` landing page follows Apple content-first hierarchy with the
+existing parchment/rosewood and dark-mode palette. Use the shipped Liquid Glass
+engine and site adapter for its controls, not CSS-only imitation glass. The hero
+leads with “Made of stardust.” and native Astra GET search. A **Liquid Design**
+framework-showcase link is the fourth Selected work row and points to
+`/design.html` (superseding the former separate strip beneath three projects).
+The section count is 04 projects. These are editorial content rows, following
+Apple's Lists and tables / Materials guidance, not glass controls. References:
+The approved screenshot presentation (2026-10-04) is a compact inset list:
+one rounded content container, titles on the left, short muted details on the
+right and quiet trailing chevrons, with equal inset separators. No project
+icons or stacked descriptions. Dark mode uses the reference's charcoal
+surface (#1c1c1e); light mode keeps the existing site palette. Labs carries
+Coming soon as its right-hand detail and has no navigation chevron.
+No numbered columns or duplicate action labels. Keep native row links.
+`docs/research/2026-10-04-apple-selected-work-lists.md`.
+Homepage appearance lives in the home section of `src/site.css`;
+scroll reveals use `src/motion.js` for reduced-motion/webdriver and no-JS safety.
+The homepage opts into `NAV_CONFIG.variant = 'tools'` in `src/nav.js`: use the
+portable example's actual Tools split/rejoin component for Work, Liquid Design,
+and theme actions. The trigger stays at the right of a fixed mobile-safe footprint.
+The homepage Tools nav resets inherited capsule padding to zero so its top and
+right viewport insets match (24px desktop, 16px at widths up to 400px).
+Tools navigation has a left chevron for More and a right chevron for Close.
+A pink Labs21 link with its logo on the right targets `/AI/index.html`. The
+icon-only left-chevron trigger sits directly to its left, switching to a right
+chevron when open (accessible More/Close names). Actions expand leftward on all
+screen sizes. Mobile uses 44px controls, 6px action gaps and a compact Labs21
+pill with bold Labs21 text. Tools actions expand horizontally in the same row
+on mobile too; the user explicitly rejected downward expansion.
+Homepage Socials lives in a separate root-level nav at the top-left, aligned
+with the top-right navigation (24px insets; 16px at up to 400px). Its circular
+connected-nodes button uses the engine's Options dropdown for GitHub and
+YouTube, with keyboard navigation, Escape focus restoration and outside-close.
+Controls retain their normal sizes and Labs21 keeps its bold text. Opening
+Socials closes Tools; if its 200px dropdown would overlap the opposite chevron,
+the menu moves below that row with a 12px gap. Expanded Tools remains horizontal;
+if it overlaps the Socials circle, that circle slides off the left edge of the
+viewport, then returns when Tools closes. Never shrink controls
+The Socials container owns a transform transition using --dur-4/--ease-smooth;
+the circle must visibly travel left and back, rather than disappear instantly.
+or hide labels to resolve collisions. Layout is set before the glass engine
+measures its opening path; the menu offset is passed into the engine controller.
+Pointer-down prepares that menu offset before hold-to-open starts, so long presses
+use the same below-chevron placement as clicks and keyboard activation.
+At desktop widths (>=1024px), both floating navigation groups sit 32px from
+the top and align with the 1024px main-content edges, with at least 48px side
+insets. Mobile retains its existing viewport insets.
+Selected work rows are 52px tall with 12px vertical padding.
+The user removed the two-line “A one-person corner…” hero description.
+Production glass theme is explicitly synchronized by `src/liquid-glass-site.js`
+from the page's root `.dark` class; a saved light theme must override OS dark
+preference. Compound Tools controls bypass independent adapter enhancement.
+Homepage light glass uses a uniform near-white translucent veil (64%), with no
+vertical shading: the reference's darker upper area came from backdrop content.
+Keep 12px backdrop blur and a faint dark contour beneath the bright rim so it
+remains visible over white. Its white foreground touch light peaks at 68%.
+The homepage grey contour is only .5px; the 1.25px white rim is more prominent
+at the top (85%) and bottom (62%) in light mode, with subdued side reflections.
+Dark-mode edges follow the user's quieter reference: .75px white rim, 24% top
+and 12% bottom opacity, with very subdued intermediate reflections.
+Touch highlights live in clipped, pointer-inert
+foreground layers above text; fill/blur remain below. The profile picture is a
+native glass button with hold/pull/stretch/rebound and a fixed layout hitbox.
+Dark homepage glass uses an 18% charcoal veil with the same 12px blur, following
+the user's transparent Apple reference while retaining blurred background detail.
+The Tools trigger is labeled **More** when closed and **Close** when expanded.
+Foreground highlights use explicit local `path()` clipping from the same current
+material contour, including during press/pull and hash navigation.
+The complete homepage search pill opts into `data-liquid-glass="surface"`,
+not just its submit button. Its native input and GET submission remain intact;
+the engine owns blur, perimeter, restrained stretch and foreground highlights.
+Editable plugin surfaces keep a full-size foreground wrapper so native input
+text/placeholders share material X/Y scaling. No extra pink focus box is painted
+around the homepage search surface; submit-button keyboard focus remains visible.
+Nested plugin controls convert viewport measurements back to their group's local
+CSS space before painting. Parent surface stretch must affect child material,
+rim, touch light and label exactly once, including independent child presses.
+
+### Liquid-glass interaction correction (2026-09-29)
+
+The planned liquid-glass lab must not drag controls directly or deform diagonally. During a drag, resolve the current dominant signed axis dynamically to exactly one of up, down, left, or right; direction may switch during the same gesture, with a small crossover hysteresis to avoid flicker. The rendered material center may move, but very stiffly at only 5-8% of pointer displacement (6% baseline). Most travel must appear as facing-edge stretch, and native button content moves no more than half of the material-center offset. The outer track and DOM layout remain fixed.
+
 ### Lumen 1.9 AI landing hero (design approved 2026-09-08)
 
 The planned `AI/index.html` hero introduces one provisional model named **Lumen 1.9** through an eight-second NASA-cinematic Solar → Terra → Luna journey. Capable devices use adaptive Three.js with locally hosted NASA-derived textures; low-end devices use a matching pre-rendered fallback, while reduced-motion and webdriver receive the final poster immediately. The sequence ends on the asymmetric "Mission title" composition (Terra upper-right, Lumen copy lower-left), holds until the user deliberately selects one of the two existing video slides, and provides Skip intro followed by Replay. This is landing-page branding only and does not rename Saga in chat or backend data. Approved design: `docs/superpowers/specs/2026-09-08-lumen-solar-system-hero-design.md`.

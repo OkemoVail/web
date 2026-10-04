@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Okemo</title>
+  <script>
+    window.__glassShellEntry = true;
+    (function () {
+      var saved = localStorage.getItem('vail_theme');
+      var dark = saved === 'dark' || saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', dark);
+      document.documentElement.setAttribute('data-liquid-design-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+  <link rel="stylesheet" href="src/site.css">
+  <link rel="preload" href="Fonts/Satoshi-Variable.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="liquid-design/liquid-design.css">
+  <script defer src="liquid-design/liquid-design.js"></script>
+  <script defer src="src/glass-shell-motion.js"></script>
+  <script defer src="src/glass-shell-controls.js"></script>
+  <script defer src="src/glass-shell-search.js"></script>
+  <script defer src="src/glass-shell.js"></script>
+</head><body><p>Loading page…</p></body></html>

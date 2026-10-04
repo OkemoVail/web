@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="../src/glass-navigation.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Okemo Astra ✦</title>
@@ -18,9 +19,13 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
 <link rel="stylesheet" href="../src/site.css?v=20260829-astra-boat-1">
+<link rel="stylesheet" href="../liquid-design/liquid-design.css">
 <style>
   .r-source-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
   .r-source-tag { padding: 1px 5px; border: 1px solid var(--border-strong); border-radius: 999px; color: var(--text-secondary); font-size: .62rem; line-height: 1.35; }
+  /* The full-row hit target must stay beneath direct titles and brief actions,
+     even while the glass plugin raises its focused/pressed native host. */
+  [data-page="search"] .summary-hit[data-lg-site] { --z-chrome: 1; }
 </style>
 
 </head>
@@ -139,5 +144,7 @@
 <script src="../src/motion.js"></script>
 <script src="astra-helpers.js"></script>
 <script src="astra.js"></script>
+<script defer src="../liquid-design/liquid-design.js"></script>
+<script defer src="../src/liquid-design-site.js"></script>
 </body>
 </html>

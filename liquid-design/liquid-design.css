@@ -1,0 +1,162 @@
+/* Only initialized opt-in controls and owned layers consume these rules. */
+[data-lgp-control], [data-lgp-group], [data-lgp-component] {
+  --lgp-material-fill: rgb(240 240 240 / .64);
+  --lgp-edge-contrast: rgb(58 54 52 / .18);
+  --lgp-touch-light: radial-gradient(circle, rgb(255 255 255 / .68), rgb(255 255 255 / .30) 35%, transparent 70%);
+  --lgp-rim-top: .85;
+  --lgp-rim-bottom: .62;
+  --lgp-rim-width: 1.25px;
+  --lgp-prism-opacity: .28;
+}
+[data-lgp-theme="dark"] {
+  --lgp-material-fill: rgb(28 30 33 / .18);
+  --lgp-edge-contrast: transparent;
+  --lgp-touch-light: radial-gradient(circle, rgb(255 255 255 / .26), rgb(255 255 255 / .09) 35%, transparent 70%);
+  --lgp-rim-top: .24;
+  --lgp-rim-bottom: .12;
+  --lgp-rim-width: .75px;
+  --lgp-prism-opacity: .18;
+}
+[data-lgp-control], [data-lgp-group] {
+  --lgp-default-fill: rgba(255,255,255,.38);
+}
+[data-lgp-theme="dark"] { --lgp-default-fill: rgba(28,30,33,.38); }
+[data-lgp-control] { touch-action: none; -webkit-user-select: none; user-select: none; }
+[data-lgp-control="surface"] { touch-action: auto; user-select: auto; -webkit-user-select: auto; }
+[data-lgp-control][aria-disabled="true"] { cursor: not-allowed; }
+[data-lgp-control][aria-disabled="true"] > .lgp-content { opacity: .5; }
+[data-lgp-control] > .lgp-content {
+  position: relative; z-index: 2; transform-origin: center;
+  min-width: 0; max-width: 100%; pointer-events: none;
+  color: var(--liquid-design-color, inherit);
+}
+[data-lgp-control="surface"] > .lgp-content { pointer-events: auto; }
+/* Editable glass has its material perimeter, not an extra fixed focus box.
+   Standalone button keyboard indicators remain host-owned. */
+[data-lgp-control="surface"]:focus-within { --lgp-focus-shadow: none; }
+[data-lgp-control="surface"] input:focus,
+[data-lgp-control="surface"] textarea:focus {
+  outline: none; box-shadow: none;
+}
+[data-lgp-control][data-lgp-theme="dark"] > .lgp-content,
+[data-lgp-component][data-lgp-theme="dark"] [data-liquid-button],
+[data-lgp-component][data-lgp-theme="dark"] .lgc-exit {
+  color: var(--liquid-design-color, #f7f7f5);
+}
+[data-lgp-control="surface"][data-lgp-theme="dark"] textarea,
+[data-lgp-control="surface"][data-lgp-theme="dark"] input {
+  color: var(--liquid-design-color, #f7f7f5);
+}
+[data-lgp-control="surface"][data-lgp-theme="dark"] textarea::placeholder,
+[data-lgp-control="surface"][data-lgp-theme="dark"] input::placeholder { color: #c3c5ca; }
+[data-lgp-control] > .lgp-material,
+[data-lgp-group] > .lgp-material,
+[data-lgp-control] > .lgp-outline,
+[data-lgp-group] > .lgp-outline {
+  position: absolute; pointer-events: none; margin: 0; padding: 0; border: 0;
+  z-index: 0; box-sizing: border-box;
+}
+[data-lgp-control] > .lgp-material, [data-lgp-group] > .lgp-material {
+  overflow: hidden; background: var(--liquid-design-fill, var(--lgp-material-fill));
+  -webkit-backdrop-filter: blur(var(--liquid-design-blur, 12px)) saturate(1.05);
+  backdrop-filter: blur(var(--liquid-design-blur, 12px)) saturate(1.05);
+}
+[data-lgp-control] > .lgp-material::after, [data-lgp-group] > .lgp-material::after {
+  content: ''; position: absolute; inset: 0; background: var(--liquid-design-tint, transparent); pointer-events: none;
+}
+[data-lgp-control] > .lgp-outline, [data-lgp-group] > .lgp-outline { overflow: visible; z-index: 1; }
+.lgp-outline > .lgp-rim { opacity: var(--liquid-design-rim, 1); }
+.lgp-contrast-rim, [data-lgp-component] .lgc-contrast-rim { stroke: var(--liquid-design-edge-contrast, var(--lgp-edge-contrast)); stroke-width: .5px; }
+.lgp-rim, .lgc-rim { stroke-width: var(--liquid-design-rim-width, var(--lgp-rim-width)); }
+:is(.lgp-outline, .lgc-outline) linearGradient:not([id$="-prism"]) stop:first-child { stop-opacity: var(--liquid-design-rim-top, var(--lgp-rim-top)); }
+:is(.lgp-outline, .lgc-outline) linearGradient:not([id$="-prism"]) stop:last-child { stop-opacity: var(--liquid-design-rim-bottom, var(--lgp-rim-bottom)); }
+[data-lgp-theme="dark"] :is(.lgp-outline, .lgc-outline) linearGradient:not([id$="-prism"]) stop:not(:first-child):not(:last-child) { stop-opacity: .025; }
+.lgp-prism-rim, .lgc-prism-rim { opacity: 0; pointer-events: none; }
+.lgp-highlights > .lgp-glow {
+  position: absolute; width: 184px; height: 184px; margin: 0; padding: 0;
+  border: 0; border-radius: 50%; transform: translate(-50%,-50%);
+   background: var(--liquid-design-touch-light, var(--lgp-touch-light));
+  filter: blur(9px); pointer-events: none; opacity: 0;
+}
+[data-lgp-theme="dark"] > .lgp-highlights > .lgp-glow {
+  background: var(--liquid-design-touch-light, var(--lgp-touch-light));
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-lgp-control] > .lgp-material, [data-lgp-group] > .lgp-material { background: rgba(235,238,242,.95); }
+  [data-lgp-theme="dark"] > .lgp-material { background: rgba(40,45,51,.95); }
+}
+/* Optional native Options/Tools controllers reuse the original demo engine. */
+[data-lgp-component] { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; padding: 24px; }
+[data-lgp-component="options"] { width: 280px; min-height: 100px; }
+[data-lgp-component] .lgc-material, [data-lgp-component] .lgc-outline {
+  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+}
+[data-lgp-component] .lgc-material {
+  overflow: hidden; background: var(--liquid-design-fill,var(--lgp-material-fill));
+  -webkit-backdrop-filter: blur(var(--liquid-design-blur,12px)) saturate(1.05);
+  backdrop-filter: blur(var(--liquid-design-blur,12px)) saturate(1.05);
+}
+[data-lgp-component][data-lgp-theme="dark"] .lgc-material { background: var(--liquid-design-fill,var(--lgp-material-fill)); }
+[data-lgp-component] .lgc-outline { overflow: visible; z-index: 1; }
+[data-lgp-component] .lgc-rim { opacity: var(--liquid-design-rim,1); }
+[data-lgp-component] .lgc-border, [data-lgp-component] .lgc-outer-dark, [data-lgp-component] .lgc-outer-bright { display: none; }
+[data-lgp-component] .lgc-lights { position: absolute; inset: 0; }
+[data-lgp-component] .lgc-glow {
+  position: absolute; width: 184px; height: 184px; transform: translate(-50%,-50%); border-radius: 50%;
+    background: var(--liquid-design-touch-light, var(--lgp-touch-light)); filter: blur(9px); opacity: 0;
+}
+[data-lgp-component] [data-liquid-button] {
+  position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center;
+  touch-action: none; -webkit-user-select: none; user-select: none; box-shadow: none;
+  background: transparent; border-color: transparent; transform: none;
+}
+[data-lgp-component] [data-liquid-button][aria-disabled="true"] { cursor: not-allowed; }
+[data-lgp-component] [data-liquid-button][aria-disabled="true"] > .lgc-content { opacity: .5; }
+[data-lgp-component] .lgc-content {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; min-width: 0; transform-origin: center; pointer-events: none;
+}
+[data-lgp-component] .lgc-content svg { width: 20px; height: 20px; flex: 0 0 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+[data-lgp-component] [data-liquid-button][hidden],
+[data-lgp-component="tools"] .lgd-tools[hidden],
+[data-lgp-component="options"] [data-liquid-menu][hidden] { display: none; }
+[data-lgp-component="tools"] { gap: 9px; justify-content: flex-start; }
+[data-lgp-component="tools"] .lgd-tools { position: absolute; inset: 0; pointer-events: none; }
+[data-lgp-component="tools"] .lgd-tools [data-liquid-button] { position: absolute; pointer-events: auto; width: 52px; height: 52px; padding: 0; border-radius: 50%; }
+[data-lgp-component="options"] [data-liquid-menu] {
+  position: absolute; left: 24px; top: 0; width: 232px; padding: 6px; display: flex; flex-direction: column; gap: 0;
+  z-index: 2; transform-origin: center; touch-action: none; -webkit-user-select: none; user-select: none;
+}
+[data-lgp-component="options"] [data-liquid-menu] [data-liquid-button] {
+  width: 100%; height: 44px; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 17px; font-weight: 400;
+}
+[data-lgp-component="options"] [data-liquid-menu] .lgc-content { justify-content: flex-start; gap: 12px; }
+[data-lgp-component] .lgc-selection-pill {
+  position: absolute; left: 0; top: 0; z-index: 1; box-sizing: border-box;
+  border-radius: 999px; border: 0; background: rgba(255,255,255,.2); pointer-events: none; opacity: 0;
+}
+[data-lgp-component] .lgc-exit { position: absolute; z-index: 2; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+[data-lgp-control="surface"] [data-lgp-pinned] { position: relative; z-index: var(--z-chrome,100); }
+[data-lgp-component] [data-liquid-button] > .lgc-content { position: relative; z-index: 2; }
+
+/* Touch light washes over foreground, never adding a second backdrop blur. */
+.lgp-highlights, [data-lgp-component] .lgc-highlights {
+  position: absolute; display: block; pointer-events: none; overflow: hidden;
+  margin: 0; padding: 0; border: 0; z-index: 3;
+}
+[data-lgp-component] .lgc-highlights .lgc-lights { pointer-events: none; }
+
+
+.lg-color-spills { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+[data-liquid-color-scene] { position: relative; isolation: isolate; }
+[data-liquid-design-move] { transition: transform var(--dur-4, 560ms) var(--ease-smooth, cubic-bezier(.65,0,.35,1)); }
+@media (prefers-reduced-motion: reduce) { [data-liquid-design-move] { transition: none; } }
+[data-liquid-color-scene] > .lg-color-object {
+    position: absolute; z-index: 0; width: 56px; height: 40px; padding: 0;
+    border: 1px solid rgb(0 0 0 / .18); border-radius: 5px; box-shadow: none;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+[data-liquid-color-scene] > .lg-color-object--1 { width: 44px; height: 44px; border-radius: 50%; }
+[data-liquid-color-scene] > .lg-color-object--2 { width: 36px; height: 36px; }
+[data-liquid-color-scene] > .lg-color-object:active { cursor: grabbing; }
+[data-liquid-color-scene] > .lg-color-object:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }

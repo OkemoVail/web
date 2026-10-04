@@ -485,17 +485,17 @@ window.showSources = (idx) => {
 window.copyMsg = (idx, btnEl) => {
     const content = window.chatHistory[idx][1] || '';
     navigator.clipboard.writeText(content);
-    const originalHTML = btnEl.innerHTML;
-    btnEl.innerHTML = feather.icons.check.toSvg({ class: 'w-4 h-4' });
-    setTimeout(() => { btnEl.innerHTML = originalHTML; }, 2000);
+    const originalHTML = window.getButtonContent(btnEl).innerHTML;
+    window.getButtonContent(btnEl).innerHTML = feather.icons.check.toSvg({ class: 'w-4 h-4' });
+    setTimeout(() => { window.getButtonContent(btnEl).innerHTML = originalHTML; }, 2000);
 };
 
 window.copyUserMsg = (idx, btnEl) => {
     const content = window.chatHistory[idx][0] || '';
     navigator.clipboard.writeText(content);
-    const originalHTML = btnEl.innerHTML;
-    btnEl.innerHTML = feather.icons.check.toSvg({ class: 'w-3 h-3' });
-    setTimeout(() => { btnEl.innerHTML = originalHTML; }, 2000);
+    const originalHTML = window.getButtonContent(btnEl).innerHTML;
+    window.getButtonContent(btnEl).innerHTML = feather.icons.check.toSvg({ class: 'w-3 h-3' });
+    setTimeout(() => { window.getButtonContent(btnEl).innerHTML = originalHTML; }, 2000);
 };
 
 window.editMsg = (idx) => {
