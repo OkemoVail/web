@@ -8,14 +8,11 @@ const root = process.cwd();
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
-    if (url.pathname === '/AI/chat' && url.searchParams.get('__glass_page') === '1') {
+    if (url.pathname === '/AI/chat') {
       res.setHeader('Content-Type', 'text/html');
-      res.end(`<!doctype html><title>Chat fixture</title><script>window.LiquidDesign = {}; window.GlassPageBridge = {}; document.addEventListener('DOMContentLoaded', () => parent.GlassShell.childReady(window, new URL(location.href), null));</script><body><main>Chat fixture</main></body>`);
+      res.end('<!doctype html><title>Chat fixture</title><script src="/src/glass-navigation.js"></script><body><main>Chat fixture</main></body>');
       return;
     }
-    // Production normalizes this page to its extensionless URL. Mirror that
-    // behavior locally so the shell's initial-load route is exercised. The
-    // shell receives the extensionless URL; its child is deliberately tiny.
     const pathname = url.pathname;
     const file = path.resolve(root, '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));
     if (!file.startsWith(root + path.sep)) throw new Error('outside root');
@@ -39,16 +36,14 @@ try {
     localStorage.setItem('vail_last_seen_build', '999999');
     localStorage.setItem('vail_settings_v4', JSON.stringify({ userName: 'Route test', sidebarMode: 'manual', hasCompletedTutorial: true, folders: [], chatOrder: [], customAccents: [] }));
   });
-  await page.route('https://api.okemovail.com/**', route => route.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{}' }));
-
   const extensionlessChat = `${origin}/AI/chat`;
-  await page.goto(`${origin}/glass-shell.html?url=${encodeURIComponent(extensionlessChat)}`, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => window.GlassShell?.ready && document.querySelector('[data-glass-page]:not([aria-hidden])'), null, { timeout: 10000 });
+  await page.goto(extensionlessChat, { waitUntil: 'domcontentloaded' });
 
-  assert.equal(await page.evaluate(() => GlassShell.currentURL.pathname), '/AI/chat', 'the extensionless public chat route stays inside the shell');
-  assert.equal(await page.locator('[data-glass-page]:not([aria-hidden])').count(), 1, 'the shell commits one active chat frame');
-  assert.deepEqual(errors, [], 'the extensionless route has no shell errors');
-  console.log('PASS extensionless public chat route loads in the glass shell');
+  assert.equal(await page.evaluate(() => location.pathname), '/AI/chat', 'the extensionless public chat route remains direct');
+  assert.equal(await page.evaluate(() => !!window.GlassShell), false, 'chat never enters the persistent iframe shell');
+  assert.equal(await page.locator('main').textContent(), 'Chat fixture');
+  assert.deepEqual(errors, [], 'the native chat route has no navigation errors');
+  console.log('PASS extensionless public chat route stays native');
 } finally {
   await browser.close();
   await new Promise(resolve => server.close(resolve));

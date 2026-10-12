@@ -27,6 +27,7 @@
   function clean(url) { url = new URL(url, location.href); url.searchParams.delete('__glass_page'); return url; }
   function canonical(url) { var p = url.pathname; if (p === '/') return '/index.html'; if (p === '/AI/chat') return '/AI/chat.html'; if (p.endsWith('/')) return p + 'index.html'; return p; }
   function accepts(url) { url = clean(url); return url.origin === location.origin && routes.indexOf(canonical(url)) !== -1; }
+  function isNativePage(url) { return canonical(url) === '/AI/chat.html'; }
   function frameFor(win) { return [active, pending].find(function (record) { return record && record.frame.contentWindow === win; }); }
   function dispose(record) { if (!record) return; clearTimeout(record.timer); try { record.frame.contentWindow.LumenHero?.destroy(); } catch (_) {} record.frame.remove(); }
   function announce(text) { document.querySelector('#glass-shell-status').textContent = text; }
@@ -54,6 +55,7 @@
   function navigate(value, options) {
     options = options || {}; var url = clean(value);
     if (!accepts(url)) { location.href = url.href; return Promise.resolve(false); }
+    if (isNativePage(url)) { url.searchParams.set('__glass_native', '1'); location.href = url.href; return Promise.resolve(false); }
     if (!started) return Promise.resolve(false);
     if (pending) { dispose(pending); pending.resolve(false); pending = null; }
     if (outgoing) { dispose(outgoing); outgoing = null; }

@@ -1,7 +1,12 @@
 (function () {
   'use strict';
   var internal = new URL(location.href).searchParams.get('__glass_page') === '1';
-  var eligible = /^https?:$/.test(location.protocol) && !navigator.webdriver && !new URL(location.href).searchParams.has('__glass_native');
+  var path = location.pathname;
+  // Chat is a full application with its own long-lived state and boot work.
+  // Keep it out of the persistent iframe shell, which is meant for document
+  // pages and can otherwise loop when the host normalizes chat.html to /chat.
+  var nativePage = path === '/AI/chat' || path === '/AI/chat.html';
+  var eligible = /^https?:$/.test(location.protocol) && !navigator.webdriver && !nativePage && !new URL(location.href).searchParams.has('__glass_native');
   if (internal && window.parent !== window) {
     document.documentElement.setAttribute('data-glass-child', '');
     window.GlassPageBridge = { child: true };
