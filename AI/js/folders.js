@@ -6,7 +6,7 @@ window.createFolder = () => {
         'Enter folder name',
         'New Folder',
         (name) => {
-            const id = crypto.randomUUID();
+            const id = window.createId();
             window.settings.folders.push({ id, name, isOpen: true });
             window.saveSettings();
             window.renderHistory();

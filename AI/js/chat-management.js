@@ -269,7 +269,7 @@ window.delChat = async (id) => {
             delete window.allChats[id];
             await window.StorageController.deleteChat(id);
             if (id === window.currentChatId) {
-                window.currentChatId = crypto.randomUUID();
+                window.currentChatId = window.createId();
                 window.updateChatTokens();
                 window.chatHistory = [];
                 window.render();
@@ -378,7 +378,7 @@ window.resetChat = () => {
 
     window.toggleSendIcon('send');
     if (window.isGenerating && window.currentJob) window.currentJob.cancel();
-    window.currentChatId = crypto.randomUUID(); window.chatHistory = []; window.isGenerating = false;
+    window.currentChatId = window.createId(); window.chatHistory = []; window.isGenerating = false;
     const tokenDisplay = document.getElementById('token-count-display');
     if (tokenDisplay) tokenDisplay.innerText = window.formatTokenCount(0);
 

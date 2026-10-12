@@ -4,6 +4,24 @@
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
+// crypto.randomUUID arrived after some iPadOS releases we still support. Keep
+// IDs RFC 4122-shaped there while preferring the browser's native generator.
+window.createId = () => {
+    const secureCrypto = window.crypto;
+    if (typeof secureCrypto?.randomUUID === 'function') return secureCrypto.randomUUID();
+
+    const bytes = new Uint8Array(16);
+    if (typeof secureCrypto?.getRandomValues === 'function') {
+        secureCrypto.getRandomValues(bytes);
+    } else {
+        for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+    }
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
+
 const UNIQUE_SVG_NORTH = `<svg class="w-full h-full stroke-[2px] stroke-current fill-none" viewBox="0 0 24 24"><path d="M12 2V22M2 12H22M19.07 4.93L4.93 19.07M19.07 19.07L4.93 4.93" /><circle cx="12" cy="12" r="3" class="fill-current stroke-none" /></svg>`;
 const UNIQUE_SVG_SAGA = `<svg class="w-full h-full stroke-[1.8px] stroke-current fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6 C10 4.5,6.5 4.5,4.5 6 L4.5 18.5 C6.5 17,10 17,12 18.5 C14 17,17.5 17,19.5 18.5 L19.5 6 C17.5 4.5,14 4.5,12 6 Z"/><path d="M12 6 L12 18.5"/></svg>`;
 
@@ -361,7 +379,7 @@ window.currentJob = null;
 window.abortController = null;
 window.currentModel = window.MODELS.SAGA;
 window.allChats = {};
-window.currentChatId = crypto.randomUUID();
+window.currentChatId = window.createId();
 
 window.streamQueue = "";
 window.typedResponseText = "";
