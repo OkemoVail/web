@@ -8,7 +8,7 @@ import { chromium, webkit } from 'playwright';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const html = await fs.readFile(path.join(root, 'AI/version.html'), 'utf8');
 assert.ok(html.indexOf('../liquid-design/liquid-design.css') > html.indexOf('../src/site.css'), 'plugin CSS follows site CSS');
-assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design\.js"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site\.js"><\/script>/, 'ordered deferred plugin and adapter');
+assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design\.js(?:\?[^"\s]*)?"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site\.js(?:\?[^"\s]*)?"><\/script>/, 'ordered deferred plugin and adapter');
 
 const server = http.createServer(async (req, res) => {
   const file = path.resolve(root, '.' + new URL(req.url, 'http://localhost').pathname);

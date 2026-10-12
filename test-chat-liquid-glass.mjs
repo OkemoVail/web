@@ -2,239 +2,363 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { chromium, webkit } from 'playwright';
 
-const root = path.dirname(fileURLToPath(import.meta.url));
-const html = await fs.readFile(path.join(root, 'AI/chat.html'), 'utf8');
-assert.ok(html.indexOf('../src/site.css') < html.indexOf('../liquid-design/liquid-design.css'));
-assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design.js"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site.js">/);
+const root = process.cwd();
 const server = http.createServer(async (req, res) => {
   try {
-    const file = path.join(root, decodeURIComponent(new URL(req.url, 'http://local').pathname));
-    const bytes = await fs.readFile(file);
-    res.setHeader('Content-Type', ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' })[path.extname(file)] || 'application/octet-stream');
-    res.end(bytes);
-  } catch { res.writeHead(404); res.end(); }
+    const pathname = new URL(req.url, 'http://localhost').pathname;
+    const file = path.resolve(root, '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));
+    if (!file.startsWith(root + path.sep)) throw Error('outside');
+    res.setHeader('Content-Type', ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' })[path.extname(file)] || 'application/octet-stream');
+    res.end(await fs.readFile(file));
+  } catch { res.writeHead(404).end(); }
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-const origin = `http://127.0.0.1:${server.address().port}`;
-const engine = process.env.CHAT_BROWSER === 'webkit' ? webkit : chromium;
-const browser = await engine.launch();
-const external = new Map();
-const errors = [];
-const bootstrapErrors = [];
-async function setup(context) {
-  await context.addInitScript(() => {
-    localStorage.setItem('vail_settings_v4', JSON.stringify({ hasCompletedTutorial: true, userName: 'Glass tester', lang: 'en', accent: '#c96478' }));
-    localStorage.setItem('vail_theme', 'light');
-    localStorage.setItem('vail_last_seen_build', '999999');
-    window.__clipboard = [];
-    Object.defineProperty(navigator, 'clipboard', { value: { writeText: async text => window.__clipboard.push(text) } });
-    // Stub transport only; sendMessage, SSE parsing, typing, rendering and stop
-    // all remain the real application. Holding a response exercises stop UI.
-    const nativeFetch = window.fetch;
-    window.fetch = async (url, options = {}) => {
-      if (!String(url).includes('api.okemovail.com')) return nativeFetch(url, options);
-      if (String(url).endsWith('/v1/chat/completions')) {
-        const request = JSON.parse(options.body);
-        if (!request.stream) return new Response(JSON.stringify({ choices: [{ message: { content: 'Glass response' } }] }), { headers: { 'Content-Type': 'application/json' } });
-        if (window.__holdResponse) return new Promise((resolve, reject) => options.signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true }));
-        const content = 'A real streamed answer.\n\n```js\nconsole.log("glass");\n```';
-        return new Response('data: ' + JSON.stringify({ choices: [{ delta: { content } }] }) + '\n\ndata: [DONE]\n\n', { headers: { 'Content-Type': 'text/event-stream' } });
-      }
-      if (String(url).includes('/api/accounts/')) return new Response(JSON.stringify({ detail: 'Stubbed authentication failure' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-      return new Response('{}', { headers: { 'Content-Type': 'application/json' } });
-    };
-  });
-  // Use the actual CDN implementations, fetched once, so bootstrap/layout are
-  // real and reproducible without depending on browser CDN connection timing.
-  await context.route('https://**/*', async route => {
-    const url = route.request().url();
-    if (/cdn\.tailwindcss\.com|marked\/marked.min.js|katex.*\.js|anime.*\.js/.test(url)) {
-      if (!external.has(url)) external.set(url, await (await fetch(url)).text());
-      return route.fulfill({ contentType: 'text/javascript', body: external.get(url) });
-    }
-    return route.fulfill({ status: 200, contentType: url.endsWith('.css') ? 'text/css' : 'text/plain', body: '' });
-  });
-}
-async function open(context) {
-  const page = await context.newPage();
-  page.on('pageerror', error => errors.push(error.stack));
-  page.on('console', message => { if (message.type() === 'error' && message.text().includes('Initialization error:')) bootstrapErrors.push(message.text()); });
-  await page.goto(origin + '/AI/chat.html');
-  await page.waitForFunction(() => window.els?.input && window.LiquidDesignSite && !document.querySelector('#app-preloader'));
-  await page.waitForFunction(() => [...document.querySelectorAll('button')].every(button => button.querySelector(':scope > .lgp-material')));
-  return page;
-}
-async function chrome(page, selector) {
-  await page.waitForFunction(selector => {
-    const button = document.querySelector(selector);
-    return button && button.querySelectorAll(':scope > .lgp-content').length === 1 && button.querySelectorAll(':scope > .lgp-material').length === 1 && !button.querySelector('.lgp-content .lgp-content');
-  }, selector);
-}
-const tint = (page, selector) => page.locator(selector + ' > .lgp-material').evaluate(el => getComputedStyle(el, '::after').backgroundColor);
+const browser = await (process.env.LIQUID_BROWSER === 'webkit' ? webkit : chromium).launch();
 try {
-  const desktop = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
-  await setup(desktop);
-  const page = await open(desktop);
-  assert.deepEqual(bootstrapErrors, []);
-  await chrome(page, '#send-btn');
-  assert.equal(await page.locator('a.sb-nav-item[data-lg-site]').count(), 2);
-  assert.equal(await page.locator('.lgp-material[data-surfaces="2"]').count(), 0);
-  await page.evaluate(() => { window.__send = els.send; window.__input = els.input; window.__sendIcon = els.icon; window.__handler = els.send.onclick; window.__nativeChildren = getButtonContent(els.send).innerHTML; });
-  await page.locator('#tra-chevron').click();
-  assert.equal(await page.locator('#tra-chevron').getAttribute('aria-expanded'), 'true');
-  await page.locator('#tra-theme').click();
-  await page.waitForFunction(() => document.querySelector('#send-btn').dataset.lgpTheme === 'dark');
-  assert.ok(await page.locator('html').evaluate(el => el.classList.contains('dark')));
-  await page.evaluate(() => window.updateAccent('#3b82f6'));
-  assert.match(await tint(page, '.sb-new-chat-btn'), /59, 130, 246|0\.231373 0\.509804 0\.964706/);
-  await page.locator('#tra-theme').click();
-  await page.evaluate(() => { window.__handler = els.send.onclick; LiquidDesignSite.refresh(); });
-  assert.ok(await page.evaluate(() => __send === els.send && __handler === els.send.onclick));
-  await page.locator('#tra-chevron').focus();
-  await page.keyboard.press('Tab');
-  assert.notEqual(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle), 'none');
-  console.log('Shared CSS rim dimensions:', await page.evaluate(() => ['#tra-theme', '#tra-chevron'].map(selector => {
-    const button = document.querySelector(selector), rim = button.querySelector('.lgp-outline');
-    return { selector, host: [button.getBoundingClientRect().width, button.getBoundingClientRect().height], rim: [rim.getBoundingClientRect().width, rim.getBoundingClientRect().height] };
-  })));
+  for (const mode of ['native', 'shell']) for (const width of [1280, 960, 390]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 }, hasTouch: width === 390 });
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      localStorage.setItem('vail_theme', 'light');
+      localStorage.setItem('vail_last_seen_build', '999999');
+      localStorage.setItem('vail_settings_v4', JSON.stringify({ userName: 'Glass test', accent: '#c96478', lang: 'en', sidebarMode: 'manual', hasCompletedTutorial: true, folders: [], chatOrder: [], customAccents: [] }));
+    });
+    await page.route('https://api.okemovail.com/**', route => route.fulfill({ contentType: 'application/json', body: '{}' }));
+    await page.goto(`http://127.0.0.1:${server.address().port}/AI/chat.html${mode === 'native' ? '?__glass_native=1' : ''}`);
+    if (mode === 'shell') await page.waitForFunction(() => window.GlassShell?.ready);
+    const frame = mode === 'shell' ? page.frames().find(f => f.parentFrame() && f.url().includes('/AI/chat.html')) : page.mainFrame();
+    await frame.waitForFunction(() => window.els?.input && document.querySelector('.input-box-wrap[data-lgp-control="surface"]') && document.querySelector('#chat-title-menu'));
+    await frame.evaluate(() => {
+      document.getElementById('onboarding-overlay').style.display = 'none';
+      document.getElementById('app-preloader').style.display = 'none';
+    });
+    const composer = frame.locator('.input-box-wrap');
+    const input = frame.locator('#user-input');
+    await page.waitForTimeout(400);
+    const emptyAlignment = await frame.evaluate(() => {
+      const rect = selector => document.querySelector(selector).getBoundingClientRect();
+      const main = rect('main'), title = rect('#top-left-chat-title'), dock = rect('#chat-composer-dock'), greeting = rect('#welcome-greeting');
+      return { dockOffset: dock.x + dock.width / 2 - main.x - main.width / 2,
+        greetingOffset: greeting.y + greeting.height / 2 - (title.bottom + dock.top) / 2 };
+    });
+    assert.ok(Math.abs(emptyAlignment.dockOffset) < 1, 'composer centers in actual conversation pane');
+    assert.ok(Math.abs(emptyAlignment.greetingOffset) < 3, 'greeting centers between heading and composer');
+    await page.setViewportSize({ width, height: 650 });
+    await page.waitForTimeout(400);
+    assert.ok(await frame.evaluate(() => {
+      const dock = document.getElementById('chat-composer-dock').getBoundingClientRect();
+      const footer = document.querySelector('[data-t="saga_hallucination_warn"]').getBoundingClientRect();
+      const greeting = document.getElementById('welcome-greeting').getBoundingClientRect();
+      return footer.bottom < innerHeight && dock.right <= innerWidth && dock.left >= 0 && greeting.bottom < dock.top;
+    }), 'short-window greeting/composer/footer remain within their layout bounds');
+    if (mode === 'native') await page.screenshot({ path: path.join('C:/Users/okemo/AppData/Local/Temp/opencode', `chat-empty-alignment-${width}.png`) });
+    await page.setViewportSize({ width, height: 900 });
+    await page.waitForTimeout(400);
+    assert.equal(await frame.locator('#chat-title-text').innerText(), 'New chat', 'empty chat has a content heading');
+    assert.equal(await frame.locator('#chat-title-more').isVisible(), true, 'empty chats retain access to Personality and Memories');
+    await input.fill('Native editing stays intact.\nA second line.');
+    assert.equal(await input.inputValue(), 'Native editing stays intact.\nA second line.');
+    await input.evaluate(el => { el.setSelectionRange(0, 6); });
+    assert.equal(await input.evaluate(el => el.value.slice(el.selectionStart, el.selectionEnd)), 'Native');
+    await page.waitForTimeout(500);
+    const writing = await input.boundingBox();
+    const add = await frame.locator('#plus-menu-btn').boundingBox();
+    const send = await frame.locator('#send-btn').boundingBox();
+    const composerBox = await composer.boundingBox();
+    assert.ok(writing.y + writing.height >= add.y && writing.y <= add.y + add.height, 'writing field shares the Add and Send row');
+    assert.ok(Math.abs(add.y - send.y) < 1, 'Add and Send share the bottom control row');
+    await input.fill('A short message');
+    await page.waitForTimeout(500);
+    const compactLayout = await frame.evaluate(() => Object.fromEntries(['.input-box-wrap', '#input-inner', '#user-input', '.input-textarea-wrap'].map(s => {
+      const el = document.querySelector(s), c = getComputedStyle(el);
+      return [s, { height: el.getBoundingClientRect().height, inline: el.style.height, min: c.minHeight, padding: c.padding, line: c.lineHeight }];
+    })));
+    assert.ok((await composer.boundingBox()).height <= 80, `composer is a compact messaging input: ${JSON.stringify(compactLayout)}`);
+    await input.fill('Native editing stays intact.\nA second line.');
+    await page.waitForTimeout(500);
+    assert.equal(await composer.evaluate(el => getComputedStyle(el, '::before').content), 'none');
+    assert.equal(await composer.evaluate(el => getComputedStyle(el).backdropFilter), 'none');
+    assert.equal(await composer.locator(':scope > .lgp-material').evaluate(el => getComputedStyle(el).backdropFilter.includes('12px')), true);
+    const initialThread = await frame.locator('#chat-container').boundingBox();
+    await input.fill(Array.from({ length: 8 }, (_, i) => `Writing line ${i + 1}`).join('\n'));
+    await page.waitForTimeout(500);
+    const grownThread = await frame.locator('#chat-container').boundingBox();
+    const grownDock = await frame.locator('#chat-composer-dock').boundingBox();
+    assert.ok(Math.abs(grownThread.height - initialThread.height) < 1, 'floating composer growth preserves full-height canvas');
+    assert.ok(Math.abs(grownThread.y - initialThread.y) < 1, 'composer growth keeps header and thread top stationary');
+    assert.ok(grownThread.y + grownThread.height > grownDock.y + grownDock.height, 'growing composer floats above the canvas');
+    assert.ok(await frame.locator('#chat-messages').evaluate(el => parseFloat(getComputedStyle(el).paddingBottom) > document.getElementById('chat-composer-dock').getBoundingClientRect().height), 'thread reserves enough trailing space for the growing composer');
+    await input.fill('Native editing stays intact.\nA second line.');
+    await page.waitForTimeout(500);
+    if (width === 390) {
+      await frame.evaluate(() => {
+        Object.defineProperty(visualViewport, 'height', { configurable: true, get: () => 520 });
+        Object.defineProperty(visualViewport, 'offsetTop', { configurable: true, get: () => 0 });
+        visualViewport.dispatchEvent(new Event('resize'));
+      });
+      await page.waitForTimeout(150);
+      const keyboardLayout = await frame.evaluate(() => ({
+        dockBottom: document.getElementById('chat-composer-dock').getBoundingClientRect().bottom,
+        bodyHeight: getComputedStyle(document.body).height,
+        bodyMinHeight: getComputedStyle(document.body).minHeight,
+        viewportHeight: getComputedStyle(document.body).getPropertyValue('--chat-viewport-height')
+      }));
+      assert.ok(Math.abs(keyboardLayout.dockBottom - 504) < 1, `keyboard-sized visual viewport keeps the floating composer inset: ${JSON.stringify(keyboardLayout)}`);
+      await frame.evaluate(() => {
+        delete visualViewport.height;
+        delete visualViewport.offsetTop;
+        visualViewport.dispatchEvent(new Event('resize'));
+      });
+      await page.waitForTimeout(150);
+    }
 
-  // Settings: selected tabs, native field editing, smart toggle and hidden-size repair.
-  await page.locator('#sidebar-bottom-actions button[title="Settings"]').click();
-  await page.locator('#settings-submenu button').filter({ hasText: 'General' }).click();
-  await page.waitForFunction(() => document.querySelector('#settings-panel').classList.contains('active'));
-  await page.locator('#ptab-btn-profile').click();
-  assert.ok(await page.locator('#ptab-btn-profile').evaluate(el => el.classList.contains('skuo-accent')));
-  assert.notEqual(await tint(page, '#ptab-btn-profile'), 'rgba(0, 0, 0, 0)');
-  await page.locator('#ptab-btn-general').click();
-  const toggle = page.locator('#toggle-smart-sidebar');
-  if (await toggle.count()) {
-    const before = await page.evaluate(() => settings.sidebarMode);
-    await toggle.click();
-    assert.notEqual(await page.evaluate(() => settings.sidebarMode), before);
-    assert.equal(await toggle.locator('.lgp-content > div').evaluate(el => el.style.transform), before === 'smart' ? 'translateX(0px)' : 'translateX(22px)');
+    async function pull(button) {
+      const before = await button.boundingBox();
+      const x = before.x + before.width / 2, y = before.y + before.height / 2;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x - 65, y, { steps: 6 });
+      await page.waitForTimeout(250);
+      assert.equal(await button.locator(':scope > .lgp-content').evaluate(el => Math.abs(new DOMMatrix(getComputedStyle(el).transform).a - 1) > .002), true, 'held button stretches');
+      const held = await button.boundingBox();
+      assert.ok(Math.abs(held.x - before.x) < 1 && Math.abs(held.width - before.width) < 1, 'layout hitbox stays fixed');
+      await page.mouse.up();
+      await page.waitForTimeout(1300);
+      assert.equal(await button.locator(':scope > .lgp-content').evaluate(el => Math.abs(new DOMMatrix(getComputedStyle(el).transform).a - 1) < .002), true, 'button rebounds');
+    }
+    await pull(frame.locator('#send-btn'));
+    await pull(frame.locator('#chat-new-button'));
+    if (width === 390 && process.env.LIQUID_BROWSER !== 'webkit') {
+      const button = frame.locator('#send-btn');
+      const box = await button.boundingBox();
+      const x = box.x + box.width / 2, y = box.y + box.height / 2;
+      const session = await page.context().newCDPSession(page);
+      await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+      for (let d = 5; d <= 60; d += 5) await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x - d, y }] });
+      await page.waitForTimeout(250);
+      assert.equal(await button.locator(':scope > .lgp-content').evaluate(el => Math.abs(new DOMMatrix(getComputedStyle(el).transform).a - 1) > .002), true, 'real touch stretches send');
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await page.waitForTimeout(1300);
+      await session.detach();
+    }
+    assert.equal(await input.inputValue(), 'Native editing stays intact.\nA second line.', 'pull never sends');
+    await frame.locator('#plus-menu-btn').click();
+    assert.equal(await frame.locator('#plus-menu').evaluate(el => getComputedStyle(el).visibility), 'visible');
+    await frame.locator('#plus-menu-btn').click();
+    if (width === 390) {
+      await frame.locator('#menu-toggle-btn').click();
+      await page.waitForTimeout(500);
+      assert.equal(await frame.locator('#sidebar').evaluate(el => el.classList.contains('-translate-x-full')), false);
+      await frame.evaluate(() => window.toggleSidebar());
+      await page.waitForTimeout(500);
+    }
+
+    for (const dark of [false, true]) {
+      await frame.evaluate(dark => {
+        document.documentElement.classList.toggle('dark', dark);
+        window.chatHistory = Array.from({ length: 12 }, (_, i) => [`Question ${i}`, 'A readable answer.\n\n' + 'Long conversation content. '.repeat(30), null, Date.now()]);
+        window.render();
+        window.updateChatTitleDisplay('A glass conversation');
+        document.body.classList.add('is-generating');
+      }, dark);
+      await page.waitForTimeout(400);
+      assert.equal(await composer.getAttribute('data-lgp-theme'), dark ? 'dark' : 'light');
+       assert.equal(await frame.locator('#top-left-chat-title > .lgp-material').count(), 0, 'heading remains plain content like the Music reference');
+        for (const selector of ['#chat-new-button', '.input-box-wrap', '#plus-menu-btn', '#send-btn']) {
+         assert.ok(await frame.locator(selector + ' > .lgp-outline .lgp-rim').evaluate(el => {
+           const style = getComputedStyle(el);
+           return style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && parseFloat(style.opacity) > 0;
+         }), `${selector} keeps an engine-owned reflective rim at rest`);
+       }
+      assert.equal(await frame.locator('#tra-bar .lgp-material').count(), 1, 'one material for utility group');
+        assert.equal(await frame.locator('#chat-messages .chat-action-glass > .lgp-material').count(), 36, 'each exchange has three functionally grouped glass action materials');
+        assert.equal(await frame.locator('.chat-sidebar-actions > .lgp-material').count(), 0, 'sidebar utility buttons use separate Liquid Design materials');
+        assert.equal(await frame.locator('.chat-sidebar-actions').getAttribute('data-liquid-design'), null, 'sidebar utility wrapper does not own a shared surface');
+        assert.equal(await frame.locator('#sidebar-search-toggle[data-liquid-design-independent]').count(), 1, 'sidebar search is independently enhanced');
+        assert.equal(await frame.locator('.chat-sidebar-actions > .sb-icon-btn[data-liquid-design-independent]').count(), 2, 'sidebar utility buttons are independently enhanced');
+        assert.equal(await frame.locator('.chat-sidebar-actions [data-lg-site]').count(), 2, 'both sidebar utility buttons are enhanced by the production Liquid Design adapter');
+        assert.ok(await frame.evaluate(() => {
+          const group = document.querySelector('.chat-sidebar-actions').getBoundingClientRect();
+          const header = document.querySelector('.chat-library-header').getBoundingClientRect();
+          return Math.abs(group.right - (header.right - parseFloat(getComputedStyle(header).paddingRight))) < 1;
+        }), 'sidebar glass group stays aligned to the header right edge');
+        assert.equal(await frame.locator('.chat-sidebar-actions .chat-sidebar-actions-separator').count(), 1, 'sidebar glass group has one centered separator');
+        assert.equal(await frame.locator('#sidebar-search-toggle').evaluate(el => `${el.getBoundingClientRect().width}x${el.getBoundingClientRect().height}`), '40x40', 'sidebar search control is reduced to 40px');
+        assert.equal(await frame.locator('.chat-sidebar-actions').evaluate(el => getComputedStyle(el).borderRadius), '0px', 'sidebar utility wrapper has no competing shared capsule radius');
+        assert.ok(await frame.evaluate(() => {
+          const group = document.querySelector('.chat-sidebar-actions').getBoundingClientRect();
+          const search = document.querySelector('#sidebar-search-toggle').getBoundingClientRect();
+          const collapse = document.querySelector('.chat-sidebar-actions > .sb-icon-btn:last-of-type').getBoundingClientRect();
+          const separator = document.querySelector('.chat-sidebar-actions-separator').getBoundingClientRect();
+          const outerLeft = search.left - group.left;
+          const outerRight = group.right - collapse.right;
+          const leftGap = separator.left - search.right;
+          const rightGap = collapse.left - separator.right;
+          return Math.abs(outerLeft - outerRight) < 1 && Math.abs(leftGap - rightGap) < 1;
+        }), 'sidebar glass group has equal outer and separator spacing');
+        assert.equal(await frame.locator('.chat-sidebar-actions .sb-icon-btn').evaluate(el => getComputedStyle(el).borderRadius), '9999px', 'child controls retain their original circular radius');
+        assert.equal(await frame.locator('#sidebar a.sb-nav-item').count(), 0, 'sidebar keeps only New chat; secondary links were removed');
+       assert.equal(await frame.locator('#sidebar > .lgp-material').count(), 1, 'floating sidebar uses the same live glass engine');
+       assert.equal(await frame.evaluate(() => new Set(Array.from(document.querySelectorAll('[data-lgp-control]')).map(el => getComputedStyle(el).getPropertyValue('--liquid-design-fill').trim())).size), 1, 'all glass hosts use one resolved fill recipe');
+       assert.ok(await frame.locator('.chat-action-glass button').evaluateAll(buttons => buttons.every(button => {
+         const rect = button.getBoundingClientRect();
+         return rect.width >= 44 && rect.height >= 44 && !!button.getAttribute('aria-label');
+       })), 'grouped action buttons have 44px targets and accessible names');
+       await frame.evaluate(() => window.refreshChatActionGlass());
+       assert.equal(await frame.locator('#chat-messages .chat-action-glass > .lgp-material').count(), 36, 'refresh does not duplicate action glass');
+       assert.equal(await frame.locator('#history-list .lgp-material').count(), 0, 'history remains plain');
+       const messageLayout = await frame.evaluate(() => {
+         const row = document.querySelector('.ai-row');
+         const bubble = row.querySelector('.ai-bubble-container > .prose-target');
+         const actions = row.querySelector('.ai-msg-actions');
+         const b = bubble.getBoundingClientRect(), a = actions.getBoundingClientRect();
+         return {
+           fill: getComputedStyle(bubble).backgroundColor,
+           userFill: getComputedStyle(document.querySelector('.user-msg-bubble')).backgroundColor,
+            gap: b.top - a.bottom,
+           aligned: Math.abs(a.left - b.left) < 1,
+           aiSpacing: getComputedStyle(row).marginBottom,
+           userSpacing: getComputedStyle(document.querySelector('.user-row')).marginBottom
+         };
+       });
+       assert.notEqual(messageLayout.fill, 'rgba(0, 0, 0, 0)', 'assistant has a readable Messages-style bubble');
+       assert.notEqual(messageLayout.userFill, messageLayout.fill, 'user and assistant bubbles have distinct theme-aware fills');
+        assert.ok(messageLayout.aligned && messageLayout.gap >= 0 && messageLayout.gap <= 8, 'assistant actions reveal immediately above their bubble');
+        assert.equal(messageLayout.aiSpacing, '16px');
+        assert.equal(messageLayout.userSpacing, '8px');
+      const title = await frame.locator('#top-left-chat-title').boundingBox();
+      assert.ok(title.x >= 0 && title.x + title.width <= width + 1, 'title controls fit viewport');
+      assert.ok(await frame.locator('#top-left-chat-title button:visible').evaluateAll(els => els.every(el => {
+        const b = el.getBoundingClientRect(), parent = document.getElementById('top-left-chat-title').getBoundingClientRect();
+        return b.bottom <= parent.bottom + 1;
+      })), 'title material contains every action');
+        for (const selector of ['#send-btn', '#plus-menu-btn', '#chat-new-button', '#chat-title-more']) {
+        for (const box of await frame.locator(selector).evaluateAll(els => els.map(el => ({ w: el.getBoundingClientRect().width, h: el.getBoundingClientRect().height })))) {
+          assert.ok(box.w >= 44 && box.h >= 44, `${selector}: touch target >=44px`);
+        }
+      }
+      {
+        assert.ok(title.height < 90, `header stays a single row: ${JSON.stringify(await frame.evaluate(() => Object.fromEntries(['#top-left-chat-title','#chat-corner-actions','#chat-mobile-navigation'].map(s => { const el=document.querySelector(s); return [s,{h:el.getBoundingClientRect().height,display:getComputedStyle(el).display}];}))))}`);
+        const more = frame.locator('#chat-title-more');
+        await more.focus();
+        await more.press('ArrowDown');
+        assert.equal(await more.getAttribute('aria-expanded'), 'true');
+        const menu = frame.locator('#chat-title-menu');
+        await page.waitForTimeout(500);
+        assert.equal(await frame.locator('#chat-more-glass > .lgc-material').count(), 1, 'menu and More share one morphing material');
+        const bounds = await menu.boundingBox();
+        assert.ok(bounds.x >= 0 && bounds.x + bounds.width <= width, 'menu is clamped');
+        const focused = () => frame.evaluate(() => document.activeElement.textContent.trim());
+        assert.equal(await focused(), 'Rename chat');
+        await page.keyboard.press('ArrowDown');
+        assert.equal(await focused(), 'Regenerate title');
+        await page.keyboard.press('End');
+        assert.equal(await focused(), 'Toggle theme');
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(1500);
+        assert.equal(await more.evaluate(el => el === document.activeElement), true, 'Escape restores focus');
+        assert.equal(await menu.isVisible(), false);
+        await frame.evaluate(() => { window.renameCurrentChat = () => { window.__titleMenuRenamed = true; }; });
+        await more.click();
+        await page.waitForTimeout(500);
+        await menu.getByRole('menuitem', { name: 'Rename chat', exact: true }).click();
+        await page.waitForTimeout(1500);
+        assert.equal(await frame.evaluate(() => window.__titleMenuRenamed), true, 'menu routes to existing title action');
+        assert.equal(await menu.isVisible(), false, 'selection closes menu');
+      }
+      if (width >= 768) {
+        const sidebar = await frame.locator('#sidebar').boundingBox();
+        assert.ok(Math.abs(sidebar.x - 12) < 1 && Math.abs(sidebar.y - 12) < 1 && Math.abs(sidebar.height - 876) < 1, 'sidebar floats with 12px insets');
+        assert.ok(title.x > sidebar.x + sidebar.width, 'plain heading sits beside floating sidebar');
+        await frame.evaluate(() => window.toggleSidebar());
+        await page.waitForTimeout(500);
+        assert.ok(await frame.locator('#sidebar').evaluate(el => Math.abs(el.getBoundingClientRect().width - 60) < 1), 'sidebar collapses to its internal reopen rail');
+        assert.equal(await frame.locator('#sidebar #menu-toggle-btn').isVisible(), true, 'reopen control stays inside sidebar');
+        await frame.evaluate(() => window.toggleSidebar());
+        await page.waitForTimeout(500);
+      }
+      const dockBox = await frame.locator('#chat-composer-dock').boundingBox();
+      const threadBox = await frame.locator('#chat-container').boundingBox();
+      assert.ok(Math.abs(dockBox.y + dockBox.height - 884) < 1, 'composer floats inset from the bottom edge');
+      assert.ok(threadBox.y + threadBox.height > dockBox.y + dockBox.height, 'conversation canvas continues behind floating composer');
+      assert.ok(threadBox.y < title.y, 'heading sits over the continuous content canvas');
+      await frame.locator('#chat-container').evaluate(el => { el.scrollTop = 0; });
+      const before = await composer.boundingBox();
+      const area = await frame.locator('#chat-container').boundingBox();
+      await page.mouse.move(area.x + area.width / 2, area.y + area.height / 2);
+      await page.mouse.wheel(0, 600);
+      await page.waitForTimeout(300);
+      assert.ok(await frame.locator('#chat-container').evaluate(el => el.scrollTop > 0), 'thread scrolls natively');
+      assert.equal(await frame.locator('.chat-scroll-edge').count(), 1, 'soft scroll edge protects the plain heading above scrolling content');
+      assert.equal(await frame.locator('#chat-title-text').evaluate(el => {
+        const b = el.getBoundingClientRect();
+        const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+        return !!hit?.closest('#top-left-chat-title');
+      }), true, 'scroll edge never covers title controls');
+      const after = await composer.boundingBox();
+      assert.ok(Math.abs(after.y - before.y) < 1, 'composer remains anchored');
+      if (mode === 'native') await page.screenshot({ path: path.join('C:/Users/okemo/AppData/Local/Temp/opencode', `chat-glass-${width}-${dark ? 'dark' : 'light'}.png`) });
+    }
+    await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
+    await frame.waitForFunction(() => getComputedStyle(document.querySelector('.input-box-wrap > .lgp-material')).backdropFilter === 'none');
+    assert.equal(await composer.locator(':scope > .lgp-material').evaluate(el => getComputedStyle(el).backdropFilter), 'none', 'increased contrast removes transparency');
+    assert.equal(await composer.evaluate(el => getComputedStyle(el).getPropertyValue('--liquid-design-prism-opacity').trim()), '0');
+    const reducedButton = frame.locator('#send-btn');
+    const reducedBox = await reducedButton.boundingBox();
+    await page.mouse.move(reducedBox.x + 22, reducedBox.y + 22);
+    await page.mouse.down();
+    await page.mouse.move(reducedBox.x - 40, reducedBox.y + 22);
+    await page.waitForTimeout(150);
+    assert.equal(await reducedButton.locator(':scope > .lgp-content').evaluate(el => Math.abs(new DOMMatrix(getComputedStyle(el).transform).a - 1) < .002), true, 'reduced motion suppresses stretch');
+    await page.mouse.up();
+    await page.emulateMedia({ contrast: 'no-preference', reducedMotion: 'no-preference' });
+    await frame.evaluate(() => window.toggleSettingsPanel());
+    await page.waitForTimeout(350);
+    const settings = frame.locator('#settings-panel');
+    assert.equal(await settings.getAttribute('role'), 'dialog');
+    const settingsBounds = await settings.boundingBox();
+    assert.ok(settingsBounds.x >= 0 && settingsBounds.x + settingsBounds.width <= width + 1, 'settings dialog fits viewport');
+    await frame.locator('#ptab-btn-profile').click();
+    assert.equal(await frame.locator('#ptab-btn-profile').getAttribute('aria-selected'), 'true');
+    assert.equal(await frame.locator('#tab-profile').isVisible(), true);
+    if (width < 768) await frame.getByRole('button', { name: 'Back to settings categories' }).click();
+    await frame.locator('#ptab-btn-general').click();
+    for (const dark of [false, true]) {
+      await frame.evaluate(dark => window.setTheme(dark ? 'dark' : 'light'), dark);
+      await page.waitForTimeout(200);
+      if (width === 390) assert.equal(await frame.locator('.Cadance-tab-bar').isVisible(), false, 'mobile category detail uses the full panel in both themes');
+      if (mode === 'native') await page.screenshot({ path: path.join('C:/Users/okemo/AppData/Local/Temp/opencode', `chat-redesign-settings-${width}-${dark ? 'dark' : 'light'}.png`) });
+    }
+    await page.keyboard.press('Escape');
+    assert.equal(await settings.isVisible(), false, 'Escape closes settings');
+    await frame.evaluate(() => window.openPersonality());
+    await page.waitForTimeout(150);
+    assert.equal(await frame.locator('#personality-modal').isVisible(), true);
+    const personalityBounds = await frame.locator('#personality-modal > .card').boundingBox();
+    assert.ok(personalityBounds.x >= 0 && personalityBounds.x + personalityBounds.width <= width + 1, 'Personality sheet fits viewport');
+    await page.keyboard.press('Escape');
+    assert.equal(await frame.locator('#personality-modal').isVisible(), false);
+    await frame.evaluate(() => window.showCustomConfirm('Delete conversation?', 'This action cannot be undone.', () => {}, true));
+    assert.equal(await frame.locator('.custom-modal-card').getAttribute('role'), 'dialog');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(350);
+    assert.equal(await frame.locator('.custom-modal-overlay').count(), 0, 'Escape dismisses confirmation');
+    await frame.evaluate(() => {
+      window.canvasEnabled = false;
+      window.chatHistory = [['Show a snippet', '```python\nprint("Hello")\n```', null, Date.now()]];
+      window.render();
+    });
+    await page.waitForTimeout(200);
+    const codeColors = await frame.evaluate(() => {
+      const windowEl = document.querySelector('.code-window');
+      return ['.code-header', 'pre'].map(selector => getComputedStyle(windowEl.querySelector(selector)).backgroundColor);
+    });
+    assert.equal(codeColors[0], codeColors[1], 'code header and body use a continuous theme-matched surface');
+    console.log(`PASS ${mode} ${width}: floating sidebar/internal rail, visible title, corner menu, rectangular composer and accessibility`);
+    await page.close();
   }
-  await page.evaluate(() => toggleSettingsPanel());
-  await page.waitForFunction(() => !document.querySelector('#settings-panel').classList.contains('active'));
-
-  // Onboarding's native label must survive the wrapper and failed-submit restore.
-  await page.evaluate(() => { els.onboarding.classList.remove('hidden'); document.body.classList.add('onboarding-active'); });
-  await page.locator('#ob-mode-register').click();
-  assert.match(await page.locator('#ob-auth-submit .lgp-content > span').textContent(), /Create Account/i);
-  assert.equal(await page.locator('#ob-auth-submit .lgp-content svg').count(), 1);
-  await page.locator('#ob-mode-login').click();
-  await page.locator('#ob-email-input').fill('glass@example.com');
-  await page.locator('#ob-password-input').fill('glass-password');
-  await page.locator('#ob-password-input').locator('..').locator('button').click();
-  assert.equal(await page.locator('#ob-password-input').getAttribute('type'), 'text');
-  console.log('Password visibility vertical centers:', await page.evaluate(() => {
-    const input = document.querySelector('#ob-password-input'), button = input.parentElement.querySelector('button');
-    const a = input.getBoundingClientRect(), b = button.getBoundingClientRect();
-    return { input: a.y + a.height / 2, button: b.y + b.height / 2 };
-  }));
-  await page.locator('#ob-auth-submit').click();
-  await page.waitForFunction(() => !document.querySelector('#ob-auth-submit').disabled);
-  await chrome(page, '#ob-auth-submit');
-  assert.equal(await page.locator('#ob-auth-submit .lgp-content svg').count(), 1);
-  await page.locator('button[onclick="window.continueAsGuest()"]').click();
-  await page.evaluate(() => setLang('zh'));
-  await chrome(page, '#ob-mode-login');
-  await page.evaluate(() => setLang('en'));
-  await chrome(page, '#ob-mode-login');
-
-  // Editable prompt, real send/stream/render, dynamic message + code controls.
-  await page.locator('#user-input').fill('Verify native glass chat');
-  assert.equal(await page.locator('#user-input').inputValue(), 'Verify native glass chat');
-  await chrome(page, '#send-btn');
-  assert.notEqual(await tint(page, '#send-btn'), 'rgba(0, 0, 0, 0)');
-  await page.locator('#send-btn').click();
-  await page.waitForFunction(() => chatHistory.length === 1 && !isGenerating && document.querySelector('.main-response-content')?.textContent.includes('streamed answer'));
-  await page.waitForFunction(() => [...document.querySelectorAll('#chat-messages button')].every(button => button.querySelector(':scope > .lgp-material')));
-  assert.ok(await page.locator('#chat-messages button').count() >= 4);
-  assert.ok(await page.evaluate(() => __send === els.send && __input === els.input && __sendIcon === els.icon));
-  const copy = page.locator('#chat-messages button[onclick*="copyMsg"]').first();
-  await copy.click();
-  assert.match(await page.evaluate(() => __clipboard.at(-1)), /streamed answer/);
-  await page.waitForTimeout(2150);
-  assert.equal(await copy.locator(':scope > .lgp-material').count(), 1);
-  assert.equal(await copy.locator('.lgp-content .lgp-content').count(), 0);
-  await page.locator('.code-copy-btn').first().click();
-  assert.match(await page.evaluate(() => __clipboard.at(-1)), /console.log/);
-  await page.waitForTimeout(2150);
-  assert.equal(await page.locator('.code-copy-btn .lgp-content .lgp-content').count(), 0);
-
-  // Title feedback loading/restore and editable dynamic prompt dialog.
-  await page.locator('#header-feedback-good').click();
-  await page.waitForFunction(() => !document.querySelector('#header-feedback-good').disabled);
-  await chrome(page, '#header-feedback-good');
-  page.once('dialog', dialog => dialog.accept('Native glass title'));
-  await page.locator('#top-left-chat-title button[title="Rename Chat"]').click();
-  await page.waitForFunction(() => document.querySelector('#chat-title-text').textContent.includes('Native glass title'));
-  await page.evaluate(() => { window.__promptValue = ''; showCustomPrompt('Editable dialog', 'Title', 'Initial', value => __promptValue = value); });
-  await page.locator('.custom-modal-input').fill('Native editable dialog');
-  await page.locator('.custom-modal-overlay .modal-btn-primary').click();
-  assert.equal(await page.evaluate(() => __promptValue), 'Native editable dialog');
-  await page.waitForFunction(() => !document.querySelector('.custom-modal-overlay'));
-  await page.evaluate(() => { window.__confirmed = 0; showCustomConfirm('Delete test', 'Dynamic danger control', () => __confirmed++, true); });
-  await chrome(page, '.custom-modal-overlay .modal-btn-primary');
-  assert.match(await tint(page, '.custom-modal-overlay .modal-btn-primary'), /239, 68, 68/);
-  await page.locator('.custom-modal-overlay .modal-btn-primary').click();
-  assert.equal(await page.evaluate(() => __confirmed), 1);
-  await page.waitForFunction(() => !document.querySelector('.custom-modal-overlay'));
-
-  // Hold transport to inspect stop and invoke the real cancellation handler.
-  await page.evaluate(() => { window.__holdResponse = true; });
-  await page.locator('#user-input').fill('Stop this response');
-  await page.locator('#send-btn').click();
-  await page.waitForFunction(() => isGenerating && document.querySelector('#send-icon-wrapper .fa-square'));
-  await page.locator('#send-btn').click();
-  await page.waitForFunction(() => !isGenerating);
-  await chrome(page, '#send-btn');
-
-  // Voice is intentionally disabled in production. Exercise icon/action handoff
-  // with a capability stub, preserving the real updateUI and button dispatch.
-  await page.evaluate(() => { window.__voiceStarts = 0; VoiceMode.isSupported = () => true; VoiceMode.start = () => __voiceStarts++; els.input.value = ''; updateUI(); });
-  await page.waitForFunction(() => document.querySelector('#send-icon-wrapper svg'));
-  await page.locator('#send-btn').click();
-  assert.equal(await page.evaluate(() => __voiceStarts), 1);
-  await page.locator('#user-input').fill('Back to text');
-  assert.equal(await page.locator('#send-icon-wrapper .fa-arrow-up').count(), 1);
-
-  // No document rescans or cloned decoration during normal content churn.
-  await page.evaluate(() => { window.__scans = 0; window.__scanSites = {}; const query = Document.prototype.querySelectorAll; Document.prototype.querySelectorAll = function (...args) { __scans++; const key = args[0] + ':' + new Error().stack.split('\n').slice(2, 4).join(' '); __scanSites[key] = (__scanSites[key] || 0) + 1; return query.apply(this, args); }; });
-  await page.locator('#user-input').fill('More editable text');
-  await page.waitForTimeout(100);
-  console.log('Chat content-churn document query sites:', await page.evaluate(() => __scanSites));
-  assert.ok(await page.evaluate(() => Object.keys(__scanSites).every(key => !key.includes('liquid-design-site.js'))), 'site adapter does not rescan the document for content replacement');
-  assert.equal(await page.locator('.lgp-content .lgp-content').count(), 0);
-  await page.evaluate(() => { window.__handler = els.send.onclick; LiquidDesignSite.destroy(); });
-  assert.equal(await page.locator('[data-lg-site],.lgp-material,.lgp-outline,.lgp-content').count(), 0);
-  assert.ok(await page.evaluate(() => __send === els.send && __handler === els.send.onclick));
-  await page.evaluate(() => LiquidDesignSite.refresh());
-  await chrome(page, '#send-btn');
-  console.log('Desktop: actual chat bootstrap, independent buttons/links, theme, settings, onboarding submit/restore, editable prompt, real SSE send/stop, response copy, title feedback/rename, dynamic danger confirm, voice icon/action handoff PASS');
-
-  const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
-  await setup(mobile);
-  const small = await open(mobile);
-  await small.locator('#menu-toggle-btn').tap();
-  assert.ok(await small.locator('#sidebar-overlay').evaluate(el => getComputedStyle(el).pointerEvents !== 'none'));
-  await small.locator('#sidebar-overlay').tap({ position: { x: 350, y: 400 } });
-  await small.locator('#plus-menu-btn').tap();
-  assert.equal(await small.locator('#upload-file-btn').evaluate(el => el.disabled), true);
-  assert.equal(await small.locator('#web-search-btn').evaluate(el => el.disabled), true);
-  await small.locator('#user-input').fill('Mobile native send');
-  await small.locator('#send-btn').tap();
-  await small.waitForFunction(() => chatHistory.length === 1 && !isGenerating);
-  await small.waitForFunction(() => [...document.querySelectorAll('#chat-messages button')].every(button => button.querySelector(':scope > .lgp-material')));
-  assert.ok(await small.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-  assert.equal(await small.locator('.lgp-content .lgp-content').count(), 0);
-  console.log('Mobile 390x844/reduced motion: sidebar open/close, disabled menu controls, native tap send, dynamic response enhancement, no document horizontal overflow PASS');
-  assert.deepEqual(bootstrapErrors, []);
-  assert.deepEqual(errors, []);
-  console.log(`${process.env.CHAT_BROWSER || 'chromium'}: zero page errors and zero bootstrap errors PASS`);
 } finally {
   await browser.close();
   await new Promise(resolve => server.close(resolve));

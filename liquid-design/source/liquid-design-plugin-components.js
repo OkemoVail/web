@@ -21,13 +21,22 @@
     entries.forEach(function (item) {
       var content = item.content, effect = content._lgpTextEffect;
       if (!content.isConnected || !content.parentElement) return;
-      function clear() {
+       function clear() {
+         if (content.querySelector('svg')) root.LiquidDesignGlyphBlur(content, 0, 'occlusion');
         if (!effect) return;
         if (content.style.filter.indexOf(effect.id) !== -1) content.style.filter = effect.originalFilter;
         content.style.clipPath = effect.originalClip;
       }
       if (!active || item === active) { clear(); return; }
-      var rect = content.getBoundingClientRect(), box = active.box;
+       var ownBox = item.box, box = active.box;
+        if (box.x >= ownBox.x + ownBox.w || box.x + box.w <= ownBox.x || box.y >= ownBox.y + ownBox.h || box.y + box.h <= ownBox.y) { clear(); return; }
+        if (group.dataset.lgpComponent === 'tools' && content.querySelector('svg')) {
+          var overlapWidth = Math.min(box.x + box.w, ownBox.x + ownBox.w) - Math.max(box.x, ownBox.x);
+          var overlapHeight = Math.min(box.y + box.h, ownBox.y + ownBox.h) - Math.max(box.y, ownBox.y);
+          root.LiquidDesignGlyphBlur(content, 2 * Math.min(1, overlapWidth * overlapHeight / Math.max(1, ownBox.w * ownBox.h)), 'occlusion');
+          return;
+        }
+       var rect = content.getBoundingClientRect();
       if (box.x >= rect.right || box.x+box.w <= rect.left || box.y >= rect.bottom || box.y+box.h <= rect.top) { clear(); return; }
       var matrix = new DOMMatrix(getComputedStyle(content).transform);
       var sx = Math.max(.01,Math.abs(matrix.a)), sy = Math.max(.01,Math.abs(matrix.d));

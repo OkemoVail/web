@@ -44,8 +44,8 @@ async function open(viewport, options = {}) {
     await route.fulfill({ contentType: 'text/event-stream', body: 'data: {"choices":[{"delta":{"content":"A grounded answer [1]."}}]}\n\ndata: [DONE]\n\n' }).catch(() => {});
   });
   if (baseline) {
-    await page.route('**/liquid-design.js', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
-    await page.route('**/liquid-design-site.js', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+    await page.route(/\/liquid-design\.js(?:\?.*)?$/, route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+    await page.route(/\/liquid-design-site\.js(?:\?.*)?$/, route => route.fulfill({ contentType: 'text/javascript', body: '' }));
   }
   await page.goto(url);
   if (!baseline) await page.waitForFunction(() => document.querySelector('#hero-search > .lgp-material'));
@@ -65,6 +65,8 @@ const tint = (page, selector) => page.locator(`${selector} > .lgp-material`).eva
 
 try {
   const page = await open({ width: 1280, height: 900 });
+  await glass(page, '#hero-bar');
+  assert.equal(await page.locator('#hero-bar').getAttribute('data-lgp-control'), 'surface', 'native search field uses the same editable glass API as Home');
   assert.equal(await page.locator('.ov-nav,[data-lgp-group]:not([data-lgp-control]),[data-liquid-color-scene]').count(), 0);
   assert.equal(await page.locator('.ai-ring > #hero-cosmic').count(), 1, 'cosmic aurora wrapper remains intact');
   await page.locator('#tour-later').click();

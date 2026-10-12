@@ -158,14 +158,22 @@ window.updateChatTitleDisplay = (title) => {
     if (!titleEl) return;
 
     if (window.chatHistory.length > 0 && title) {
+        titleEl.inert = false;
+        titleEl.removeAttribute('aria-hidden');
         const textEl = document.getElementById('chat-title-text');
         if (textEl) textEl.innerText = window.truncateTitle(title);
         titleEl.classList.remove('opacity-0');
         titleEl.classList.add('opacity-100', 'pointer-events-auto');
     } else {
-        titleEl.classList.remove('opacity-100', 'pointer-events-auto');
-        titleEl.classList.add('opacity-0');
+        const textEl = document.getElementById('chat-title-text');
+        if (textEl) textEl.innerText = window.settings.lang === 'zh' ? '新對話' : 'New chat';
+        titleEl.inert = false;
+        titleEl.removeAttribute('aria-hidden');
+        titleEl.classList.remove('opacity-0');
+        titleEl.classList.add('opacity-100', 'pointer-events-auto');
     }
+    const more = document.getElementById('chat-title-more');
+    if (more) more.hidden = false;
 };
 
 window.regenerateCurrentTitle = () => {
@@ -307,6 +315,18 @@ window.loadChat = (id) => {
 
 window.filterChats = (query) => {
     window.renderHistory(query.toLowerCase());
+};
+
+window.toggleChatSearch = () => {
+    const panel = document.getElementById('chat-search-panel');
+    const input = document.getElementById('chat-search-input');
+    const button = document.getElementById('sidebar-search-toggle');
+    if (!panel || !input) return;
+    const open = panel.hidden;
+    panel.hidden = !open;
+    button?.setAttribute('aria-expanded', String(open));
+    if (open) input.focus();
+    else { input.value = ''; window.filterChats(''); }
 };
 
 window.selectModel = (key) => {

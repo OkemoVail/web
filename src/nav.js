@@ -8,7 +8,7 @@
   var DEFAULT_LINKS = [
     { label: 'Home', href: '/index.html' },
     { label: 'Design', href: '/design.html' },
-    { label: 'GitHub', href: 'https://github.com/ar12c' },
+    { label: 'GitHub', href: 'https://github.com/okemovail' },
     { label: 'YouTube', href: 'https://www.youtube.com/@SochiVail' }
   ];
   var DEFAULT_PRIMARY = { label: 'Labs21', href: '/AI/index.html', icon: 'labs21' };
@@ -91,10 +91,10 @@
       'data-liquid-design-toggle="ov-nav-socials" aria-controls="ov-nav-socials" aria-expanded="false" aria-label="Socials" title="Socials">' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg></button>' +
     '<div id="ov-nav-socials" aria-label="Social links" hidden inert>' +
-      '<button type="button" data-liquid-design data-social-href="https://github.com/ar12c">' +
-        '<span>GitHub</span></button>' +
+      '<button type="button" data-liquid-design data-social-href="https://github.com/okemovail">' +
+        '<svg class="social-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.57 22.02c.56.1.77-.24.77-.54v-2.1c-3.14.68-3.8-1.33-3.8-1.33-.51-1.3-1.26-1.65-1.26-1.65-1.03-.7.08-.69.08-.69 1.14.08 1.73 1.17 1.73 1.17 1.01 1.73 2.65 1.23 3.3.94.1-.73.4-1.23.72-1.51-2.5-.29-5.14-1.26-5.14-5.59 0-1.23.44-2.24 1.16-3.03-.12-.29-.5-1.44.11-3 0 0 .95-.3 3.1 1.16a10.8 10.8 0 0 1 5.64 0c2.15-1.46 3.1-1.16 3.1-1.16.61 1.56.23 2.71.11 3 .72.79 1.16 1.8 1.16 3.03 0 4.34-2.64 5.3-5.15 5.58.41.35.77 1.04.77 2.1v3.08c0 .3.2.65.78.54A11.3 11.3 0 0 0 12 .7Z"/></svg><span>GitHub</span></button>' +
       '<button type="button" data-liquid-design data-social-href="https://www.youtube.com/@SochiVail">' +
-        '<span>YouTube</span></button>' +
+        '<svg class="social-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.3 31.3 0 0 0 24 12a31.3 31.3 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg><span>YouTube</span></button>' +
     '</div></div>';
   var toolsHtml = '<div class="ov-nav__toolkit" data-liquid-design-component="tools">' +
     '<button type="button" class="skuo skuo-neutral skuo-pill ov-nav__tools-toggle" data-liquid-design ' +
@@ -137,7 +137,14 @@
       var backNav = document.createElement('nav');
       backNav.className = 'ov-social-nav';
       backNav.setAttribute('aria-label', 'Back');
-      backNav.innerHTML = '<a href="' + esc(cfg.back.href) + '" class="skuo skuo-icon ov-nav__back" data-liquid-design aria-label="' + esc(cfg.back.label) + '" title="' + esc(cfg.back.label) + '">' + CHEVRON_SVG + '</a>';
+      backNav.innerHTML = '<a href="/index.html" class="skuo skuo-icon ov-nav__back" data-liquid-design aria-label="Back" title="Back">' + CHEVRON_SVG + '</a>';
+      backNav.querySelector('a').addEventListener('click', function (event) {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (window.GlassPageBridge && window.parent.GlassShell) { event.preventDefault(); window.parent.GlassShell.back(); return; }
+        var previous;
+        try { previous = new URL(document.referrer); } catch (_) {}
+        if (history.length > 1 && previous && previous.origin === location.origin) { event.preventDefault(); history.back(); }
+      });
       document.body.insertBefore(backNav, nav);
     }
 

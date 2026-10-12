@@ -55,6 +55,9 @@
     // Enter a dedicated parent before page application scripts initialize. The
     // original scripts run once, in their child document, never on removed DOM.
     var source = new URL(location.href);
+    if (history.state && history.state.glassShell) {
+      try { sessionStorage.setItem('glass-shell-resume', JSON.stringify({ url: source.href, state: history.state })); } catch (_) {}
+    }
     location.replace(new URL('../glass-shell.html?url=' + encodeURIComponent(source.href), document.currentScript.src).href);
     return;
   }
@@ -64,7 +67,11 @@
     var transition = event.viewTransition, html = document.documentElement;
     function cleanup() { html.classList.remove('glass-navigation-transition', 'glass-search-transition'); }
     if (!transition) { if (event.type === 'pagereveal') cleanup(); return; }
-    if (navigator.webdriver || matchMedia('(prefers-reduced-motion: reduce)').matches) { transition.skipTransition(); return; }
+    if (navigator.webdriver || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // An intentional skip rejects ready; consume it before skipping.
+      transition.ready.catch(function () {});
+      transition.skipTransition(); return;
+    }
     html.classList.add('glass-navigation-transition');
     var from = event.activation && event.activation.from;
     var to = event.activation && event.activation.entry;

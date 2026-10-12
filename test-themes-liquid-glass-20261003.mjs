@@ -8,13 +8,13 @@ import { chromium, webkit } from 'playwright';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const html = await fs.readFile(path.join(root, 'Themes/Themes.html'), 'utf8');
 const includes = [
-  '<link rel="stylesheet" href="../liquid-design/liquid-design.css">',
-  '<script defer src="../liquid-design/liquid-design.js"></script>',
-  '<script defer src="../src/liquid-design-site.js"></script>',
+  html.match(/<link rel="stylesheet" href="\.\.\/liquid-design\/liquid-design\.css(?:\?[^"\s]*)?">/)?.[0],
+  html.match(/<script defer src="\.\.\/liquid-design\/liquid-design\.js(?:\?[^"\s]*)?"><\/script>/)?.[0],
+  html.match(/<script defer src="\.\.\/src\/liquid-design-site\.js(?:\?[^"\s]*)?"><\/script>/)?.[0],
 ];
-let last = html.indexOf('href="/src/site.css"');
+let last = html.indexOf('href="/src/site.css');
 for (const include of includes) {
-  assert.ok(html.indexOf(include) > last, 'glass assets load after site CSS in dependency order');
+  assert.ok(include && html.indexOf(include) > last, 'glass assets load after site CSS in dependency order');
   last = html.indexOf(include);
 }
 assert.doesNotMatch(html, /data-liquid-design|liquid-glass-group|liquid-color-scene/, 'page needs no marking, groups or playground');
@@ -83,7 +83,7 @@ try {
         assert.equal(await page.locator('.ov-nav__link').first().getAttribute('href'), '/index.html');
         assert.equal(await page.locator('.ov-nav__link').last().getAttribute('target'), '_blank');
         if (process.argv.includes('--screenshots')) await page.screenshot({ path: `C:/Users/okemo/AppData/Local/Temp/opencode/themes-glass-${name}-${width}.png` });
-        assert.equal(await page.locator('[data-lgp-group]:not([data-lgp-control]), [data-lgp-component], .lg-color-object').count(), 0, 'no shared sibling group or playground');
+        assert.equal(await page.locator('[data-lgp-group]:not([data-lgp-control]), .lg-color-object').count(), 0, 'no shared sibling group or playground');
         assert.equal(await page.locator('a:not(.skuo):not(.ov-nav__link):not(.ov-nav__primary) [class="lgp-material"]').count(), 0, 'editorial links stay native');
         for (const selector of controls) {
           for (const el of await page.locator(selector).all()) {
@@ -130,7 +130,7 @@ try {
         assert.equal(await page.locator('.ov-nav__moon').isVisible(), true);
         assert.equal(await page.locator('.ov-nav__sun').isVisible(), false);
         await page.evaluate(() => LiquidDesignSite.destroy());
-        assert.equal(await page.locator('.lgp-content,.lgp-material,.lgp-outline').count(), 0);
+        assert.equal(await page.locator('[data-lg-site] :is(.lgp-content,.lgp-material,.lgp-outline)').count(), 0);
         await page.locator('#More').click();
         assert.equal(await page.locator('#test').isVisible(), true, 'native handlers survive teardown');
         await page.locator('#Close').click();

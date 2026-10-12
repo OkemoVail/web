@@ -18,9 +18,9 @@ const plugin = await read('liquid-design/liquid-design.js');
 const pluginCSS = await read('liquid-design/liquid-design.css');
 const adapter = await read('src/liquid-design-site.js');
 const siteCSS = await read('src/site.css');
-const fixture = `<!doctype html><html><head><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/plugin.css">
-<style>body{padding:24px;font:16px Arial}.row{display:flex;gap:0}button,a.skuo{font:inherit}#host{width:220px;height:48px;display:flex;gap:8px}#host .grow{flex:1}#stream{height:40px}#hidden{display:none}
-#passwordField{position:relative;width:240px;height:48px;margin:12px}#passwordField input{height:48px;box-sizing:border-box}#passwordToggle{position:absolute;top:50%;right:4px;height:24px;transform:translateY(-50%)}#passwordToggle:hover{transform:translateY(-50%) scale(1.1)}#passwordToggle:active{transform:translateY(-50%) scale(.9)}</style></head><body>
+const fixture = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/plugin.css">
+<style>body{padding:24px;font:16px Arial}.row{display:flex;gap:0}a.skuo{font:inherit}#host{width:220px;height:48px;display:flex;gap:8px}#host .grow{flex:1}#stream{height:40px}#hidden{display:none}
+#passwordField{position:relative;width:240px;height:48px;margin:12px}#passwordField input{height:48px;box-sizing:border-box}#passwordToggle{position:absolute;top:50%;right:4px;height:24px;transform:translateY(-50%)}#passwordToggle:hover{transform:translateY(-50%) scale(1.1)}#passwordToggle:active{transform:translateY(-50%) scale(.9)}#legacyFill{background:#ccc;transition:background-color 1s}#legacyFill:hover{background:#aaa}</style></head><body>
 <form id="form"><div class="row" data-liquid-design-group><button class="skuo" id="host" type="submit"><span class="grow" id="label">Send</span><span>↑</span></button><button class="skuo" id="peer" type="button">Peer</button></div></form>
 <button id="disabled" disabled class="skuo">Disabled</button><button id="aria" aria-disabled="true" class="skuo">Unavailable</button>
 <button id="tint" class="skuo skuo-accent">Tint</button><button class="skuo modal-btn-danger" id="danger">Delete</button><a class="skuo discord" id="brand" href="#brand">Discord</a>
@@ -28,6 +28,8 @@ const fixture = `<!doctype html><html><head><link rel="stylesheet" href="/site.c
 <div id="hidden"><button id="hiddenButton" class="skuo">Hidden</button></div><div id="dynamic"></div><div id="stream">Tokens</div>
 <div id="passwordField"><input type="password" aria-label="Password"><button type="button" class="skuo" id="passwordToggle">Eye</button></div>
 <button type="button" id="themeChoice" class="skuo Cadance-theme-item">Theme</button>
+<div data-page="search"><button type="button" id="nativeFont">Native font</button></div>
+<button type="button" id="legacyFill">Legacy transition</button>
 <script>window.clicks=0;window.submits=0;window.unavailable=0;window.identity=document.querySelector('#host');window.labelIdentity=document.querySelector('#label');window.before=identity.getBoundingClientRect().toJSON();identity.addEventListener('click',()=>clicks++);document.querySelector('#form').addEventListener('submit',e=>{e.preventDefault();submits++});document.querySelector('#aria').addEventListener('click',()=>unavailable++);</script>
 <script src="/plugin.js"></script><script src="/adapter.js"></script></body></html>`;
 const portable = `<!doctype html><link rel="stylesheet" href="/plugin.css"><style>
@@ -53,6 +55,12 @@ try {
   // run reports every break instead of hiding later failures behind the first.
   const regressions = [];
   async function regression(name, run) { try { await run(); console.log(name + ' PASS'); } catch (error) { regressions.push(name + ': ' + error.message); } }
+  await regression('glass buttons retain site typography without browser preflight', async () => {
+    assert.match(await page.locator('#nativeFont').evaluate(el=>getComputedStyle(el).fontFamily), /^Satoshi/);
+  });
+  await regression('legacy fill transition cannot paint a second face during initialization', async () => {
+    assert.equal(await page.locator('#legacyFill').evaluate(el=>getComputedStyle(el).backgroundColor), 'rgba(0, 0, 0, 0)');
+  });
   await regression('positional transforms retain password centering without hover/press scale', async () => {
     const alignment = await page.locator('#passwordToggle').evaluate(el => {
       const a=el.getBoundingClientRect(),b=el.parentElement.querySelector('input').getBoundingClientRect();
@@ -188,8 +196,9 @@ try {
   await page.waitForFunction(() => document.querySelector('#hiddenButton .lgp-material').dataset.surfaces === '1');
   // Instrument actual native DOM queries: token churn must not cause document scans.
   await page.evaluate(() => { window.scans=0; window.mutations=0; const query=Document.prototype.querySelectorAll; Document.prototype.querySelectorAll=function(...args){scans++;return query.apply(this,args)}; window.counter=new MutationObserver(records=>mutations+=records.length); counter.observe(document.body,{subtree:true,attributes:true,childList:true}); });
-  await page.waitForTimeout(150); const baseline = await page.evaluate(() => mutations);
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(300);
+  const baseline = await page.evaluate(() => mutations);
+  await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => mutations), baseline, 'idle decorations do not recursively repaint');
   for (let i=0; i<15; i++) { await page.locator('#stream').evaluate((el,i)=>el.textContent='Token '+i,i); await page.waitForTimeout(20); }
   assert.equal(await page.evaluate(() => scans), 0, 'streamed text outside controls causes no document-wide scans');
@@ -225,6 +234,8 @@ try {
   const small = await mobile.newPage(); small.on('pageerror', error => errors.push(error.message));
   await small.goto(`http://127.0.0.1:${server.address().port}`);
   await small.locator('#host').tap();
+  await small.waitForFunction(() => clicks === 1);
+  await small.waitForFunction(() => submits === 1);
   assert.deepEqual(await small.evaluate(() => [clicks, submits]), [1, 1]);
   assert.equal(await small.locator('#host .lgp-content').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a), 1, 'reduced-motion touch keeps stable glass');
   assert.ok(await small.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'native mobile controls do not introduce horizontal overflow');
@@ -239,7 +250,8 @@ try {
   const hit = await live.locator('#host').boundingBox();
   await live.mouse.move(hit.x + hit.width/2, hit.y + hit.height/2); await live.mouse.down();
   await live.mouse.move(hit.x + hit.width + 100, hit.y + hit.height/2, { steps: 10 });
-  await live.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector('#host .lgp-content')).transform).a > 1.05);
+  // Area resistance intentionally limits a 220x48 face to less than 5% stretch.
+  await live.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector('#host .lgp-content')).transform).a > 1.01);
   assert.equal(await live.locator('.row > .lgp-material').count(), 0, 'overlapping live drag does not create a sibling union');
   assert.equal(await live.locator('#host > .lgp-material').getAttribute('data-connections'), '0');
   assert.equal(await live.locator('#peer > .lgp-material').getAttribute('data-connections'), '0');

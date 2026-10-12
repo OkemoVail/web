@@ -16,6 +16,15 @@ window.CloudStorageController = (() => {
         'Authorization': `Bearer ${localStorage.getItem('vail_auth_token')}`
     });
 
+    // Cloud storage must never be allowed to hold the whole chat app hostage.
+    // A stalled account request is recoverable: the local controller can still
+    // render the UI and preserve new work for this session.
+    const request = (url, options = {}) => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 1200);
+        return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+    };
+
     const _handle401 = () => {
         localStorage.removeItem('vail_auth_token');
         if (window._OriginalStorageController) {
@@ -24,13 +33,22 @@ window.CloudStorageController = (() => {
     };
 
     const init = async () => {
-        const resp = await fetch(`${base()}/api/accounts/me`, { headers: authHeaders() });
-        if (resp.status === 401) { _handle401(); return false; }
-        return resp.ok;
+        try {
+            const resp = await request(`${base()}/api/accounts/me`, { headers: authHeaders() });
+            if (resp.status === 401) { _handle401(); return false; }
+            if (!resp.ok && window._OriginalStorageController) window.StorageController = window._OriginalStorageController;
+            return resp.ok;
+        } catch (error) {
+            console.warn('[CloudStorage] Startup request timed out; using local storage.', error);
+            if (window._OriginalStorageController) window.StorageController = window._OriginalStorageController;
+            return false;
+        }
     };
 
     const getAllChats = async () => {
-        const listResp = await fetch(`${base()}/api/accounts/chats`, { headers: authHeaders() });
+        let listResp;
+        try { listResp = await request(`${base()}/api/accounts/chats`, { headers: authHeaders() }); }
+        catch { return {}; }
         if (listResp.status === 401) { _handle401(); return {}; }
         if (!listResp.ok) return {};
         const list = await listResp.json();
@@ -38,8 +56,12 @@ window.CloudStorageController = (() => {
         await Promise.all(list
             .filter(item => item.id !== PROFILE_DOC_ID)
             .map(async (item) => {
-                const r = await fetch(`${base()}/api/accounts/chats/${item.id}`, { headers: authHeaders() });
-                if (r.ok) map[item.id] = await r.json();
+                try {
+                    const r = await request(`${base()}/api/accounts/chats/${item.id}`, { headers: authHeaders() });
+                    if (r.ok) map[item.id] = await r.json();
+                } catch (error) {
+                    console.warn('[CloudStorage] Could not load chat:', item.id, error);
+                }
             }));
         return map;
     };
@@ -55,7 +77,7 @@ window.CloudStorageController = (() => {
     };
 
     const loadProfile = async () => {
-        const resp = await fetch(`${base()}/api/accounts/chats/${PROFILE_DOC_ID}`, { headers: authHeaders() });
+        const resp = await request(`${base()}/api/accounts/chats/${PROFILE_DOC_ID}`, { headers: authHeaders() });
         if (resp.status === 401) { _handle401(); return null; }
         if (!resp.ok) return null;
         const data = await resp.json();

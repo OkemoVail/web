@@ -60,18 +60,18 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="../src/site.css">
-    <link rel="stylesheet" href="../liquid-design/liquid-design.css">
+    <link rel="stylesheet" href="../src/site.css?v=20261007-api-audit">
+    <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261007-api-audit">
     <script src="../src/glass-navigation.js"></script>
     <link rel="expect" href="#site-navigation-ready" blocking="render">
-    <script defer src="../liquid-design/liquid-design.js"></script>
-    <script defer src="../src/liquid-design-site.js"></script>
+    <script defer src="../liquid-design/liquid-design.js?v=20261007-api-audit"></script>
+    <script defer src="../src/liquid-design-site.js?v=20261007-api-audit"></script>
     
 
     
 
 <body data-page="research"
-    class="bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
+    class="home-base bg-parchment text-text-warm dark:bg-deep-dark min-h-screen flex flex-col font-sans selection:bg-rose-light selection:text-text-warm overflow-x-hidden">
 
     <main class="flex-1 w-full max-w-7xl mx-auto pt-24 px-8 pb-8 md:pt-28 md:px-12 md:pb-12 lg:pt-28 lg:px-20 lg:pb-20 pb-40">
         <header class="max-w-4xl mx-auto mb-16 flex justify-between items-center text-gray-900 dark:text-white">
@@ -321,13 +321,15 @@
     </script>
   <script>
     window.NAV_CONFIG = {
+      variant: 'pages',
+      back: { label: 'Back to Labs21', href: '/AI/index.html' },
       links: [
         { label: 'Goals', href: '/AI/goals.html' },
         { label: 'Research', href: '/AI/research.html' },
         { label: 'Privacy', href: '/AI/privacy.html' },
-        { label: 'TOS', href: '/AI/tos.html' }
+        { label: 'Terms', href: '/AI/tos.html' }
       ],
-      primary: { label: 'Home', href: '/AI/index.html' }
+      primary: { label: 'Chat', href: '/AI/chat.html', icon: 'labs21' }
     };
   </script>
   <script src="../src/nav.js"></script>

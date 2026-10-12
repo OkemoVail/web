@@ -10,5 +10,5 @@ window.hidePreloader = () => {
     setTimeout(() => {
         preloader.remove();
         document.body.classList.remove('overflow-hidden');
-    }, 800);
+    }, 180);
 };

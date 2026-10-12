@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
   if (root.LiquidDesignSite || !root.LiquidDesign) return;
-  var selector = 'button,a.skuo,a.skuomorphic-button,a.skuomorphic-btn,a[role="button"],a.ov-nav__link,a.ov-nav__primary,a[data-liquid-design]';
+  var selector = 'button,a.skuo,a.skuomorphic-button,a.skuomorphic-btn,a[role="button"],a.ov-nav__link,a.ov-nav__primary,a[data-liquid-design],div[data-liquid-design],a.sb-nav-item';
   var records = new Map(), pending = new Set(), frame = 0, observer = null;
   // Production pages resolve their own explicit theme; OS preference is only
   // a fallback for the portable engine, never an override of that page state.
@@ -37,11 +37,18 @@
   }
   function enhance(el) {
     if (el.closest('[data-liquid-design-component]')) return;
+    // Chat glass is a functional layer, not a skin on every list/message action.
+    // Shared toolbar surfaces own their background; their icons stay plain.
+    if (el.closest('[data-page="chat"]') && !el.matches('#send-btn,#menu-toggle-btn,.chat-sidebar-actions,#profile-identity-glass,.sb-profile-btn,#profile-row-actions button[data-liquid-design]') ) return;
     if (records.has(el) || !el.isConnected || !el.matches(selector)) return;
     var saved = ['data-liquid-design', 'data-liquid-design-independent', 'data-lg-site'].map(function (name) { return [name, el.getAttribute(name)]; });
     // The portable plugin retains grouped demos. Production never shares a face.
     if (el.hasAttribute('data-lgp-control')) root.LiquidDesign.destroy(el);
     var layoutStyle = getComputedStyle(el), originalLayout = el.style.getPropertyValue('--lg-site-layout-transform');
+    // Stop legacy fill transitions BEFORE the engine clears the native face.
+    // Otherwise CSS keeps interpolating that face above the new glass for a frame.
+    var transition = [el.style.getPropertyValue('transition-property'), el.style.getPropertyPriority('transition-property')];
+    el.style.setProperty('transition-property', 'opacity, color', 'important');
     // Absolute/fixed control transforms often center a native hitbox. Retain
     // only their positional component; discard legacy hover/press scaling.
     if ((layoutStyle.position === 'absolute' || layoutStyle.position === 'fixed') && layoutStyle.transform !== 'none') {
@@ -57,8 +64,11 @@
         el.style.setProperty('--lg-site-layout-transform', 'translate(var(--tw-translate-x, 0px), var(--tw-translate-y, 0px))');
       }
     }
-    el.setAttribute('data-liquid-design-independent', ''); el.setAttribute('data-liquid-design', ''); el.setAttribute('data-lg-site', '');
-    var record = { saved: saved, signature: '', background: null, layout: originalLayout, tint: el.style.getPropertyValue('--lg-site-inline-tint') };
+    el.setAttribute('data-liquid-design-independent', '');
+    // Keep an author-declared surface: as a plain button the wrapper captures the
+    // pointer, which retargets the click away from its nested buttons.
+    el.setAttribute('data-liquid-design', el.getAttribute('data-liquid-design') === 'surface' ? 'surface' : ''); el.setAttribute('data-lg-site', '');
+    var record = { saved: saved, signature: '', background: null, layout: originalLayout, tint: el.style.getPropertyValue('--lg-site-inline-tint'), transition: transition };
     var background = el.style.getPropertyValue('background-color');
     root.LiquidDesign.refresh(el);
     if (background && background !== 'transparent') {
@@ -81,6 +91,7 @@
     }
     if (record.tint) el.style.setProperty('--lg-site-inline-tint', record.tint); else el.style.removeProperty('--lg-site-inline-tint');
     if (record.layout) el.style.setProperty('--lg-site-layout-transform', record.layout); else el.style.removeProperty('--lg-site-layout-transform');
+    if (record.transition[0]) el.style.setProperty('transition-property', record.transition[0], record.transition[1]); else el.style.removeProperty('transition-property');
     record.saved.forEach(function (entry) {
       if (entry[1] === null) el.removeAttribute(entry[0]); else el.setAttribute(entry[0], entry[1]);
     }); records.delete(el);

@@ -22,18 +22,18 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/output.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
 
     <!-- Monaco Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
-    <link rel="stylesheet" href="../src/site.css">
-    <link rel="stylesheet" href="../liquid-design/liquid-design.css">
+    <link rel="stylesheet" href="../src/site.css?v=20261012-rail-inset">
+    <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261013-profile-recipe">
     <script src="../src/glass-navigation.js"></script>
-    <script defer src="../liquid-design/liquid-design.js"></script>
-    <script defer src="../src/liquid-design-site.js"></script>
+    <script defer src="../liquid-design/liquid-design.js?v=20261012-rail-rotation"></script>
+    <script defer src="../src/liquid-design-site.js?v=20261012-new-chat-click"></script>
     
 
     <style id="dynamic-accent-styles">
@@ -129,9 +129,6 @@
         body {
             line-height: 1.6;
             letter-spacing: 0.01em;
-            /* Canvas behind the floating sidebar reads as the chat surface,
-               so the panel floats on the same plane as <main>. */
-            background-color: var(--bg-elevated);
         }
 
         @media (max-width: 1023px) {
@@ -142,51 +139,6 @@
             }
         }
     </style>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        parchment: 'var(--bg)',
-                        ivory: 'var(--bg-elevated)',
-                        'text-warm': 'var(--text-primary)',
-                        'olive-gray': 'var(--text-secondary)',
-                        'stone-gray': 'var(--text-tertiary)',
-                        rosewood: 'var(--accent)',
-                        'rose-light': 'var(--accent-light)',
-                        'border-cream': 'var(--border)',
-                        'border-warm': 'var(--border-strong)',
-                        'ring-warm': 'var(--shadow-ring)',
-                        'surf-dark': 'var(--surface-dark)',
-                        'deep-dark': 'var(--deep-dark)',
-                        accent: 'var(--accent-color)',
-                        'accent-glow': 'var(--accent-glow)',
-                    },
-                    fontFamily: {
-                        serif: ['Century', 'Georgia', 'serif'],
-                        sans: ['Satoshi', 'Inter', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace'],
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s var(--ease-smooth) forwards',
-                        'slide-up': 'slideUp 0.4s var(--ease-smooth) forwards',
-                        'shimmer': 'shimmer 2.5s linear infinite',
-                    },
-                    keyframes: {
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        slideUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
-                        'shimmer-btn': {
-                            '0%': { backgroundPosition: '-200% 0' },
-                            '100%': { backgroundPosition: '200% 0' }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
 
     
 
@@ -384,8 +336,8 @@
         <div id="sidebar-full-content" class="flex flex-col h-full">
 
             <!-- Header: wordmark + actions -->
-            <div class="h-[var(--header-height)] flex items-center shrink-0 px-2">
-                <button onclick="document.body.classList.contains('sidebar-collapsed') ? window.toggleSidebar() : (window.location.href='index.html')" class="sb-nav-item text-left bg-transparent border-none pr-2"
+            <div class="chat-library-header h-[var(--header-height)] flex items-center shrink-0 px-2">
+                <button onclick="document.body.classList.contains('sidebar-collapsed') ? window.toggleSidebar() : (window.location.href='index.html')" class="sb-nav-item text-left bg-transparent border-none pr-2" aria-label="Labs21 home" title="Labs21"
                     style="gap: 8px; padding-top: 4px; padding-bottom: 4px;">
                     <span class="sb-nav-icon">
                         <svg class="mini-logo-svg w-5 h-5 fill-current vail-logo-ai" xmlns="http://www.w3.org/2000/svg"
@@ -402,43 +354,37 @@
                                 d="M1075.04,765.79l-508.97-180.31v94.71s485.39,393.71,485.39,393.71c9.42,11.88,28.54,5.22,28.54-9.94v-286.6c0-4.38-1.79-8.56-4.96-11.58Z" />
                         </svg>
                     </span>
-                    <span
-                        class="sb-row-text text-[19px] font-normal text-zinc-900 dark:text-zinc-100 tracking-wide">Labs21</span>
                 </button>
-                <button onclick="window.toggleSidebar()" title="Collapse sidebar" data-t-title="title_collapse_sidebar"
-                    class="sb-icon-btn sb-row-text shrink-0 ml-auto">
-                    <i data-feather="sidebar" class="w-[1.3rem] h-[1.3rem]"></i>
-                </button>
+                <div class="sb-tools-dock">
+                <div class="chat-sidebar-actions" data-liquid-design="surface" data-liquid-design-independent data-liquid-design-static-actions>
+                    <button id="sidebar-search-toggle" type="button" onclick="window.toggleChatSearch()" title="Search chats" aria-label="Search chats"
+                        class="sb-icon-btn shrink-0">
+                        <i data-feather="search" class="w-[1.3rem] h-[1.3rem]"></i>
+                    </button>
+                    <span class="chat-sidebar-actions-separator" aria-hidden="true"></span>
+                     <button onclick="window.toggleSidebar()" title="Collapse sidebar" data-t-title="title_collapse_sidebar" data-sidebar-collapse
+                        class="sb-icon-btn shrink-0">
+                        <i data-feather="sidebar" class="w-[1.3rem] h-[1.3rem]"></i>
+                    </button>
+                </div>
+                </div>
             </div>
 
             <!-- New chat -->
             <div class="shrink-0 pt-1.5 pb-2 px-4">
-                <button onclick="window.resetChat()" class="sb-new-chat-btn skuo skuo-accent sb-tile">
-                    <span class="sb-nav-icon">
-                        <i data-feather="edit-2" class="nc-icon-new w-[1.3rem] h-[1.3rem]"></i>
-                        <i data-feather="message-square" class="nc-icon-active w-[1.3rem] h-[1.3rem]"></i>
+                <button onclick="window.resetChat()" class="sb-new-chat-btn skuo skuo-accent sb-tile" aria-keyshortcuts="Control+I Meta+I">
+                    <span class="sb-nav-icon sb-new-chat-plus" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                     </span>
                     <span class="sb-row-text" data-t="new_conversation">New chat</span>
+                    <kbd class="sb-new-chat-shortcut" data-shortcut-mac="⌘I" data-shortcut-windows="Ctrl+I" aria-hidden="true"></kbd>
                     <i data-feather="chevron-right" class="sb-new-chat-chevron sb-row-text w-[1.3rem] h-[1.3rem]"></i>
                 </button>
             </div>
 
-            <!-- Nav items -->
-            <div class="shrink-0 flex flex-col px-2">
-                <a href="research.html" class="sb-nav-item sb-tile" data-liquid-design>
-                    <span class="sb-nav-icon"><i data-feather="compass" class="w-[1.3rem] h-[1.3rem]"></i></span>
-                    <span class="sb-row-text" data-t="research_btn">Research</span>
-                </a>
-                <a href="https://voidai.app" target="_blank" class="sb-nav-item sb-nav-item--muted sb-tile -mt-[6px]" data-liquid-design>
-                    <span class="sb-nav-icon"><i data-feather="zap" class="w-[1.3rem] h-[1.3rem]"></i></span>
-                    <span class="sb-row-text" data-t="try_voidai">Try VoidAI</span>
-                    <i data-feather="arrow-up-right" class="sb-nav-ext-icon sb-row-text w-[1.3rem] h-[1.3rem]"></i>
-                </a>
-            </div>
-
             <!-- Recents search bar + history -->
             <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 mt-3">
-                <div class="sb-search-wrap sb-row-text">
+                <div id="chat-search-panel" class="sb-search-wrap sb-row-text" hidden>
                     <i data-feather="search" class="sb-search-icon"></i>
                     <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..."
                         data-t-placeholder="ph_search_chats" oninput="window.filterChats(this.value)">
@@ -462,8 +408,11 @@
                 ondragleave="window.onFolderDragLeave(event)" ondragover="window.onFolderDragOver(event)"
                 ondrop="window.onFolderDrop(event, null)">
                 <div id="user-profile-section">
-                    <div onclick="window.toggleSettingsPanel()" class="sb-profile-btn group" style="gap: 16px;">
+                    <div class="sidebar-profile-dock">
+                    <div class="sb-profile-slot">
+                    <div onclick="window.toggleSettingsPanel()" class="sb-profile-btn group" style="gap: 16px;" data-liquid-design="surface" data-liquid-design-independent>
                         <!-- 44px avatar slot — always visible, same centering as nav icons -->
+                        <div id="profile-identity-glass" class="profile-identity-glass">
                         <div class="sb-nav-icon">
                             <div id="user-avatar-container"
                                 class="w-7 h-7 rounded-full bg-zinc-300 dark:bg-zinc-600 flex items-center justify-center text-[10px] font-bold overflow-hidden">
@@ -478,60 +427,22 @@
                                 class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 truncate"
                                 data-t="storage_empty">Storage: —</span>
                         </div>
-                        <!-- Actions (fades when collapsed) -->
-                        <div id="profile-row-actions"
-                            class="sb-row-text flex items-center gap-1 mr-2"
-                            style="overflow: visible;">
-                            <div class="relative" id="settings-submenu-wrap">
-                                <button onclick="event.stopPropagation(); window.toggleSettingsSubmenu()"
-                                    title="Settings"
-                                    class="sb-icon-btn">
-                                    <i data-feather="settings" class="w-[1.3rem] h-[1.3rem]"></i>
-                                </button>
-                                <div id="settings-submenu"
-                                    class="hidden absolute bottom-full right-0 mb-2 w-44 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl z-50 p-1 flex flex-col gap-0.5" style="box-shadow: var(--shadow-float)">
-                                    <button onclick="event.stopPropagation(); window.openSettingsTo('general')"
-                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
-                                        <i data-feather="sliders" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span data-t="tab_general">General</span>
-                                    </button>
-                                    <button onclick="event.stopPropagation(); window.openSettingsTo('profile')"
-                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
-                                        <i data-feather="user" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span data-t="btn_profile">Profile</span>
-                                    </button>
-                                    <button
-                                        onclick="event.stopPropagation(); window.openPersonality(); window.closeSettingsSubmenu();"
-                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
-                                        <i data-feather="smile" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span>Personality</span>
-                                    </button>
-                                    <button
-                                        onclick="event.stopPropagation(); window.openSettingsTo('memories'); window.renderMemoriesTab(); window.closeSettingsSubmenu();"
-                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
-                                        <i data-feather="bookmark" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span>Memories</span>
-                                    </button>
-                                    <button
-                                        onclick="event.stopPropagation(); window.openSettingsTo('storage'); window.renderStorageTab(); window.closeSettingsSubmenu();"
-                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
-                                        <i data-feather="hard-drive" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span>Storage</span>
-                                    </button>
-                                    <button
-                                        onclick="event.stopPropagation(); window.showChangelog(); window.closeSettingsSubmenu();"
-                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5">
-                                        <i data-feather="zap" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span>Updates</span>
-                                    </button>
-                                    <button
-                                        onclick="event.stopPropagation(); window.closeSettingsSubmenu(); window.showCustomConfirm('Clear all chats?', 'This permanently deletes all your chats and folders. This cannot be undone.', window.clearAll, true);"
-                                        title="Clear all chats" data-t-title="title_clear_chats"
-                                        class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-2.5">
-                                        <i data-feather="trash-2" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span>Clear all chats</span>
-                                    </button>
-                                </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div id="profile-row-actions" class="profile-row-actions-detached">
+                        <div class="relative" id="settings-submenu-wrap">
+                            <button data-liquid-design="button" data-liquid-design-independent onclick="event.stopPropagation(); window.toggleSettingsSubmenu()"
+                                title="Settings" aria-label="Settings" class="sb-icon-btn">
+                                <i data-feather="settings" class="w-[1.3rem] h-[1.3rem]"></i>
+                            </button>
+                            <div id="settings-submenu"
+                                class="hidden absolute bottom-full right-0 mb-2 w-44 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl z-50 p-1 flex flex-col gap-0.5" style="box-shadow: var(--shadow-float)">
+                                <button onclick="event.stopPropagation(); window.openSettingsTo('general')" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="sliders" class="w-3.5 h-3.5 shrink-0"></i><span data-t="tab_general">General</span></button>
+                                <button onclick="event.stopPropagation(); window.openSettingsTo('profile')" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="user" class="w-3.5 h-3.5 shrink-0"></i><span data-t="btn_profile">Profile</span></button>
+                                <button onclick="event.stopPropagation(); window.openPersonality(); window.closeSettingsSubmenu();" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="smile" class="w-3.5 h-3.5 shrink-0"></i><span>Personality</span></button>
+                                <button onclick="event.stopPropagation(); window.openSettingsTo('memories'); window.renderMemoriesTab(); window.closeSettingsSubmenu();" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="bookmark" class="w-3.5 h-3.5 shrink-0"></i><span>Memories</span></button>
+                                <button onclick="event.stopPropagation(); window.openSettingsTo('storage'); window.renderStorageTab(); window.closeSettingsSubmenu();" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="hard-drive" class="w-3.5 h-3.5 shrink-0"></i><span>Storage</span></button>
                             </div>
                         </div>
                     </div>
@@ -545,42 +456,51 @@
         <div id="mini-avatar-display" style="display:none">U</div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-full relative overflow-hidden" style="background: var(--bg-elevated);">
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden">
 
 
 
         <!-- Same capsule look as #top-right-actions (.ov-nav__bar recipe via
              .chat-capsule), compact metrics scoped in the #top-left-chat-title CSS. -->
-        <div id="top-left-chat-title"
-            class="chat-capsule absolute top-3 lg:top-4 left-16 right-4 lg:left-6 lg:w-fit lg:max-w-md z-50 text-zinc-500 dark:text-zinc-400 font-semibold text-sm opacity-0 pointer-events-auto flex items-center group">
-            <span id="chat-title-text" class="truncate flex-1"></span>
-            <button onclick="window.renameCurrentChat()" title="Rename Chat" data-t-title="title_rename_chat"
-                class="flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150">
+        <div id="top-left-chat-title" class="chat-heading">
+            <div id="chat-mobile-navigation">
+                <button id="menu-toggle-btn" type="button" onclick="window.toggleSidebar()" aria-label="Open sidebar"
+                    class="chat-capsule flex items-center justify-center">
+                    <i data-feather="menu" class="w-[1.15rem] h-[1.15rem]"></i>
+                </button>
+            </div>
+            <h1 id="chat-title-text">New chat</h1>
+            <button onclick="window.renameCurrentChat()" aria-label="Rename chat" title="Rename Chat" data-t-title="title_rename_chat"
+                class="chat-title-inline flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150">
                 <i data-feather="edit-2" class="w-5 h-5"></i>
             </button>
-            <button onclick="window.regenerateCurrentTitle()" title="Regenerate Title"
+            <button onclick="window.regenerateCurrentTitle()" aria-label="Regenerate title" title="Regenerate Title"
                 data-t-title="title_regenerate_title"
-                class="flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150">
+                class="chat-title-inline flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150">
                 <i data-feather="rotate-cw" class="w-5 h-5"></i>
             </button>
-            <div class="ov-nav__div"></div>
+            <div class="ov-nav__div chat-title-inline"></div>
             <button onclick="window.setTitleFeedback(window.currentChatId, 'good', this)"
                 id="header-feedback-good"
-                class="title-feedback-btn flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
+                aria-label="Good title" class="chat-title-inline title-feedback-btn flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
                 title="Good title format" data-t-title="title_good_format">
                 <i data-feather="thumbs-up" class="w-5 h-5"></i>
             </button>
             <button onclick="window.setTitleFeedback(window.currentChatId, 'bad', this)"
                 id="header-feedback-bad"
-                class="title-feedback-btn flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
+                aria-label="Bad title" class="chat-title-inline title-feedback-btn flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150"
                 title="Bad title format" data-t-title="title_bad_format">
                 <i data-feather="thumbs-down" class="w-5 h-5"></i>
             </button>
+            <div id="chat-corner-actions">
+                <button id="chat-new-button" type="button" data-liquid-design data-liquid-design-independent onclick="window.resetChat()" aria-label="New chat" title="New chat"><i data-feather="edit"></i></button>
+                <button id="chat-title-more" type="button" aria-label="Title actions" aria-haspopup="menu" aria-expanded="false" aria-controls="chat-title-menu"><i data-feather="more-horizontal"></i></button>
+            </div>
         </div>
 
 
         <div id="top-right-actions" class="animate-fade-in flex items-center gap-2">
-            <div class="ov-nav__bar" id="tra-bar">
+            <div class="ov-nav__bar" id="tra-bar" data-liquid-design="surface" data-liquid-design-independent>
                 <button type="button" class="ov-nav__chevron" id="tra-chevron"
                     aria-label="Toggle actions" aria-controls="tra-actions" aria-expanded="false">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -625,17 +545,6 @@
             </div>
         </div>
 
-        <header
-            class="h-14 lg:h-16 flex items-start pt-3 justify-between px-4 lg:px-6 z-50 pointer-events-none sticky top-0 lg:hidden">
-            <div class="flex items-center gap-2 pointer-events-auto">
-                <button id="menu-toggle-btn" onclick="window.toggleSidebar()"
-                    class="chat-capsule flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors duration-150 lg:hidden">
-                    <i data-feather="sidebar" class="w-[1.15rem] h-[1.15rem]"></i></button>
-            </div>
-            <div class="flex items-center gap-2 pointer-events-auto">
-            </div>
-        </header>
-
         <div id="chat-container" class="flex-1 overflow-y-auto no-scrollbar flex flex-col relative">
             <div id="welcome-state"
                 class="absolute inset-0 flex flex-col items-center justify-center p-6 pt-[150px] text-center animate-fade-in z-0">
@@ -644,7 +553,7 @@
 
                     <h2 id="welcome-greeting"
                         class="text-4xl sm:text-5xl font-normal tracking-wide text-zinc-900 dark:text-[#f0f0f0]"
-                        style="font-family: Century, 'Century Schoolbook', Georgia, serif;" data-t="welcome_header">
+                         data-t="welcome_header">
                         Welcome back</h2>
                 </div>
 
@@ -657,11 +566,12 @@
                 class="w-full max-w-2xl mx-auto flex flex-col pt-8 lg:pt-24 pb-36 px-8 relative z-10">
             </div>
         </div>
-        <div class="px-5 md:px-0 w-full max-w-2xl mx-auto relative group">
+        <div id="chat-composer-dock" class="px-5 md:px-0 w-full max-w-2xl mx-auto relative group">
 
             <div id="memory-consent-stack" class="flex flex-col gap-2 mb-2 w-full"></div>
 
             <div
+                data-liquid-design="surface" data-liquid-design-independent
                 class="input-box-wrap mb-2 transition-all duration-300 group focus-within:ring-0 focus-within:outline-none relative flex flex-col !overflow-visible pointer-events-auto">
 
                 <div id="upload-preview-container" class="hidden px-4 pt-3 flex gap-2 overflow-x-auto w-full"></div>
@@ -670,7 +580,7 @@
 
                     <!-- LEFT: plus / attach menu -->
                     <div id="plus-menu-container" class="relative z-50 shrink-0">
-                        <button id="plus-menu-btn" onclick="window.toggleMenu(event, 'plus-menu')"
+                        <button id="plus-menu-btn" type="button" data-liquid-design data-liquid-design-independent aria-label="Add tools" aria-controls="plus-menu" onclick="window.toggleMenu(event, 'plus-menu')"
                             class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
                             <i data-feather="plus" class="w-4 h-4"></i>
                             <span id="plus-active-icon" class="flex items-center gap-0.5" style="display:none">
@@ -710,7 +620,7 @@
                                 </span>
                             </span>
                         </button>
-                        <div id="plus-menu"
+                        <div id="plus-menu" data-liquid-design="surface" data-liquid-design-independent
                             class="absolute bottom-full left-0 mb-2 w-52 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl opacity-0 invisible transition-all duration-200 z-50 origin-bottom-left" style="box-shadow: var(--shadow-float)"
                             style="transform: translateY(6px) scale(0.97)">
                             <div class="p-2 flex flex-col gap-2">
@@ -773,7 +683,7 @@
                     <!-- BOTTOM ROW (right side): send button -->
                     <div id="input-actions" class="flex items-center gap-2 shrink-0">
 
-                        <button id="send-btn" onclick="window.handleAction()" disabled
+                        <button id="send-btn" aria-label="Send message" onclick="window.handleAction()" disabled
                             class="skuomorphic-btn skuo-accent w-11 h-11 flex items-center justify-center rounded-[8px] opacity-50 cursor-not-allowed transition-all active:scale-95"
                             style="transition: background 0.2s, opacity 0.2s;">
                             <span id="send-icon-wrapper" class="flex items-center justify-center h-full w-full">
@@ -843,7 +753,7 @@
     <script src="js/state.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/storage.js"></script>
-    <script src="js/cloud-storage.js"></script>
+    <script src="js/cloud-storage.js?v=20261009-startup"></script>
     <script src="js/modals.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/theme.js"></script>
@@ -852,9 +762,9 @@
     <script src="js/api.js"></script>
 
     <script src="js/profile.js"></script>
-    <script src="js/sidebar.js"></script>
+    <script src="js/sidebar.js?v=20261012-rail-morph"></script>
     <script src="js/folders.js"></script>
-    <script src="js/settings.js"></script>
+    <script src="js/settings.js?v=20261007-settings-layout"></script>
     <script src="js/streaming.js"></script>
     <script src="js/chat-management.js"></script>
     <script src="js/kv-context.js"></script>
@@ -865,7 +775,7 @@
     <script src="js/chat-actions.js"></script>
     <script src="js/voice.js"></script>
     <script src="js/feedback.js"></script>
-    <script src="js/history.js"></script>
+    <script src="js/history.js?v=20261011-sidebar-cleanup"></script>
     <script src="js/menus.js"></script>
     <script src="js/send-icon.js"></script>
     <script src="js/research.js"></script>
@@ -873,16 +783,17 @@
     <script src="js/render.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/mini-logo.js"></script>
-    <script src="js/loader.js"></script>
+    <script src="js/loader.js?v=20261009-startup"></script>
     <script src="js/account-modal.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=20261011-new-chat-shortcut"></script>
+    <script src="js/tap-debug.js?v=1"></script><!-- TEMP iPad tap debug, remove -->
 
     <div id="settings-overlay" onclick="window.toggleSettingsPanel()"></div>
 
 
-    <div id="settings-panel">
+    <div id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="chat-settings-heading" tabindex="-1">
 
-        <div class="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
+        <div class="chat-settings-header flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
             <div class="flex items-center gap-3">
 
                 <div id="settings-sidebar-pfp-card"
@@ -890,21 +801,21 @@
                     onclick="window.openSettingsTab('profile')">
                 </div>
                 <div>
-                    <p class="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400" data-t="settings">
+                    <p id="chat-settings-heading" class="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400" data-t="settings">
                         Settings</p>
                     <p id="settings-sidebar-name-card"
                         class="text-sm font-bold text-zinc-900 dark:text-white leading-tight" data-t="settings_user">
                         User</p>
                 </div>
             </div>
-            <button onclick="window.toggleSettingsPanel()"
+            <button onclick="window.toggleSettingsPanel()" aria-label="Close settings" data-liquid-design data-liquid-design-independent
                 class="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-95">
                 <i data-feather="x" class="w-5 h-5"></i>
             </button>
         </div>
 
 
-        <div class="Cadance-tab-bar shrink-0">
+        <div class="Cadance-tab-bar shrink-0" role="tablist" aria-label="Settings categories">
             <button class="Cadance-tab-btn skuo skuo-accent active" id="ptab-btn-general" onclick="window.openSettingsTab('general')">
                 <i data-feather="sliders" class="w-3.5 h-3.5"></i> General
             </button>
@@ -1315,7 +1226,7 @@
         </div>
     </div>
 
-    <div id="personality-modal"
+    <div id="personality-modal" role="dialog" aria-modal="true" aria-label="Personality" tabindex="-1"
         style="position:fixed;inset:0;z-index:var(--z-dialog);background:rgba(15, 15, 15, 0.4);display:none;align-items:center;justify-content:center;padding:1rem;">
         <div class="changelog-card card" style="max-width:520px;">
             <div class="p-8 relative z-10">
@@ -1380,7 +1291,7 @@
     </div>
 
     <!-- Memories modal -->
-    <div id="memories-modal"
+    <div id="memories-modal" role="dialog" aria-modal="true" aria-label="Memories" tabindex="-1"
         style="position:fixed;inset:0;z-index:var(--z-dialog);background:rgba(15,15,15,0.4);display:none;align-items:center;justify-content:center;padding:1rem;">
         <div class="changelog-card card" style="max-width:520px;width:100%;">
             <div class="p-8 relative z-10">
@@ -2036,6 +1947,7 @@
   <!-- Chat does not use the shared floating nav; its own #top-right-actions cluster
        (save · memories · personality · language + theme toggle) serves as the top-right
        controls, using the shared floating-capsule look with an expand/collapse chevron. -->
+  <script src="js/chat-glass.js?v=20261012-rail-morph"></script>
   <script>
     (function () {
       var bar = document.getElementById('tra-bar');
@@ -2045,6 +1957,8 @@
 
       function setCollapsed(collapsed, animate) {
         bar.classList.toggle('collapsed', collapsed);
+        group.inert = collapsed;
+        group.setAttribute('aria-hidden', String(collapsed));
         chevron.setAttribute('aria-expanded', String(!collapsed));
         group.style.maxWidth = collapsed ? '0px' : group.scrollWidth + 'px';
         if (animate) {

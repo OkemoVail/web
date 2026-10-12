@@ -8,7 +8,7 @@ import { chromium, webkit } from 'playwright';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const html = await fs.readFile(path.join(root, 'AI/tos.html'), 'utf8');
 assert.ok(html.indexOf('../src/site.css') < html.indexOf('../liquid-design/liquid-design.css'));
-assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design\.js"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site\.js"><\/script>/);
+assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design\.js(?:\?[^"\s]*)?"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site\.js(?:\?[^"\s]*)?"><\/script>/);
 const server = http.createServer(async (req, res) => {
   try {
     const name = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);

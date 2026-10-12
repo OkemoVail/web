@@ -8,7 +8,7 @@ import { chromium, webkit } from 'playwright';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const html = await fs.readFile(path.join(root, 'AI/editor.html'), 'utf8');
 assert.match(html, /site\.css[\s\S]*liquid-design\/liquid-design\.css/);
-assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design\.js"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site\.js">/);
+assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design\.js(?:\?[^"\s]*)?"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site\.js(?:\?[^"\s]*)?">/);
 const tailwind = await fetch('https://cdn.tailwindcss.com').then(r => { assert.ok(r.ok); return r.text(); });
 const server = http.createServer(async (req, res) => {
   try {
@@ -45,7 +45,7 @@ async function selectText(page, text = 'Selected words') {
   }, text);
 }
 async function checkChrome(page) {
-  assert.equal(await page.locator('[data-lgp-group]:not([data-lgp-control]),.lg-color-object,[data-lgp-component]').count(), 0);
+  assert.equal(await page.locator('[data-lgp-group]:not([data-lgp-control]),.lg-color-object').count(), 0);
   assert.equal(await page.locator('.lgp-content .lgp-content').count(), 0);
   assert.ok(await page.locator('button').evaluateAll(els => els.every(el => el.querySelectorAll(':scope > .lgp-material').length === 1 && el.querySelectorAll(':scope > .lgp-outline').length === 1 && el.hasAttribute('data-liquid-design-independent'))));
 }

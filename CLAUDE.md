@@ -135,6 +135,589 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
+Chat sidebar template (2026-10-11): user supplied a placeholder-colored
+wireframe (colors are NOT to be followed, only placement). Rounded sidebar
+card; search/collapse toolbar pill pinned top-right (20px insets, 72px header);
+one bottom row in `.sidebar-profile-dock` with the profile pill (40px avatar
+flush-left + name, storage line hidden) on the left and a 48px Settings circle
+on the right, both 48px tall, 20px side/bottom insets. Corner radii are
+concentric with the reference: card 44px (= 20px inset + 24px control
+half-height); toolbar is a 48px pill with its own 24px radius (it previously
+rendered as a 0px-radius square glass box because the wrapper had no radius).
+The collapsed 60px rail keeps its own 26px radius rule. Rules live in the
+"Sidebar template (2026-10-11)" block at the end of the chat Settings section
+of `src/site.css`. Pre-existing unrelated test failures at that time:
+`test-chat-settings-layout.mjs` (hidden mobile `#menu-toggle-btn`),
+`test-chat-liquid-glass.mjs` (message action material count),
+`test-chat-demo-integration.mjs` (composer generation glint).
+
+Chat sidebar cleanup (2026-10-11): user kept only the New chat row; the
+Research and Try VoidAI sidebar links were removed from `AI/chat.html`
+(the composer plus-menu "Research" entry is a "Coming soon" placeholder, so
+chat no longer links to `research.html`). The chat list
+is one continuous list with no date dividers (Today / Last 7 days / Dust
+Collecting / Pinned headers removed from `renderHistory` in `history.js`);
+pinned chats still sort first. With zero folders, `renderHistory` shows
+`.folders-empty`: an outlined open empty-folder SVG, a bold "404" and "No
+folders found" (CSS at the end of the sidebar template block in `src/site.css`,
+hidden in the collapsed rail). New chat follows a Perplexity reference: a
+36px soft filled circle (`.sb-new-chat-plus`, text color at 10%, 16% on hover)
+holding an inline SVG plus, then the 16px/500 label; no accent bar, chevron
+or row fill. The old pencil/message-square `nc-icon-*` swap was removed.
+The sidebar header shows the logo mark only; the "Labs21" wordmark span was
+removed (the button keeps `aria-label="Labs21 home"`). The logo button is a
+48px rounded square (14px radius), same height and top edge as the toolbar
+pill, left edge on the shared 20px line, 22px mark centered inside, so its
+hover highlight is a square. Top rhythm: 20px inset, 48px header row, 12px to
+New chat, 24px to "Your Folders". Sidebar alignment:
+everything (logo, New chat circle, "Your Folders", "Chats",
+chat titles, profile pill) starts 20px from the sidebar's inner left edge, and
+trailing icons (toolbar, folder-plus, row kebabs, Settings) end 20px from the
+right; chat-row hover fills extend 12px past the text. The "Chats" heading is
+inserted by `chat-glass.js` at the top of `#recents-section`, i.e. directly
+above the chat rows and below the folders block.
+
+Sidebar collapse click fix (2026-10-12): real mouse clicks on the sidebar
+Collapse/Search buttons did nothing. `src/liquid-design-site.js` `enhance()`
+overwrote `.chat-sidebar-actions`'s `data-liquid-design="surface"` with `""`,
+so the engine treated the wrapper as a button: its pointerdown called
+`setPointerCapture` on the div, which retargets the click to the div, and the
+nested buttons' onclick never fired. The adapter now keeps an author-declared
+`surface` value (the engine's nested-button guards only apply to surfaces).
+Likely also the real cause of the earlier "static-actions broke mouse clicks"
+note below. Checks: `node test-chat-sidebar-real-collapse.mjs`,
+`node test-chat-glass-collapse-click.mjs`. Pre-existing, unrelated failures:
+`test-chat-messaging.mjs` line 53 (`#menu-toggle-btn` has no box) and
+`test-chat-liquid-glass.mjs` (message action material count).
+
+Sidebar rail morph (2026-10-12, user wireframe; colors not to be followed):
+expanded and collapsed (>=768px) share one set of absolutely placed controls,
+so toggling is a CSS transition, not a scale-down/layout swap. The toolbar pill
+(`.sb-tools-dock`) rotates -90deg about its centre from top-right to the rail
+top, so Collapse/Open sits on top and Search below; its icons counter-rotate
+to stay upright. The
+profile pill (`.sb-profile-slot`) rotates -90deg about its avatar, so the
+name reads upward above the avatar; the avatar counter-rotates to stay
+upright. Settings moves from bottom-right to just above the profile, offset
+by `--sb-profile-len` (published by `sidebar.js`). Logo, New chat and history
+fade out. The desktop rail is not inert; Collapse doubles as Open (label
+swaps). Mobile drawer behaviour is unchanged. CSS: the "Rail morph" block in
+the chat section of `src/site.css`. Check: `node test-chat-sidebar-rail.mjs`.
+The collapsed rail is a full capsule (`border-radius: 30px`, animated) with a
+5px inset on every edge. The Search/Collapse pill is a static-action surface:
+a press on its nested buttons is handed to the glass like a press in a field
+(no capture while inside, so the button still clicks; past the edge the pill
+stretches). Engine change in `liquid-design/source/liquid-design-live-demo.js`,
+rebuilt with `node liquid-design/build.mjs`.
+
+Rail pill stretch rotation (2026-10-12): the collapsed rail rotates the
+Search/Collapse pill -90deg, but the engine measured and stretched in screen
+space, so pulls deformed the wrong axis. `liquid-design-live-demo.js` now has
+`LiquidDesignFrame(el)` (sums ancestor `rotate`/`transform` angles) and runs
+pointer/geometry math in the track's unrotated local frame; the plugin's
+`paint()` measures controls in that frame too. Upright controls take the old
+path unchanged. Check: `node test-chat-sidebar-rail-stretch.mjs` (also
+`LIQUID_BROWSER=webkit`) compares rotated vs upright stretch.
+
+Chat glass touch freeze (2026-10-11): `liquid-design.css` gives
+`[data-lgp-control="surface"]` `touch-action: auto`, so on touch the browser
+claimed drags on the composer (`.input-box-wrap`) and `#sidebar` for panning
+and fired `pointercancel` mid-gesture; the glass froze. Small buttons were
+fine (`touch-action: none`). Fix in the chat section of `src/site.css`: those
+surfaces and `#user-input` are `touch-action: none`; `#recents-scroll-area`,
+`#folders-section` and `#user-input.is-scrollable` keep `pan-y`. `main.js`'s
+`refreshInputLayout` toggles `.is-scrollable` when composer text overflows.
+Touches that START on a sidebar row (Labs21, New chat, Research, VoidAI) still
+don't stretch the sidebar: by engine design, editable surfaces ignore
+pointerdown on nested button/a. `data-liquid-design-static-actions` would fix
+that but broke mouse clicks on those rows in testing, so it is NOT applied.
+Second cause, same day: the sidebar surface's pointerdown ran first and took
+pointer capture from glass controls nested inside it (toolbar pill, profile
+pill), so those controls never moved on their own; the whole sidebar
+stretched instead. The engine (`liquid-design-live-demo.js`, plus the
+bundle) now makes an editable surface ignore pointerdown whose nearest
+`[data-lgp-control]` is a different control. Also: the shipped bundle had a
+hand edit (chat `.chat-sidebar-actions` `blendRange` 0) missing from
+`source/liquid-design-plugin.js`; it is now in source, so
+`node liquid-design/build.mjs` reproduces the bundle exactly.
+
+Chat profile Liquid Glass editing note (2026-10-13): the profile footer in
+`AI/chat.html` must be edited in the live `#user-profile-section` markup. A
+new profile glass surface requires a `data-liquid-design` attribute in the
+HTML, matching page-scoped rules in `src/site.css`, and an allow-list entry in
+`src/liquid-design-site.js`; the chat adapter intentionally skips most chat
+descendants. When changing chat assets, bump the query versions in
+`AI/chat.html` for the stylesheet, Liquid Design bundle, and site adapter so
+cached browser copies cannot hide the change. Verify the live DOM contains the
+new IDs/attributes before claiming the profile styling is visible.
+
+Liquid Design API audit (2026-10-08): `tools/audit-liquid-design.mjs --check`
+opens the shipped page inventory in native and persistent-shell navigation at
+1280/390px, light/dark, and asserts the shared Satoshi typography, one
+engine-owned material, homepage fill/blur/rim tokens, and Astra's editable
+search surfaces. The audit data is written only to Temp. `src/liquid-design-site.js`
+suppresses legacy host background transitions before the plugin clears a native
+face, preventing a second interpolating fill during initialization. Astra's
+`#hero-bar` and `#results-bar` explicitly use `data-liquid-design="surface"`;
+all first-party shared CSS/plugin/adapter URLs use the `20261007-api-audit`
+cache version. Some legacy standalone navigation suites still expect the
+pre-existing old nav control topology and should be reconciled separately,
+rather than weakening the material audit.
+
+Message ellipsis outline clarification (2026-10-07): user clarified that removing
+the outer glass meant the circular outline around the message ellipsis, not the
+assistant reply surface. Restored the assistant bubble; settled closed message
+Options controls hide only their outline SVG. Material, dots, gestures, and
+opening/open/closing dropdown contours remain intact. Chat CSS URL refreshed.
+
+Open assistant replies (2026-10-07): user requested removing the outer assistant
+bubble surface shown around a reply. Assistant prose containers now have a
+transparent background and no rounded outer contour; their padding, message
+content and inner code/thought formatting retain existing layout. Message
+ellipsis Liquid Glass and actual Options menu remain. Chat CSS URL refreshed.
+
+Claude-reference sidebar/Settings density (2026-10-07): user approved borrowing
+Claude's navigation proportions while retaining floating Liquid Glass. New chat
+and secondary sidebar actions now use normal icon/label rows; account settings
+and folder buttons are normal controls too. Sidebar collapse, floating surfaces,
+composer and Options retain glass. Settings title lives in a 216px navigation
+column, with the profile header hidden, a floating glass Close control, wider
+960px desktop window and compact 21px content heading/52px setting rows.
+Mobile retains category/detail routing and glass Back/Close. Asset URLs refreshed.
+
+Desktop Settings Close blur tile (2026-10-07): user screenshot showed a square
+grey backdrop patch outside the circular Close control. Reproduced in Chromium
+despite correct circular path clipping. Independent material layers now also
+receive their live rx/ry as border-radius, keeping backdrop capture rounded;
+compound shapes retain path clipping. Rendered before/after Settings screenshots
+confirm removal. Chat library URL refreshed; Settings layout checks assert the
+rounded material boundary.
+
+Sidebar/Settings layout (2026-10-07): user approved a compact library and grouped
+Apple Settings-inspired hierarchy. Sidebar has a 64px header, aligned search,
+44px quiet secondary navigation rows, and a compact anchored account footer.
+Secondary sidebar links no longer receive independent glass from the site adapter.
+Desktop Settings uses a 200px category column and grouped content rows; mobile
+opens a category list, then a full-width detail view with Back and focus restoration.
+Hidden mobile views are inert; direct openSettingsTab navigation still works.
+Chat assets are versioned. Verify test-chat-settings-layout.mjs in Chromium/WebKit
+and message/Options regression suites. Demo integration optics now reflect the
+previously approved homepage material rather than the retired demo veil.
+
+Actual message Options controller (2026-10-07): user approved replacing custom
+message-menu WAAPI/gesture code with the same portable Options controller used
+by homepage Socials. Root-level per-message clusters retain real action buttons,
+anchor to noninteractive message slots, prune on rerender, and open upward via
+data-liquid-design-menu-direction. Hold opens at the library's 260ms threshold;
+drag tracks the shared selection pill and release invokes the selected action.
+Shared selection now slides between rows in 180ms, including pointer capture and
+keyboard focus, with reduced-motion fallback. Rows remain non-stretchable.
+Chat asset versions refresh iPad caches. Verify with test-chat-options.mjs and
+test-chat-messaging.mjs in Chromium/WebKit, native/shell desktop/mobile.
+
+Compound menu selection guard (2026-10-07): iPad screenshot showed blue native
+page selection behind the top-right title Options menu. Shared live runtime
+only prevented default for editable surfaces, leaving compound Options and
+independent buttons exposed to selection on initial press. All non-editor glass
+presses now prevent default; actual editor paths return beforehand and retain
+native caret/selection. Chat library URL is versioned. Messaging coverage verifies
+initial Options row press cancellation in native/shell Chromium/WebKit.
+
+Message dropdown row parity (2026-10-07): message actions now consume the portable
+library's Options row recipe via liquid-design-menu-row: 17px/500 labels, 20px
+icons, 16px side padding, 44px rows and pill-shaped inset hover/focus selection.
+The selection fill is shared with Options (.12 dark ink in light, .2 white in
+dark). Removed chat's 15px/18px/12px custom rows and whole-row hover fill;
+menu settles at the library's 28px corner radius. Chat CSS/script URLs are versioned.
+
+Chat/home glass parity (2026-10-07): user reported chat buttons visually differ
+from index.html despite using the library. Chat-specific 38% white/charcoal veil
+and softened rim overrides caused the mismatch. Chat now uses the homepage's
+64% neutral light veil, 18% charcoal dark veil, .85/.62 light rims, .24/.12 dark
+rims and theme-aware library prism/touch light. Browser checks compare actual
+chat and homepage profile material fills, blur and rendered gradient stops in
+both themes; chat stylesheet URL is versioned for iPad refresh.
+
+Whole message-menu gestures (2026-10-07): static dropdown rows now opt their
+shared portable surface into data-liquid-design-static-actions, so a press on
+any row drives panel stretch/touch-light without independent row deformation.
+Captured stationary releases invoke the original row handler; pulls suppress
+activation and text selection. Message ellipsis now has zero resting opacity
+on touch as well as desktop, revealing on message hover/focus or open state.
+Chat asset URLs carry a menu-gestures version to refresh iPad Safari caches.
+Chromium/WebKit messaging checks measure actual panel stretch/glow from a row
+press, feedback click/pull behavior and zero unused-trigger opacity.
+
+Chat library highlight (2026-10-07): user requested the developed Liquid Design
+library's highlight. Chat's .14/.10 white touch-light overrides now consume the
+library's theme-aware --lgp-touch-light (.68 light/.26 dark). Message ellipsis
+buttons reach full opacity while hovered, focused, pressed or open, so unused-state
+fading no longer dims active library highlights. Existing fade and static menu rows remain.
+
+Message ellipsis glass (2026-10-07): user superseded the plain-trigger preference.
+Message-level ellipsis triggers now explicitly initialize independent Liquid Glass
+buttons, retaining their 44px hitboxes, unused-state fade and existing animated
+action dropdown. Action rows remain non-stretchable.
+
+Message menu closing/fade (2026-10-07): message dropdown dismissal now keeps the
+glass visible but inert for a 450ms reversed shared trajectory, fades/defocuses
+rows in 160ms, then fades the returning material before hiding and restoring
+original action buttons. Reopening cancels stale close cleanup. Desktop ellipsis
+triggers fade to zero outside message hover/focus/open state; touch retains a
+quiet .3 opacity for discoverability. Messaging checks sample actual close bounds,
+rapid reopen, eventual hiding and unused-trigger opacity in Chromium/WebKit.
+
+Message dropdown/date refinement (2026-10-07): user requested the actual shared
+dropdown opening choreography rather than simple scale-in. Message menus reuse
+`LiquidDesign.menuFrame` (the Options trajectory) for 370ms material travel/pop
+and a separate blurred-to-sharp row reveal; the ellipsis stays transparent and
+rows remain non-stretchable. Chat dates are centered muted time separators at
+the start, a local-calendar day change, or a >=30-minute pause, with Today /
+Yesterday / weekday-date plus local time. Dates no longer appear in the action
+dropdown. Existing timestamp-less exchanges omit separators rather than inventing
+dates. Messaging coverage verifies day/pause grouping and rendered opening/reveal
+states in native/shell desktop/mobile Chromium/WebKit.
+
+Message dropdown opening correction (2026-10-07): engine-owned inline
+transform:important overrode the menu host's WAAPI scale, leaving its rendered
+width unchanged during opening. Opening motion now belongs to a separate fixed
+wrapper; the inner menu retains engine-owned glass. Messaging tests sample
+start/middle/end rendered widths rather than only the settled menu.
+
+Message action dropdown (2026-10-07): user approved a plain transparent ellipsis
+trigger with no glass background. Copy/Regenerate/feedback (user Copy/Edit) open
+in one root-level Liquid Glass menu, animated out from the trigger. Action rows
+are plain non-stretchable buttons; timestamp remains in the menu. Keyboard
+navigation, Escape focus restoration, outside/scroll dismissal, viewport clamping
+and drag-click suppression preserve real handlers. Glass non-editor pointerdown
+prevents selection from the initial press; editable fields keep native selection.
+`test-chat-messaging.mjs` covers native/shell desktop/mobile in Chromium/WebKit.
+
+Glass text selection (2026-10-07): user requested preventing accidental label
+selection during glass stretching. Portable glass surfaces now retain the
+control's user-select:none instead of resetting the whole surface to auto;
+inputs, textareas and editable content explicitly restore native text selection.
+Chromium/WebKit checks cover surface labels, independent/compound buttons and
+editable field selection.
+
+Messaging refinement (2026-10-07): user requested sidebar glass buttons stretching
+past the sidebar edge and a stronger messaging-app feel. Sidebar host now allows
+visible overflow while its material keeps its own clip; history retains native
+scroll containment and collapsed content stays hidden/inert. Chat messages use
+natural-width bubbles, 8px user/16px assistant spacing, bottom-aligned short threads,
+and a one-row 60px resting composer with native multiline growth. Message commands
+are overlay toolbars revealed by hover, keyboard focus, or named Message actions
+buttons for touch; they open above the bubble to stay clear of the composer.
+Streaming completion initializes these triggers in-place. Verification:
+`node test-chat-messaging.mjs` (also `LIQUID_BROWSER=webkit`), plus existing chat
+integration and glass suites.
+
+Chat demo production integration (2026-10-07): user approved adopting the internal
+Chat elements preview in functioning `AI/chat.html`. Production glass uses the
+demo's 38% neutral veil, softer white rims, restrained large-surface physics and
+independent button springs within shared message-action materials. More uses the
+portable Options controller in a root-level `#chat-more-glass` cluster. Its fixed
+anchor follows a noninteractive header slot; Escape restores focus after settlement,
+and actions open their real dialogs without closing-motion focus theft. Sidebar
+contracts with the independent CSS `scale` property for 150ms, swaps expanded/60px
+rail layout, then settles over 280ms; rapid reversal keeps the latest desired state.
+Both desktop/mobile hidden libraries are inert. Empty Send uses guarded aria-disabled
+to retain glass gestures; actual generation controls the clipped bottom rainbow lane
+and aria-busy, clearing on completion, Stop or failure. Chat button touch-action
+overrides the legacy manipulation rule. The engine's optional
+`--liquid-design-front-z` preserves sidebar/menu popover stacking during contact.
+User subsequently requested identical canvas color behind sidebar and floating
+controls: body/main now share `--chat-canvas`, with the old inline elevated body/main
+backgrounds removed. `test-chat-demo-integration.mjs` verifies native/shell desktop
+and mobile in Chromium/WebKit, SSE send/stop, feedback, IndexedDB, Options/Settings,
+error recovery, canvas equality and sidebar transition/reversal; the existing
+`test-chat-liquid-glass.mjs` additionally covers tablet geometry and real touch.
+
+Internal nested-glass outline correction (2026-10-06): the demo's broad
+`.lgc-content svg` icon rule also matched nested material SVGs, giving sidebar
+and Send contours a white currentColor stroke and icon sizing. It now excludes
+`.lgc-outline`; material SVGs retain stroke:none and full material bounds.
+Internal preview checks verify nested sidebar/Send material stroke isolation.
+
+Softer white glass rims (2026-10-06): user requested reduced light rim
+reflection. White perimeter gradient opacities are halved in the internal
+demo and shared component/portable renderers. Nearby-color rim reflections,
+prismatic color, and interior color diffusion retain their current strengths.
+
+Diffused nearby-color glass (2026-10-06): user requested a small background
+color wash as well as rim reflections. Shared production/internal-demo color
+renderer now uses .12 peak face spill, a 120px inward footprint and 12px local
+blur, clipped by the existing material. Native backdrop blur and .8 rim
+reflection strength remain; this is supplemental color diffusion, not refraction.
+
+Area-aware button bounce (2026-10-06): user requested bouncy buttons while
+keeping large glass firm. Shared demo/production runtime interpolates damping
+from .72 attack/.62 release for 52px-sized controls to .98/.98 for surfaces
+with resting-area scale >=3. It retains velocity with no artificial release
+kick. Internal preview regression verifies a small-button rest crossing and
+settlement while retaining the sidebar anchoring and calm-release contracts.
+
+Large-surface anchoring correction (2026-10-06): runtime center translation and
+cross-axis squeeze previously bypassed the area-limited edge solver. A real
+sidebar pull measured 8.3px translation and 52.9px height change. Both demo and
+production live runtimes now divide center sensitivity/limits by resting-area
+scale and cap cross-axis compression at 12px divided by that scale. The rebuilt
+library and internal preview tests verify sidebar translation below 3px and
+dimension changes below 4px during the tested 160px outward pull, while retaining
+stretch, proportional glow, and calm release.
+
+Calmer glass motion (2026-10-06): user approved a restrained profile after
+finding the bounce excessive. Shared production/internal-demo motion uses .98
+damping for material and touch-light springs; press contact is 8 divided by
+resting-area scale instead of 32. Release preserves velocity without injecting
+a kick or minimum bulge. Internal sidebar scales from .96 to 1 with no 106%
+overshoot. Area-limited cursor stretch and proportional touch-glow size remain.
+`test-internal-chat-preview.mjs` samples release geometry for visible undershoot
+and settlement; this is an Apple-inspired tuning, not Apple's published physics.
+
+Area-limited glass deformation (2026-10-06): shared library now divides maximum
+facing-edge extension by max(1, sqrt(resting area / 52²)), in addition to the
+existing area resistance and half-cursor pressure. Larger glass therefore has
+less maximum deformation even with extreme pulls. Production and internal demo
+physics share the rule; `test-glass-area-resistance.mjs` checks extreme pulls.
+
+Glass area resistance (2026-10-06): shared deriveIpadFluidState divides pull
+sensitivity by 1.35 × max(1, sqrt(resting area / 52²)); larger surfaces require more
+pointer travel while retaining stretch caps. Updated production and internal
+demo physics sources and rebuilt the plugin. Internal demo sidebar now uses a
+scale-down/layout-swap/scale-up transition with reduced-motion fallback.
+Checks: `node test-glass-area-resistance.mjs` and
+`node test-internal-chat-preview.mjs`.
+
+Area-aware touch glow (2026-10-06): internal demo and plugin component renderer
+both size the touch highlight diameter as 184 × sqrt(rendered area) / 52,
+including open menus. Larger panels receive broader highlights with the same
+brightness profile; existing material clipping confines the glow. Resistance
+has the 1.35 baseline multiplier requested by the user.
+
+Cursor stretch reduction (2026-10-06): facing-edge stretch now feeds half of
+the cursor's outside-boundary displacement into the rubber-band response in
+both production and internal demo physics. Area resistance and maximum caps
+remain; the same edge stretch therefore needs twice the cursor travel.
+
+Messages-style chat layout (2026-10-06): user selected compact left/right
+exchanges while retaining floating sidebar/internal rail, visible title,
+top-right New/More, and the long rectangular composer. User bubbles are
+right-aligned with an accent-tinted fill; assistant bubbles are left-aligned
+elevated reading surfaces with asymmetric 20px corners. Exchanges use 12px
+user/24px assistant spacing; glass actions sit 6px beneath their bubble and
+feedback stays beside Copy/Regenerate. Code/tables retain local overflow.
+Native/shell Chromium/WebKit contracts verify bubble fills, nearby actions,
+spacing, themes, and existing input/sidebar/settings behavior.
+
+Unified chat experience (2026-10-06): user approved light/dark versions of one
+Apple-inspired design using the existing parchment/charcoal/rosewood palette.
+Chat canvas and materials now consume site tokens; typography and markdown
+spacing are normalized. Settings is a wider grouped-form dialog with desktop
+category navigation and a horizontal mobile category row in both themes.
+Personality/Memories sheets and custom dialogs share surface, type, spacing,
+and button proportions. More groups actions with separators and includes Settings.
+Settings/personality sheets and custom confirm/prompt support Escape and focus
+handling; confirmation blocks repeated submit while pending. Browser coverage
+includes settings category selection, mobile theme layout, Personality bounds,
+dialog dismissal, and existing chat contracts in native/shell Chromium/WebKit.
+
+Chat secondary-control glass (2026-10-06): user approved making remaining
+sidebar commands and message actions consistent with Liquid Glass and Apple's
+functional grouping. Research and Try VoidAI use engine-owned glass pills;
+Copy/Regenerate, response feedback, and user Copy/Edit each share a compact
+glass action group with 44px named buttons and timestamps outside. The helper
+`refreshChatActionGlass(scope)` in `AI/js/chat-glass.js` is called by full render
+and in-place streaming completion. History rows remain readable content.
+The floating sidebar/internal rail, visible title, top-right New/More menu,
+and roomy rectangular composer remain the approved layout. Regression checks
+verify real material counts, refresh idempotence, names/targets, and native/shell
+Chromium/WebKit behavior.
+
+Floating chat layout correction (2026-10-06): user superseded the ChatGPT layout
+with an inset floating sidebar and internal collapse/reopen control. Collapsed
+sidebar retains a 60px floating rail, including on mobile; its hidden content
+is inert on mobile. The title is visible at the conversation's top-left. New
+chat and More remain at top-right; More exposes Personality, Memories, theme
+and title actions even in empty chats. Composer is again a roomy two-row,
+long rounded rectangle (24px radius), with native multiline growth. Tests in
+`test-chat-liquid-glass.mjs` cover native/shell Chromium/WebKit, sidebar rail,
+menu reachability, floating geometry, growth and keyboard-sized viewport.
+
+ChatGPT-reference chat (2026-10-06): user approved adapting the supplied ChatGPT
+iPad screenshot. This supersedes the inset Music layout below: full-height,
+edge-aligned 280px library, black dark conversation canvas, a floating sidebar
+toggle on all widths, and a shared New chat/More glass capsule at top-right.
+Chat title stays accessible but visually hidden. Composer is a compact single-row
+glass pill (Add, native textarea, Send), growing with multiline input up to 200px;
+the old two-row layout and footer warning are no longer shown. Sidebar collapses
+fully on desktop/tablet. Labs21 branding and rosewood accent remain. Geometry,
+editing, growth, viewport, menus, rims and accessibility are covered by
+`node test-chat-liquid-glass.mjs` in native/shell Chromium and WebKit.
+
+iPadOS floating chat correction (2026-10-05): user explicitly rejected the
+attached workspace and supplied an Apple Music iPad screenshot. This supersedes
+the attached layout below. Sidebar is inset 12px with rounded glass edges;
+heading stays plain content with an independent glass overflow control; the
+roomy two-row composer floats 16px above the bottom over a continuous scrolling
+canvas. A soft top scroll-edge fade protects heading legibility, and a more
+opaque composer glass veil keeps text readable. ResizeObserver reserves actual
+dock height in trailing message padding and centers the empty greeting; mobile
+visualViewport adaptation is retained. Native/shell Chromium/WebKit coverage
+in `test-chat-liquid-glass.mjs` checks floating insets, growth/trailing space,
+keyboard-sized viewport, rims, menus, editing and accessibility.
+
+Attached chat workspace (2026-10-05): user approved replacing the floating
+Music-reference layout with an attached split pane. Desktop/tablet sidebar is
+full-height with zero inset; header and roomy two-row composer reserve real
+layout rows, and only the conversation scrolls. Mobile keeps the drawer and
+integrates its trigger into the header. Header, composer, Add and menus use
+engine-owned glass surfaces/rims; dark pane edges remain visible at rest.
+`chat-glass.js` no longer measures dock bounds or inserts scroll-edge overlays;
+it adapts mobile available height to visualViewport changes. Contracts in
+`test-chat-liquid-glass.mjs` cover native/shell Chromium/WebKit at 1280, 960 and
+390px, short windows, composer growth, simulated keyboard viewport, editing,
+menus, stretch/rebound and accessibility preferences. Apple reference:
+developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass.
+
+Chat empty-state alignment (2026-10-05): user reported misplaced elements after
+restoring the two-row composer. The old empty greeting used fixed asymmetric
+padding and an extra spacer instead of centering in the free space. The dock
+now uses equal left/right content anchors and auto margins, without a centering
+transform. `chat-glass.js` measures heading/dock bounds with ResizeObserver so
+the greeting centers between them as the pane or composer resizes. Tests cover
+empty-state centers and footer/greeting bounds at 650px and 900px heights across
+desktop/tablet/mobile in both native and shell modes.
+
+Roomier chat composer restoration (2026-10-05): user disliked the compact
+Music-player-style single-row composer and approved restoring the older
+two-row chat box. The floating Liquid Glass dock retains its wide conversation
+alignment; the full-width textarea sits above Add (bottom-left) and Send
+(bottom-right), with 12px inner padding and a 52px minimum writing field.
+Heading/sidebar retain the approved reference layout. The chat harness verifies
+writing-row width, vertical separation, bottom control alignment and >=120px
+composer height in native/shell desktop, tablet and mobile configurations.
+
+Music-reference chat layout (2026-10-05): user supplied an Apple Music iPad
+screenshot and approved adapting its inset sidebar, editorial content heading,
+and floating bottom controls to chat. Chat has a 240px translucent inset library
+from 768px upward (collapsible to its existing rail); smaller screens use the
+drawer. Sidebar search precedes New chat. The title is a plain h1, with an
+anchored overflow menu on all sizes; Memories, Personality and theme join the
+existing title actions there. The old utility bar is hidden. Composer is an
+absolutely anchored glass dock with Add/input/Send in one row, native multiline
+growth, and a ResizeObserver reserving its actual height at the end of the
+thread. Main content scrolls beneath it. Empty conversations show New chat.
+Layout rules are in the chat section of `src/site.css`; `chat-glass.js` owns
+menu/dock wiring. `test-chat-liquid-glass.mjs` covers native/shell at 1280, 960,
+and 390px in Chromium/WebKit, heading/menu, tablet collapse, dock anchoring,
+editing, touch stretch, themes and accessibility modes.
+
+Apple-guided chat glass correction (2026-10-05): user requested Apple's actual
+implementation guidance. Sources: developer.apple.com/documentation/
+technologyoverviews/adopting-liquid-glass and swiftui/applying-liquid-glass-to-custom-views.
+Chat now restricts automatic glass enhancement to its prominent Send/sidebar
+controls; title and utility groups each share one material with plain icon buttons.
+Message/history actions and secondary sidebar links are plain. The composer keeps
+its native editable material and rosewood Send. Below 768px, title actions move
+into a root-level anchored menu in `AI/js/chat-glass.js`, with arrow/Home/End
+navigation, Escape/selection focus restoration, outside-close and viewport clamping.
+A scroll-edge treatment obscures the thread beneath controls, not the controls;
+material is more opaque for text legibility. Reduced-transparency/increased-contrast
+settings use opaque surfaces without blur/prism; forced colors use system colors.
+Hidden titles and collapsed utility actions are inert. `test-chat-liquid-glass.mjs`
+covers shared material counts, mobile menu wiring/keyboard behavior, readability
+stacking, contrast/reduced motion and existing editing/stretch/scrolling contracts.
+The engine now observes changes to reduced-motion preferences live, clearing
+active deformation when enabled rather than requiring a page reload.
+
+Chat Liquid Glass refinement (2026-10-05): user approved improving the existing
+chat layout with the homepage's glass material. Composer, title capsule and
+utility capsule use independent engine-owned surfaces; the composer conic
+border/glow and duplicate HTML backdrop blur were removed. Send/Add controls
+are circular, title/utility/sidebar controls have 44px targets, and narrow
+phones wrap title actions inside the material. Sidebar is quietly translucent;
+messages retain their existing layout. Chat chrome/button stretch is enabled
+in shell children, while title/utility container motion stays static. Shell
+omits its fallback Back on chat because it covered the mobile sidebar button.
+`node test-chat-liquid-glass.mjs` (also `LIQUID_BROWSER=webkit`) exercises
+native/shell desktop/mobile, theme agreement, editing/selection, menus, fixed
+hitboxes, stretch/rebound and scrolling; Chromium also injects real touch.
+
+Homepage profile stretching (2026-10-05): `.hero-profile` on root Home now
+bypasses the shell-child static-motion restriction, enabling the existing
+directional hold/pull and spring-back interaction. `node test-home-profile-stretch.mjs`
+(also `LIQUID_BROWSER=webkit`) covers shell/native desktop and mobile, fixed
+layout hitboxes, rebound and cleared press highlights; Chromium mobile uses
+real touch injection.
+
+Firm page navigation and history Back (2026-10-05): the user requested quicker,
+stiffer Back/Forward page movement and a Back button that returns to the actual
+previous page, with root Home as the direct-entry fallback. Shell Back traverses
+browser history rather than pushing its configured parent link; native Back uses
+same-origin referrer history. Shell history index survives refresh through its
+entry redirect. Page slides use a critically damped frequency of 34 while chrome
+geometry retains 22. Intentional native view-transition skips consume the ready
+rejection. `node test-site-history.mjs` (also `LIQUID_BROWSER=webkit`) covers
+previous-page return, preserved Forward, shell refresh, direct-entry fallback,
+and arrival within 2px at 300ms.
+
+Rapid theme canvas consistency (2026-10-05): iPad recording
+`Downloads/ScreenRecording_10-05-2026 09-49-18_1.MP4` shows grey side gutters
+while the AI landing's central sections switch directly between light/dark.
+The global body color/background transition was interpolating independently;
+`body.home-base` now switches immediately with its content sections. This also
+covers the shell body. `node test-theme-rapid-toggle.mjs` (also
+`LIQUID_BROWSER=webkit`) checks nine 70ms-spaced real toggle clicks at
+1376px/DPR2, canvas color and shell/child theme agreement in both navigation modes.
+
+Social dropdown details (2026-10-05): Options labels use medium weight (500).
+GitHub and YouTube rows have 20px monochrome SVG logos before their labels;
+shell descriptors reuse the native Socials row glyphs and URLs. The GitHub
+navigation target is now `https://github.com/okemovail`.
+
+Dropdown foreground/selection (2026-10-05): Options menu rows explicitly use
+`var(--text-primary)` in `src/site.css` so iPad Safari cannot default their text
+to blue. Light-mode `.lgc-selection-pill` uses a dark translucent fill (12%);
+dark-mode selection retains the plugin's white translucent fill.
+
+iPad expanded Tools icon color (2026-10-05): shell action buttons explicitly
+use `var(--text-primary)` in `src/site.css`, preventing iPad Safari's native
+blue button foreground. Light mode is near-black; the existing dark-mode
+foreground remains theme-aware. iPad-sized rendered/computed icon coverage
+is in `test-tools-webkit.mjs`.
+
+iPad Tools glyph artifacts (2026-10-05):
+`Downloads/ScreenRecording_10-05-2026 09-19-50_1.MP4` shows saturated magenta
+glyph-sized top/right seams while the briefcase, droplet and chevron defocus,
+not material-corner leaks. Normal split/rejoin traced to HTML CSS blur, with
+an additional nested shell chevron morph blur. Tools SVG glyphs now own local
+`feGaussianBlur` on their ink; split, shell morph and held-overlap blur channels
+share that path instead of filtering HTML foreground layers. Morph cancellation
+clears stale blur, and component teardown restores original SVG ink. iPad-sized
+1376px/DPR2 regressions cover reversals, local defocus/sharp settling, held overlap
+and rendered icon ink/magenta checks in `test-tools-webkit.mjs`. Desktop WebKit
+does not reproduce the physical iPad GPU seam; device confirmation is still needed.
+
+iOS Tools artifacts/performance (2026-10-05): compound material now owns a local
+CSS `path()` clip matching its live contour, avoiding cross-layer SVG fragment
+loss in WebKit. Tools excludes hidden shell placeholder actions and snapshots
+native hitboxes before foreground writes; occlusion skips disjoint lobes before
+reading glyph layout. Mobile animation measurements fell from 22 (shell) / 17
+(native) to 5 per frame, including trigger physics. `node test-tools-webkit.mjs`
+(also `LIQUID_BROWSER=webkit`) covers rendered pink-leak corners with the SVG
+fragment removed, real surface count, read budget, reversal, stretch and rebound.
+This is desktop WebKit coverage; physical iOS performance still needs user confirmation.
+
+AI info-page glass navigation (2026-10-05): Goals, Research, Privacy and Terms
+now share the AI landing's `NAV_CONFIG.variant = 'pages'`: glass Back to Labs21
+on the left; circular hamburger, independent theme toggle and logo-first Chat
+pill on the right. Their `home-base` class adopts the same material and navigation
+insets; page-menu sizing rules are shared across that class. The Terms footer
+returns to `/AI/index.html`. `node test-ai-info-glass.mjs` (also
+`LIQUID_BROWSER=webkit`) covers native/shell mobile and desktop controls, theme
+switching, menu reachability, route continuity and the footer return.
+
 Rounded AI button material (2026-10-04): user screenshot showed a rectangular
 pink fill behind the rounded Start here rim. Independent glass material now
 uses the same explicit local `path()` clip as its live foreground contour,
@@ -783,3 +1366,11 @@ Astra turns TYPE character-by-character as tokens stream (2026-08-19
   transform use `backwards` fill (never `both`/`forwards` — a forwards fill
   pins transform forever and kills hover/press transforms); `[data-reveal]`
   is print-safe via a `@media print` reveal-all rule.
+
+New chat click fix (2026-10-12): the sidebar New chat row often did nothing on
+real clicks. `src/liquid-design-site.js` had `.sb-new-chat-btn` in its chat
+glass allow-list, so it became an independent glass button; the plugin's click
+guard (`liquid-design-plugin.js`) swallows any click whose press moved >2px as
+a "drag", which a normal hand click easily does. Webdriver runs skipped the
+physics, so tests passed. The row is a plain button again (it already renders
+as the soft-circle Perplexity row). Check: `node test-chat-glass-collapse-click.mjs`.

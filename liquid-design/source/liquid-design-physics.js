@@ -197,22 +197,26 @@
 
     var width = geometry.slabHalfWidth * 2;
     var height = geometry.slabHalfHeight * 2;
+    // Small controls keep their familiar feel; broad surfaces resist the same
+    // pointer pressure progressively. Use resting area, never deformed bounds.
+    var areaResistance = 1.35 * Math.max(1, Math.sqrt(width * height / (52 * 52)));
     var centerCoupling = clamp(config.centerCoupling, 0.05, 0.08);
     var stretchGain = clamp(Number(config.fluidStretchGain) || 1, 1, 3);
     var stretchRatio = clamp(Number(config.fluidStretchRatio) || 0.55, 0.1, 0.7);
     var facingShare = 0.88;
     var oppositeShare = 1 - facingShare;
     // stretchLimit is the maximum facing-edge extension in CSS pixels.
-    var horizontalFacingLimit = Math.min(config.stretchLimit, width * stretchRatio);
-    var verticalFacingLimit = Math.min(config.stretchLimit, height * stretchRatio);
+    var areaScale = Math.max(1, Math.sqrt(width * height / (52 * 52)));
+    var horizontalFacingLimit = Math.min(config.stretchLimit, width * stretchRatio) / areaScale;
+    var verticalFacingLimit = Math.min(config.stretchLimit, height * stretchRatio) / areaScale;
     var horizontalPressure = Math.abs(rubberBand(
-      input.pointerDx,
-      centerCoupling * 3 * stretchGain,
+      input.pointerDx * 0.5,
+      centerCoupling * 3 * stretchGain / areaResistance,
       horizontalFacingLimit / facingShare,
     ));
     var verticalPressure = Math.abs(rubberBand(
-      input.pointerDy,
-      centerCoupling * 3 * stretchGain,
+      input.pointerDy * 0.5,
+      centerCoupling * 3 * stretchGain / areaResistance,
       verticalFacingLimit / facingShare,
     ));
 

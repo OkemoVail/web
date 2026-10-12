@@ -16,7 +16,8 @@
     [active, outgoing].forEach(function (record) {
       if (!record || !record.slide) return;
       var s = record.slide;
-      GlassShellMotion.step(s, dt);
+      // Pages arrive firmly while live control geometry keeps its own response.
+      GlassShellMotion.step(s, dt, 34);
       if (Math.abs(s.target - s.x) < .1 && Math.abs(s.v) < 1) { s.x = s.target; s.v = 0; } else moving = true;
       record.frame.style.transform = 'translateX(' + s.x + 'px)';
     });
@@ -40,7 +41,14 @@
     var chrome = document.createElement('nav'); chrome.id = 'glass-shell-chrome'; chrome.setAttribute('aria-label', 'Site navigation');
     var status = document.createElement('div'); status.id = 'glass-shell-status'; status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
     document.body.append(viewport, chrome, status); GlassShellControls.update(descriptors); GlassShell.currentURL = initialURL;
-    history.replaceState({ glassShell: true, index: 0, scroll: 0 }, '', initialURL);
+    var resume = history.state;
+    try {
+      var saved = JSON.parse(sessionStorage.getItem('glass-shell-resume'));
+      sessionStorage.removeItem('glass-shell-resume');
+      if (saved && saved.url === initialURL.href) resume = saved.state;
+    } catch (_) {}
+    sequence = resume && resume.glassShell ? resume.index : 0;
+    history.replaceState({ glassShell: true, index: sequence, scroll: resume && resume.scroll || 0 }, '', initialURL);
     navigate(initialURL, { initial: true, replace: true });
   }
   function navigate(value, options) {
@@ -140,13 +148,18 @@
   function childTheme(win, dark) { if (!active || active.frame.contentWindow !== win) return; document.documentElement.classList.toggle('dark', dark); document.documentElement.setAttribute('data-liquid-design-theme', dark ? 'dark' : 'light'); }
   function childTitle(win, title) { if (active && active.frame.contentWindow === win) { document.title = title; active.frame.title = title; } }
   function dismissPopovers() { GlassShellControls.closeMenu(); GlassShellSearch.closeSuggestions(); }
+  function back() {
+    dismissPopovers();
+    if (sequence > 0) history.back();
+    else navigate('/index.html', { back: true });
+  }
   function toggleTheme() {
     var dark = document.documentElement.classList.toggle('dark'); localStorage.setItem('vail_theme', dark ? 'dark' : 'light');
     if (active) active.frame.contentDocument.documentElement.classList.toggle('dark', dark);
     document.documentElement.setAttribute('data-liquid-design-theme', dark ? 'dark' : 'light');
     if (active) childLayout(active.frame.contentWindow);
   }
-  window.GlassShell = { navigate: navigate, accepts: accepts, ready: false, currentURL: clean(location.href), childReady: childReady, childLayout: childLayout, childRoute: childRoute, childTheme: childTheme, childTitle: childTitle, toggleTheme: toggleTheme, dismissPopovers: dismissPopovers };
+  window.GlassShell = { navigate: navigate, back: back, accepts: accepts, ready: false, currentURL: clean(location.href), childReady: childReady, childLayout: childLayout, childRoute: childRoute, childTheme: childTheme, childTitle: childTitle, toggleTheme: toggleTheme, dismissPopovers: dismissPopovers };
   addEventListener('popstate', function (event) { var index = event.state?.index || 0, back = index < sequence; sequence = index; navigate(location.href, { history: true, back: back, scroll: event.state?.scroll || 0 }); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

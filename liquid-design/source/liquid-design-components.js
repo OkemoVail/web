@@ -2,6 +2,7 @@
   'use strict';
   var instances = new Map();
   var serial = 0;
+  var glyphSerial = 0;
   var NS = 'http://www.w3.org/2000/svg';
   function svg(name, attrs) {
     var el = document.createElementNS(NS, name);
@@ -12,6 +13,41 @@
     var list = Array.from(scope.querySelectorAll('[data-liquid-cluster]'));
     if (scope.matches && scope.matches('[data-liquid-cluster]')) list.unshift(scope);
     return list;
+  }
+  // Keep SVG glyph defocus in SVG's own paint pipeline. Filtering an HTML
+  // wrapper containing SVGs creates a separate compositor backing store. The
+  // iPad recording's magenta seams coincide with that wrapper blur path.
+  root.LiquidDesignGlyphBlur = function (content, amount, channel) {
+    if (!content) return;
+    var key = channel === 'morph' ? '_lgcMorphBlur' : channel === 'occlusion' ? '_lgcOcclusionBlur' : '_lgcSplitBlur';
+    content[key] = Math.max(0, amount);
+    var blur = Math.max(content._lgcMorphBlur || 0, content._lgcSplitBlur || 0, content._lgcOcclusionBlur || 0);
+    content.querySelectorAll('svg').forEach(function (icon) {
+      var effect = icon._lgcGlyphBlur;
+      if (!effect && blur > .01) {
+        var id = 'lgc-glyph-' + (++glyphSerial);
+        var defs = svg('defs');
+        var filter = svg('filter', { id: id, x: '-75%', y: '-75%', width: '250%', height: '250%', 'color-interpolation-filters': 'sRGB' });
+        var gaussian = svg('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '0' });
+        var ink = svg('g');
+        Array.from(icon.children).forEach(function (node) { if (!node.matches('defs,title,desc')) ink.append(node); });
+        filter.append(gaussian); defs.append(filter); icon.append(defs, ink);
+        effect = icon._lgcGlyphBlur = { defs: defs, ink: ink, gaussian: gaussian, id: id };
+      }
+      if (!effect) return;
+      effect.gaussian.setAttribute('stdDeviation', blur.toFixed(3));
+      if (blur > .01) effect.ink.setAttribute('filter', 'url(#' + effect.id + ')');
+      else effect.ink.removeAttribute('filter');
+    });
+  };
+  function clearGlyphBlur(content) {
+    content.querySelectorAll('svg').forEach(function (icon) {
+      var effect = icon._lgcGlyphBlur;
+      if (!effect) return;
+      while (effect.ink.firstChild) icon.insertBefore(effect.ink.firstChild, effect.ink);
+      effect.ink.remove(); effect.defs.remove(); delete icon._lgcGlyphBlur;
+    });
+    delete content._lgcMorphBlur; delete content._lgcSplitBlur; delete content._lgcOcclusionBlur;
   }
   function pill(b) {
     var x = b.x, y = b.y, w = b.w, h = b.h, r = b.r === undefined ? Math.min(w, h) / 2 : Math.min(b.r, w / 2, h / 2);
@@ -179,14 +215,25 @@
       if (disposed) return;
       var rect = group.getBoundingClientRect();
       var boxes = [];
+      // Read native hitboxes before writing any foreground transforms. Tools
+      // reuse this snapshot for their flights and occlusion instead of forcing
+      // layout again for every lobe (including hidden shell placeholders).
+      var measurements = new Map();
+      records.forEach(function (record, el) {
+        if (el.closest('[hidden]') || (!toolsPaint && el.closest('[inert]'))) return;
+        var bounds = el.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+        measurements.set(el, { bounds: bounds, radius: parseFloat(getComputedStyle(el).borderTopLeftRadius) });
+      });
       var dark = document.documentElement.classList.contains('dark');
       var stops = gradient.querySelectorAll('stop');
        var pluginMaterial = group.hasAttribute('data-lgp-component');
-       (pluginMaterial ? [.55, .25, .03, .02, .10, .30] : [.24, .10, .012, .008, .035, .12]).forEach(function (v, i) { stops[i].setAttribute('stop-opacity', v); });
+       (pluginMaterial ? [.275, .125, .015, .01, .05, .15] : [.12, .05, .006, .004, .0175, .06]).forEach(function (v, i) { stops[i].setAttribute('stop-opacity', v); });
        if (pluginMaterial) filter.querySelector('feMorphology').setAttribute('radius', '1.1');
       records.forEach(function (record, el) {
-        if (!visible(el)) { record.glow.style.opacity = 0; return; }
-        var r = el.getBoundingClientRect();
+        var measured = measurements.get(el);
+        if (!measured) { record.glow.style.opacity = 0; return; }
+        var r = measured.bounds;
         var f = record.state;
         if (f && (!f.geometry.slabHalfWidth || !f.geometry.slabHalfHeight)) f = null;
         var x = r.left - rect.left, y = r.top - rect.top, w = r.width, h = r.height;
@@ -199,11 +246,11 @@
         }
         record.content.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
         var b = { x: x + w / 2 + dx - w * sx / 2, y: y + h / 2 + dy - h * sy / 2, w: w * sx, h: h * sy };
-        if (pluginMaterial) {
+        {
           var glowDiameter = 184 * Math.sqrt(b.w * b.h) / 52;
           record.glow.style.width = glowDiameter + 'px'; record.glow.style.height = glowDiameter + 'px';
         }
-        var declaredRadius = parseFloat(getComputedStyle(el).borderTopLeftRadius);
+        var declaredRadius = measured.radius;
         var restingRadius = Math.min(Number.isFinite(declaredRadius) ? declaredRadius : Math.min(w, h) / 2, w / 2, h / 2);
         b.rx = restingRadius * sx; b.ry = restingRadius * sy;
         if (pluginMaterial) {
@@ -229,7 +276,7 @@
         boxes.push({ x: r.left - rect.left, y: r.top - rect.top, w: r.width, h: r.height });
       });
       if (menuPaint) boxes = menuPaint(boxes, rect);
-      if (toolsPaint) boxes = toolsPaint(boxes, rect);
+      if (toolsPaint) boxes = toolsPaint(boxes, rect, measurements);
        if (searchPaint) boxes = searchPaint(boxes, rect);
        if (pluginMaterial) boxes.forEach(function (b) {
          ['x','y','w','h','r','rx','ry'].forEach(function (key) {
@@ -239,7 +286,7 @@
        if (pluginMaterial && toolsPaint) {
          var foreground = [], index = 0;
          records.forEach(function (record, el) {
-           if (!visible(el)) return;
+            if (!measurements.has(el)) return;
            var b = boxes[index++]; if (!b) return;
            foreground.push({ content: record.content, touch: record.state ? record.state.touch : 0,
              box: { x: rect.left + b.x, y: rect.top + b.y, w: b.w, h: b.h, rx: b.rx, ry: b.ry } });
@@ -282,6 +329,9 @@
         if (count) d = unionOutline.path;
       }
       shape.setAttribute('d', d);
+      // HTML backdrop layers must own their clip locally. SVG fragment clips
+      // can disappear across WebKit compositor layers during split/rejoin.
+      material.style.clipPath = 'path("' + d + '")';
       highlights.style.clipPath = 'path("' + d + '")';
        rim.setAttribute('d', d);
         // Each expanded lobe references its own contour bounds so the actions
@@ -348,7 +398,7 @@
         records.set(el, record);
         if (!el.closest('[data-liquid-menu]')) record.motion = root.LiquidDesignLiveDemo.create(group, {
           button: el, slab: el, track: group,
-          staticMotion: document.documentElement.hasAttribute('data-glass-child') && !group.closest('.ov-nav,.ov-social-nav'),
+          staticMotion: document.documentElement.hasAttribute('data-glass-child') && !group.closest('.ov-nav,.ov-social-nav,[data-page="chat"]'),
           editableSurface: el.matches('[data-liquid-surface]'),
           releaseFrequency: 15,
           deformationScale: el.classList.contains('lgd-chat-composer') ? .33 : undefined,
@@ -368,7 +418,7 @@
       var before = new Map();
       records.forEach(function (_, el) { if (visible(el)) before.set(el, el.getBoundingClientRect()); });
       change();
-      if (!reduced()) {
+         if (!reduced()) {
         var anchor = group.querySelector('[data-liquid-toggle], [data-liquid-search-open]');
         var anchorRect = anchor && anchor.getBoundingClientRect();
         var groupRect = group.getBoundingClientRect();
@@ -458,13 +508,15 @@
         if (focus) trigger.focus({ preventScroll: true });
         paint(); refresh(started ? 1400 : 0);
       }
-      toolsPaint = function (boxes, rect) {
+      toolsPaint = function (boxes, rect, measurements) {
         advance(performance.now());
         if (panel.hidden) return boxes;
-        var native = items.map(function (el) {
-          var r = el.getBoundingClientRect();
+        var activeItems = items.filter(function (el) { return measurements.has(el); });
+        var native = activeItems.map(function (el) {
+          var r = measurements.get(el).bounds;
           return { x: r.left - rect.left, y: r.top - rect.top, w: r.width, h: r.height };
         });
+        if (!native.length) return boxes;
         var first = native[0], last = native[native.length - 1];
         // The trigger is the persistent identity. Actions emerge from its
         // fixed native center, never from the expanding toolbar's midpoint.
@@ -472,7 +524,7 @@
         var p = progress, reveal = Math.max(0, Math.min(1, p));
         var fade = reveal * reveal * (3 - 2 * reveal);
         return native.map(function (b, i) {
-          var r = records.get(items[i]), f = r.state;
+          var r = records.get(activeItems[i]), f = r.state;
           if (f && (!f.geometry.slabHalfWidth || !f.geometry.slabHalfHeight)) f = null;
           var dx = f ? f.bounds.centerX - f.geometry.slabCenterX : 0;
           var dy = f ? f.bounds.centerY - f.geometry.slabCenterY : 0;
@@ -486,7 +538,10 @@
           r.content.style.transform = 'translate(' + (cx - b.x - b.w / 2) + 'px,' + dy + 'px) scale(' + sx * growth + ',' + sy * growth + ')';
           r.content.style.opacity = i ? fade : 1;
           var blur = 3 * 4 * reveal * (1 - reveal);
-          r.content.style.filter = blur > .02 ? 'blur(' + blur + 'px)' : 'none';
+          if (group.hasAttribute('data-lgp-component') && r.content.querySelector('svg')) {
+            r.content.style.filter = 'none';
+            root.LiquidDesignGlyphBlur(r.content, blur, 'split');
+          } else r.content.style.filter = blur > .02 ? 'blur(' + blur + 'px)' : 'none';
           return { x: cx - w / 2, y: cy - h / 2, w: w, h: h,
             rx: Math.min(b.w, b.h) / 2 * sx * growth, ry: Math.min(b.w, b.h) / 2 * sy * growth };
         });
@@ -496,7 +551,7 @@
         if (e.key === 'Escape' && open) { e.preventDefault(); set(false, true); }
       });
       cleanups.push(function () {
-        items.forEach(function (el) { var r = records.get(el); r.content.style.opacity = ''; r.content.style.filter = ''; });
+        items.forEach(function (el) { var r = records.get(el); r.content.style.opacity = ''; r.content.style.filter = ''; clearGlyphBlur(r.content); });
         panelState(panel, false);
       });
     }
@@ -547,9 +602,12 @@
         return out;
       }
       function highlight(item) {
+        if (selected === item) return;
+        var hadSelection = !!selected;
         selected = item;
         items.forEach(function (el) { el.setAttribute('data-liquid-highlighted', String(el === item)); });
         if (item) {
+          selectionPill.style.transition = hadSelection && !reduced() ? 'transform 180ms cubic-bezier(.4,0,.2,1), width 180ms cubic-bezier(.4,0,.2,1), height 180ms cubic-bezier(.4,0,.2,1), opacity 120ms linear' : 'opacity 120ms linear';
           selectionPill.style.opacity = '1';
           selectionPill.style.width = Math.max(0, item.offsetWidth - 8) + 'px';
           selectionPill.style.height = Math.max(0, item.offsetHeight - 8) + 'px';
@@ -557,6 +615,8 @@
         } else selectionPill.style.opacity = '0';
       }
       function needsUpwardOpening() {
+        if (group.getAttribute('data-liquid-design-menu-direction') === 'up') return true;
+        if (group.getAttribute('data-liquid-design-menu-direction') === 'down') return false;
         var anchor = trigger.getBoundingClientRect();
         var menuHeight = panel.hidden ? panel.scrollHeight : panel.offsetHeight;
         if (!menuHeight) {
@@ -590,7 +650,13 @@
           var up = needsUpwardOpening();
           var menuOffset = parseFloat(getComputedStyle(group).getPropertyValue('--liquid-design-menu-offset-y')) || 0;
           var top = up ? anchor.bottom - menuHeight : anchor.top + menuOffset;
+          var styles = getComputedStyle(group);
+          var gap = parseFloat(styles.getPropertyValue('--liquid-design-menu-gap'));
+          if (Number.isFinite(gap)) top = up ? anchor.top - menuHeight - gap : anchor.bottom + gap;
           top = Math.max(12, Math.min(innerHeight - menuHeight - 12, top));
+          var topBound = parseFloat(styles.getPropertyValue('--liquid-design-menu-top-bound'));
+          var bottomBound = parseFloat(styles.getPropertyValue('--liquid-design-menu-bottom-bound'));
+          if (Number.isFinite(topBound) && Number.isFinite(bottomBound)) top = Math.max(topBound, Math.min(bottomBound - menuHeight, top));
           panel.style.top = (top - bounds.top) + 'px';
           group.dataset.menuDirection = up ? 'up' : 'down';
         }
@@ -614,12 +680,16 @@
           morphFace.setAttribute('aria-hidden', 'true');
           var originalFace = records.get(trigger).content.cloneNode(true);
           originalFace.style.transform = 'none';
-          morphFace.append(originalFace);
-          group.append(morphFace);
-          trigger.style.visibility = 'hidden';
-        }
+           morphFace.append(originalFace);
+           group.append(morphFace);
+           trigger.style.visibility = 'hidden';
+           // Message menus live in a root-level fixed cluster. During the
+           // closing morph, the temporary circle must yield to the message
+           // bubble it came from rather than painting over it.
+           if (!value && group.hasAttribute('data-message-menu')) morphFace.classList.add('lgc-message-closing-face');
+         }
         start = reduced() ? 0 : performance.now();
-        group.dataset.morphPhase = reduced() ? 'settled' : 'expand';
+         group.dataset.morphPhase = reduced() ? 'settled' : (value ? 'expand' : 'collapse');
         if (focus) (value ? items[0] : trigger).focus({ preventScroll: true });
         if (!value) highlight(null);
         paint(); refresh(reduced() ? 0 : pathDuration + (value ? 60 : 1200));
@@ -652,7 +722,7 @@
         }
         if (elapsed < pathDuration || (springMotion && !springMotion.settled)) {
           current = trajectory;
-          group.dataset.morphPhase = elapsed < pathDuration ? 'expand' : 'overshoot';
+           group.dataset.morphPhase = open ? (elapsed < pathDuration ? 'expand' : 'overshoot') : 'collapse';
           if (!open && elapsed >= pathDuration) panelState(panel, false);
           if (morphFace) {
             morphFace.style.left = current.x + 'px'; morphFace.style.top = current.y + 'px';
@@ -697,7 +767,7 @@
         }
         var menuGlow = records.get(trigger).glow;
         if (open && menuState) {
-          var menuGlowDiameter = group.hasAttribute('data-lgp-component') ? 184 * Math.sqrt(current.w * current.h) / 52 : 260;
+          var menuGlowDiameter = 184 * Math.sqrt(current.w * current.h) / 52;
           menuGlow.style.width = menuGlowDiameter + 'px'; menuGlow.style.height = menuGlowDiameter + 'px';
           menuGlow.style.left = (rect.width / 2 + menuState.lightPoint.x) + 'px';
           menuGlow.style.top = (rect.height / 2 + menuState.lightPoint.y) + 'px';
@@ -789,6 +859,10 @@
       listen(panel, 'click', function (e) { if (e.target.closest('button')) set(false, true); });
       listen(panel, 'pointerleave', function () {
         highlight(null);
+      });
+      listen(panel, 'focusin', function (e) {
+        var item = e.target.closest('button');
+        if (open && items.indexOf(item) !== -1) highlight(item);
       });
       function pointItem(e) {
         return items.find(function (item) {

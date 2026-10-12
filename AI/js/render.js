@@ -17,8 +17,20 @@ window.render = () => {
     if (window.els.welcome) window.els.welcome.style.display = 'none';
     window.els.chatMsgs.innerHTML = "";
 
+    let previousDate = null;
     window.chatHistory.forEach((pair, pairIdx) => {
         const [userMsg, responseText, feedback, timestamp, attachment, sources] = pair;
+        const date = timestamp ? new Date(timestamp) : null;
+        if (date && Number.isFinite(date.getTime())) {
+            if (!previousDate || date.toDateString() !== previousDate.toDateString() || date - previousDate >= 30 * 60000) {
+                const separator = document.createElement('time');
+                separator.className = 'chat-date-separator';
+                separator.dateTime = date.toISOString();
+                separator.textContent = window.chatDateLabel(timestamp);
+                window.els.chatMsgs.appendChild(separator);
+            }
+            previousDate = date;
+        }
 
         // 1. Render USER Row
         // No entrance animation on rows — render() rebuilds the whole list, so
@@ -126,6 +138,7 @@ window.render = () => {
     });
 
     feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 });
+    window.refreshChatActionGlass?.(window.els.chatMsgs);
     if (!window.isGenerating) {
         window.els.chatCont.scrollTop = window.els.chatCont.scrollHeight;
     }

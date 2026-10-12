@@ -60,9 +60,6 @@ window.renderHistory = (query = "") => {
     const visibleChats = filteredChats.slice(0, window.__historyRenderLimit);
     const hasMore = filteredChats.length > visibleChats.length;
 
-    const sectionHeader = (title) =>
-        `<div class="history-section-header mb-0.5 px-3 text-[10px] font-black uppercase tracking-widest text-zinc-400/80">${title}</div>`;
-
     // --- 1. Generate Folders HTML ---
     let foldersHtml = '';
     if (!query) {
@@ -73,6 +70,19 @@ window.renderHistory = (query = "") => {
                 <i data-feather="folder-plus" class="w-[1.3rem] h-[1.3rem]"></i>
             </button>
         </div>`;
+
+        if (!window.settings.folders.length) {
+            // Empty state: an open, empty folder with a dry "404".
+            foldersHtml += `
+            <div class="folders-empty" role="status">
+                <svg class="folders-empty-icon" viewBox="0 0 48 40" aria-hidden="true">
+                    <path d="M4 10a4 4 0 0 1 4-4h10l4 5h18a4 4 0 0 1 4 4v3H4z" />
+                    <path d="M3 18h42l-3.5 16.5A3 3 0 0 1 38.6 37H9.4a3 3 0 0 1-2.9-2.5z" />
+                </svg>
+                <span class="folders-empty-code">404</span>
+                <span class="folders-empty-text">No folders found</span>
+            </div>`;
+        }
 
         window.settings.folders.forEach(folder => {
             const folderChats = visibleChats.filter(c => c.folderId === folder.id);
@@ -113,37 +123,11 @@ window.renderHistory = (query = "") => {
         // Search is a flat view — manual order, no time buckets.
         recentsHtml = orphanedChats.map(c => window.renderChatItem(c, dict)).join('');
     } else {
-        const now = new Date();
-        const dayStartTs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        const weekStartTs = dayStartTs - (86400000 * 7);
-
-        const bucketOf = (c) =>
-            c.timestamp >= dayStartTs ? 'today'
-                : c.timestamp >= weekStartTs ? 'last_7_days'
-                    : 'dust_collecting';
-        const bucketTitle = {
-            today: dict.today_header,
-            last_7_days: "Last 7 days",
-            dust_collecting: dict.dust_collecting_header
-        };
-
-        // Pinned float to the top in their own block (manual order within).
+        // One continuous list, no divider headers: pinned chats float to the
+        // top, then everything else in manual order.
         const pinned = orphanedChats.filter(c => c.pinned);
         const unpinned = orphanedChats.filter(c => !c.pinned);
-
-        if (pinned.length) {
-            recentsHtml += sectionHeader(dict.pinned_header);
-            recentsHtml += pinned.map(c => window.renderChatItem(c, dict)).join('');
-        }
-
-        // Walk in manual order; emit each bucket header at most once, where it
-        // first appears. Headers act as dividers — position is king.
-        const seen = new Set();
-        unpinned.forEach(c => {
-            const b = bucketOf(c);
-            if (!seen.has(b)) { recentsHtml += sectionHeader(bucketTitle[b]); seen.add(b); }
-            recentsHtml += window.renderChatItem(c, dict);
-        });
+        recentsHtml = [...pinned, ...unpinned].map(c => window.renderChatItem(c, dict)).join('');
     }
 
     if (hasMore) {

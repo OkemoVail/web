@@ -13,6 +13,7 @@ window.toggleSettingsPanel = () => {
 
     if (isActive) {
         window.openSettingsTab('general');
+        window.showSettingsCategories?.();
 
         const nameInput = document.getElementById('settings-name-input-new');
         if (nameInput) nameInput.value = window.settings.userName;
@@ -62,11 +63,15 @@ window.toggleSettingsPanel = () => {
 
 window.openSettingsTab = (tabName) => {
     document.querySelectorAll('.Cadance-tab-btn').forEach(btn => {
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('aria-controls', btn.id.replace('ptab-btn-', 'tab-'));
         btn.classList.remove('active');
         btn.classList.remove('skuo-accent');
     });
     const activeBtn = document.getElementById(`ptab-btn-${tabName}`);
     if (activeBtn) {
+        activeBtn.setAttribute('aria-selected', 'true');
         activeBtn.classList.add('active');
         activeBtn.classList.add('skuo-accent');
     }
@@ -77,9 +82,12 @@ window.openSettingsTab = (tabName) => {
     });
     const target = document.getElementById(`tab-${tabName}`);
     if (target) {
+        target.setAttribute('role', 'tabpanel');
+        target.setAttribute('aria-labelledby', `ptab-btn-${tabName}`);
         target.classList.remove('hidden');
         target.classList.add('block');
     }
+    window.showSettingsCategory?.(tabName);
 };
 
 window.toggleSmartSidebar = () => {

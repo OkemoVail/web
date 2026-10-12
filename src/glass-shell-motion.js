@@ -3,8 +3,8 @@
   // One analytic, critically damped response for page and layout geometry.
   // Real elapsed time makes the same motion at 30, 60 and 120 Hz; position and
   // velocity are retained when a new target interrupts the current response.
-  var frequency = 22;
-  function step(state, dt) {
+  function step(state, dt, frequency) {
+    frequency = frequency || 22;
     var offset = state.x - state.target;
     var coefficient = state.v + frequency * offset;
     var decay = Math.exp(-frequency * dt);

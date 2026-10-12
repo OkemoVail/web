@@ -8,7 +8,7 @@ import { chromium, webkit } from 'playwright';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const html = await fs.readFile(path.join(root, 'AI/goals.html'), 'utf8');
 assert.ok(html.indexOf('../src/site.css') < html.indexOf('../liquid-design/liquid-design.css'));
-assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design\.js"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site\.js"><\/script>/);
+assert.match(html, /<script defer src="\.\.\/liquid-design\/liquid-design\.js(?:\?[^"\s]*)?"><\/script>\s*<script defer src="\.\.\/src\/liquid-design-site\.js(?:\?[^"\s]*)?"><\/script>/);
 assert.doesNotMatch(html, /data-liquid-design-group|data-liquid-color-scene|liquid-glass-live-demo/);
 
 const server = http.createServer(async (req, res) => {
@@ -61,7 +61,7 @@ try {
   const desktop = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'light' });
   const baseline = await desktop.newPage();
   baseline.on('pageerror', error => errors.push(error.message));
-  await baseline.route(/\/(liquid-design\/liquid-design\.(?:js|css)|src\/liquid-design-site\.js)$/, route => route.fulfill({ body: '', contentType: route.request().url().endsWith('.css') ? 'text/css' : 'text/javascript' }));
+  await baseline.route(/\/(liquid-design\/liquid-design\.(?:js|css)|src\/liquid-design-site\.js)(?:\?.*)?$/, route => route.fulfill({ body: '', contentType: new URL(route.request().url()).pathname.endsWith('.css') ? 'text/css' : 'text/javascript' }));
   await baseline.goto(url);
   await baseline.waitForFunction(() => window.tailwind && document.querySelector('.ov-nav'));
   await baseline.evaluate(() => document.fonts.ready);

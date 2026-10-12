@@ -1,6 +1,46 @@
 (function (root) {
   'use strict';
 
+  // Screen-to-local frame for an element whose ancestors may be rotated
+  // (the chat rail turns its toolbar pill -90deg). Returns null when the
+  // element is upright, so callers keep their plain screen-space path.
+  function frameOf(el) {
+    var angle = 0;
+    for (var node = el; node && node.nodeType === 1; node = node.parentElement) {
+      var cs = getComputedStyle(node);
+      var rotate = cs.rotate;
+      if (rotate && rotate !== 'none') {
+        var parts = rotate.trim().split(/\s+/);
+        var value = parts[parts.length - 1], deg = parseFloat(value);
+        if (/rad$/.test(value)) deg = deg * 180 / Math.PI;
+        else if (/turn$/.test(value)) deg *= 360;
+        // Only 2D (z-axis) rotations are supported.
+        if (parts.length === 1 || parts.length === 4 && parseFloat(parts[2]) !== 0) angle += deg || 0;
+      }
+      if (cs.transform && cs.transform !== 'none') {
+        var m = new DOMMatrix(cs.transform);
+        angle += Math.atan2(m.b, m.a) * 180 / Math.PI;
+      }
+    }
+    angle = ((angle % 360) + 360) % 360;
+    if (angle < 0.01 || angle > 359.99) return null;
+    var theta = angle * Math.PI / 180, cos = Math.cos(theta), sin = Math.sin(theta);
+    var rect = el.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+    // A rotated box's bounding width + height = (w + h)(|cos| + |sin|) * scale.
+    var scale = w + h ? (rect.width + rect.height) / ((w + h) * (Math.abs(cos) + Math.abs(sin))) : 1;
+    scale = Math.max(.01, scale || 1);
+    var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    return {
+      angle: angle, scale: scale, width: w, height: h,
+      // Local CSS px from the element's border-box top-left.
+      toLocal: function (x, y) {
+        var dx = x - cx, dy = y - cy;
+        return { x: (dx * cos + dy * sin) / scale + w / 2, y: (-dx * sin + dy * cos) / scale + h / 2 };
+      },
+    };
+  }
+  root.LiquidDesignFrame = frameOf;
+
   function create(group, options) {
     options = options || {};
     var button = options.button || group.querySelector('[data-liquid-control]');
@@ -14,7 +54,8 @@
       listeners.push(function () { element.removeEventListener(name, handler); });
     }
     var Physics = root.LiquidDesignPhysics;
-    var reduced = !!options.staticMotion || root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var motionMedia = root.matchMedia('(prefers-reduced-motion: reduce)');
+    var reduced = !!options.staticMotion || motionMedia.matches;
     var pointerId = null;
     var editingPointer = null;
     var startX = 0;
@@ -47,21 +88,33 @@
       fluidStretchRatio: 0.30,
     });
     var attack = Object.assign({}, Physics.IPAD_FLUID_SPRING, {
-      springFrequency: 23, springDamping: 0.42,
+      springFrequency: 26, springDamping: 0.98,
     });
     var release = Object.assign({}, Physics.IPAD_FLUID_SPRING, {
-      springFrequency: options.releaseFrequency || 15, springDamping: 0.40,
+      springFrequency: options.releaseFrequency || 22, springDamping: 0.98,
     });
     var lightSpringConfig = Object.assign({}, Physics.IPAD_FLUID_SPRING, {
-      springFrequency: 42, springDamping: 0.48,
+      springFrequency: 32, springDamping: 0.98,
     });
 
+    // When the track is rotated, all geometry and pointer math runs in the
+    // track's own (unrotated) CSS space, so a pull along the rotated pill
+    // stretches its long axis instead of a screen axis.
+    var frame = null;
+    function local(x, y) { return frame ? frame.toLocal(x, y) : { x: x, y: y }; }
     function measure() {
-      var rect = options.measureRect ? options.measureRect() : slab.getBoundingClientRect();
+      frame = options.measureRect ? null : frameOf(track);
+      var rect;
+      if (options.measureRect) rect = options.measureRect();
+      else if (frame) {
+        var sr = slab.getBoundingClientRect(), c = frame.toLocal(sr.left + sr.width / 2, sr.top + sr.height / 2);
+        rect = { left: c.x - slab.offsetWidth / 2, top: c.y - slab.offsetHeight / 2,
+          width: slab.offsetWidth, height: slab.offsetHeight };
+      } else rect = slab.getBoundingClientRect();
       var radius = parseFloat(getComputedStyle(slab).borderTopLeftRadius);
       restingRect = { left: rect.left, top: rect.top, width: rect.width, height: rect.height,
         radius: Number.isFinite(radius) ? radius : Math.min(rect.width, rect.height) / 2 };
-      trackRect = track.getBoundingClientRect();
+      trackRect = frame ? { left: 0, top: 0, width: frame.width, height: frame.height } : track.getBoundingClientRect();
       geometry = {
         slabHalfWidth: rect.width / 2,
         slabHalfHeight: rect.height / 2,
@@ -73,6 +126,15 @@
     function wake() {
       if (!destroyed && !frameId) frameId = root.requestAnimationFrame(tick);
     }
+    listen(motionMedia, 'change', function () {
+      reduced = !!options.staticMotion || motionMedia.matches;
+      if (reduced) {
+        pressing = false; touchTarget = 0; touch = 0;
+        springNames.forEach(function (name) { springs[name] = { x: 0, velocity: 0 }; });
+        contact = { x: 0, velocity: 0 }; touchSpring = { x: 0, velocity: 0 };
+      }
+      wake();
+    });
 
     function tick(time) {
       frameId = 0;
@@ -80,6 +142,10 @@
       var dt = lastTime ? Math.min((time - lastTime) / 1000, 1 / 30) : 1 / 60;
       lastTime = time;
       releaseElapsed = pressing ? 0 : releaseElapsed + dt;
+      var rawX = pointerX, rawY = pointerY, rawStartX = startX, rawStartY = startY;
+      var p = local(rawX, rawY), s0 = local(rawStartX, rawStartY);
+      pointerX = p.x; pointerY = p.y; startX = s0.x; startY = s0.y;
+      try {
       var outside = pointerId !== null ? Physics.pointerOutsideGlass(pointerX, pointerY, restingRect) : { x: 0, y: 0 };
       var target = Physics.deriveIpadFluidState({
         // A dropdown can hide its panel before the pointer spring settles.
@@ -91,8 +157,9 @@
       // Position is resisted relative to the gesture's original resting anchor,
       // not accumulated from the previous frame or the moving material center.
       if (pressing && !reduced && (pointerId !== null || editingPointer !== null)) {
-        target.centerOffsetX = Physics.rubberBand(pointerX - startX, options.centerCoupling || 0.06, options.centerLimit || 14);
-        target.centerOffsetY = Physics.rubberBand(pointerY - startY, options.centerCoupling || 0.06, options.centerLimit || 14);
+        var areaScale = Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52)));
+        target.centerOffsetX = Physics.rubberBand(pointerX - startX, (options.centerCoupling || 0.06) / areaScale, (options.centerLimit || 14) / areaScale);
+        target.centerOffsetY = Physics.rubberBand(pointerY - startY, (options.centerCoupling || 0.06) / areaScale, (options.centerLimit || 14) / areaScale);
         var horizontal = Math.abs(outside.x);
         var vertical = Math.abs(outside.y);
         // Smooth axis preference suppresses squeeze at diagonal crossover.
@@ -100,14 +167,21 @@
         // compensate that bulge as the facing-edge stretch grows.
         var xWeight = Math.max(0, horizontal - vertical) / Math.max(1, horizontal);
         var yWeight = Math.max(0, vertical - horizontal) / Math.max(1, vertical);
-        target.compressionY += (7.68 + geometry.slabHalfHeight * .16) * (1 - Math.exp(-horizontal / 48)) * xWeight;
-        target.compressionX += (11.52 + geometry.slabHalfWidth * .12) * (1 - Math.exp(-vertical / 48)) * yWeight;
+        target.compressionY = Math.min(target.compressionY + (7.68 + geometry.slabHalfHeight * .16) * (1 - Math.exp(-horizontal / 48)) * xWeight / areaScale, 12 / areaScale);
+        target.compressionX = Math.min(target.compressionX + (11.52 + geometry.slabHalfWidth * .12) * (1 - Math.exp(-vertical / 48)) * yWeight / areaScale, 12 / areaScale);
       }
+      // Small controls get one restrained rebound; large surfaces retain the
+      // anchored, nearly critical response. Derive this from resting area.
+      var restingAreaScale = Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52)));
+      var panelWeight = Math.min(1, Math.max(0, (restingAreaScale - 1) / 2));
+      attack.springDamping = 0.72 + 0.26 * panelWeight;
+      release.springDamping = 0.62 + 0.36 * panelWeight;
       var motion = pressing ? attack : release;
       springNames.forEach(function (name) {
         springs[name] = Physics.stepSpring(springs[name], target[name], dt, motion);
       });
-      contact = Physics.stepSpring(contact, pressing && !reduced ? 32 : 0, dt, motion);
+      var contactArea = Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52)));
+      contact = Physics.stepSpring(contact, pressing && !reduced ? 8 / contactArea : 0, dt, motion);
       // A fast light spring adds a small pulse while sharing the material's spring character.
       touchSpring = Physics.stepSpring(touchSpring, touchTarget, dt,
         pressing ? lightSpringConfig : release);
@@ -162,6 +236,7 @@
         && springNames.every(function (name) {
           return Math.abs(springs[name].x) < 0.08 && Math.abs(springs[name].velocity) < 0.8;
         });
+      } finally { pointerX = rawX; pointerY = rawY; startX = rawStartX; startY = rawStartY; }
       if (!settled && !reduced) wake();
       else if (settled) {
         lastTime = 0;
@@ -180,35 +255,41 @@
       pressing = false;
       releaseElapsed = 0;
       touchTarget = 0;
-      if (!reduced && contact.x < 12) contact = { x: 12, velocity: 0 };
-      if (!reduced) {
-        // Give the stored deformation a return-directed impulse. Signed springs
-        // then cross rest naturally, so the rebound goes opposite to the pull.
-        springNames.forEach(function (name) {
-          var spring = springs[name];
-          if (Math.abs(spring.x) < 0.1) return;
-          spring.velocity = -spring.x * release.springFrequency * 0.55;
-        });
-      }
+      // Preserve current velocity; release adds no artificial kick or bulge.
       if (button.hasPointerCapture(captured)) button.releasePointerCapture(captured);
       wake();
     }
 
     listen(button, 'pointerdown', function (event) {
       if (button.disabled || event.button !== 0 || pointerId !== null) return;
-      if (options.editableSurface && event.target.closest('button, a')) return;
-      if (options.editableSurface && event.target.closest('input, textarea, select, [contenteditable]')) {
+      // Nested buttons and links own their activation, including inside a
+      // static-action surface. Do not preventDefault or capture their press
+      // for the parent glass surface, or their click handlers never fire.
+      // A static-action surface (a toolbar pill) instead hands the press to
+      // the glass the same way as a field below: no preventDefault or capture
+      // while inside, so the button still clicks, and the glass stretches
+      // once the pointer pulls past its edge.
+      var nestedAction = options.editableSurface && event.target.closest('button, a');
+      if (nestedAction && !options.staticActionSurface) return;
+      // A nested independent glass control owns its own gesture; capturing it
+      // here would steal pointer capture and lock that control in place.
+      if (options.editableSurface && event.target.closest('[data-lgp-control]') !== button) return;
+      if (nestedAction || (options.editableSurface && event.target.closest('input, textarea, select, [contenteditable]'))) {
         // Let the native field place its caret/select text until the pointer
         // leaves the resting glass. Then hand that same gesture to the spring.
         measure();
         editingPointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
         startX = pointerX = event.clientX; startY = pointerY = event.clientY;
         pressing = !reduced; releaseElapsed = 0; touchTarget = reduced ? 0 : 1;
-        lastTouchPoint = { x: event.clientX - trackRect.left - trackRect.width / 2,
-          y: event.clientY - trackRect.top - trackRect.height / 2 };
+        var down = local(event.clientX, event.clientY);
+        lastTouchPoint = { x: down.x - trackRect.left - trackRect.width / 2,
+          y: down.y - trackRect.top - trackRect.height / 2 };
         wake();
         return;
       }
+      // Blank glass/labels belong to the gesture from its very first press.
+      // Editors above retain native caret placement and text selection.
+      event.preventDefault();
       measure();
       pointerId = event.pointerId;
       startX = pointerX = event.clientX;
@@ -243,7 +324,8 @@
         if (!editingPointer || event.pointerId !== editingPointer.id) return;
         pointerX = event.clientX; pointerY = event.clientY;
         wake();
-        var outside = Physics.pointerOutsideGlass(event.clientX, event.clientY, restingRect);
+        var here = local(event.clientX, event.clientY);
+        var outside = Physics.pointerOutsideGlass(here.x, here.y, restingRect);
         if (reduced || Math.hypot(outside.x, outside.y) < 3) return;
         pointerId = event.pointerId;
         startX = editingPointer.x; startY = editingPointer.y;
@@ -256,7 +338,6 @@
       function endEditingPointer(event) {
         if (!editingPointer || event.pointerId !== editingPointer.id) return;
         editingPointer = null; pressing = false; releaseElapsed = 0; touchTarget = 0;
-        if (!reduced && contact.x < 12) contact = { x: 12, velocity: 0 };
         wake();
       }
       listen(root, 'pointerup', endEditingPointer);
@@ -276,7 +357,6 @@
       pressing = false;
       releaseElapsed = 0;
       touchTarget = 0;
-      if (!reduced && contact.x < 12) contact = { x: 12, velocity: 0 };
       wake();
     });
     listen(button, 'blur', function () {

@@ -85,15 +85,15 @@
               if (i === 0) x=b.x; else if(i === 1) x=b.x+b.w; else if(i === 2) y=b.y; else y=b.y+b.h;
             }
             var proximity = Math.pow(1 - distance / range, 2);
-            var strength = .072 * proximity;
+            var strength = .12 * proximity;
             var color = source.getAttribute('data-liquid-color-source') || style.backgroundColor;
             if (!root.CSS.supports('color', color)) return;
             var spill = document.createElement('span'); spill.className = 'lg-color-spill';
             var rx = Math.min(180, Math.max(65, s.width)), ry = Math.min(180, Math.max(65, s.height));
             // Broad along the object's facing edge; shorter across the glass.
-            if (x === b.x || x === b.x+b.w) { rx=85; ry=Math.min(180,Math.max(65,s.height*1.3)); }
-            else { ry=85; rx=Math.min(180,Math.max(65,s.width*1.3)); }
-            spill.style.cssText = 'position:absolute;pointer-events:none;inset:0;opacity:'+strength+';background:radial-gradient(ellipse '+rx+'px '+ry+'px at '+x+'px '+y+'px,'+color+' 0%,transparent 100%)';
+            if (x === b.x || x === b.x+b.w) { rx=120; ry=Math.min(180,Math.max(85,s.height*1.3)); }
+            else { ry=120; rx=Math.min(180,Math.max(85,s.width*1.3)); }
+            spill.style.cssText = 'position:absolute;pointer-events:none;inset:0;filter:blur(12px);opacity:'+strength+';background:radial-gradient(ellipse '+rx+'px '+ry+'px at '+x+'px '+y+'px,'+color+' 0%,transparent 100%)';
             gradients.push(spill);
             if (drawing && contour) {
               var gradientId = id + '-' + reflections.length;

@@ -22,7 +22,12 @@
 }
 [data-lgp-theme="dark"] { --lgp-default-fill: rgba(28,30,33,.38); }
 [data-lgp-control] { touch-action: none; -webkit-user-select: none; user-select: none; }
-[data-lgp-control="surface"] { touch-action: auto; user-select: auto; -webkit-user-select: auto; }
+[data-lgp-control="surface"] { touch-action: auto; }
+/* Stretchable chrome must not start native text selection. Restore it only
+   on actual editors, rather than making the entire glass surface selectable. */
+[data-lgp-control="surface"] :is(input, textarea, [contenteditable]:not([contenteditable="false"])) {
+  -webkit-user-select: text; user-select: text;
+}
 [data-lgp-control][aria-disabled="true"] { cursor: not-allowed; }
 [data-lgp-control][aria-disabled="true"] > .lgp-content { opacity: .5; }
 [data-lgp-control] > .lgp-content {
@@ -127,14 +132,24 @@
   position: absolute; left: 24px; top: 0; width: 232px; padding: 6px; display: flex; flex-direction: column; gap: 0;
   z-index: 2; transform-origin: center; touch-action: none; -webkit-user-select: none; user-select: none;
 }
-[data-lgp-component="options"] [data-liquid-menu] [data-liquid-button] {
+[data-lgp-component="options"] [data-liquid-menu] [data-liquid-button],
+[data-lgp-control="surface"] .liquid-design-menu-row {
   width: 100%; height: 44px; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 17px; font-weight: 400;
 }
 [data-lgp-component="options"] [data-liquid-menu] .lgc-content { justify-content: flex-start; gap: 12px; }
+[data-lgp-control="surface"] .liquid-design-menu-row { position: relative; font-weight: 500; isolation: isolate; }
+[data-lgp-control="surface"] .liquid-design-menu-row::before {
+  content: ''; position: absolute; inset: 4px; z-index: -1; border-radius: 999px;
+  background: var(--lgp-selection-fill); opacity: 0; pointer-events: none;
+}
+[data-lgp-control="surface"] .liquid-design-menu-row:is(:hover,:focus-visible)::before { opacity: 1; }
+[data-lgp-control="surface"] .liquid-design-menu-row svg { width: 20px; height: 20px; flex: 0 0 20px; }
 [data-lgp-component] .lgc-selection-pill {
   position: absolute; left: 0; top: 0; z-index: 1; box-sizing: border-box;
-  border-radius: 999px; border: 0; background: rgba(255,255,255,.2); pointer-events: none; opacity: 0;
+  border-radius: 999px; border: 0; background: var(--lgp-selection-fill); pointer-events: none; opacity: 0;
 }
+[data-lgp-control], [data-lgp-component] { --lgp-selection-fill: rgb(20 20 19 / .12); }
+[data-lgp-theme="dark"] { --lgp-selection-fill: rgb(255 255 255 / .2); }
 [data-lgp-component] .lgc-exit { position: absolute; z-index: 2; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 [data-lgp-control="surface"] [data-lgp-pinned] { position: relative; z-index: var(--z-chrome,100); }
 [data-lgp-component] [data-liquid-button] > .lgc-content { position: relative; z-index: 2; }

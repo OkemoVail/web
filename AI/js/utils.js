@@ -66,6 +66,17 @@ window.formatDate = (ts) => {
     return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
+window.chatDateLabel = (ts, now = Date.now()) => {
+    const date = new Date(ts), today = new Date(now);
+    if (!Number.isFinite(date.getTime())) return '';
+    const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+    const day = date.toDateString() === today.toDateString() ? 'Today' :
+        date.toDateString() === yesterday.toDateString() ? 'Yesterday' :
+        date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric',
+            ...(date.getFullYear() !== today.getFullYear() ? { year: 'numeric' } : {}) });
+    return `${day} ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+};
+
 // Fresh random 16-digit seed per request so the sampler never replays the
 // same stream. Capped at Number.MAX_SAFE_INTEGER (9007199254740991) so every
 // value stays an exact integer (full 16-digit space 10^15..10^16-1 exceeds it).

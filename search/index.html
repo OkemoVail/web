@@ -18,8 +18,8 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
-<link rel="stylesheet" href="../src/site.css?v=20260829-astra-boat-1">
-<link rel="stylesheet" href="../liquid-design/liquid-design.css">
+<link rel="stylesheet" href="../src/site.css?v=20261007-api-audit">
+<link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261007-api-audit">
 <style>
   .r-source-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
   .r-source-tag { padding: 1px 5px; border: 1px solid var(--border-strong); border-radius: 999px; color: var(--text-secondary); font-size: .62rem; line-height: 1.35; }
@@ -43,7 +43,7 @@
     <h1 class="wordmark"><svg class="astra-boat" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h18l-3 5H6z"/><path d="M11 4v10"/><path d="M11 5l6 7h-6z"/></svg> Okemo Astra</h1>
     <p class="tagline">your tiny telescope for the internet</p>
   </div>
-  <div class="bar" id="hero-bar">
+  <div class="bar" id="hero-bar" data-liquid-design="surface" data-liquid-design-independent>
     <span class="bar-icon">🔭</span>
     <span class="ph-wrap"><input id="hero-input" type="text" role="combobox" aria-autocomplete="list" aria-controls="hero-suggest" aria-expanded="false" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web" placeholder="search the web…"><span class="ph-ghost" id="hero-ghost" aria-hidden="true"></span></span>
     <div class="suggest" id="hero-suggest" role="listbox" hidden></div>
@@ -69,7 +69,7 @@
 <main id="results" class="results" hidden>
   <header class="r-top">
     <a class="r-logo" href="./" id="logo-home"><svg class="astra-boat" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h18l-3 5H6z"/><path d="M11 4v10"/><path d="M11 5l6 7h-6z"/></svg> Astra</a>
-    <div class="bar" id="results-bar">
+    <div class="bar" id="results-bar" data-liquid-design="surface" data-liquid-design-independent>
       <span class="bar-icon">🔭</span>
       <span class="ph-wrap"><input id="results-input" type="text" role="combobox" aria-autocomplete="list" aria-controls="results-suggest" aria-expanded="false" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web" placeholder="search the web…"><span class="ph-ghost" id="results-ghost" aria-hidden="true"></span></span>
       <button class="skuo skuo-neutral" id="results-search" aria-label="search">🔍 <span class="lbl">Search</span></button>
@@ -144,7 +144,7 @@
 <script src="../src/motion.js"></script>
 <script src="astra-helpers.js"></script>
 <script src="astra.js"></script>
-<script defer src="../liquid-design/liquid-design.js"></script>
-<script defer src="../src/liquid-design-site.js"></script>
+<script defer src="../liquid-design/liquid-design.js?v=20261011-nested-glass"></script>
+<script defer src="../src/liquid-design-site.js?v=20261007-api-audit"></script>
 </body>
 </html>

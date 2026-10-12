@@ -79,6 +79,7 @@ window.finalizeLastAIMessage = () => {
         `;
         prose.parentNode.appendChild(actionRow);
         feather.replace({ 'stroke-width': 2, 'width': 16, 'height': 16 }, actionRow);
+        window.refreshChatActionGlass?.(aiRow);
     }
 
     // 3. Settle scroll at the bottom.

@@ -15,19 +15,28 @@ window.updateUI = () => {
     if (sendBtn) {
         const hasText = input && input.value.trim().length > 0;
         const shouldEnable = window.isGenerating || hasText || voiceReady;
+        const composer = document.querySelector('.input-box-wrap');
+        if (composer) {
+            composer.dataset.generating = String(!!window.isGenerating);
+            composer.dataset.staticGlint = String(!!navigator.webdriver);
+            composer.setAttribute('aria-busy', String(!!window.isGenerating));
+        }
 
         const isDarkSend = document.documentElement.classList.contains('dark');
         const sendActive = window.isGenerating || hasText;
-        sendBtn.style.backgroundColor = sendActive ? 'var(--accent-color)' : (isDarkSend ? '#3a3a3d' : '#e4e4e7');
+        sendBtn.setAttribute('aria-label', window.isGenerating ? 'Stop response' : voiceReady ? 'Start voice conversation' : 'Send message');
+        sendBtn.style.setProperty('--liquid-design-tint', sendActive ? 'color-mix(in srgb, var(--accent-color) 65%, transparent)' : 'transparent');
         sendBtn.style.color = sendActive ? 'var(--accent-contrast)' : (isDarkSend ? '#e9e9ec' : '#52525b');
 
+        // aria-disabled guards activation without losing the empty button's springs.
+        sendBtn.disabled = false;
+        sendBtn.setAttribute('aria-disabled', String(!shouldEnable));
         if (shouldEnable) {
-            sendBtn.disabled = false;
             sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             sendBtn.classList.add('opacity-100', 'cursor-pointer', 'hover:opacity-90');
         } else {
-            sendBtn.disabled = true;
-            sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            sendBtn.classList.add('cursor-not-allowed');
+            sendBtn.classList.remove('opacity-50');
             sendBtn.classList.remove('opacity-100', 'cursor-pointer', 'hover:opacity-90');
         }
 
@@ -42,7 +51,7 @@ window.updateUI = () => {
 
     if (iconWrapper) {
         if (window.isGenerating) {
-            iconWrapper.innerHTML = '<i class="fa-solid fa-square text-sm"></i>';
+            iconWrapper.innerHTML = '<span class="send-spinner" aria-hidden="true"></span><i class="fa-solid fa-square send-stop-icon text-sm" aria-hidden="true"></i>';
         } else if (input && input.value.trim().length > 0) {
             iconWrapper.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
         } else if (voiceReady) {

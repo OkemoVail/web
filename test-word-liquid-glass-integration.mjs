@@ -8,7 +8,7 @@ import { chromium, webkit } from 'playwright';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const html = await fs.readFile(path.join(root, 'word/index.html'), 'utf8');
 assert.ok(html.indexOf('../src/site.css') < html.indexOf('../liquid-design/liquid-design.css'));
-assert.ok(html.indexOf('defer src="../liquid-design/liquid-design.js"') < html.indexOf('defer src="../src/liquid-design-site.js"'));
+assert.ok(html.indexOf('defer src="../liquid-design/liquid-design.js') < html.indexOf('defer src="../src/liquid-design-site.js'));
 const server = http.createServer(async (req, res) => {
   const file = path.resolve(root, '.' + new URL(req.url, 'http://localhost').pathname);
   if (!file.startsWith(root + path.sep)) return res.writeHead(403).end();

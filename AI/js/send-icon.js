@@ -8,7 +8,7 @@ window.toggleSendIcon = (state) => {
     btn.onclick = () => window.handleAction();
 
     if (state === 'stop') {
-        iconWrapper.innerHTML = '<i class="fa-solid fa-square text-sm"></i>';
+        iconWrapper.innerHTML = '<span class="send-spinner" aria-hidden="true"></span><i class="fa-solid fa-square send-stop-icon text-sm" aria-hidden="true"></i>';
     } else {
         iconWrapper.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
     }

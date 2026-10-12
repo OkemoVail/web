@@ -17,7 +17,7 @@
       if (target !== el && !el.matches('[data-lgp-group],[data-lgp-component]')) return;
       if (target === el && event.type === 'pointerdown') root.LiquidDesignPluginClaim(el);
       clearTimeout(timer); active = true; el.setAttribute('data-lgp-front', 'true');
-      el.style.setProperty('z-index', 'var(--z-chrome, 100)', 'important');
+       el.style.setProperty('z-index', 'var(--liquid-design-front-z, var(--z-chrome, 100))', 'important');
     }
     function release() {
       if (!active) return;
@@ -92,7 +92,7 @@
     filter.append(svg('feMorphology', { in: 'SourceAlpha', operator: 'erode', radius: '1.1', result: 'inside' }));
     filter.append(svg('feComposite', { in: 'SourceGraphic', in2: 'inside', operator: 'out' }));
     var gradient = svg('linearGradient', { id: id + '-light', x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
-    [['0%', '.55'], ['12%', '.25'], ['40%', '.03'], ['62%', '.02'], ['88%', '.10'], ['100%', '.30']].forEach(function (s) {
+    [['0%', '.275'], ['12%', '.125'], ['40%', '.015'], ['62%', '.01'], ['88%', '.05'], ['100%', '.15']].forEach(function (s) {
       gradient.append(svg('stop', { offset: s[0], 'stop-color': 'white', 'stop-opacity': s[1] }));
     });
     var edgeMask = svg('mask', { id: id + '-mask', maskUnits: 'userSpaceOnUse', 'mask-type': 'alpha' });
@@ -134,6 +134,16 @@
     // Nested controls inherit their editable parent's transform. Convert screen
     // measurements back to this group's local CSS space before painting, or the
     // child's material gets parent-scaled twice while its label scales once.
+    // A rotated group (the chat rail's vertical toolbar pill) is measured
+    // in its own unrotated frame; screen bounding boxes swap its axes.
+    var frame = root.LiquidDesignFrame ? root.LiquidDesignFrame(group.el) : null;
+    function localRect(el) {
+      if (!frame) return el.getBoundingClientRect();
+      var r = el.getBoundingClientRect(), c = frame.toLocal(r.left + r.width / 2, r.top + r.height / 2);
+      var w = el.offsetWidth * frame.scale, h = el.offsetHeight * frame.scale;
+      return { left: c.x * frame.scale - w / 2, top: c.y * frame.scale - h / 2, width: w, height: h };
+    }
+    if (frame) anchor = { left: 0, top: 0, width: frame.width * frame.scale, height: frame.height * frame.scale };
     var ancestorScaleX = group.el.offsetWidth ? anchor.width / group.el.offsetWidth : 1;
     var ancestorScaleY = group.el.offsetHeight ? anchor.height / group.el.offsetHeight : 1;
     ancestorScaleX = Math.max(.01, ancestorScaleX); ancestorScaleY = Math.max(.01, ancestorScaleY);
@@ -142,7 +152,7 @@
       // Host replacement may detach the wrapper before the adapter's queued
       // repair runs. Never paint stale foreground into this frame.
       if (record.content.parentNode !== record.el) return;
-      var el = record.el, rect = el.getBoundingClientRect(), f = record.state;
+      var el = record.el, rect = localRect(el), f = record.state;
       el.setAttribute('data-lgp-theme', theme(el));
       if (!rect.width || !rect.height || el.hidden || getComputedStyle(el).visibility === 'hidden') { record.glow.style.opacity = '0'; return; }
       var dx = 0, dy = 0, sx = 1, sy = 1;
@@ -172,7 +182,10 @@
         y: (anchor.height / 2 + (f ? f.lightPoint.y : 0)) / ancestorScaleY, opacity: f ? f.touch : 0 });
     });
     root.LiquidDesignPluginOcclusion(group.el, foreground);
-    var blendRange = 4;
+    // The chat sidebar action capsule already owns its exact inset geometry;
+    // the generic multi-control contour expansion would add uneven-looking
+    // outer space around the compact controls.
+    var blendRange = group.el.matches('[data-page="chat"] .chat-sidebar-actions') ? 0 : 4;
     var pad = boxes.length > 1 ? blendRange : 0;
     var minX = boxes.length ? Math.min.apply(null, boxes.map(function (b) { return b.x; })) - pad : 0;
     var minY = boxes.length ? Math.min.apply(null, boxes.map(function (b) { return b.y; })) - pad : 0;
@@ -217,6 +230,9 @@
     // layers are promoted or the page navigates to an anchor. The tinted fill
     // must share this contour too, otherwise an unresolved SVG clip paints a box.
     group.material.style.clipPath = 'path("' + d + '")';
+    // Rounded backdrop capture prevents a square blur tile showing through
+    // outside an independent pill/circle's path-clipped material on desktop.
+    group.material.style.borderRadius = boxes.length === 1 ? boxes[0].rx + 'px / ' + boxes[0].ry + 'px' : '0px';
     group.highlights.style.clipPath = 'path("' + d + '")';
     group.maskPath.setAttribute('d', d);
     group.rim.setAttribute('d', d);
@@ -313,7 +329,8 @@
     }, cleanup, true);
     record.motion = root.LiquidDesignLiveDemo.create(group.el, {
       button: el, slab: el, track: group.el, editableSurface: surface,
-      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,#hero-bar,#results-bar,[data-page="ai-home"]')),
+      staticActionSurface: el.hasAttribute('data-liquid-design-static-actions'),
+      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,[data-page="home"] .hero-profile,#hero-bar,#results-bar,[data-page="ai-home"],[data-page="chat"]')),
       deformationScale: surface ? .33 : undefined, centerCoupling: surface ? .025 : undefined, centerLimit: surface ? 5 : undefined,
       render: function (state) { record.state = state; schedule(); },
     });
@@ -365,6 +382,8 @@
     root.cancelAnimationFrame(paintFrame); paintFrame = 0;
   }
   root.LiquidDesign = {
+    menuFrame: root.LiquidDesignMenuMotion.frame,
+    setGlyphBlur: function (content, amount) { root.LiquidDesignGlyphBlur(content, amount, 'morph'); },
     refresh: function (scope) {
       scope = scope || document;
       root.LiquidDesignPluginComponents.refresh(scope);

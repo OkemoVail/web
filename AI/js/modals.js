@@ -1,4 +1,24 @@
 // ─── Modals (confirm, prompt, toast) ───────────────────────────
+let chatDialogSequence = 0;
+function prepareChatDialog(overlay, close) {
+    const card = overlay.querySelector('.custom-modal-card');
+    const title = overlay.querySelector('.custom-modal-title');
+    title.id = `chat-dialog-title-${++chatDialogSequence}`;
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', title.id);
+    const previous = document.activeElement;
+    overlay.addEventListener('keydown', event => {
+        if (event.key === 'Escape') { event.preventDefault(); close(); }
+        if (event.key === 'Tab') {
+            const controls = Array.from(card.querySelectorAll('button:not(:disabled),input'));
+            const first = controls[0], last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }
+    });
+    return () => { if (previous?.isConnected) previous.focus({ preventScroll: true }); };
+}
 
 window.showToast = (message, duration = 4000) => {
     if (typeof window.showInputNotice === 'function') {
@@ -48,12 +68,18 @@ window.showCustomConfirm = (title, message, onConfirm, isDanger = false) => {
     const close = () => {
         overlay.classList.remove('is-active');
         setTimeout(() => overlay.remove(), 300);
+        restoreFocus();
     };
+    const restoreFocus = prepareChatDialog(overlay, close);
+    overlay.querySelector('.modal-btn-cancel').focus();
 
     overlay.querySelector('.modal-btn-cancel').onclick = close;
     overlay.querySelector('.modal-btn-primary').onclick = async () => {
-        await onConfirm();
-        close();
+        const button = overlay.querySelector('.modal-btn-primary');
+        if (button.disabled) return;
+        button.disabled = true;
+        try { await onConfirm(); close(); }
+        finally { button.disabled = false; }
     };
     overlay.onclick = (e) => { if (e.target === overlay) close(); };
 };
@@ -83,7 +109,9 @@ window.showCustomPrompt = (title, placeholder, defaultValue, onConfirm) => {
     const close = () => {
         overlay.classList.remove('is-active');
         setTimeout(() => overlay.remove(), 300);
+        restoreFocus();
     };
+    const restoreFocus = prepareChatDialog(overlay, close);
 
     const handleConfirm = () => {
         const rawVal = input.value.trim();

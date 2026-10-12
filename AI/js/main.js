@@ -123,10 +123,11 @@ window.initChatUI = () => {
         const ta = window.els.input;
         if (!ta) return;
         ta.style.height = 'auto';
-        const newHeight = Math.min(ta.scrollHeight, 600);
+        const newHeight = Math.min(ta.scrollHeight, 200);
         ta.style.height = newHeight + 'px';
-        // Layout is permanently two-row (Claude-style): textarea on top, controls
-        // beneath. No single-row/multiline toggling needed.
+        // Overflowing text needs native touch scrolling; otherwise the glass owns the drag.
+        ta.classList.toggle('is-scrollable', ta.scrollHeight > ta.clientHeight + 1);
+        // The compact pill keeps tools beside the field while native lines grow.
     };
     if (window.els.input) {
         window.els.input.oninput = () => {
@@ -140,6 +141,23 @@ window.initChatUI = () => {
             }
         };
     }
+
+    // New chat shortcut: Command+I on macOS, Control+I elsewhere. Keep the
+    // browser's native editing shortcuts intact while the user is typing.
+    const newChatShortcut = document.querySelector('.sb-new-chat-shortcut');
+    if (newChatShortcut) {
+        const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
+        newChatShortcut.textContent = newChatShortcut.dataset[isMac ? 'shortcutMac' : 'shortcutWindows'];
+    }
+    document.addEventListener('keydown', function newChatShortcutHandler(e) {
+        const target = e.target;
+        const isEditable = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLElement && target.isContentEditable;
+        const usesSinglePlatformModifier = (e.ctrlKey && !e.metaKey) || (e.metaKey && !e.ctrlKey);
+        if (!isEditable && usesSinglePlatformModifier && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'i') {
+            e.preventDefault();
+            window.resetChat();
+        }
+    });
 
     // 6. Global Click Menu Hijack
     window.onclick = (e) => {
@@ -211,11 +229,16 @@ window.initChatUI = () => {
         window.StorageController = window.CloudStorageController;
     }
     await window.StorageController.init();
+    // Cloud initialization may restore the local controller after an outage or
+    // expired token. Initialize that controller before reading its history.
+    if (window._OriginalStorageController && window.StorageController === window._OriginalStorageController) {
+        await window.StorageController.init();
+    }
     const loadedChats = await window.StorageController.getAllChats();
     window.allChats = loadedChats || {};
 
     // On refresh with existing token, restore cloud profile (pic, name, etc.)
-    if (localStorage.getItem('vail_auth_token') && window.CloudStorageController) {
+    if (localStorage.getItem('vail_auth_token') && window.StorageController === window.CloudStorageController) {
         try {
             const savedProfile = await window.CloudStorageController.loadProfile();
             if (savedProfile) {

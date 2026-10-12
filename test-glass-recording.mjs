@@ -47,6 +47,24 @@ try {
         // Held material deforms toward the pointer; its opening layout must
         // still use the same top inset as a click.
         check(`${native ? 'native' : 'shell'} ${width}: Socials ${hold ? 'hold' : 'click'} respects 430px top alignment`, aligned.open === 'true' && Math.abs((hold ? aligned.layoutTop : aligned.top) - aligned.expected) < 1, true);
+        if (!hold) {
+          const rows = await socials.evaluate(el => {
+            const panel = document.getElementById(el.getAttribute('data-liquid-design-toggle'));
+            return [...panel.querySelectorAll('[data-liquid-button]:not([hidden])')].map(row => ({
+              label: row.textContent.trim(), weight: getComputedStyle(row).fontWeight,
+              icon: !!row.querySelector('.social-menu-icon'),
+              iconFirst: row.querySelector('.lgc-content')?.firstElementChild?.matches('.social-menu-icon') || false
+            }));
+          });
+          check(`${native ? 'native' : 'shell'} ${width}: Socials medium labels have leading brand icons`, rows, [
+            { label: 'GitHub', weight: '500', icon: true, iconFirst: true },
+            { label: 'YouTube', weight: '500', icon: true, iconFirst: true }
+          ]);
+          check(`${native ? 'native' : 'shell'} ${width}: GitHub points to okemovail`, await socials.evaluate(el => {
+            if (window.GlassShellControls) return GlassShellControls.get('leading').d.items.find(item => item.label === 'GitHub').href;
+            return document.querySelector('#ov-nav-socials [data-social-href]').getAttribute('data-social-href');
+          }), 'https://github.com/okemovail');
+        }
         if (hold) await page.mouse.up();
         await socials.evaluate(el => { if (el.getAttribute('aria-expanded') === 'true') el.click(); }); await page.waitForTimeout(900);
       }

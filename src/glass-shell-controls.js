@@ -34,8 +34,11 @@
       }
     }
     var leading = doc.querySelector('.ov-nav__back,.ov-nav__socials-toggle');
-    add('leading', leading, leading && leading.matches('.ov-nav__socials-toggle') ? { label: 'Socials', items: [{ label: 'GitHub', href: 'https://github.com/ar12c' }, { label: 'YouTube', href: 'https://www.youtube.com/@SochiVail' }] } : { label: 'Back' });
-    if (!leading) result.push({ role: 'leading', rect: { x: 24, y: 24, w: 44, h: 44 }, circle: true, label: 'Home', href: '/index.html', glyph: '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>' });
+    add('leading', leading, leading && leading.matches('.ov-nav__socials-toggle') ? { label: 'Socials', items: Array.from(doc.querySelectorAll('#ov-nav-socials [data-social-href]')).map(function (item) {
+      return { label: item.textContent.trim(), href: item.getAttribute('data-social-href'), glyph: glyph(item) };
+    }) } : { label: 'Back', action: 'back', href: '/index.html' });
+    // Chat owns its top-left sidebar control and its in-app return link.
+    if (!leading && !doc.querySelector('[data-page="chat"]')) result.push({ role: 'leading', rect: { x: 24, y: 24, w: 44, h: 44 }, circle: true, label: 'Back', action: 'back', href: '/index.html', glyph: '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>' });
     return result;
   }
   function create(d) {
@@ -102,6 +105,7 @@
       var descriptor = record.d;
       if (d.role === 'theme') { GlassShell.toggleTheme(); return; }
       if (descriptor.items) { if (!record.panel) openMenu(record); return; }
+      if (descriptor.action === 'back') { GlassShell.back(); return; }
       if (descriptor.href) { var url = new URL(descriptor.href, GlassShell.currentURL); if (url.origin !== location.origin) window.open(url.href, '_blank', 'noopener'); else GlassShell.navigate(url); }
     });
     roles.set(d.key || d.role, record); updateFace(record, d); return record;
@@ -128,7 +132,10 @@
       var choice = d.items && d.items[index]; item.hidden = !choice;
       var content = item.querySelector('.lgc-content') || item;
       if (d.component === 'tools') { content.innerHTML = choice ? choice.glyph || '' : ''; item.setAttribute('aria-label', choice ? choice.label : ''); item.title = choice ? choice.label : ''; }
-      else content.textContent = choice ? choice.label : '';
+      else {
+        content.innerHTML = choice ? choice.glyph || '' : '';
+        if (choice) { var label = document.createElement('span'); label.textContent = choice.label; content.append(label); }
+      }
     });
     if (changedComponent) LiquidDesign.refresh(component ? record.wrapper : record.button);
     morphFace(record, d);
@@ -141,6 +148,9 @@
       clearTimeout(record.swapTimer);
       if (record.pop) record.pop.cancel();
       if (record.blur) record.blur.cancel();
+      if (record.glyphBlurFrame) cancelAnimationFrame(record.glyphBlurFrame);
+      record.glyphBlurFrame = 0;
+      LiquidDesign.setGlyphBlur(record.button.querySelector(':scope > .lgc-content'), 0);
       function swap() {
         record.face.innerHTML = d.role === 'primary' && d.iconAfter ? '<span></span>' + (d.glyph || '') : (d.glyph || '') + (d.role === 'primary' ? '<span></span>' : '');
         if (d.role === 'primary') record.face.querySelector('span').textContent = d.label || '';
@@ -152,6 +162,22 @@
         // Separate scale leaves the pointer solver's transforms untouched.
         var easing = getComputedStyle(record.wrapper).getPropertyValue('--ease-soft').trim() || 'ease-in-out';
         record.pop = record.wrapper.animate([{ scale: '1' }, { scale: '1.08', offset: .3 }, { scale: '1' }], { duration: 400, easing: easing });
+        if (record.d.component === 'tools') {
+          // Tools already animates its live SVG glyphs. Keep this second
+          // icon-swap defocus in that pipeline, not a nested HTML filter.
+          var content = record.button.querySelector(':scope > .lgc-content');
+          var start = performance.now(), swapped = false;
+          function glyphTick(now) {
+            var elapsed = now - start;
+            if (!swapped && elapsed >= 220) { swap(); swapped = true; }
+            var t = elapsed < 220 ? Math.max(0, (elapsed - 120) / 100) : Math.max(0, 1 - (elapsed - 220) / 180);
+            LiquidDesign.setGlyphBlur(content, 4 * t * t * (3 - 2 * t));
+            record.glyphBlurFrame = elapsed < 400 ? requestAnimationFrame(glyphTick) : 0;
+          }
+          LiquidDesign.setGlyphBlur(content, 0);
+          record.glyphBlurFrame = requestAnimationFrame(glyphTick);
+          return;
+        }
         record.blur = record.face.animate([{ filter: 'blur(0px)' }, { filter: 'blur(4px)' }], { delay: 120, duration: 100, easing: easing, fill: 'forwards' });
         record.swapTimer = setTimeout(function () {
           swap(); record.blur.cancel();
@@ -201,6 +227,9 @@
       record.retiring = true; if (!record.held) record.button.inert = true;
       clearTimeout(record.swapTimer); record.signature = undefined;
       if (record.pop) record.pop.cancel(); if (record.blur) record.blur.cancel();
+      if (record.glyphBlurFrame) cancelAnimationFrame(record.glyphBlurFrame);
+      record.glyphBlurFrame = 0;
+      LiquidDesign.setGlyphBlur(record.button.querySelector(':scope > .lgc-content'), 0);
       delete record.button.dataset.glassRole;
       var finish = function () { if (record.retiring && !record.held) record.wrapper.hidden = true; };
       if (navigator.webdriver || matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
@@ -224,5 +253,5 @@
   });
   document.addEventListener('pointerdown', function (event) { if (menu && !menu.contains(event.target) && !menuOrigin.button.contains(event.target)) closeMenu(); });
   function dismiss() { closeMenu(); roles.forEach(function (r) { if (r.panel && r.button.getAttribute('aria-expanded') === 'true' && !r.held) r.button.click(); }); }
-  window.GlassShellControls = { descriptors: descriptors, update: update, closeMenu: dismiss, get: function (role) { var found = null; roles.forEach(function (r) { if (r.d.role === role && !r.retiring) found = r; }); return found; }, destroy: function () { cancelAnimationFrame(frame); closeMenu(); roles.forEach(function (r) { clearTimeout(r.swapTimer); if (r.pop) r.pop.cancel(); if (r.blur) r.blur.cancel(); LiquidDesign.destroy(r.wrapper); r.wrapper.remove(); }); roles.clear(); } };
+  window.GlassShellControls = { descriptors: descriptors, update: update, closeMenu: dismiss, get: function (role) { var found = null; roles.forEach(function (r) { if (r.d.role === role && !r.retiring) found = r; }); return found; }, destroy: function () { cancelAnimationFrame(frame); closeMenu(); roles.forEach(function (r) { clearTimeout(r.swapTimer); if (r.pop) r.pop.cancel(); if (r.blur) r.blur.cancel(); if (r.glyphBlurFrame) cancelAnimationFrame(r.glyphBlurFrame); LiquidDesign.destroy(r.wrapper); r.wrapper.remove(); }); roles.clear(); } };
 })();

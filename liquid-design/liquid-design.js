@@ -201,22 +201,26 @@ var window=Object.create(host),module=undefined;
 
     var width = geometry.slabHalfWidth * 2;
     var height = geometry.slabHalfHeight * 2;
+    // Small controls keep their familiar feel; broad surfaces resist the same
+    // pointer pressure progressively. Use resting area, never deformed bounds.
+    var areaResistance = 1.35 * Math.max(1, Math.sqrt(width * height / (52 * 52)));
     var centerCoupling = clamp(config.centerCoupling, 0.05, 0.08);
     var stretchGain = clamp(Number(config.fluidStretchGain) || 1, 1, 3);
     var stretchRatio = clamp(Number(config.fluidStretchRatio) || 0.55, 0.1, 0.7);
     var facingShare = 0.88;
     var oppositeShare = 1 - facingShare;
     // stretchLimit is the maximum facing-edge extension in CSS pixels.
-    var horizontalFacingLimit = Math.min(config.stretchLimit, width * stretchRatio);
-    var verticalFacingLimit = Math.min(config.stretchLimit, height * stretchRatio);
+    var areaScale = Math.max(1, Math.sqrt(width * height / (52 * 52)));
+    var horizontalFacingLimit = Math.min(config.stretchLimit, width * stretchRatio) / areaScale;
+    var verticalFacingLimit = Math.min(config.stretchLimit, height * stretchRatio) / areaScale;
     var horizontalPressure = Math.abs(rubberBand(
-      input.pointerDx,
-      centerCoupling * 3 * stretchGain,
+      input.pointerDx * 0.5,
+      centerCoupling * 3 * stretchGain / areaResistance,
       horizontalFacingLimit / facingShare,
     ));
     var verticalPressure = Math.abs(rubberBand(
-      input.pointerDy,
-      centerCoupling * 3 * stretchGain,
+      input.pointerDy * 0.5,
+      centerCoupling * 3 * stretchGain / areaResistance,
       verticalFacingLimit / facingShare,
     ));
 
@@ -469,6 +473,46 @@ var window=Object.create(host),module=undefined;
 (function (root) {
   'use strict';
 
+  // Screen-to-local frame for an element whose ancestors may be rotated
+  // (the chat rail turns its toolbar pill -90deg). Returns null when the
+  // element is upright, so callers keep their plain screen-space path.
+  function frameOf(el) {
+    var angle = 0;
+    for (var node = el; node && node.nodeType === 1; node = node.parentElement) {
+      var cs = getComputedStyle(node);
+      var rotate = cs.rotate;
+      if (rotate && rotate !== 'none') {
+        var parts = rotate.trim().split(/\s+/);
+        var value = parts[parts.length - 1], deg = parseFloat(value);
+        if (/rad$/.test(value)) deg = deg * 180 / Math.PI;
+        else if (/turn$/.test(value)) deg *= 360;
+        // Only 2D (z-axis) rotations are supported.
+        if (parts.length === 1 || parts.length === 4 && parseFloat(parts[2]) !== 0) angle += deg || 0;
+      }
+      if (cs.transform && cs.transform !== 'none') {
+        var m = new DOMMatrix(cs.transform);
+        angle += Math.atan2(m.b, m.a) * 180 / Math.PI;
+      }
+    }
+    angle = ((angle % 360) + 360) % 360;
+    if (angle < 0.01 || angle > 359.99) return null;
+    var theta = angle * Math.PI / 180, cos = Math.cos(theta), sin = Math.sin(theta);
+    var rect = el.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+    // A rotated box's bounding width + height = (w + h)(|cos| + |sin|) * scale.
+    var scale = w + h ? (rect.width + rect.height) / ((w + h) * (Math.abs(cos) + Math.abs(sin))) : 1;
+    scale = Math.max(.01, scale || 1);
+    var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    return {
+      angle: angle, scale: scale, width: w, height: h,
+      // Local CSS px from the element's border-box top-left.
+      toLocal: function (x, y) {
+        var dx = x - cx, dy = y - cy;
+        return { x: (dx * cos + dy * sin) / scale + w / 2, y: (-dx * sin + dy * cos) / scale + h / 2 };
+      },
+    };
+  }
+  root.LiquidDesignFrame = frameOf;
+
   function create(group, options) {
     options = options || {};
     var button = options.button || group.querySelector('[data-liquid-control]');
@@ -482,7 +526,8 @@ var window=Object.create(host),module=undefined;
       listeners.push(function () { element.removeEventListener(name, handler); });
     }
     var Physics = root.LiquidDesignPhysics;
-    var reduced = !!options.staticMotion || root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var motionMedia = root.matchMedia('(prefers-reduced-motion: reduce)');
+    var reduced = !!options.staticMotion || motionMedia.matches;
     var pointerId = null;
     var editingPointer = null;
     var startX = 0;
@@ -515,21 +560,33 @@ var window=Object.create(host),module=undefined;
       fluidStretchRatio: 0.30,
     });
     var attack = Object.assign({}, Physics.IPAD_FLUID_SPRING, {
-      springFrequency: 23, springDamping: 0.42,
+      springFrequency: 26, springDamping: 0.98,
     });
     var release = Object.assign({}, Physics.IPAD_FLUID_SPRING, {
-      springFrequency: options.releaseFrequency || 15, springDamping: 0.40,
+      springFrequency: options.releaseFrequency || 22, springDamping: 0.98,
     });
     var lightSpringConfig = Object.assign({}, Physics.IPAD_FLUID_SPRING, {
-      springFrequency: 42, springDamping: 0.48,
+      springFrequency: 32, springDamping: 0.98,
     });
 
+    // When the track is rotated, all geometry and pointer math runs in the
+    // track's own (unrotated) CSS space, so a pull along the rotated pill
+    // stretches its long axis instead of a screen axis.
+    var frame = null;
+    function local(x, y) { return frame ? frame.toLocal(x, y) : { x: x, y: y }; }
     function measure() {
-      var rect = options.measureRect ? options.measureRect() : slab.getBoundingClientRect();
+      frame = options.measureRect ? null : frameOf(track);
+      var rect;
+      if (options.measureRect) rect = options.measureRect();
+      else if (frame) {
+        var sr = slab.getBoundingClientRect(), c = frame.toLocal(sr.left + sr.width / 2, sr.top + sr.height / 2);
+        rect = { left: c.x - slab.offsetWidth / 2, top: c.y - slab.offsetHeight / 2,
+          width: slab.offsetWidth, height: slab.offsetHeight };
+      } else rect = slab.getBoundingClientRect();
       var radius = parseFloat(getComputedStyle(slab).borderTopLeftRadius);
       restingRect = { left: rect.left, top: rect.top, width: rect.width, height: rect.height,
         radius: Number.isFinite(radius) ? radius : Math.min(rect.width, rect.height) / 2 };
-      trackRect = track.getBoundingClientRect();
+      trackRect = frame ? { left: 0, top: 0, width: frame.width, height: frame.height } : track.getBoundingClientRect();
       geometry = {
         slabHalfWidth: rect.width / 2,
         slabHalfHeight: rect.height / 2,
@@ -541,6 +598,15 @@ var window=Object.create(host),module=undefined;
     function wake() {
       if (!destroyed && !frameId) frameId = root.requestAnimationFrame(tick);
     }
+    listen(motionMedia, 'change', function () {
+      reduced = !!options.staticMotion || motionMedia.matches;
+      if (reduced) {
+        pressing = false; touchTarget = 0; touch = 0;
+        springNames.forEach(function (name) { springs[name] = { x: 0, velocity: 0 }; });
+        contact = { x: 0, velocity: 0 }; touchSpring = { x: 0, velocity: 0 };
+      }
+      wake();
+    });
 
     function tick(time) {
       frameId = 0;
@@ -548,6 +614,10 @@ var window=Object.create(host),module=undefined;
       var dt = lastTime ? Math.min((time - lastTime) / 1000, 1 / 30) : 1 / 60;
       lastTime = time;
       releaseElapsed = pressing ? 0 : releaseElapsed + dt;
+      var rawX = pointerX, rawY = pointerY, rawStartX = startX, rawStartY = startY;
+      var p = local(rawX, rawY), s0 = local(rawStartX, rawStartY);
+      pointerX = p.x; pointerY = p.y; startX = s0.x; startY = s0.y;
+      try {
       var outside = pointerId !== null ? Physics.pointerOutsideGlass(pointerX, pointerY, restingRect) : { x: 0, y: 0 };
       var target = Physics.deriveIpadFluidState({
         // A dropdown can hide its panel before the pointer spring settles.
@@ -559,8 +629,9 @@ var window=Object.create(host),module=undefined;
       // Position is resisted relative to the gesture's original resting anchor,
       // not accumulated from the previous frame or the moving material center.
       if (pressing && !reduced && (pointerId !== null || editingPointer !== null)) {
-        target.centerOffsetX = Physics.rubberBand(pointerX - startX, options.centerCoupling || 0.06, options.centerLimit || 14);
-        target.centerOffsetY = Physics.rubberBand(pointerY - startY, options.centerCoupling || 0.06, options.centerLimit || 14);
+        var areaScale = Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52)));
+        target.centerOffsetX = Physics.rubberBand(pointerX - startX, (options.centerCoupling || 0.06) / areaScale, (options.centerLimit || 14) / areaScale);
+        target.centerOffsetY = Physics.rubberBand(pointerY - startY, (options.centerCoupling || 0.06) / areaScale, (options.centerLimit || 14) / areaScale);
         var horizontal = Math.abs(outside.x);
         var vertical = Math.abs(outside.y);
         // Smooth axis preference suppresses squeeze at diagonal crossover.
@@ -568,14 +639,21 @@ var window=Object.create(host),module=undefined;
         // compensate that bulge as the facing-edge stretch grows.
         var xWeight = Math.max(0, horizontal - vertical) / Math.max(1, horizontal);
         var yWeight = Math.max(0, vertical - horizontal) / Math.max(1, vertical);
-        target.compressionY += (7.68 + geometry.slabHalfHeight * .16) * (1 - Math.exp(-horizontal / 48)) * xWeight;
-        target.compressionX += (11.52 + geometry.slabHalfWidth * .12) * (1 - Math.exp(-vertical / 48)) * yWeight;
+        target.compressionY = Math.min(target.compressionY + (7.68 + geometry.slabHalfHeight * .16) * (1 - Math.exp(-horizontal / 48)) * xWeight / areaScale, 12 / areaScale);
+        target.compressionX = Math.min(target.compressionX + (11.52 + geometry.slabHalfWidth * .12) * (1 - Math.exp(-vertical / 48)) * yWeight / areaScale, 12 / areaScale);
       }
+      // Small controls get one restrained rebound; large surfaces retain the
+      // anchored, nearly critical response. Derive this from resting area.
+      var restingAreaScale = Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52)));
+      var panelWeight = Math.min(1, Math.max(0, (restingAreaScale - 1) / 2));
+      attack.springDamping = 0.72 + 0.26 * panelWeight;
+      release.springDamping = 0.62 + 0.36 * panelWeight;
       var motion = pressing ? attack : release;
       springNames.forEach(function (name) {
         springs[name] = Physics.stepSpring(springs[name], target[name], dt, motion);
       });
-      contact = Physics.stepSpring(contact, pressing && !reduced ? 32 : 0, dt, motion);
+      var contactArea = Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52)));
+      contact = Physics.stepSpring(contact, pressing && !reduced ? 8 / contactArea : 0, dt, motion);
       // A fast light spring adds a small pulse while sharing the material's spring character.
       touchSpring = Physics.stepSpring(touchSpring, touchTarget, dt,
         pressing ? lightSpringConfig : release);
@@ -630,6 +708,7 @@ var window=Object.create(host),module=undefined;
         && springNames.every(function (name) {
           return Math.abs(springs[name].x) < 0.08 && Math.abs(springs[name].velocity) < 0.8;
         });
+      } finally { pointerX = rawX; pointerY = rawY; startX = rawStartX; startY = rawStartY; }
       if (!settled && !reduced) wake();
       else if (settled) {
         lastTime = 0;
@@ -648,35 +727,41 @@ var window=Object.create(host),module=undefined;
       pressing = false;
       releaseElapsed = 0;
       touchTarget = 0;
-      if (!reduced && contact.x < 12) contact = { x: 12, velocity: 0 };
-      if (!reduced) {
-        // Give the stored deformation a return-directed impulse. Signed springs
-        // then cross rest naturally, so the rebound goes opposite to the pull.
-        springNames.forEach(function (name) {
-          var spring = springs[name];
-          if (Math.abs(spring.x) < 0.1) return;
-          spring.velocity = -spring.x * release.springFrequency * 0.55;
-        });
-      }
+      // Preserve current velocity; release adds no artificial kick or bulge.
       if (button.hasPointerCapture(captured)) button.releasePointerCapture(captured);
       wake();
     }
 
     listen(button, 'pointerdown', function (event) {
       if (button.disabled || event.button !== 0 || pointerId !== null) return;
-      if (options.editableSurface && event.target.closest('button, a')) return;
-      if (options.editableSurface && event.target.closest('input, textarea, select, [contenteditable]')) {
+      // Nested buttons and links own their activation, including inside a
+      // static-action surface. Do not preventDefault or capture their press
+      // for the parent glass surface, or their click handlers never fire.
+      // A static-action surface (a toolbar pill) instead hands the press to
+      // the glass the same way as a field below: no preventDefault or capture
+      // while inside, so the button still clicks, and the glass stretches
+      // once the pointer pulls past its edge.
+      var nestedAction = options.editableSurface && event.target.closest('button, a');
+      if (nestedAction && !options.staticActionSurface) return;
+      // A nested independent glass control owns its own gesture; capturing it
+      // here would steal pointer capture and lock that control in place.
+      if (options.editableSurface && event.target.closest('[data-lgp-control]') !== button) return;
+      if (nestedAction || (options.editableSurface && event.target.closest('input, textarea, select, [contenteditable]'))) {
         // Let the native field place its caret/select text until the pointer
         // leaves the resting glass. Then hand that same gesture to the spring.
         measure();
         editingPointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
         startX = pointerX = event.clientX; startY = pointerY = event.clientY;
         pressing = !reduced; releaseElapsed = 0; touchTarget = reduced ? 0 : 1;
-        lastTouchPoint = { x: event.clientX - trackRect.left - trackRect.width / 2,
-          y: event.clientY - trackRect.top - trackRect.height / 2 };
+        var down = local(event.clientX, event.clientY);
+        lastTouchPoint = { x: down.x - trackRect.left - trackRect.width / 2,
+          y: down.y - trackRect.top - trackRect.height / 2 };
         wake();
         return;
       }
+      // Blank glass/labels belong to the gesture from its very first press.
+      // Editors above retain native caret placement and text selection.
+      event.preventDefault();
       measure();
       pointerId = event.pointerId;
       startX = pointerX = event.clientX;
@@ -711,7 +796,8 @@ var window=Object.create(host),module=undefined;
         if (!editingPointer || event.pointerId !== editingPointer.id) return;
         pointerX = event.clientX; pointerY = event.clientY;
         wake();
-        var outside = Physics.pointerOutsideGlass(event.clientX, event.clientY, restingRect);
+        var here = local(event.clientX, event.clientY);
+        var outside = Physics.pointerOutsideGlass(here.x, here.y, restingRect);
         if (reduced || Math.hypot(outside.x, outside.y) < 3) return;
         pointerId = event.pointerId;
         startX = editingPointer.x; startY = editingPointer.y;
@@ -724,7 +810,6 @@ var window=Object.create(host),module=undefined;
       function endEditingPointer(event) {
         if (!editingPointer || event.pointerId !== editingPointer.id) return;
         editingPointer = null; pressing = false; releaseElapsed = 0; touchTarget = 0;
-        if (!reduced && contact.x < 12) contact = { x: 12, velocity: 0 };
         wake();
       }
       listen(root, 'pointerup', endEditingPointer);
@@ -744,7 +829,6 @@ var window=Object.create(host),module=undefined;
       pressing = false;
       releaseElapsed = 0;
       touchTarget = 0;
-      if (!reduced && contact.x < 12) contact = { x: 12, velocity: 0 };
       wake();
     });
     listen(button, 'blur', function () {
@@ -979,15 +1063,15 @@ var window=Object.create(host),module=undefined;
               if (i === 0) x=b.x; else if(i === 1) x=b.x+b.w; else if(i === 2) y=b.y; else y=b.y+b.h;
             }
             var proximity = Math.pow(1 - distance / range, 2);
-            var strength = .072 * proximity;
+            var strength = .12 * proximity;
             var color = source.getAttribute('data-liquid-color-source') || style.backgroundColor;
             if (!root.CSS.supports('color', color)) return;
             var spill = document.createElement('span'); spill.className = 'lg-color-spill';
             var rx = Math.min(180, Math.max(65, s.width)), ry = Math.min(180, Math.max(65, s.height));
             // Broad along the object's facing edge; shorter across the glass.
-            if (x === b.x || x === b.x+b.w) { rx=85; ry=Math.min(180,Math.max(65,s.height*1.3)); }
-            else { ry=85; rx=Math.min(180,Math.max(65,s.width*1.3)); }
-            spill.style.cssText = 'position:absolute;pointer-events:none;inset:0;opacity:'+strength+';background:radial-gradient(ellipse '+rx+'px '+ry+'px at '+x+'px '+y+'px,'+color+' 0%,transparent 100%)';
+            if (x === b.x || x === b.x+b.w) { rx=120; ry=Math.min(180,Math.max(85,s.height*1.3)); }
+            else { ry=120; rx=Math.min(180,Math.max(85,s.width*1.3)); }
+            spill.style.cssText = 'position:absolute;pointer-events:none;inset:0;filter:blur(12px);opacity:'+strength+';background:radial-gradient(ellipse '+rx+'px '+ry+'px at '+x+'px '+y+'px,'+color+' 0%,transparent 100%)';
             gradients.push(spill);
             if (drawing && contour) {
               var gradientId = id + '-' + reflections.length;
@@ -1031,6 +1115,7 @@ var window=Object.create(host),module=undefined;
   'use strict';
   var instances = new Map();
   var serial = 0;
+  var glyphSerial = 0;
   var NS = 'http://www.w3.org/2000/svg';
   function svg(name, attrs) {
     var el = document.createElementNS(NS, name);
@@ -1041,6 +1126,41 @@ var window=Object.create(host),module=undefined;
     var list = Array.from(scope.querySelectorAll('[data-liquid-cluster]'));
     if (scope.matches && scope.matches('[data-liquid-cluster]')) list.unshift(scope);
     return list;
+  }
+  // Keep SVG glyph defocus in SVG's own paint pipeline. Filtering an HTML
+  // wrapper containing SVGs creates a separate compositor backing store. The
+  // iPad recording's magenta seams coincide with that wrapper blur path.
+  root.LiquidDesignGlyphBlur = function (content, amount, channel) {
+    if (!content) return;
+    var key = channel === 'morph' ? '_lgcMorphBlur' : channel === 'occlusion' ? '_lgcOcclusionBlur' : '_lgcSplitBlur';
+    content[key] = Math.max(0, amount);
+    var blur = Math.max(content._lgcMorphBlur || 0, content._lgcSplitBlur || 0, content._lgcOcclusionBlur || 0);
+    content.querySelectorAll('svg').forEach(function (icon) {
+      var effect = icon._lgcGlyphBlur;
+      if (!effect && blur > .01) {
+        var id = 'lgc-glyph-' + (++glyphSerial);
+        var defs = svg('defs');
+        var filter = svg('filter', { id: id, x: '-75%', y: '-75%', width: '250%', height: '250%', 'color-interpolation-filters': 'sRGB' });
+        var gaussian = svg('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '0' });
+        var ink = svg('g');
+        Array.from(icon.children).forEach(function (node) { if (!node.matches('defs,title,desc')) ink.append(node); });
+        filter.append(gaussian); defs.append(filter); icon.append(defs, ink);
+        effect = icon._lgcGlyphBlur = { defs: defs, ink: ink, gaussian: gaussian, id: id };
+      }
+      if (!effect) return;
+      effect.gaussian.setAttribute('stdDeviation', blur.toFixed(3));
+      if (blur > .01) effect.ink.setAttribute('filter', 'url(#' + effect.id + ')');
+      else effect.ink.removeAttribute('filter');
+    });
+  };
+  function clearGlyphBlur(content) {
+    content.querySelectorAll('svg').forEach(function (icon) {
+      var effect = icon._lgcGlyphBlur;
+      if (!effect) return;
+      while (effect.ink.firstChild) icon.insertBefore(effect.ink.firstChild, effect.ink);
+      effect.ink.remove(); effect.defs.remove(); delete icon._lgcGlyphBlur;
+    });
+    delete content._lgcMorphBlur; delete content._lgcSplitBlur; delete content._lgcOcclusionBlur;
   }
   function pill(b) {
     var x = b.x, y = b.y, w = b.w, h = b.h, r = b.r === undefined ? Math.min(w, h) / 2 : Math.min(b.r, w / 2, h / 2);
@@ -1208,14 +1328,25 @@ var window=Object.create(host),module=undefined;
       if (disposed) return;
       var rect = group.getBoundingClientRect();
       var boxes = [];
+      // Read native hitboxes before writing any foreground transforms. Tools
+      // reuse this snapshot for their flights and occlusion instead of forcing
+      // layout again for every lobe (including hidden shell placeholders).
+      var measurements = new Map();
+      records.forEach(function (record, el) {
+        if (el.closest('[hidden]') || (!toolsPaint && el.closest('[inert]'))) return;
+        var bounds = el.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+        measurements.set(el, { bounds: bounds, radius: parseFloat(getComputedStyle(el).borderTopLeftRadius) });
+      });
       var dark = document.documentElement.classList.contains('dark');
       var stops = gradient.querySelectorAll('stop');
        var pluginMaterial = group.hasAttribute('data-lgp-component');
-       (pluginMaterial ? [.55, .25, .03, .02, .10, .30] : [.24, .10, .012, .008, .035, .12]).forEach(function (v, i) { stops[i].setAttribute('stop-opacity', v); });
+       (pluginMaterial ? [.275, .125, .015, .01, .05, .15] : [.12, .05, .006, .004, .0175, .06]).forEach(function (v, i) { stops[i].setAttribute('stop-opacity', v); });
        if (pluginMaterial) filter.querySelector('feMorphology').setAttribute('radius', '1.1');
       records.forEach(function (record, el) {
-        if (!visible(el)) { record.glow.style.opacity = 0; return; }
-        var r = el.getBoundingClientRect();
+        var measured = measurements.get(el);
+        if (!measured) { record.glow.style.opacity = 0; return; }
+        var r = measured.bounds;
         var f = record.state;
         if (f && (!f.geometry.slabHalfWidth || !f.geometry.slabHalfHeight)) f = null;
         var x = r.left - rect.left, y = r.top - rect.top, w = r.width, h = r.height;
@@ -1228,11 +1359,11 @@ var window=Object.create(host),module=undefined;
         }
         record.content.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
         var b = { x: x + w / 2 + dx - w * sx / 2, y: y + h / 2 + dy - h * sy / 2, w: w * sx, h: h * sy };
-        if (pluginMaterial) {
+        {
           var glowDiameter = 184 * Math.sqrt(b.w * b.h) / 52;
           record.glow.style.width = glowDiameter + 'px'; record.glow.style.height = glowDiameter + 'px';
         }
-        var declaredRadius = parseFloat(getComputedStyle(el).borderTopLeftRadius);
+        var declaredRadius = measured.radius;
         var restingRadius = Math.min(Number.isFinite(declaredRadius) ? declaredRadius : Math.min(w, h) / 2, w / 2, h / 2);
         b.rx = restingRadius * sx; b.ry = restingRadius * sy;
         if (pluginMaterial) {
@@ -1258,7 +1389,7 @@ var window=Object.create(host),module=undefined;
         boxes.push({ x: r.left - rect.left, y: r.top - rect.top, w: r.width, h: r.height });
       });
       if (menuPaint) boxes = menuPaint(boxes, rect);
-      if (toolsPaint) boxes = toolsPaint(boxes, rect);
+      if (toolsPaint) boxes = toolsPaint(boxes, rect, measurements);
        if (searchPaint) boxes = searchPaint(boxes, rect);
        if (pluginMaterial) boxes.forEach(function (b) {
          ['x','y','w','h','r','rx','ry'].forEach(function (key) {
@@ -1268,7 +1399,7 @@ var window=Object.create(host),module=undefined;
        if (pluginMaterial && toolsPaint) {
          var foreground = [], index = 0;
          records.forEach(function (record, el) {
-           if (!visible(el)) return;
+            if (!measurements.has(el)) return;
            var b = boxes[index++]; if (!b) return;
            foreground.push({ content: record.content, touch: record.state ? record.state.touch : 0,
              box: { x: rect.left + b.x, y: rect.top + b.y, w: b.w, h: b.h, rx: b.rx, ry: b.ry } });
@@ -1311,6 +1442,9 @@ var window=Object.create(host),module=undefined;
         if (count) d = unionOutline.path;
       }
       shape.setAttribute('d', d);
+      // HTML backdrop layers must own their clip locally. SVG fragment clips
+      // can disappear across WebKit compositor layers during split/rejoin.
+      material.style.clipPath = 'path("' + d + '")';
       highlights.style.clipPath = 'path("' + d + '")';
        rim.setAttribute('d', d);
         // Each expanded lobe references its own contour bounds so the actions
@@ -1377,7 +1511,7 @@ var window=Object.create(host),module=undefined;
         records.set(el, record);
         if (!el.closest('[data-liquid-menu]')) record.motion = root.LiquidDesignLiveDemo.create(group, {
           button: el, slab: el, track: group,
-          staticMotion: document.documentElement.hasAttribute('data-glass-child') && !group.closest('.ov-nav,.ov-social-nav'),
+          staticMotion: document.documentElement.hasAttribute('data-glass-child') && !group.closest('.ov-nav,.ov-social-nav,[data-page="chat"]'),
           editableSurface: el.matches('[data-liquid-surface]'),
           releaseFrequency: 15,
           deformationScale: el.classList.contains('lgd-chat-composer') ? .33 : undefined,
@@ -1397,7 +1531,7 @@ var window=Object.create(host),module=undefined;
       var before = new Map();
       records.forEach(function (_, el) { if (visible(el)) before.set(el, el.getBoundingClientRect()); });
       change();
-      if (!reduced()) {
+         if (!reduced()) {
         var anchor = group.querySelector('[data-liquid-toggle], [data-liquid-search-open]');
         var anchorRect = anchor && anchor.getBoundingClientRect();
         var groupRect = group.getBoundingClientRect();
@@ -1487,13 +1621,15 @@ var window=Object.create(host),module=undefined;
         if (focus) trigger.focus({ preventScroll: true });
         paint(); refresh(started ? 1400 : 0);
       }
-      toolsPaint = function (boxes, rect) {
+      toolsPaint = function (boxes, rect, measurements) {
         advance(performance.now());
         if (panel.hidden) return boxes;
-        var native = items.map(function (el) {
-          var r = el.getBoundingClientRect();
+        var activeItems = items.filter(function (el) { return measurements.has(el); });
+        var native = activeItems.map(function (el) {
+          var r = measurements.get(el).bounds;
           return { x: r.left - rect.left, y: r.top - rect.top, w: r.width, h: r.height };
         });
+        if (!native.length) return boxes;
         var first = native[0], last = native[native.length - 1];
         // The trigger is the persistent identity. Actions emerge from its
         // fixed native center, never from the expanding toolbar's midpoint.
@@ -1501,7 +1637,7 @@ var window=Object.create(host),module=undefined;
         var p = progress, reveal = Math.max(0, Math.min(1, p));
         var fade = reveal * reveal * (3 - 2 * reveal);
         return native.map(function (b, i) {
-          var r = records.get(items[i]), f = r.state;
+          var r = records.get(activeItems[i]), f = r.state;
           if (f && (!f.geometry.slabHalfWidth || !f.geometry.slabHalfHeight)) f = null;
           var dx = f ? f.bounds.centerX - f.geometry.slabCenterX : 0;
           var dy = f ? f.bounds.centerY - f.geometry.slabCenterY : 0;
@@ -1515,7 +1651,10 @@ var window=Object.create(host),module=undefined;
           r.content.style.transform = 'translate(' + (cx - b.x - b.w / 2) + 'px,' + dy + 'px) scale(' + sx * growth + ',' + sy * growth + ')';
           r.content.style.opacity = i ? fade : 1;
           var blur = 3 * 4 * reveal * (1 - reveal);
-          r.content.style.filter = blur > .02 ? 'blur(' + blur + 'px)' : 'none';
+          if (group.hasAttribute('data-lgp-component') && r.content.querySelector('svg')) {
+            r.content.style.filter = 'none';
+            root.LiquidDesignGlyphBlur(r.content, blur, 'split');
+          } else r.content.style.filter = blur > .02 ? 'blur(' + blur + 'px)' : 'none';
           return { x: cx - w / 2, y: cy - h / 2, w: w, h: h,
             rx: Math.min(b.w, b.h) / 2 * sx * growth, ry: Math.min(b.w, b.h) / 2 * sy * growth };
         });
@@ -1525,7 +1664,7 @@ var window=Object.create(host),module=undefined;
         if (e.key === 'Escape' && open) { e.preventDefault(); set(false, true); }
       });
       cleanups.push(function () {
-        items.forEach(function (el) { var r = records.get(el); r.content.style.opacity = ''; r.content.style.filter = ''; });
+        items.forEach(function (el) { var r = records.get(el); r.content.style.opacity = ''; r.content.style.filter = ''; clearGlyphBlur(r.content); });
         panelState(panel, false);
       });
     }
@@ -1576,9 +1715,12 @@ var window=Object.create(host),module=undefined;
         return out;
       }
       function highlight(item) {
+        if (selected === item) return;
+        var hadSelection = !!selected;
         selected = item;
         items.forEach(function (el) { el.setAttribute('data-liquid-highlighted', String(el === item)); });
         if (item) {
+          selectionPill.style.transition = hadSelection && !reduced() ? 'transform 180ms cubic-bezier(.4,0,.2,1), width 180ms cubic-bezier(.4,0,.2,1), height 180ms cubic-bezier(.4,0,.2,1), opacity 120ms linear' : 'opacity 120ms linear';
           selectionPill.style.opacity = '1';
           selectionPill.style.width = Math.max(0, item.offsetWidth - 8) + 'px';
           selectionPill.style.height = Math.max(0, item.offsetHeight - 8) + 'px';
@@ -1586,6 +1728,8 @@ var window=Object.create(host),module=undefined;
         } else selectionPill.style.opacity = '0';
       }
       function needsUpwardOpening() {
+        if (group.getAttribute('data-liquid-design-menu-direction') === 'up') return true;
+        if (group.getAttribute('data-liquid-design-menu-direction') === 'down') return false;
         var anchor = trigger.getBoundingClientRect();
         var menuHeight = panel.hidden ? panel.scrollHeight : panel.offsetHeight;
         if (!menuHeight) {
@@ -1619,7 +1763,13 @@ var window=Object.create(host),module=undefined;
           var up = needsUpwardOpening();
           var menuOffset = parseFloat(getComputedStyle(group).getPropertyValue('--liquid-design-menu-offset-y')) || 0;
           var top = up ? anchor.bottom - menuHeight : anchor.top + menuOffset;
+          var styles = getComputedStyle(group);
+          var gap = parseFloat(styles.getPropertyValue('--liquid-design-menu-gap'));
+          if (Number.isFinite(gap)) top = up ? anchor.top - menuHeight - gap : anchor.bottom + gap;
           top = Math.max(12, Math.min(innerHeight - menuHeight - 12, top));
+          var topBound = parseFloat(styles.getPropertyValue('--liquid-design-menu-top-bound'));
+          var bottomBound = parseFloat(styles.getPropertyValue('--liquid-design-menu-bottom-bound'));
+          if (Number.isFinite(topBound) && Number.isFinite(bottomBound)) top = Math.max(topBound, Math.min(bottomBound - menuHeight, top));
           panel.style.top = (top - bounds.top) + 'px';
           group.dataset.menuDirection = up ? 'up' : 'down';
         }
@@ -1643,12 +1793,16 @@ var window=Object.create(host),module=undefined;
           morphFace.setAttribute('aria-hidden', 'true');
           var originalFace = records.get(trigger).content.cloneNode(true);
           originalFace.style.transform = 'none';
-          morphFace.append(originalFace);
-          group.append(morphFace);
-          trigger.style.visibility = 'hidden';
-        }
+           morphFace.append(originalFace);
+           group.append(morphFace);
+           trigger.style.visibility = 'hidden';
+           // Message menus live in a root-level fixed cluster. During the
+           // closing morph, the temporary circle must yield to the message
+           // bubble it came from rather than painting over it.
+           if (!value && group.hasAttribute('data-message-menu')) morphFace.classList.add('lgc-message-closing-face');
+         }
         start = reduced() ? 0 : performance.now();
-        group.dataset.morphPhase = reduced() ? 'settled' : 'expand';
+         group.dataset.morphPhase = reduced() ? 'settled' : (value ? 'expand' : 'collapse');
         if (focus) (value ? items[0] : trigger).focus({ preventScroll: true });
         if (!value) highlight(null);
         paint(); refresh(reduced() ? 0 : pathDuration + (value ? 60 : 1200));
@@ -1681,7 +1835,7 @@ var window=Object.create(host),module=undefined;
         }
         if (elapsed < pathDuration || (springMotion && !springMotion.settled)) {
           current = trajectory;
-          group.dataset.morphPhase = elapsed < pathDuration ? 'expand' : 'overshoot';
+           group.dataset.morphPhase = open ? (elapsed < pathDuration ? 'expand' : 'overshoot') : 'collapse';
           if (!open && elapsed >= pathDuration) panelState(panel, false);
           if (morphFace) {
             morphFace.style.left = current.x + 'px'; morphFace.style.top = current.y + 'px';
@@ -1726,7 +1880,7 @@ var window=Object.create(host),module=undefined;
         }
         var menuGlow = records.get(trigger).glow;
         if (open && menuState) {
-          var menuGlowDiameter = group.hasAttribute('data-lgp-component') ? 184 * Math.sqrt(current.w * current.h) / 52 : 260;
+          var menuGlowDiameter = 184 * Math.sqrt(current.w * current.h) / 52;
           menuGlow.style.width = menuGlowDiameter + 'px'; menuGlow.style.height = menuGlowDiameter + 'px';
           menuGlow.style.left = (rect.width / 2 + menuState.lightPoint.x) + 'px';
           menuGlow.style.top = (rect.height / 2 + menuState.lightPoint.y) + 'px';
@@ -1818,6 +1972,10 @@ var window=Object.create(host),module=undefined;
       listen(panel, 'click', function (e) { if (e.target.closest('button')) set(false, true); });
       listen(panel, 'pointerleave', function () {
         highlight(null);
+      });
+      listen(panel, 'focusin', function (e) {
+        var item = e.target.closest('button');
+        if (open && items.indexOf(item) !== -1) highlight(item);
       });
       function pointItem(e) {
         return items.find(function (item) {
@@ -2091,13 +2249,22 @@ var window=Object.create(host),module=undefined;
     entries.forEach(function (item) {
       var content = item.content, effect = content._lgpTextEffect;
       if (!content.isConnected || !content.parentElement) return;
-      function clear() {
+       function clear() {
+         if (content.querySelector('svg')) root.LiquidDesignGlyphBlur(content, 0, 'occlusion');
         if (!effect) return;
         if (content.style.filter.indexOf(effect.id) !== -1) content.style.filter = effect.originalFilter;
         content.style.clipPath = effect.originalClip;
       }
       if (!active || item === active) { clear(); return; }
-      var rect = content.getBoundingClientRect(), box = active.box;
+       var ownBox = item.box, box = active.box;
+        if (box.x >= ownBox.x + ownBox.w || box.x + box.w <= ownBox.x || box.y >= ownBox.y + ownBox.h || box.y + box.h <= ownBox.y) { clear(); return; }
+        if (group.dataset.lgpComponent === 'tools' && content.querySelector('svg')) {
+          var overlapWidth = Math.min(box.x + box.w, ownBox.x + ownBox.w) - Math.max(box.x, ownBox.x);
+          var overlapHeight = Math.min(box.y + box.h, ownBox.y + ownBox.h) - Math.max(box.y, ownBox.y);
+          root.LiquidDesignGlyphBlur(content, 2 * Math.min(1, overlapWidth * overlapHeight / Math.max(1, ownBox.w * ownBox.h)), 'occlusion');
+          return;
+        }
+       var rect = content.getBoundingClientRect();
       if (box.x >= rect.right || box.x+box.w <= rect.left || box.y >= rect.bottom || box.y+box.h <= rect.top) { clear(); return; }
       var matrix = new DOMMatrix(getComputedStyle(content).transform);
       var sx = Math.max(.01,Math.abs(matrix.a)), sy = Math.max(.01,Math.abs(matrix.d));
@@ -2304,7 +2471,7 @@ var window=Object.create(host),module=undefined;
       if (target !== el && !el.matches('[data-lgp-group],[data-lgp-component]')) return;
       if (target === el && event.type === 'pointerdown') root.LiquidDesignPluginClaim(el);
       clearTimeout(timer); active = true; el.setAttribute('data-lgp-front', 'true');
-      el.style.setProperty('z-index', 'var(--z-chrome, 100)', 'important');
+       el.style.setProperty('z-index', 'var(--liquid-design-front-z, var(--z-chrome, 100))', 'important');
     }
     function release() {
       if (!active) return;
@@ -2379,7 +2546,7 @@ var window=Object.create(host),module=undefined;
     filter.append(svg('feMorphology', { in: 'SourceAlpha', operator: 'erode', radius: '1.1', result: 'inside' }));
     filter.append(svg('feComposite', { in: 'SourceGraphic', in2: 'inside', operator: 'out' }));
     var gradient = svg('linearGradient', { id: id + '-light', x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
-    [['0%', '.55'], ['12%', '.25'], ['40%', '.03'], ['62%', '.02'], ['88%', '.10'], ['100%', '.30']].forEach(function (s) {
+    [['0%', '.275'], ['12%', '.125'], ['40%', '.015'], ['62%', '.01'], ['88%', '.05'], ['100%', '.15']].forEach(function (s) {
       gradient.append(svg('stop', { offset: s[0], 'stop-color': 'white', 'stop-opacity': s[1] }));
     });
     var edgeMask = svg('mask', { id: id + '-mask', maskUnits: 'userSpaceOnUse', 'mask-type': 'alpha' });
@@ -2421,6 +2588,16 @@ var window=Object.create(host),module=undefined;
     // Nested controls inherit their editable parent's transform. Convert screen
     // measurements back to this group's local CSS space before painting, or the
     // child's material gets parent-scaled twice while its label scales once.
+    // A rotated group (the chat rail's vertical toolbar pill) is measured
+    // in its own unrotated frame; screen bounding boxes swap its axes.
+    var frame = root.LiquidDesignFrame ? root.LiquidDesignFrame(group.el) : null;
+    function localRect(el) {
+      if (!frame) return el.getBoundingClientRect();
+      var r = el.getBoundingClientRect(), c = frame.toLocal(r.left + r.width / 2, r.top + r.height / 2);
+      var w = el.offsetWidth * frame.scale, h = el.offsetHeight * frame.scale;
+      return { left: c.x * frame.scale - w / 2, top: c.y * frame.scale - h / 2, width: w, height: h };
+    }
+    if (frame) anchor = { left: 0, top: 0, width: frame.width * frame.scale, height: frame.height * frame.scale };
     var ancestorScaleX = group.el.offsetWidth ? anchor.width / group.el.offsetWidth : 1;
     var ancestorScaleY = group.el.offsetHeight ? anchor.height / group.el.offsetHeight : 1;
     ancestorScaleX = Math.max(.01, ancestorScaleX); ancestorScaleY = Math.max(.01, ancestorScaleY);
@@ -2429,7 +2606,7 @@ var window=Object.create(host),module=undefined;
       // Host replacement may detach the wrapper before the adapter's queued
       // repair runs. Never paint stale foreground into this frame.
       if (record.content.parentNode !== record.el) return;
-      var el = record.el, rect = el.getBoundingClientRect(), f = record.state;
+      var el = record.el, rect = localRect(el), f = record.state;
       el.setAttribute('data-lgp-theme', theme(el));
       if (!rect.width || !rect.height || el.hidden || getComputedStyle(el).visibility === 'hidden') { record.glow.style.opacity = '0'; return; }
       var dx = 0, dy = 0, sx = 1, sy = 1;
@@ -2459,7 +2636,10 @@ var window=Object.create(host),module=undefined;
         y: (anchor.height / 2 + (f ? f.lightPoint.y : 0)) / ancestorScaleY, opacity: f ? f.touch : 0 });
     });
     root.LiquidDesignPluginOcclusion(group.el, foreground);
-    var blendRange = 4;
+    // The chat sidebar action capsule already owns its exact inset geometry;
+    // the generic multi-control contour expansion would add uneven-looking
+    // outer space around the compact controls.
+    var blendRange = group.el.matches('[data-page="chat"] .chat-sidebar-actions') ? 0 : 4;
     var pad = boxes.length > 1 ? blendRange : 0;
     var minX = boxes.length ? Math.min.apply(null, boxes.map(function (b) { return b.x; })) - pad : 0;
     var minY = boxes.length ? Math.min.apply(null, boxes.map(function (b) { return b.y; })) - pad : 0;
@@ -2504,6 +2684,9 @@ var window=Object.create(host),module=undefined;
     // layers are promoted or the page navigates to an anchor. The tinted fill
     // must share this contour too, otherwise an unresolved SVG clip paints a box.
     group.material.style.clipPath = 'path("' + d + '")';
+    // Rounded backdrop capture prevents a square blur tile showing through
+    // outside an independent pill/circle's path-clipped material on desktop.
+    group.material.style.borderRadius = boxes.length === 1 ? boxes[0].rx + 'px / ' + boxes[0].ry + 'px' : '0px';
     group.highlights.style.clipPath = 'path("' + d + '")';
     group.maskPath.setAttribute('d', d);
     group.rim.setAttribute('d', d);
@@ -2600,7 +2783,8 @@ var window=Object.create(host),module=undefined;
     }, cleanup, true);
     record.motion = root.LiquidDesignLiveDemo.create(group.el, {
       button: el, slab: el, track: group.el, editableSurface: surface,
-      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,#hero-bar,#results-bar,[data-page="ai-home"]')),
+      staticActionSurface: el.hasAttribute('data-liquid-design-static-actions'),
+      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,[data-page="home"] .hero-profile,#hero-bar,#results-bar,[data-page="ai-home"],[data-page="chat"]')),
       deformationScale: surface ? .33 : undefined, centerCoupling: surface ? .025 : undefined, centerLimit: surface ? 5 : undefined,
       render: function (state) { record.state = state; schedule(); },
     });
@@ -2652,6 +2836,8 @@ var window=Object.create(host),module=undefined;
     root.cancelAnimationFrame(paintFrame); paintFrame = 0;
   }
   root.LiquidDesign = {
+    menuFrame: root.LiquidDesignMenuMotion.frame,
+    setGlyphBlur: function (content, amount) { root.LiquidDesignGlyphBlur(content, amount, 'morph'); },
     refresh: function (scope) {
       scope = scope || document;
       root.LiquidDesignPluginComponents.refresh(scope);
