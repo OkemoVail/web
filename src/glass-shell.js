@@ -25,7 +25,7 @@
     else { slideTime = 0; if (outgoing) { dispose(outgoing); outgoing = null; } settled(active); }
   }
   function clean(url) { url = new URL(url, location.href); url.searchParams.delete('__glass_page'); return url; }
-  function canonical(url) { var p = url.pathname; if (p === '/') return '/index.html'; if (p.endsWith('/')) return p + 'index.html'; return p; }
+  function canonical(url) { var p = url.pathname; if (p === '/') return '/index.html'; if (p === '/AI/chat') return '/AI/chat.html'; if (p.endsWith('/')) return p + 'index.html'; return p; }
   function accepts(url) { url = clean(url); return url.origin === location.origin && routes.indexOf(canonical(url)) !== -1; }
   function frameFor(win) { return [active, pending].find(function (record) { return record && record.frame.contentWindow === win; }); }
   function dispose(record) { if (!record) return; clearTimeout(record.timer); try { record.frame.contentWindow.LumenHero?.destroy(); } catch (_) {} record.frame.remove(); }
