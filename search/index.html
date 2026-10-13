@@ -49,8 +49,8 @@
     <div class="suggest" id="hero-suggest" role="listbox" hidden></div>
   </div>
   <div class="hero-btns">
-    <button class="skuo skuo-neutral" id="hero-search" aria-label="search">🔍 <span class="lbl">search the cosmos</span></button>
-    <span class="ai-ring"><button class="skuo" id="hero-cosmic" aria-label="i'm feeling cosmic">✦ <span class="lbl">i'm feeling cosmic</span></button></span>
+    <button class="skuo skuo-neutral hero-action" id="hero-search" aria-label="search" data-liquid-design data-liquid-design-independent><svg class="hero-action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4.2 4.2"/></svg><span class="lbl">search the cosmos</span></button>
+    <button class="skuo hero-action hero-action-cosmic" id="hero-cosmic" aria-label="i'm feeling cosmic"><svg class="hero-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.5 4.8 3.2 7.5 8 8-4.8.5-7.5 3.2-8 8-.5-4.8-3.2-7.5-8-8 4.8-.5 7.5-3.2 8-8Z"/></svg><span class="lbl">i'm feeling cosmic</span></button>
   </div>
   <section id="first-tour-prompt" class="first-tour-prompt" aria-label="First time guide" hidden>
     <p class="first-tour-copy"><strong>Hey, I noticed it’s your first time using Astra.</strong> Would you like a tour of our special features?</p>
@@ -61,7 +61,7 @@
     </div>
   </section>
   <p class="hint">enter = search · no wrong questions</p>
-  <button class="tour-replay" id="tour-replay" type="button" aria-label="Replay Astra tour" hidden>Replay tour</button>
+  <button class="skuo skuo-neutral tour-replay" id="tour-replay" type="button" aria-label="Replay Astra tour" hidden>Replay tour</button>
   <footer class="foot">made of stardust · <a href="../index.html">okemo</a> ✦</footer>
 </main>
 
@@ -72,7 +72,7 @@
     <div class="bar" id="results-bar" data-liquid-design="surface" data-liquid-design-independent>
       <span class="bar-icon">🔭</span>
       <span class="ph-wrap"><input id="results-input" type="text" role="combobox" aria-autocomplete="list" aria-controls="results-suggest" aria-expanded="false" enterkeyhint="search" autocomplete="off" spellcheck="false" aria-label="Search the web" placeholder="search the web…"><span class="ph-ghost" id="results-ghost" aria-hidden="true"></span></span>
-      <button class="skuo skuo-neutral" id="results-search" aria-label="search">🔍 <span class="lbl">Search</span></button>
+      <button class="skuo skuo-neutral" id="results-search" aria-label="search" data-liquid-design data-liquid-design-independent>🔍 <span class="lbl">Search</span></button>
       <div class="suggest" id="results-suggest" role="listbox" hidden></div>
     </div>
   </header>
@@ -92,9 +92,10 @@
     <section id="ai-panel" class="ai-panel" aria-busy="false" hidden>
       <div class="ai-head">
         <span id="ai-head-label">✦ Astra Answer</span>
-        <div class="ai-mode-toggle" id="ai-mode-toggle" role="radiogroup" aria-label="AI panel mode">
+        <div class="ai-mode-toggle" id="ai-mode-toggle" role="radiogroup" aria-label="AI panel mode" data-liquid-design="surface" data-liquid-design-independent>
+          <span class="ai-mode-highlight" aria-hidden="true"></span>
           <button class="ai-mode-btn on" id="ai-mode-answer" role="radio" aria-checked="true" tabindex="0" type="button">Answer</button>
-          <button class="ai-mode-btn" id="ai-mode-perspectives" role="radio" aria-checked="false" tabindex="-1" type="button">⚖ Perspectives</button>
+          <button class="ai-mode-btn" id="ai-mode-perspectives" role="radio" aria-checked="false" tabindex="-1" type="button">Perspectives</button>
         </div>
         <button class="skuo skuo-icon" id="ai-expand" aria-label="fullscreen" aria-expanded="false" aria-controls="ai-panel" title="fullscreen">⤢</button>
       </div>

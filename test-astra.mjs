@@ -7,6 +7,7 @@ const AstraHelpers = require('./search/astra-helpers.js');
 const html = readFileSync(new URL('./search/index.html', import.meta.url), 'utf8');
 const js = readFileSync(new URL('./search/astra.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
+const liquidPlugin = readFileSync(new URL('./liquid-design/source/liquid-design-plugin.js', import.meta.url), 'utf8');
 
 function test(name, fn) {
   try {
@@ -213,6 +214,8 @@ test('search and AI progress expose polite status and busy state', () => {
   assert.match(js, /\$\('result-list'\)\.setAttribute\('aria-busy', 'true'\)/);
   assert.match(html, /id="ai-error"[^>]*role="status"[^>]*aria-live="polite"/);
   assert.match(js, /if \(!firstToken\) \{ firstToken = true; hideThinking\(\); \}/);
+  assert.match(js, /function ensureThinking\(\)/);
+  assert.match(js, /const t = ensureThinking\(\)/);
 });
 
 test('AI toggle and fullscreen control keep accessible labels and expanded state in sync', () => {
@@ -380,7 +383,7 @@ test('tour final step requires opening the real first-result preview', () => {
 });
 
 test('hero exposes an accessible replay control directly above its footer', () => {
-  assert.match(html, /id="tour-replay"[^>]*type="button"[^>]*aria-label="Replay Astra tour"[^>]*>Replay tour<\/button>\s*<footer class="foot">made of stardust/);
+  assert.match(html, /class="skuo skuo-neutral tour-replay" id="tour-replay"[^>]*type="button"[^>]*aria-label="Replay Astra tour"[^>]*>Replay tour<\/button>\s*<footer class="foot">made of stardust/);
   assert.doesNotMatch(html, /id="result-list"[\s\S]{0,300}id="tour-replay"/);
   assert.match(js, /\$\('tour-replay'\)\.addEventListener\('click', startTour\)/);
   assert.match(js, /function updateTourReplay\(/);
@@ -389,6 +392,7 @@ test('hero exposes an accessible replay control directly above its footer', () =
   assert.match(js, /function finishTour\([\s\S]*?updateTourReplay\(\)/);
   assert.doesNotMatch(js, /function startTour\([\s\S]{0,180}hasTourSeen/);
   assert.match(css, /\.tour-replay\s*\{[^}]*position:\s*absolute[^}]*bottom:\s*32px[^}]*left:\s*50%[^}]*transform:\s*translateX\(-50%\)/);
+  assert.match(css, /\.tour-replay\s*\{[^}]*border-radius:\s*999px/);
   assert.doesNotMatch(css, /\.tour-replay\s*\{[^}]*margin:\s*auto/);
 });
 
@@ -429,7 +433,7 @@ test('Astra logos use the tail-free boat mark and the Images tab uses Font Aweso
 
 test('tour has no mascot or eye-following behavior', () => {
   assert.doesNotMatch(html, /tour-mascot|tour-eye|tour-pupil/);
-  assert.doesNotMatch(js, /tour-mascot|tour-eye|tour-pupil|trackTourEyes|lookMascotAt|pointermove/);
+  assert.doesNotMatch(js, /tour-mascot|tour-eye|tour-pupil|trackTourEyes|lookMascotAt/);
   assert.doesNotMatch(css, /tour-mascot|tour-eye|tour-pupil/);
 });
 
@@ -477,6 +481,23 @@ test('standard search runs once then dispatches the saved AI panel mode', () => 
   assert.doesNotMatch(js, /setAiPanelMode\('perspectives'\)[\s\S]{0,300}runSearch\(q\)/);
 });
 
+test('AI panel mode switching never reruns or rebuilds web results', () => {
+  const switchMode = js.slice(js.indexOf('function switchAiPanelMode'), js.indexOf('function showPerspectivesFallback'));
+  const perspectives = js.slice(js.indexOf('async function runPerspectives'), js.indexOf('window.runPerspectives'));
+  assert.doesNotMatch(switchMode, /runSearch\(|restoreStandardResults\(|renderResults\(/);
+  assert.doesNotMatch(perspectives, /renderResults\(|lastResults\s*=|\$\('r-meta'\)\.textContent/);
+  assert.match(switchMode, /if \(lastStandardQuery === q\) askAstra\(q, lastStandardResults\)/);
+});
+
+test('completed AI modes are cached per query and restored without another request', () => {
+  assert.match(js, /const aiPanelCache = new Map\(\)/);
+  assert.match(js, /function cacheAiPanel\(q, mode\)/);
+  assert.match(js, /function restoreAiPanel\(q, mode\)/);
+  assert.match(js, /if \(restoreAiPanel\(q, mode\)\) return/);
+  assert.match(js, /aiPanelCache\.clear\(\)/);
+  assert.match(js, /e\.target\.closest\('#perspectives-fallback-answer'\)[\s\S]*?switchAiPanelMode\('answer'\)/);
+});
+
 test('Perspectives fetch renders its exact source rows and bounds citations to them', () => {
   assert.match(js, /\/api\/perspectives\?q=' \+ encodeURIComponent\(q\) \+ '&n=30'/);
   assert.match(js, /ngrok-skip-browser-warning/);
@@ -501,7 +522,7 @@ test('Perspective result rows construct compact badges for known source engines'
 });
 
 test('Perspectives styles stay search-scoped and keep resting surfaces flat', () => {
-  const perspectiveRules = css.match(/[^{}]+\{[^{}]*\}/g).filter((rule) => /\.(?:ai-mode-(?:toggle|btn)|perspectives-[\w-]+|r-source-tags?)(?![\w-])/.test(rule));
+  const perspectiveRules = css.match(/[^{}]+\{[^{}]*\}/g).filter((rule) => /\.(?:ai-mode-btn|perspectives-[\w-]+|r-source-tags?)(?![\w-])/.test(rule));
   assert(perspectiveRules.length > 0, 'Perspectives selectors should exist in site.css');
   perspectiveRules.forEach((rule) => {
     const selector = rule.slice(0, rule.indexOf('{'));
@@ -513,14 +534,24 @@ test('Perspectives styles stay search-scoped and keep resting surfaces flat', ()
     assert.doesNotMatch(rule, /backdrop-filter|filter:\s*blur|linear-gradient|conic-gradient/);
   });
   assert.match(css, /\[data-page="search"\] \.perspectives-section\s*\{[^}]*border:\s*1px solid[^}]*box-shadow:\s*none/);
-  assert.match(css, /\[data-page="search"\] \.ai-mode-toggle\s*\{(?=[^}]*background-color:\s*var\(--bg-elevated\))(?=[^}]*border:\s*1px solid)[^}]*\}/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-toggle\s*\{(?=[^}]*background-color:\s*var\(--bg-elevated\))(?=[^}]*border:\s*1px solid)[^}]*--liquid-design-fill:/);
 });
 
-test('Perspectives mode controls expose flat interaction, focus, and mobile touch contracts', () => {
+test('Perspectives mode controls expose draggable highlight, focus, and mobile touch contracts', () => {
   assert.match(css, /\[data-page="search"\] \.ai-mode-btn:hover\s*\{[^}]*background-color:/);
   assert.match(css, /\[data-page="search"\] \.ai-mode-btn:active\s*\{[^}]*transform:\s*scale\(0\.97\)[^}]*transition:[^}]*var\(--dur-1\)[^}]*var\(--ease-soft\)/);
   assert.match(css, /\[data-page="search"\] \.ai-mode-btn:focus-visible\s*\{[^}]*outline:\s*none[^}]*box-shadow:\s*0 0 0 3px color-mix/);
-  assert.match(css, /\[data-page="search"\] \.ai-mode-btn\.on\s*\{[^}]*background-color:\s*var\(--accent\)[^}]*color:\s*#fff/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-highlight\s*\{[^}]*background-color:\s*var\(--accent\)[^}]*transform:\s*translateX\(0\)/);
+  assert.match(css, /data-dragging[^}]*\.ai-mode-highlight\s*\{[^}]*transform:\s*translateX\(var\(--ai-mode-drag-x\)\)[^}]*transition:\s*none/);
+  assert.match(js, /style\.setProperty\('--ai-mode-drag-x', left \+ 'px'\)/);
+  assert.match(js, /style\.removeProperty\('--ai-mode-drag-x'\)/);
+  assert.match(js, /if \(shouldCommit\) toggle\.dataset\.mode = next;\s*delete toggle\.dataset\.dragging/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-toggle\s*\{[^}]*width:\s*min\(100%, 260px\)/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-toggle\s*\{[^}]*height:\s*40px[^}]*box-sizing:\s*border-box/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-btn\s*\{[^}]*white-space:\s*nowrap/);
+  assert.match(css, /\.ai-mode-toggle\[data-lgp-control="surface"\] > \.lgp-content\s*\{[^}]*display:\s*grid !important[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important/);
+  assert.doesNotMatch(html, /⚖ Perspectives/);
+  assert.match(css, /\[data-page="search"\] \.ai-mode-btn\.on\s*\{[^}]*background-color:\s*transparent[^}]*color:\s*#fff/);
   assert.match(css, /@media \(max-width: 768px\)[\s\S]*?\[data-page="search"\] \.ai-mode-btn\s*\{[^}]*min-height:\s*44px/);
 });
 
@@ -573,18 +604,21 @@ test('mobile results header stacks the logo above the search bar', () => {
   assert.match(css, /@media \(max-width: 768px\)[\s\S]*?\.r-logo\s*\{[^}]*align-self:\s*center/);
 });
 
-test('cosmic button uses a drifting aurora border with reduced-motion fallback', () => {
+test('search limits liquid glass to authored search and mode surfaces', () => {
   const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
-  assert.match(css, /\.ai-ring\s*\{[^}]*display:\s*inline-flex[^}]*line-height:\s*0[^}]*padding:\s*2px[^}]*linear-gradient\([^}]*#d97790[^}]*#f0a35e[^}]*#f6c177[^}]*#d97790[^}]*background-size:\s*300% 100%[^}]*animation:\s*astra-aurora-drift 8s var\(--ease-smooth\) infinite alternate/);
-  assert.match(css, /@keyframes astra-aurora-drift\s*\{[^}]*background-position:\s*100% 50%/);
-  assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.ai-ring[^}]*animation:\s*none/);
-});
-
-test('cosmic button press scales the gradient wrapper and inner button together', () => {
-  const css = readFileSync(new URL('./src/site.css', import.meta.url), 'utf8');
-  assert.match(css, /\.ai-ring\s*\{[^}]*transition:\s*transform var\(--dur-1\) var\(--ease-soft\)/);
-  assert.match(css, /\.ai-ring:has\(\.skuo:active\)\s*\{[^}]*transform:\s*scale\(0\.97\)/);
-  assert.match(css, /\.ai-ring \.skuo:active\s*\{[^}]*transform:\s*none/);
+  assert.match(html, /id="hero-search"[^>]*>\s*<svg class="hero-action-icon"/);
+  assert.match(html, /id="hero-search"[^>]*data-liquid-design[^>]*data-liquid-design-independent/);
+  assert.match(html, /id="results-search"[^>]*data-liquid-design[^>]*data-liquid-design-independent/);
+  assert.match(html, /class="skuo hero-action hero-action-cosmic" id="hero-cosmic"/);
+  assert.doesNotMatch(html, /class="ai-ring"/);
+  assert.match(html, /id="ai-mode-toggle"[^>]*data-liquid-design="surface"/);
+  assert.match(css, /\.ai-mode-toggle\s*\{[^}]*border-radius:\s*999px[^}]*--liquid-design-fill:/);
+  assert.doesNotMatch(css, /\.hero-btns \.hero-action\s*\{[^}]*--liquid-design-fill:/);
+  assert.match(css, /\[data-page="search"\] :is\(button\.skuo, a\.skuo\)\s*\{[^}]*border-radius:\s*999px/);
+  assert.match(js, /toggle\.setPointerCapture\(e\.pointerId\)/);
+  assert.match(js, /switchAiPanelMode\(next\)/);
+  assert.match(liquidPlugin, /data-glass-child[^\n]*el\.closest\('[^']*#hero-bar,#results-bar,#hero-search,#results-search,#ai-mode-toggle/);
+  assert.doesNotMatch(css, /astra-aurora-drift|\.ai-ring/);
 });
 
 console.log('Astra helper tests passed');

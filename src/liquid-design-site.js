@@ -40,6 +40,10 @@
     // Chat glass is a functional layer, not a skin on every list/message action.
     // Shared toolbar surfaces own their background; their icons stay plain.
     if (el.closest('[data-page="chat"]') && !el.matches('#send-btn,#menu-toggle-btn,.chat-sidebar-actions,#profile-identity-glass,.sb-profile-btn,#profile-row-actions button[data-liquid-design],.folder-create-btn,.custom-modal-card,.custom-modal-input-shell,.custom-modal-card .modal-btn') ) return;
+    // Search is deliberately sparse: only explicitly authored search and mode
+    // surfaces use Liquid Glass. Result hit targets and ordinary actions must
+    // retain their native geometry instead of becoming full-row glass slabs.
+    if (el.closest('[data-page="search"]') && !el.hasAttribute('data-liquid-design')) return;
     if (records.has(el) || !el.isConnected || !el.matches(selector)) return;
     var saved = ['data-liquid-design', 'data-liquid-design-independent', 'data-lg-site'].map(function (name) { return [name, el.getAttribute(name)]; });
     // The portable plugin retains grouped demos. Production never shares a face.

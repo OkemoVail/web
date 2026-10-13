@@ -37,8 +37,9 @@
     add('leading', leading, leading && leading.matches('.ov-nav__socials-toggle') ? { label: 'Socials', items: Array.from(doc.querySelectorAll('#ov-nav-socials [data-social-href]')).map(function (item) {
       return { label: item.textContent.trim(), href: item.getAttribute('data-social-href'), glyph: glyph(item) };
     }) } : { label: 'Back', action: 'back', href: '/index.html' });
-    // Chat owns its top-left sidebar control and its in-app return link.
-    if (!leading && !doc.querySelector('[data-page="chat"]')) result.push({ role: 'leading', rect: { x: 24, y: 24, w: 44, h: 44 }, circle: true, label: 'Back', action: 'back', href: '/index.html', glyph: '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>' });
+    // Chat owns its top-left sidebar control; Search intentionally has no
+    // leading shell control so its landing page stays visually open.
+    if (!leading && !doc.querySelector('[data-page="chat"],[data-page="search"]')) result.push({ role: 'leading', rect: { x: 24, y: 24, w: 44, h: 44 }, circle: true, label: 'Back', action: 'back', href: '/index.html', glyph: '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>' });
     return result;
   }
   function create(d) {

@@ -130,6 +130,7 @@
     mode = mode === 'perspectives' ? mode : 'answer';
     const answer = $('ai-mode-answer');
     const perspectives = $('ai-mode-perspectives');
+    $('ai-mode-toggle').dataset.mode = mode;
     [answer, perspectives].forEach((button) => {
       const selected = button === (mode === 'perspectives' ? perspectives : answer);
       button.classList.toggle('on', selected);
@@ -230,6 +231,7 @@
   let lastResults = [];         // first-page results (citation lookups)
   let lastStandardResults = [];
   let lastStandardQuery = '';
+  const aiPanelCache = new Map();
   let perspectivesAbort = null;
   let perspectivesToken = 0;
   let scrollObserver = null;
@@ -444,6 +446,73 @@
   });
   $('ai-mode-answer').addEventListener('click', () => switchAiPanelMode('answer'));
   $('ai-mode-perspectives').addEventListener('click', () => switchAiPanelMode('perspectives'));
+  (() => {
+    const toggle = $('ai-mode-toggle');
+    let drag = null;
+    let suppressClick = false;
+    const modeAt = (x, y) => {
+      const target = document.elementFromPoint(x, y)?.closest('.ai-mode-btn');
+      if (target && toggle.contains(target)) return target.id === 'ai-mode-perspectives' ? 'perspectives' : 'answer';
+      const rect = toggle.getBoundingClientRect();
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return null;
+      return x < rect.left + rect.width / 2 ? 'answer' : 'perspectives';
+    };
+    const dragTo = (x) => {
+      const track = toggle.querySelector(':scope > .lgp-content') || toggle;
+      const rect = track.getBoundingClientRect();
+      const inset = 3;
+      const travel = (rect.width - inset * 2) / 2;
+      const left = Math.max(0, Math.min(travel, x - rect.left - inset - travel / 2));
+      toggle.style.setProperty('--ai-mode-drag-x', left + 'px');
+      const answerRect = $('ai-mode-answer').getBoundingClientRect();
+      const perspectivesRect = $('ai-mode-perspectives').getBoundingClientRect();
+      const boundary = (answerRect.right + perspectivesRect.left) / 2;
+      drag.mode = x < boundary ? 'answer' : 'perspectives';
+      toggle.dataset.dragMode = drag.mode;
+    };
+    toggle.addEventListener('pointerdown', (e) => {
+      const start = e.target.closest('.ai-mode-btn');
+      if (e.button !== 0 || !start || start.getAttribute('aria-checked') !== 'true') return;
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, mode: modeAt(e.clientX, e.clientY), moved: false };
+      toggle.setPointerCapture(e.pointerId);
+      toggle.dataset.dragging = '';
+      dragTo(e.clientX);
+    });
+    toggle.addEventListener('pointermove', (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 3) drag.moved = true;
+      dragTo(e.clientX);
+    });
+    const finish = (e, commit) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const next = drag.mode;
+      const moved = drag.moved;
+      const shouldCommit = commit && moved && next;
+      drag = null;
+      // Set the destination while the pill is still at its live drag position.
+      // Removing the drag override then transitions directly to that resting
+      // position instead of flashing back to the previously selected mode.
+      if (shouldCommit) toggle.dataset.mode = next;
+      delete toggle.dataset.dragging;
+      delete toggle.dataset.dragMode;
+      toggle.style.removeProperty('--ai-mode-drag-x');
+      if (toggle.hasPointerCapture(e.pointerId)) toggle.releasePointerCapture(e.pointerId);
+      if (shouldCommit) {
+        suppressClick = true;
+        setTimeout(() => { suppressClick = false; }, 0);
+        switchAiPanelMode(next);
+        $(next === 'perspectives' ? 'ai-mode-perspectives' : 'ai-mode-answer').focus({ preventScroll: true });
+      }
+    };
+    toggle.addEventListener('pointerup', (e) => finish(e, true));
+    toggle.addEventListener('pointercancel', (e) => finish(e, false));
+    toggle.addEventListener('click', (e) => {
+      if (!suppressClick || e.detail === 0) return;
+      suppressClick = false;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }, true);
+  })();
   $('ai-mode-toggle').addEventListener('keydown', (e) => {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
     e.preventDefault();
@@ -498,6 +567,10 @@
 
   // citation jump links: smooth-scroll inline (new tab in fullscreen), no history entry
   $('ai-body').addEventListener('click', (e) => {
+    if (e.target.closest('#perspectives-fallback-answer')) {
+      switchAiPanelMode('answer');
+      return;
+    }
     const a = e.target.closest('a[href^="#result-"]');
     if (!a) return;
     e.preventDefault();
@@ -644,16 +717,38 @@
     perspectivesAbort = null;
   }
 
-  function restoreStandardResults(q) {
-    if (lastStandardQuery !== q) return false;
-    lastResults = lastStandardResults;
-    totalResults = lastStandardResults.length;
-    nextOffset = PAGE_STEP;
-    resultsDone = false;
-    renderResults(lastStandardResults, 0, false);
-    if (lastStandardResults.length) watchSentinel(q);
-    else renderEmptyResults(q);
-    $('r-meta').textContent = lastStandardResults.length ? COPY.metaLine(totalResults, lastSecs) : '';
+  function cacheAiPanel(q, mode) {
+    const panel = $('ai-panel');
+    if (!q || panel.getAttribute('aria-busy') === 'true') return;
+    aiPanelCache.set(q + ':' + mode, {
+      body: $('ai-body').innerHTML,
+      sources: $('ai-sources').innerHTML,
+      error: $('ai-error').innerHTML,
+      heading: $('ai-head-label').textContent,
+      provenanceHidden: $('ai-provenance').hidden,
+      sourcesHidden: $('ai-sources').hidden,
+      errorHidden: $('ai-error').hidden,
+      followHidden: $('ai-follow').hidden,
+      done: panel.classList.contains('done'),
+    });
+  }
+
+  function restoreAiPanel(q, mode) {
+    const cached = aiPanelCache.get(q + ':' + mode);
+    if (!cached) return false;
+    const panel = $('ai-panel');
+    panel.hidden = false;
+    panel.setAttribute('aria-busy', 'false');
+    panel.classList.toggle('done', cached.done);
+    $('ai-head-label').textContent = cached.heading;
+    $('ai-body').innerHTML = cached.body;
+    $('ai-sources').innerHTML = cached.sources;
+    $('ai-error').innerHTML = cached.error;
+    $('ai-provenance').hidden = cached.provenanceHidden;
+    $('ai-sources').hidden = cached.sourcesHidden;
+    $('ai-error').hidden = cached.errorHidden;
+    $('ai-follow').hidden = cached.followHidden;
+    hideThinking();
     return true;
   }
 
@@ -664,16 +759,21 @@
 
   function switchAiPanelMode(mode) {
     const q = readRoute().q;
+    const previousMode = getAiPanelMode();
+    if (q && previousMode !== mode) cacheAiPanel(q, previousMode);
     setAiPanelMode(mode);
     if (!q || !getAiMode()) return;
+    if (restoreAiPanel(q, mode)) return;
     if (mode === 'perspectives') {
       if (aiAbort) aiAbort.abort();
       runPerspectives(q);
       return;
     }
     cancelPerspectives();
-    if (restoreStandardResults(q)) askAstra(q, lastStandardResults);
-    else runSearch(q);
+    // Mode changes are panel-only. Never rerun or rebuild web results: doing so
+    // flashes the list and can spend another limited search request if cache
+    // state is unavailable. A real query/navigation is the only search trigger.
+    if (lastStandardQuery === q) askAstra(q, lastStandardResults);
   }
 
   function showPerspectivesFallback(q, message) {
@@ -687,12 +787,6 @@
     button.id = 'perspectives-fallback-answer';
     button.type = 'button';
     button.textContent = 'Try standard answer';
-    button.addEventListener('click', () => {
-      setAiPanelMode('answer');
-      cancelPerspectives();
-      if (restoreStandardResults(q)) askAstra(q, lastStandardResults);
-      else runSearch(q);
-    });
     fallback.appendChild(button);
     body.appendChild(fallback);
   }
@@ -716,7 +810,6 @@
       '<div class="perspectives-skel"><span></span><span></span></div>' +
       '<div class="perspectives-skel"><span></span><span></span><span></span></div></div>';
 
-    const t0 = performance.now();
     try {
       const res = await fetch(
         backendBase() + '/api/perspectives?q=' + encodeURIComponent(q) + '&n=30',
@@ -736,11 +829,8 @@
         sources: r.sources,
         description: r.description || r.snippet || '',
       }));
-      lastResults = results;
-      renderResults(results, 0, false);
-      if (scrollObserver) scrollObserver.disconnect();
-      const secs = ((performance.now() - t0) / 1000).toFixed(2);
-      $('r-meta').textContent = results.length ? COPY.metaLine(results.length, secs) : '';
+      // Perspectives is an alternate AI interpretation of the same search.
+      // Keep the standard web-result list and its pagination completely intact.
       if (data.perspectives === null) {
         showPerspectivesFallback(q, 'Perspectives analysis unavailable for this query.');
       } else {
@@ -1320,6 +1410,7 @@
     collapseWebsiteSummary();
     if (aiAbort) aiAbort.abort();
     cancelPerspectives();
+    aiPanelCache.clear();
     const token = ++searchToken;
     const panel = $('ai-panel');
     const aiOn = getAiMode();
@@ -1519,8 +1610,27 @@
     }
   }
 
+  function ensureThinking() {
+    let t = $('ai-thinking');
+    if (t) return t;
+    t = document.createElement('div');
+    t.className = 'ai-thinking';
+    t.id = 'ai-thinking';
+    t.setAttribute('role', 'status');
+    t.setAttribute('aria-live', 'polite');
+    t.hidden = true;
+    const orb = document.createElement('span');
+    orb.className = 'ai-orb';
+    const line = document.createElement('span');
+    line.className = 'ai-thinking-line';
+    line.id = 'ai-thinking-line';
+    t.append(orb, line);
+    $('ai-body').before(t);
+    return t;
+  }
+
   function showThinking(topic, beforeEl) {
-    const t = $('ai-thinking');
+    const t = ensureThinking();
     if (beforeEl) beforeEl.before(t);               // place where the answer will land
     t.hidden = false;
     $('ai-thinking-line').textContent = COPY.loadingQuips[Math.floor(Math.random() * COPY.loadingQuips.length)];
@@ -1529,7 +1639,10 @@
     });
   }
 
-  function hideThinking() { $('ai-thinking').hidden = true; }
+  function hideThinking() {
+    const t = $('ai-thinking');
+    if (t) t.hidden = true;
+  }
 
   // ── follow-up thread state (reset on every new search) ──
   let thread = [];           // alternating {role, content} pairs after the seed
