@@ -190,20 +190,26 @@ window.regenerateCurrentTitle = () => {
     }
 };
 
-window.renameChat = async (id) => {
+window.renameChat = (id) => {
     if (!window.allChats[id]) return;
     const oldTitle = window.allChats[id].title;
-    const rawNewTitle = prompt("Enter new chat title:", oldTitle);
-    if (rawNewTitle !== null && rawNewTitle.trim() !== "" && rawNewTitle !== oldTitle) {
-        const newTitle = rawNewTitle.replace(/[\r\n]+/g, ' ').trim();
-        window.allChats[id].title = newTitle;
-        window.allChats[id].titleManual = true;
-        await window.StorageController.saveChat(window.allChats[id]);
-        if (id === window.currentChatId) {
-            window.updateChatTitleDisplay(newTitle);
+    window.showNamingDialog({
+        kind: 'chat',
+        title: 'Rename Chat',
+        placeholder: 'Enter a chat title',
+        value: oldTitle,
+        confirmLabel: 'Rename',
+        onConfirm: async (newTitle) => {
+            if (newTitle === oldTitle) return;
+            window.allChats[id].title = newTitle;
+            window.allChats[id].titleManual = true;
+            await window.StorageController.saveChat(window.allChats[id]);
+            if (id === window.currentChatId) {
+                window.updateChatTitleDisplay(newTitle);
+            }
+            window.renderHistory();
         }
-        window.renderHistory();
-    }
+    });
 };
 
 window.renameCurrentChat = () => {
@@ -230,6 +236,7 @@ window.save = () => {
         isWebSearch: window.isWebSearch,
         isDeepResearch: window.isDeepResearch,
         isThinkingEnabled: window.isThinkingEnabled,
+        thinkingEffort: window.thinkingEffort,
         canvasEnabled: window.canvasEnabled
     };
     window.allChats[window.currentChatId] = chat;
@@ -256,8 +263,11 @@ window.save = () => {
 window.togglePin = async (id) => {
     if (window.allChats[id]) {
         window.allChats[id].pinned = !window.allChats[id].pinned;
-        await window.StorageController.saveChat(window.allChats[id]);
+        if (window.allChats[id].pinned) window.allChats[id].folderId = null;
+        // Render optimistically; persistence must not delay the pin icon or
+        // the chat moving into/out of the pinned group.
         window.renderHistory();
+        await window.StorageController.saveChat(window.allChats[id]);
     }
 };
 
@@ -293,7 +303,10 @@ window.loadChat = (id) => {
     // Restore toggles if saved, or default to false
     window.isWebSearch = !!chat.isWebSearch;
     window.isDeepResearch = !!chat.isDeepResearch;
-    window.isThinkingEnabled = !!chat.isThinkingEnabled;
+    window.thinkingEffort = ['none', 'low', 'medium', 'high', 'ultra'].includes(chat.thinkingEffort)
+        ? chat.thinkingEffort
+        : (chat.isThinkingEnabled ? 'medium' : 'none');
+    window.isThinkingEnabled = window.thinkingEffort !== 'none';
     window.canvasEnabled = !!chat.canvasEnabled;
 
     window.currentChatId = id;
@@ -317,16 +330,57 @@ window.filterChats = (query) => {
     window.renderHistory(query.toLowerCase());
 };
 
-window.toggleChatSearch = () => {
+window.openChatSearch = () => {
     const panel = document.getElementById('chat-search-panel');
     const input = document.getElementById('chat-search-input');
     const button = document.getElementById('sidebar-search-toggle');
     if (!panel || !input) return;
-    const open = panel.hidden;
-    panel.hidden = !open;
-    button?.setAttribute('aria-expanded', String(open));
-    if (open) input.focus();
-    else { input.value = ''; window.filterChats(''); }
+    panel.getAnimations().forEach(animation => animation.cancel());
+    panel.classList.remove('is-closing');
+    panel.hidden = false;
+    button?.setAttribute('aria-expanded', 'true');
+    input.focus({ preventScroll: true });
+};
+
+window.closeChatSearch = ({ animate = true } = {}) => {
+    const panel = document.getElementById('chat-search-panel');
+    const input = document.getElementById('chat-search-input');
+    const button = document.getElementById('sidebar-search-toggle');
+    if (!panel || !input) return;
+    panel.getAnimations().forEach(animation => animation.cancel());
+    panel.classList.remove('is-closing');
+    button?.setAttribute('aria-expanded', 'false');
+    input.blur();
+    input.value = '';
+    window.filterChats('');
+    if (panel.hidden) return;
+    if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        panel.hidden = true;
+        return;
+    }
+    panel.classList.add('is-closing');
+    const finishClose = () => {
+        if (!panel.classList.contains('is-closing')) return;
+        panel.classList.remove('is-closing');
+        panel.hidden = true;
+    };
+    const closingAnimation = panel.getAnimations().find(animation => animation.animationName === 'chat-search-slide-up');
+    if (closingAnimation) closingAnimation.finished.then(finishClose, finishClose);
+    else finishClose();
+};
+
+window.toggleChatSearch = () => {
+    const panel = document.getElementById('chat-search-panel');
+    if (!panel) return;
+    const open = panel.hidden || panel.classList.contains('is-closing');
+    if (!open) {
+        window.closeChatSearch();
+        return;
+    }
+    // Search remains available in the desktop rail. Selecting it restores the
+    // full library and opens the field as one coordinated action.
+    if (window.isSidebarCollapsed?.()) window.setSidebarCollapsed?.(false);
+    window.openChatSearch();
 };
 
 window.selectModel = (key) => {
@@ -374,6 +428,7 @@ window.resetChat = () => {
     window.isWebSearch = false;
     window.isDeepResearch = false;
     window.isThinkingEnabled = false;
+    window.thinkingEffort = 'none';
     window.canvasEnabled = false;
 
     window.toggleSendIcon('send');

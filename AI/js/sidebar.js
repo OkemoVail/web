@@ -40,12 +40,41 @@
     // "Rail morph"); glass materials re-measure as their hosts resize, and
     // once more when the move settles.
     let settleTimer = 0;
-    window.toggleSidebar = () => {
+    let repaintFrame = 0;
+    function repaintGlassDuringTransition(sidebar) {
+        cancelAnimationFrame(repaintFrame);
+        if (reducedMotion.matches || navigator.webdriver) {
+            window.LiquidDesign?.repaint?.(sidebar);
+            return;
+        }
+        const started = performance.now();
+        const paint = now => {
+            window.LiquidDesign?.repaint?.(sidebar);
+            if (now - started < 420) repaintFrame = requestAnimationFrame(paint);
+            else repaintFrame = 0;
+        };
+        repaintFrame = requestAnimationFrame(paint);
+    }
+    function isCollapsed(sidebar) {
+        return innerWidth < 768
+            ? sidebar.classList.contains('-translate-x-full')
+            : document.body.classList.contains('sidebar-collapsed');
+    }
+    window.isSidebarCollapsed = () => {
+        const sidebar = window.els?.sidebar || document.getElementById('sidebar');
+        return sidebar ? isCollapsed(sidebar) : false;
+    };
+    window.setSidebarCollapsed = collapsed => {
         const sidebar = window.els.sidebar;
         if (!sidebar) return;
-        const current = innerWidth < 768 ? sidebar.classList.contains('-translate-x-full') : document.body.classList.contains('sidebar-collapsed');
+        const current = isCollapsed(sidebar);
+        if (current === collapsed) return;
+        // Search is part of the expanded library, so collapsing always resets
+        // it. Skip its own exit motion because the entire library is leaving.
+        if (collapsed) window.closeChatSearch?.({ animate: false });
         measureProfile();
-        applyState(sidebar, !current);
+        applyState(sidebar, collapsed);
+        repaintGlassDuringTransition(sidebar);
         clearTimeout(settleTimer);
         const refresh = () => {
             window.LiquidDesign?.refresh(sidebar);
@@ -53,6 +82,11 @@
         };
         if (reducedMotion.matches || navigator.webdriver) refresh();
         else settleTimer = setTimeout(refresh, 420);
+    };
+    window.toggleSidebar = () => {
+        const sidebar = window.els.sidebar;
+        if (!sidebar) return;
+        window.setSidebarCollapsed(!isCollapsed(sidebar));
     };
     addEventListener('DOMContentLoaded', () => {
         measureProfile();

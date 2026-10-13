@@ -271,9 +271,11 @@
       // once the pointer pulls past its edge.
       var nestedAction = options.editableSurface && event.target.closest('button, a');
       if (nestedAction && !options.staticActionSurface) return;
-      // A nested independent glass control owns its own gesture; capturing it
-      // here would steal pointer capture and lock that control in place.
-      if (options.editableSurface && event.target.closest('[data-lgp-control]') !== button) return;
+      // A nested independent glass control or compound component owns its own
+      // gesture. Capturing it here would make the parent surface deform along
+      // with an Options sheet dragged above it.
+      var nestedControl = options.editableSurface && event.target.closest('[data-lgp-control],[data-lgp-component]');
+      if (nestedControl && nestedControl !== button) return;
       if (nestedAction || (options.editableSurface && event.target.closest('input, textarea, select, [contenteditable]'))) {
         // Let the native field place its caret/select text until the pointer
         // leaves the resting glass. Then hand that same gesture to the spring.

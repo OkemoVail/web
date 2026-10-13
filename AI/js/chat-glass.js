@@ -43,17 +43,89 @@
             menu.appendChild(divider);
         }
     });
-    // A root-level live Options cluster avoids clipping by the header or sidebar.
+    // Keep Options at the root so its sheet cannot be clipped by the header.
+    const actionCluster = document.getElementById('chat-corner-actions');
+    const newChat = document.getElementById('chat-new-button');
     const anchorSlot = document.createElement('span');
-    anchorSlot.className = 'chat-more-anchor';
+    anchorSlot.id = 'chat-corner-actions';
+    anchorSlot.className = 'chat-corner-actions-anchor';
     anchorSlot.setAttribute('aria-hidden', 'true');
-    trigger.replaceWith(anchorSlot);
+    actionCluster.replaceWith(anchorSlot);
     const menuCluster = document.createElement('div');
     menuCluster.id = 'chat-more-glass';
     menuCluster.setAttribute('data-liquid-design-component', 'options');
+    newChat.setAttribute('data-liquid-button', '');
+    newChat.setAttribute('data-liquid-menu-source', '');
+    trigger.setAttribute('data-liquid-menu-source', '');
     trigger.setAttribute('data-liquid-design-toggle', menu.id);
-    menuCluster.append(trigger, menu);
+    const sourceGroup = document.createElement('div');
+    sourceGroup.className = 'chat-corner-actions-source';
+    sourceGroup.setAttribute('data-liquid-menu-source-group', '');
+    const sourceFace = document.createElement('div');
+    sourceFace.className = 'chat-corner-actions-source-face';
+    const sourceDivider = document.createElement('span');
+    sourceDivider.className = 'chat-corner-actions-divider';
+    sourceDivider.setAttribute('aria-hidden', 'true');
+    sourceFace.append(newChat, sourceDivider, trigger);
+    sourceGroup.append(sourceFace);
+    menuCluster.append(sourceGroup, menu);
     document.body.appendChild(menuCluster);
+
+    const modelTrigger = document.getElementById('chat-model-trigger');
+    const modelTriggerName = document.getElementById('chat-model-trigger-name');
+    const modelMenu = document.getElementById('chat-model-menu');
+    const modelOptions = document.getElementById('chat-model-options');
+    const thinkingEffort = document.getElementById('chat-thinking-effort');
+    const thinkingEffortValue = document.getElementById('chat-thinking-effort-value');
+    const thinkingEffortLabels = Array.from(document.querySelectorAll('.chat-thinking-effort-labels span'));
+    const modelPicker = document.getElementById('chat-model-picker');
+    const modelChevron = document.getElementById('chat-model-chevron');
+    const thinkingEfforts = ['none', 'low', 'medium', 'high', 'ultra'];
+    Object.entries(window.MODELS || {}).forEach(([key, model]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'chat-model-option';
+        button.setAttribute('data-liquid-design', '');
+        button.dataset.modelKey = key;
+        button.setAttribute('role', 'radio');
+        button.innerHTML = `<span>${model.name}</span><i data-feather="check" aria-hidden="true"></i>`;
+        button.addEventListener('click', () => {
+            window.selectModel?.(key);
+            setModelMenuOpen(false, true);
+        });
+        modelOptions.appendChild(button);
+    });
+    function setModelMenuOpen(open, restoreFocus = false) {
+        const currentlyOpen = modelTrigger.getAttribute('aria-expanded') === 'true';
+        if (open !== currentlyOpen) modelTrigger.click();
+        if (!open && restoreFocus) modelTrigger.focus({ preventScroll: true });
+    }
+    function syncHeaderControls() {
+        const selected = Object.entries(window.MODELS || {}).find(([, model]) => model.id === window.currentModel?.id);
+        modelTriggerName.textContent = selected?.[1].name || window.currentModel?.name || 'Model';
+        modelTrigger.setAttribute('aria-label', `Choose model, current model ${modelTriggerName.textContent}`);
+        modelOptions.querySelectorAll('.chat-model-option').forEach(button => {
+            const active = button.dataset.modelKey === selected?.[0];
+            button.setAttribute('aria-checked', String(active));
+            button.classList.toggle('is-active', active);
+        });
+        const effort = thinkingEfforts.includes(window.thinkingEffort) ? window.thinkingEffort : 'none';
+        const effortIndex = thinkingEfforts.indexOf(effort);
+        const effortLabel = effort[0].toUpperCase() + effort.slice(1);
+        thinkingEffort.value = String(effortIndex);
+        thinkingEffort.setAttribute('aria-valuetext', effortLabel);
+        thinkingEffort.style.setProperty('--thinking-effort-progress', `${effortIndex * 25}%`);
+        thinkingEffortValue.value = effortLabel;
+        thinkingEffortValue.textContent = effortLabel;
+        thinkingEffortLabels.forEach((label, index) => label.classList.toggle('is-active', index === effortIndex));
+    }
+    thinkingEffort.addEventListener('input', () => {
+        window.setThinkingEffort?.(thinkingEfforts[Number(thinkingEffort.value)] || 'none');
+    });
+    window.addEventListener('chat-controls-update', syncHeaderControls);
+    syncHeaderControls();
+    window.LiquidDesign?.refresh(modelChevron);
+
     function place() {
         const anchor = anchorSlot.getBoundingClientRect();
         const viewport = window.visualViewport;
@@ -133,8 +205,10 @@
     const chatsHeading = document.createElement('p');
     chatsHeading.className = 'chat-library-section-heading';
     chatsHeading.textContent = 'Chats';
-    // Directly above the chat rows, below the folders block.
-    document.getElementById('recents-section').prepend(chatsHeading);
+    chatsHeading.dataset.historyLayoutKey = 'heading:chats';
+    // Directly above ordinary chats. The optional Pinned section remains
+    // above this heading inside the same scrolling library.
+    document.getElementById('history-list').before(chatsHeading);
     const backToCategories = document.createElement('button');
     backToCategories.type = 'button';
     backToCategories.className = 'chat-settings-back';

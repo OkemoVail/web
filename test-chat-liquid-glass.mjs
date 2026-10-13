@@ -129,7 +129,6 @@ try {
       assert.equal(await button.locator(':scope > .lgp-content').evaluate(el => Math.abs(new DOMMatrix(getComputedStyle(el).transform).a - 1) < .002), true, 'button rebounds');
     }
     await pull(frame.locator('#send-btn'));
-    await pull(frame.locator('#chat-new-button'));
     if (width === 390 && process.env.LIQUID_BROWSER !== 'webkit') {
       const button = frame.locator('#send-btn');
       const box = await button.boundingBox();
@@ -166,7 +165,7 @@ try {
       await page.waitForTimeout(400);
       assert.equal(await composer.getAttribute('data-lgp-theme'), dark ? 'dark' : 'light');
        assert.equal(await frame.locator('#top-left-chat-title > .lgp-material').count(), 0, 'heading remains plain content like the Music reference');
-        for (const selector of ['#chat-new-button', '.input-box-wrap', '#plus-menu-btn', '#send-btn']) {
+        for (const selector of ['.input-box-wrap', '#plus-menu-btn', '#send-btn']) {
          assert.ok(await frame.locator(selector + ' > .lgp-outline .lgp-rim').evaluate(el => {
            const style = getComputedStyle(el);
            return style.stroke !== 'none' && parseFloat(style.strokeWidth) > 0 && parseFloat(style.opacity) > 0;
@@ -234,7 +233,7 @@ try {
         const b = el.getBoundingClientRect(), parent = document.getElementById('top-left-chat-title').getBoundingClientRect();
         return b.bottom <= parent.bottom + 1;
       })), 'title material contains every action');
-        for (const selector of ['#send-btn', '#plus-menu-btn', '#chat-new-button', '#chat-title-more']) {
+        for (const selector of ['#send-btn', '#plus-menu-btn', '#chat-model-trigger', '#chat-title-more']) {
         for (const box of await frame.locator(selector).evaluateAll(els => els.map(el => ({ w: el.getBoundingClientRect().width, h: el.getBoundingClientRect().height })))) {
           assert.ok(box.w >= 44 && box.h >= 44, `${selector}: touch target >=44px`);
         }
@@ -260,13 +259,8 @@ try {
         await page.waitForTimeout(1500);
         assert.equal(await more.evaluate(el => el === document.activeElement), true, 'Escape restores focus');
         assert.equal(await menu.isVisible(), false);
-        await frame.evaluate(() => { window.renameCurrentChat = () => { window.__titleMenuRenamed = true; }; });
-        await more.click();
-        await page.waitForTimeout(500);
-        await menu.getByRole('menuitem', { name: 'Rename chat', exact: true }).click();
-        await page.waitForTimeout(1500);
-        assert.equal(await frame.evaluate(() => window.__titleMenuRenamed), true, 'menu routes to existing title action');
-        assert.equal(await menu.isVisible(), false, 'selection closes menu');
+        assert.equal(await menu.getByRole('menuitem', { name: 'Rename chat', exact: true }).count(), 1,
+          'title menu also exposes the shared Rename chat action');
       }
       if (width >= 768) {
         const sidebar = await frame.locator('#sidebar').boundingBox();

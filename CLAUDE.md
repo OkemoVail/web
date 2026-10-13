@@ -135,6 +135,58 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
+Settings shortcut Liquid Options (2026-10-13): the sidebar footer gear and
+its General/Profile/Personality/Memories/Storage menu are one native
+`data-liquid-design-component="options"` opening upward. The component owns a
+single Liquid Glass material that morphs between the 48px gear capsule and the
+216px shortcut sheet; do not restore the old opaque Tailwind dropdown or
+manual `.hidden` toggling. CSS is scoped to `#settings-submenu-wrap` in
+`src/site.css`; regression: `node test-chat-settings-liquid-menu.mjs`.
+
+New-folder Liquid Glass dialog (2026-10-13): the `Your Folders` folder-plus is
+an independently enhanced 44px Liquid Design control. `showCustomPrompt` accepts
+an optional action label, and folder create/rename use `Create`/`Rename` rather
+than generic `Save`. Prompt/confirm cards are live Liquid Design surfaces with
+static nested actions; folder prompts place a separate editable glass text field
+above two equal-width glass action pills. The chat adapter allow-list in
+`src/liquid-design-site.js` must include dynamically inserted modal surfaces and
+their buttons, otherwise its chat guard intentionally skips them. Regression:
+`node test-chat-folder-dialog.mjs` (set `FOLDER_DIALOG_SCREENSHOT=1` for Temp
+desktop/mobile captures). The overlay uses the toast-level root stacking context:
+the focused Liquid Design card can promote itself to `--z-chrome`, which is only
+local to that overlay and must not let the chat header/sidebar paint above it.
+Use a high-fill, 32px-blur frost on the card and a high-fill field so greeting
+copy cannot remain legible through the dialog; keep the page behind it softly
+blurred rather than increasing the scrim to an opaque gray.
+
+Shared chat/folder naming (2026-10-13): folder create, folder rename, and chat
+rename all call `showNamingDialog()` in `AI/js/modals.js`; do not reintroduce
+native `prompt()` for chat titles. The shared card identifies its context with
+`data-naming-dialog="folder|chat"`. Rename chat is available from both each
+history row's three-dot Liquid Options menu (`AI/js/menus.js`) and the top
+title-actions menu, but not as an inline heading button. The row sheet reverses into its ellipsis before the
+dialog opens, avoiding competing overlay/focus layers. Regression coverage:
+`node test-chat-folder-dialog.mjs` and `node test-chat-library-menu.mjs`.
+
+Chat composer line-break morph (2026-10-12): the Claude reference recording at
+`C:\Users\okemo\Videos\2026-10-10 22-52-28.mp4` establishes that the composer
+is one compact row until copy wraps or contains a newline, then the same shell
+grows upward into a writing palette: copy occupies a full-width top row, Add
+and Send remain pinned along the bottom, and the corners tighten. Removing the
+line reverses the geometry smoothly. `main.js` measures copy in a hidden mirror
+at compact-field width (rather than using expanded textarea `scrollHeight`,
+whose control-reserving padding caused runaway height and blocked contraction),
+freezes the painted dimensions, and animates to explicit targets. The final
+rules are in the composer block at the end of `src/site.css`; regression check:
+`node test-chat-composer-transition.mjs`.
+An empty value is an explicit canonical compact state, so clearing, sending,
+resetting, or undoing to empty always returns the field and controls to their
+original one-row positions regardless of stale measurements or animation state.
+One rendered line is canonical compact state too. The mirror first measures a
+real one-line baseline with the textarea's inherited typography and padding;
+the palette opens only when measured copy exceeds that baseline, and contracts
+to the original row as soon as the copy fits on one visual line again.
+
 Chat sidebar template (2026-10-11): user supplied a placeholder-colored
 wireframe (colors are NOT to be followed, only placement). Rounded sidebar
 card; search/collapse toolbar pill pinned top-right (20px insets, 72px header);
@@ -155,9 +207,8 @@ Chat sidebar cleanup (2026-10-11): user kept only the New chat row; the
 Research and Try VoidAI sidebar links were removed from `AI/chat.html`
 (the composer plus-menu "Research" entry is a "Coming soon" placeholder, so
 chat no longer links to `research.html`). The chat list
-is one continuous list with no date dividers (Today / Last 7 days / Dust
-Collecting / Pinned headers removed from `renderHistory` in `history.js`);
-pinned chats still sort first. With zero folders, `renderHistory` shows
+has no date dividers (Today / Last 7 days / Dust Collecting). Pinned chats
+were later moved into the dedicated Pinned section described below. With zero folders, `renderHistory` shows
 `.folders-empty`: an outlined open empty-folder SVG, a bold "404" and "No
 folders found" (CSS at the end of the sidebar template block in `src/site.css`,
 hidden in the collapsed rail). New chat follows a Perplexity reference: a
@@ -174,8 +225,30 @@ everything (logo, New chat circle, "Your Folders", "Chats",
 chat titles, profile pill) starts 20px from the sidebar's inner left edge, and
 trailing icons (toolbar, folder-plus, row kebabs, Settings) end 20px from the
 right; chat-row hover fills extend 12px past the text. The "Chats" heading is
-inserted by `chat-glass.js` at the top of `#recents-section`, i.e. directly
-above the chat rows and below the folders block.
+inserted by `chat-glass.js` directly before `#history-list`.
+
+Chat pinning (2026-10-13): pinned chats render in a dedicated `Pinned`
+section above the ordinary `Chats` list. Rows do not show pin icons or pin
+buttons: pinning is spatial. Dragging a pinned row into the Chats list, a
+folder, or another root drop target unpins it; dragging any chat into the
+Pinned target pins it and removes its folder assignment.
+The row gesture is pointer-driven (`onChatPointerDown` in `folders.js`), not
+native HTML `draggable`: this keeps drag start reliable over nested row buttons
+and supports mouse, pen, and touch in Chromium and WebKit. It uses a 6px start
+threshold, a floating title preview, and suppresses the post-drag click so a
+drop cannot also open the chat.
+The `Drop here to pin` target opens with a 280ms layout-height/margin transition
+(`.chat-pin-drop-zone.is-visible`) so the Chats heading and rows are physically
+pushed downward. For an initially empty Pinned section, `__showPinDestination`
+commits the collapsed geometry before adding the open classes on the next
+animation frame; hiding is delayed until the reverse transition finishes.
+Dropping does not tear down into a new layout in one frame: `history.js`
+captures stable chat/heading geometry before `renderHistory()` and FLIP-animates
+the replacement nodes afterward, while the floating title preview flies into
+the destination row. Dropping a row back in its unchanged slot settles the
+preview into that row rather than rebuilding the list.
+Pinned chats do not consume ordinary chat pagination. Regression:
+`node test-chat-pinning.mjs`.
 
 Sidebar collapse click fix (2026-10-12): real mouse clicks on the sidebar
 Collapse/Search buttons did nothing. `src/liquid-design-site.js` `enhance()`
@@ -218,6 +291,15 @@ pointer/geometry math in the track's unrotated local frame; the plugin's
 `paint()` measures controls in that frame too. Upright controls take the old
 path unchanged. Check: `node test-chat-sidebar-rail-stretch.mjs` (also
 `LIQUID_BROWSER=webkit`) compares rotated vs upright stretch.
+
+Rail glass lighting orientation (2026-10-12): while the toolbar/profile glass
+rotates into the collapsed rail, its silhouette follows the controls but the
+reflected rim and prismatic highlight stay page-upright. The plugin
+counter-rotates both SVG gradients by `LiquidDesignFrame`'s signed angle.
+`LiquidDesign.repaint(scope)` provides a paint-only path, and `sidebar.js` uses
+it during the 420ms rail transition so the highlight does not briefly rotate
+with the buttons between the initial and settled layouts. Contract:
+`node test-chat-sidebar-rail.mjs`.
 
 Chat glass touch freeze (2026-10-11): `liquid-design.css` gives
 `[data-lgp-control="surface"]` `touch-action: auto`, so on touch the browser

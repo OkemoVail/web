@@ -110,7 +110,8 @@
     highlights.style.clipPath = material.style.clipPath;
     el.prepend(material, drawing, highlights);
     var record = { el: el, owned: owned, material: material, highlights: highlights, drawing: drawing, shape: shape,
-      maskPath: maskPath, mask: edgeMask, rim: rim, prism: prism, prismGradient: prismGradient, contrastRim: contrastRim, controls: new Set(), key: '', contour: null };
+      maskPath: maskPath, mask: edgeMask, rim: rim, lightGradient: gradient, prism: prism,
+      prismGradient: prismGradient, contrastRim: contrastRim, controls: new Set(), key: '', contour: null };
     groups.set(el, record); return record;
   }
   function pathFor(b) {
@@ -137,6 +138,15 @@
     // A rotated group (the chat rail's vertical toolbar pill) is measured
     // in its own unrotated frame; screen bounding boxes swap its axes.
     var frame = root.LiquidDesignFrame ? root.LiquidDesignFrame(group.el) : null;
+    // The material follows a rotated control, but its reflected light remains
+    // fixed to the page. Counter-rotate the gradients rather than the outline,
+    // so the glass silhouette still turns with its host.
+    var frameAngle = frame ? frame.angle : 0;
+    if (frameAngle > 180) frameAngle -= 360;
+    var lightRotation = frameAngle ? 'rotate(' + -frameAngle + ' .5 .5)' : '';
+    if (group.lightGradient.getAttribute('gradientTransform') !== lightRotation) {
+      group.lightGradient.setAttribute('gradientTransform', lightRotation);
+    }
     function localRect(el) {
       if (!frame) return el.getBoundingClientRect();
       var r = el.getBoundingClientRect(), c = frame.toLocal(r.left + r.width / 2, r.top + r.height / 2);
@@ -247,7 +257,10 @@
       if (response >= energy) { energy = response; angle = Math.atan2(state.lightPoint.y, state.lightPoint.x) * 180 / Math.PI; }
     });
     group.prism.style.opacity = 'calc(var(--liquid-design-prism-opacity, var(--lgp-prism-opacity, 0)) * ' + (.45 + energy * .55) + ')';
-    group.prismGradient.setAttribute('gradientTransform', 'rotate(' + (angle * energy * .2) + ' .5 .5)');
+    var prismRotation = 'rotate(' + (angle * energy * .2 - frameAngle) + ' .5 .5)';
+    if (group.prismGradient.getAttribute('gradientTransform') !== prismRotation) {
+      group.prismGradient.setAttribute('gradientTransform', prismRotation);
+    }
     group.mask.setAttribute('x', '-2'); group.mask.setAttribute('y', '-2'); group.mask.setAttribute('width', w + 4); group.mask.setAttribute('height', h + 4);
     group.drawing.setAttribute('viewBox', '0 0 ' + Math.max(1, w) + ' ' + Math.max(1, h));
     group.drawing.setAttribute('preserveAspectRatio', 'none');
@@ -413,6 +426,12 @@
         }
       });
       attach(); schedule();
+    },
+    repaint: function (scope) {
+      scope = scope || document;
+      groups.forEach(function (group) {
+        if (scope === document || scope === group.el || scope.contains(group.el)) paint(group);
+      });
     },
     destroy: function (scope) {
       scope = scope || document;

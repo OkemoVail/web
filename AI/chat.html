@@ -29,11 +29,11 @@
     <!-- Monaco Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
-    <link rel="stylesheet" href="../src/site.css?v=20261012-rail-inset">
+    <link rel="stylesheet" href="../src/site.css?v=20261013-thinking-effort">
     <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261013-profile-recipe">
     <script src="../src/glass-navigation.js?v=20261012-native-chat"></script>
-    <script defer src="../liquid-design/liquid-design.js?v=20261012-rail-rotation"></script>
-    <script defer src="../src/liquid-design-site.js?v=20261012-new-chat-click"></script>
+    <script defer src="../liquid-design/liquid-design.js?v=20261013-button-tracking"></script>
+    <script defer src="../src/liquid-design-site.js?v=20261013-folder-dialog-glass"></script>
     
 
     <style id="dynamic-accent-styles">
@@ -384,7 +384,8 @@
 
             <!-- Recents search bar + history -->
             <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 mt-3">
-                <div id="chat-search-panel" class="sb-search-wrap sb-row-text" hidden>
+                <div id="chat-search-panel" class="sb-search-wrap sb-row-text" role="search" aria-label="Search chats"
+                    data-liquid-design="surface" data-liquid-design-independent hidden>
                     <i data-feather="search" class="sb-search-icon"></i>
                     <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..."
                         data-t-placeholder="ph_search_chats" oninput="window.filterChats(this.value)">
@@ -396,6 +397,18 @@
                     <div id="recents-scroll-area" class="flex-1 overflow-y-auto no-scrollbar"
                         ondragenter="window.onFolderDragEnter(event)" ondragleave="window.onFolderDragLeave(event)"
                         ondragover="window.onFolderDragOver(event)" ondrop="window.onFolderDrop(event, null)">
+                        <section id="chat-pin-section" class="chat-pin-section" aria-labelledby="chat-pin-heading" hidden>
+                            <p id="chat-pin-heading" class="chat-library-section-heading" data-history-layout-key="heading:pinned">Pinned</p>
+                            <div id="chat-pin-drop-zone" class="chat-pin-drop-zone" aria-hidden="true"
+                                ondragenter="window.onPinDropEnter(event)"
+                                ondragover="window.onPinDropOver(event)"
+                                ondragleave="window.onPinDropLeave(event)"
+                                ondrop="window.onPinDrop(event)">
+                                <i data-feather="pin" aria-hidden="true"></i>
+                                <span>Drop here to pin</span>
+                            </div>
+                            <div id="pinned-history-list" class="flex flex-col px-2 gap-0.5"></div>
+                        </section>
                         <div id="history-list" class="flex flex-col pb-20 px-2 gap-0.5"
                             ondragover="window.onChatListDragOver(event)"
                             ondrop="window.onChatListDrop(event, null)"></div>
@@ -431,18 +444,19 @@
                     </div>
                     </div>
                     <div id="profile-row-actions" class="profile-row-actions-detached">
-                        <div class="relative" id="settings-submenu-wrap">
-                            <button data-liquid-design="button" data-liquid-design-independent onclick="event.stopPropagation(); window.toggleSettingsSubmenu()"
-                                title="Settings" aria-label="Settings" class="sb-icon-btn">
+                        <div id="settings-submenu-wrap" data-liquid-design-component="options"
+                            data-liquid-design-menu-direction="up">
+                            <button type="button" data-liquid-design data-liquid-design-toggle="settings-submenu"
+                                title="Settings" aria-label="Settings" aria-controls="settings-submenu"
+                                aria-expanded="false" class="sb-icon-btn">
                                 <i data-feather="settings" class="w-[1.3rem] h-[1.3rem]"></i>
                             </button>
-                            <div id="settings-submenu"
-                                class="hidden absolute bottom-full right-0 mb-2 w-44 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl z-50 p-1 flex flex-col gap-0.5" style="box-shadow: var(--shadow-float)">
-                                <button onclick="event.stopPropagation(); window.openSettingsTo('general')" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="sliders" class="w-3.5 h-3.5 shrink-0"></i><span data-t="tab_general">General</span></button>
-                                <button onclick="event.stopPropagation(); window.openSettingsTo('profile')" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="user" class="w-3.5 h-3.5 shrink-0"></i><span data-t="btn_profile">Profile</span></button>
-                                <button onclick="event.stopPropagation(); window.openPersonality(); window.closeSettingsSubmenu();" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="smile" class="w-3.5 h-3.5 shrink-0"></i><span>Personality</span></button>
-                                <button onclick="event.stopPropagation(); window.openSettingsTo('memories'); window.renderMemoriesTab(); window.closeSettingsSubmenu();" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="bookmark" class="w-3.5 h-3.5 shrink-0"></i><span>Memories</span></button>
-                                <button onclick="event.stopPropagation(); window.openSettingsTo('storage'); window.renderStorageTab(); window.closeSettingsSubmenu();" class="w-full text-left px-3 py-2 rounded-lg text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2.5"><i data-feather="hard-drive" class="w-3.5 h-3.5 shrink-0"></i><span>Storage</span></button>
+                            <div id="settings-submenu" role="menu" aria-label="Settings shortcuts" hidden inert>
+                                <button type="button" role="menuitem" data-liquid-design onclick="window.openSettingsTo('general')"><i data-feather="sliders"></i><span data-t="tab_general">General</span></button>
+                                <button type="button" role="menuitem" data-liquid-design onclick="window.openSettingsTo('profile')"><i data-feather="user"></i><span data-t="btn_profile">Profile</span></button>
+                                <button type="button" role="menuitem" data-liquid-design onclick="window.openPersonality()"><i data-feather="smile"></i><span>Personality</span></button>
+                                <button type="button" role="menuitem" data-liquid-design onclick="window.openSettingsTo('memories'); window.renderMemoriesTab();"><i data-feather="bookmark"></i><span>Memories</span></button>
+                                <button type="button" role="menuitem" data-liquid-design onclick="window.openSettingsTo('storage'); window.renderStorageTab();"><i data-feather="hard-drive"></i><span>Storage</span></button>
                             </div>
                         </div>
                     </div>
@@ -469,11 +483,33 @@
                     <i data-feather="menu" class="w-[1.15rem] h-[1.15rem]"></i>
                 </button>
             </div>
-            <h1 id="chat-title-text">New chat</h1>
-            <button onclick="window.renameCurrentChat()" aria-label="Rename chat" title="Rename Chat" data-t-title="title_rename_chat"
-                class="chat-title-inline flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150">
-                <i data-feather="edit-2" class="w-5 h-5"></i>
-            </button>
+            <div id="chat-model-picker" class="chat-model-picker">
+                <span id="chat-model-trigger-name">Saga</span>
+                <div id="chat-model-chevron" data-liquid-design-component="options">
+                    <button id="chat-model-trigger" type="button" data-liquid-design data-liquid-design-toggle="chat-model-menu"
+                        aria-label="Choose model" aria-haspopup="menu"
+                        aria-expanded="false" aria-controls="chat-model-menu">
+                        <i data-feather="chevron-down" aria-hidden="true"></i>
+                    </button>
+                    <div id="chat-model-menu" data-liquid-menu role="menu" aria-label="Model and thinking settings" hidden inert>
+                        <p class="chat-model-menu-label">Model</p>
+                        <div id="chat-model-options" role="radiogroup" aria-label="Model"></div>
+                        <div class="chat-model-menu-divider" aria-hidden="true"></div>
+                        <div class="chat-thinking-effort">
+                            <div class="chat-thinking-effort-heading">
+                                <label for="chat-thinking-effort">Thinking effort</label>
+                                <output id="chat-thinking-effort-value" for="chat-thinking-effort">None</output>
+                            </div>
+                            <input id="chat-thinking-effort" type="range" min="0" max="4" step="1" value="0"
+                                aria-valuetext="None">
+                            <div class="chat-thinking-effort-labels" aria-hidden="true">
+                                <span>None</span><span>Low</span><span>Medium</span><span>High</span><span>Ultra</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h1 id="chat-title-text" hidden>New chat</h1>
             <button onclick="window.regenerateCurrentTitle()" aria-label="Regenerate title" title="Regenerate Title"
                 data-t-title="title_regenerate_title"
                 class="chat-title-inline flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 transition-colors duration-150">
@@ -493,7 +529,7 @@
                 <i data-feather="thumbs-down" class="w-5 h-5"></i>
             </button>
             <div id="chat-corner-actions">
-                <button id="chat-new-button" type="button" data-liquid-design data-liquid-design-independent onclick="window.resetChat()" aria-label="New chat" title="New chat"><i data-feather="edit"></i></button>
+                <button id="chat-new-button" type="button" onclick="window.resetChat()" aria-label="New chat" title="New chat"><i data-feather="edit"></i></button>
                 <button id="chat-title-more" type="button" aria-label="Title actions" aria-haspopup="menu" aria-expanded="false" aria-controls="chat-title-menu"><i data-feather="more-horizontal"></i></button>
             </div>
         </div>
@@ -579,8 +615,9 @@
                 <div id="input-inner" class="flex w-full px-3 py-2.5">
 
                     <!-- LEFT: plus / attach menu -->
-                    <div id="plus-menu-container" class="relative z-50 shrink-0">
-                        <button id="plus-menu-btn" type="button" data-liquid-design data-liquid-design-independent aria-label="Add tools" aria-controls="plus-menu" onclick="window.toggleMenu(event, 'plus-menu')"
+                    <div id="plus-menu-container" class="relative z-50 shrink-0"
+                        data-liquid-design-component="options" data-liquid-design-menu-direction="up">
+                        <button id="plus-menu-btn" type="button" data-liquid-design data-liquid-design-toggle="plus-menu" aria-label="Add tools" aria-controls="plus-menu" onclick="event.stopPropagation()"
                             class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-900/10 dark:hover:bg-zinc-100/10 transition-all cursor-pointer">
                             <i data-feather="plus" class="w-4 h-4"></i>
                             <span id="plus-active-icon" class="flex items-center gap-0.5" style="display:none">
@@ -620,9 +657,8 @@
                                 </span>
                             </span>
                         </button>
-                        <div id="plus-menu" data-liquid-design="surface" data-liquid-design-independent
-                            class="absolute bottom-full left-0 mb-2 w-52 bg-white dark:bg-[#1e1d1b] border border-zinc-200 dark:border-zinc-700/50 rounded-xl opacity-0 invisible transition-all duration-200 z-50 origin-bottom-left" style="box-shadow: var(--shadow-float)"
-                            style="transform: translateY(6px) scale(0.97)">
+                        <div id="plus-menu" role="menu" aria-label="Add tools" hidden inert
+                            class="absolute w-52 rounded-xl z-50">
                             <div class="p-2 flex flex-col gap-2">
                                 <div class="grid grid-cols-2 gap-1.5">
                                     <button id="upload-file-btn" disabled title="Coming soon"
@@ -671,7 +707,9 @@
                         </div>
                     </div>
 
-                    <!-- TOP ROW: growable textarea (full width) -->
+                    <span class="composer-control-divider" aria-hidden="true"></span>
+
+                    <!-- Inline writing field: expands upward while the controls stay anchored. -->
                     <div class="input-textarea-wrap relative">
                         <input type="file" id="file-upload-input" class="hidden"
                             onchange="window.handleFileUpload(event)" />
@@ -754,7 +792,7 @@
     <script src="js/utils.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/cloud-storage.js?v=20261009-startup"></script>
-    <script src="js/modals.js"></script>
+    <script src="js/modals.js?v=20261013-shared-naming-dialog"></script>
     <script src="js/i18n.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/thought.js"></script>
@@ -762,11 +800,11 @@
     <script src="js/api.js"></script>
 
     <script src="js/profile.js"></script>
-    <script src="js/sidebar.js?v=20261012-rail-morph"></script>
-    <script src="js/folders.js?v=20261012-id-fallback"></script>
+    <script src="js/sidebar.js?v=20261012-search-state-sync"></script>
+    <script src="js/folders.js?v=20261013-shared-naming-dialog"></script>
     <script src="js/settings.js?v=20261007-settings-layout"></script>
     <script src="js/streaming.js"></script>
-    <script src="js/chat-management.js?v=20261012-id-fallback"></script>
+    <script src="js/chat-management.js?v=20261013-shared-naming-dialog"></script>
     <script src="js/kv-context.js"></script>
     <script src="js/canvas.js"></script>
     <script src="js/file_upload.js"></script>
@@ -775,13 +813,13 @@
     <script src="js/chat-actions.js"></script>
     <script src="js/voice.js"></script>
     <script src="js/feedback.js"></script>
-    <script src="js/history.js?v=20261011-sidebar-cleanup"></script>
-    <script src="js/menus.js"></script>
-    <script src="js/send-icon.js"></script>
+    <script src="js/history.js?v=20261013-folder-dialog-glass"></script>
+    <script src="js/menus.js?v=20261013-plus-options-morph"></script>
+    <script src="js/send-icon.js?v=20261013-stable-composer-icon"></script>
     <script src="js/research.js"></script>
     <script src="js/changelog.js"></script>
     <script src="js/render.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="js/ui.js?v=20261013-model-dropdown-v2"></script>
     <script src="js/mini-logo.js"></script>
     <script src="js/loader.js?v=20261009-startup"></script>
     <script src="js/account-modal.js"></script>
@@ -1756,17 +1794,11 @@
         };
 
         window.toggleSettingsSubmenu = function () {
-            const menu = document.getElementById('settings-submenu');
-            const actions = document.getElementById('profile-row-actions');
-            const opening = menu.classList.toggle('hidden');
-            // pin opacity when submenu is open so it stays visible off-hover
-            if (actions) actions.classList.toggle('!opacity-100', !opening);
+            document.querySelector('#settings-submenu-wrap > [data-liquid-design-toggle]')?.click();
         };
         window.closeSettingsSubmenu = function () {
-            const menu = document.getElementById('settings-submenu');
-            const actions = document.getElementById('profile-row-actions');
-            menu.classList.add('hidden');
-            if (actions) actions.classList.remove('!opacity-100');
+            const trigger = document.querySelector('#settings-submenu-wrap > [data-liquid-design-toggle]');
+            if (trigger?.getAttribute('aria-expanded') === 'true') trigger.click();
         };
         window.openSettingsTo = function (tab) {
             const panel = window.els && window.els.settingsPanel;
@@ -1776,12 +1808,7 @@
                 window.toggleSettingsPanel();
             }
             window.openSettingsTab(tab);
-            window.closeSettingsSubmenu();
         };
-        document.addEventListener('click', function (e) {
-            const wrap = document.getElementById('settings-submenu-wrap');
-            if (wrap && !wrap.contains(e.target)) window.closeSettingsSubmenu();
-        });
     </script>
 
     <div id="changelog-modal">
@@ -1946,7 +1973,7 @@
   <!-- Chat does not use the shared floating nav; its own #top-right-actions cluster
        (save · memories · personality · language + theme toggle) serves as the top-right
        controls, using the shared floating-capsule look with an expand/collapse chevron. -->
-  <script src="js/chat-glass.js?v=20261012-rail-morph"></script>
+  <script src="js/chat-glass.js?v=20261013-thinking-effort"></script>
   <script>
     (function () {
       var bar = document.getElementById('tra-bar');

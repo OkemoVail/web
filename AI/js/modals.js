@@ -52,12 +52,12 @@ window.showCustomConfirm = (title, message, onConfirm, isDanger = false) => {
     const overlay = document.createElement('div');
     overlay.className = 'custom-modal-overlay';
     overlay.innerHTML = `
-        <div class="custom-modal-card">
+        <div class="custom-modal-card" data-liquid-design="surface" data-liquid-design-independent data-liquid-design-static-actions>
             <div class="custom-modal-title">${title}</div>
             <div class="custom-modal-message">${message}</div>
             <div class="custom-modal-actions">
-                <button class="modal-btn modal-btn-cancel skuo skuo-neutral">Cancel</button>
-                <button class="modal-btn modal-btn-primary ${isDanger ? 'modal-btn-danger skuo' : 'modal-btn-confirm skuo skuo-accent'}">Confirm</button>
+                <button class="modal-btn modal-btn-cancel skuo skuo-neutral" data-liquid-design data-liquid-design-independent>Cancel</button>
+                <button class="modal-btn modal-btn-primary ${isDanger ? 'modal-btn-danger skuo' : 'modal-btn-confirm skuo skuo-accent'}" data-liquid-design data-liquid-design-independent ${isDanger ? 'data-action="delete"' : ''}>Confirm</button>
             </div>
         </div>
     `;
@@ -84,22 +84,31 @@ window.showCustomConfirm = (title, message, onConfirm, isDanger = false) => {
     overlay.onclick = (e) => { if (e.target === overlay) close(); };
 };
 
-window.showCustomPrompt = (title, placeholder, defaultValue, onConfirm) => {
+window.showNamingDialog = ({ kind = 'item', title, placeholder, value = '', confirmLabel = 'Save', onConfirm }) => {
+    // Naming is one shared interaction for chats and folders. Remove a stale
+    // naming overlay first so repeated menu actions can never stack dialogs.
+    document.querySelector('.custom-prompt-overlay')?.remove();
     const overlay = document.createElement('div');
-    overlay.className = 'custom-modal-overlay';
+    overlay.className = 'custom-modal-overlay custom-prompt-overlay';
     overlay.innerHTML = `
-        <div class="custom-modal-card">
-            <div class="custom-modal-title">${title}</div>
-            <input type="text" class="custom-modal-input" placeholder="${placeholder}" value="${defaultValue}">
+        <div class="custom-modal-card custom-prompt-card" data-naming-dialog="${kind}" data-liquid-design="surface" data-liquid-design-independent data-liquid-design-static-actions>
+            <div class="custom-modal-title"></div>
+            <div class="custom-modal-input-shell" data-liquid-design="surface" data-liquid-design-independent>
+                <input type="text" class="custom-modal-input" autocomplete="off">
+            </div>
             <div class="custom-modal-actions">
-                <button class="modal-btn modal-btn-cancel skuo skuo-neutral">Cancel</button>
-                <button class="modal-btn modal-btn-primary modal-btn-confirm skuo skuo-accent">Save</button>
+                <button class="modal-btn modal-btn-cancel skuo skuo-neutral" data-liquid-design data-liquid-design-independent>Cancel</button>
+                <button class="modal-btn modal-btn-primary modal-btn-confirm skuo skuo-accent" data-liquid-design data-liquid-design-independent></button>
             </div>
         </div>
     `;
+    overlay.querySelector('.custom-modal-title').textContent = title;
+    overlay.querySelector('.modal-btn-primary').textContent = confirmLabel;
     document.body.appendChild(overlay);
 
     const input = overlay.querySelector('.custom-modal-input');
+    input.placeholder = placeholder;
+    input.value = value;
     setTimeout(() => {
         overlay.classList.add('is-active');
         input.focus();
@@ -113,17 +122,30 @@ window.showCustomPrompt = (title, placeholder, defaultValue, onConfirm) => {
     };
     const restoreFocus = prepareChatDialog(overlay, close);
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         const rawVal = input.value.trim();
-        if (rawVal) {
-            const val = rawVal.replace(/[\r\n]+/g, ' ').trim();
-            onConfirm(val);
+        if (!rawVal) return;
+        const val = rawVal.replace(/[\r\n]+/g, ' ').trim();
+        const button = overlay.querySelector('.modal-btn-primary');
+        if (button.disabled) return;
+        button.disabled = true;
+        try {
+            await onConfirm(val);
+            close();
+        } catch (error) {
+            console.error('Naming action failed', error);
+            button.disabled = false;
         }
-        close();
     };
 
     overlay.querySelector('.modal-btn-cancel').onclick = close;
     overlay.querySelector('.modal-btn-primary').onclick = handleConfirm;
     input.onkeydown = (e) => { if (e.key === 'Enter') handleConfirm(); if (e.key === 'Escape') close(); };
     overlay.onclick = (e) => { if (e.target === overlay) close(); };
+};
+
+// Compatibility for any older callers while all naming features converge on
+// showNamingDialog().
+window.showCustomPrompt = (title, placeholder, defaultValue, onConfirm, confirmLabel = 'Save') => {
+    window.showNamingDialog({ title, placeholder, value: defaultValue, onConfirm, confirmLabel });
 };

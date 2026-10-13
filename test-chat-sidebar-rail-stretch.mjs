@@ -47,6 +47,25 @@ try {
   const baseline = flatPulled.layer.w - flat.layer.w;
   await page.waitForTimeout(900);
   await page.evaluate(() => window.toggleSidebar());
+  await page.waitForTimeout(180);
+  const lightingDuringTurn = await page.evaluate(() => {
+    function orientation(host, rotatingParent) {
+      const gradient = host.querySelector('.lgp-outline linearGradient:not([id$="-prism"])');
+      const rotation = getComputedStyle(rotatingParent).rotate;
+      const controlAngle = rotation === 'none' ? 0 : parseFloat(rotation);
+      const match = gradient?.getAttribute('gradientTransform')?.match(/rotate\(([-\d.]+)/);
+      return { controlAngle, lightAngle: match ? Number(match[1]) : 0 };
+    }
+    return {
+      toolbar: orientation(document.querySelector('.chat-sidebar-actions'), document.querySelector('.sb-tools-dock')),
+      profile: orientation(document.querySelector('.sb-profile-btn'), document.querySelector('.sb-profile-slot')),
+    };
+  });
+  for (const [name, value] of Object.entries(lightingDuringTurn)) {
+    assert.ok(Math.abs(value.controlAngle) > 1, `${name} should be turning: ${JSON.stringify(value)}`);
+    assert.ok(Math.abs(value.controlAngle + value.lightAngle) < 1,
+      `${name} light must counter-rotate during transition: ${JSON.stringify(value)}`);
+  }
   await page.waitForTimeout(900);
   const rest = await material();
   assert.ok(rest.pill.h > rest.pill.w, `rail pill should be vertical: ${JSON.stringify(rest.pill)}`);

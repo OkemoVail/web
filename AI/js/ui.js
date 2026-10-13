@@ -1,6 +1,7 @@
 // ─── UI State Updates ──────────────────────────────────────────
 
 window.updateUI = () => {
+    window.dispatchEvent(new Event('chat-controls-update'));
     // 1. Send / Stop button transition
     const iconWrapper = document.getElementById('send-icon-wrapper');
     const sendBtn = document.getElementById('send-btn');
@@ -50,14 +51,19 @@ window.updateUI = () => {
     }
 
     if (iconWrapper) {
-        if (window.isGenerating) {
-            iconWrapper.innerHTML = '<span class="send-spinner" aria-hidden="true"></span><i class="fa-solid fa-square send-stop-icon text-sm" aria-hidden="true"></i>';
-        } else if (input && input.value.trim().length > 0) {
-            iconWrapper.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
-        } else if (voiceReady) {
-            iconWrapper.innerHTML = VOICE;
-        } else {
-            iconWrapper.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
+        const iconState = window.isGenerating ? 'stop' : voiceReady ? 'voice' : 'send';
+        // Input events run this update for every keystroke. Preserve the icon
+        // node while its state is unchanged so its entrance animation does not
+        // restart and make Send look as if it refreshes while typing.
+        if (iconWrapper.dataset.iconState !== iconState) {
+            iconWrapper.dataset.iconState = iconState;
+            if (iconState === 'stop') {
+                iconWrapper.innerHTML = '<span class="send-spinner" aria-hidden="true"></span><i class="fa-solid fa-square send-stop-icon text-sm" aria-hidden="true"></i>';
+            } else if (iconState === 'voice') {
+                iconWrapper.innerHTML = VOICE;
+            } else {
+                iconWrapper.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
+            }
         }
     }
 
@@ -169,17 +175,18 @@ window.toggleDeepResearch = () => {
 };
 
 window.toggleThinking = () => {
-    window.isThinkingEnabled = !window.isThinkingEnabled;
-    window.updateUI();
-    if (window.chatHistory && window.chatHistory.length > 0 && typeof window.save === 'function') {
-        window.save();
-    }
+    window.setThinkingEffort(window.isThinkingEnabled ? 'none' : 'medium');
 };
 
 window.setThinkingMode = (on) => {
-    window.isThinkingEnabled = !!on;
+    window.setThinkingEffort(on ? (window.thinkingEffort === 'none' ? 'medium' : window.thinkingEffort) : 'none');
+};
+
+window.setThinkingEffort = (effort) => {
+    const efforts = ['none', 'low', 'medium', 'high', 'ultra'];
+    window.thinkingEffort = efforts.includes(effort) ? effort : 'none';
+    window.isThinkingEnabled = window.thinkingEffort !== 'none';
     window.updateUI();
-    if (typeof window.closeAllMenus === 'function') window.closeAllMenus();
     if (window.chatHistory && window.chatHistory.length > 0 && typeof window.save === 'function') {
         window.save();
     }

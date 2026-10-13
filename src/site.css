@@ -2111,7 +2111,7 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] #chat-title-menu svg { width: 18px; height: 18px; flex: none; }
         [data-page="chat"] #chat-container { isolation: isolate; z-index: var(--z-content); }
         [data-page="chat"] main > header { z-index: var(--z-nav); }
-        [data-page="chat"] :is(#top-left-chat-title,#top-right-actions) { margin-top: env(safe-area-inset-top); }
+        [data-page="chat"] :is(#top-left-chat-title,#top-right-actions) { margin-top: 0; }
         [data-page="chat"] .input-box-wrap { margin-bottom: max(8px, env(safe-area-inset-bottom)); }
         [data-page="chat"] :is(#top-left-chat-title, #tra-bar, #chat-title-menu) button:active,
         [data-page="chat"] #plus-menu-btn:active { transform: scale(.97); }
@@ -2413,13 +2413,8 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             background: var(--bg-elevated);
             color: var(--text-primary);
         }
-        [data-page="chat"] .profile-row-actions-detached .relative { position: static; }
         [data-page="chat"].sidebar-collapsed .profile-row-actions-detached { display: none; }
         [data-page="chat"].sidebar-collapsed .sidebar-profile-dock { justify-content: center; }
-        [data-page="chat"] .profile-row-actions-detached #settings-submenu {
-            right: 20px;
-            bottom: 80px;
-        }
 
         [data-page="chat"] .sb-icon-btn:hover {
             color: var(--text-primary);
@@ -3307,6 +3302,17 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             color: var(--accent-contrast) !important;
         }
 
+        [data-page="chat"] .history-chat-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-width: 0;
+        }
+
+        [data-page="chat"] .history-chat-label > .truncate {
+            min-width: 0;
+        }
+
         /* Inactive rows: accent-aware hover across the whole row, not just the label */
         [data-page="chat"] .history-btn-container:not(.history-item-active):hover {
             background: var(--sb-item-hover);
@@ -3326,6 +3332,98 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             background: var(--accent-color);
             box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-color) 35%, transparent);
             pointer-events: none;
+        }
+
+        [data-page="chat"] .chat-pin-section[hidden] { display: none; }
+
+        [data-page="chat"] .chat-pin-section {
+            padding-bottom: 4px;
+        }
+
+        /* When there are no pinned rows, the temporary section itself starts
+           at zero height. Its heading joins the same reveal as the drop target
+           so Chats is pushed down as one continuous piece of layout. */
+        [data-page="chat"] .chat-pin-section.is-drop-only {
+            padding-bottom: 0;
+            transition: padding-bottom 280ms cubic-bezier(.16, 1, .3, 1);
+        }
+
+        [data-page="chat"] .chat-pin-section.is-drop-only > .chat-library-section-heading {
+            max-height: 0;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-7px);
+            transition: max-height 280ms cubic-bezier(.16, 1, .3, 1),
+                margin 280ms cubic-bezier(.16, 1, .3, 1),
+                opacity 150ms ease, transform 280ms cubic-bezier(.16, 1, .3, 1);
+        }
+
+        [data-page="chat"] .chat-pin-section.is-drop-only.is-drag-open {
+            padding-bottom: 4px;
+        }
+
+        [data-page="chat"] .chat-pin-section.is-drop-only.is-drag-open > .chat-library-section-heading {
+            max-height: 24px;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Appears only during a chat drag inside the persistent Pinned section. */
+        [data-page="chat"] .chat-pin-drop-zone {
+            display: grid;
+            grid-template-columns: 18px auto;
+            place-content: center;
+            align-items: center;
+            gap: 8px;
+            box-sizing: border-box;
+            height: 0;
+            min-height: 0;
+            margin: 0 10px;
+            overflow: hidden;
+            border: 1px dashed transparent;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 650;
+            opacity: 0;
+            transform: translateY(-6px);
+            pointer-events: none;
+            will-change: height, min-height, margin, opacity, transform;
+            transition: height 280ms cubic-bezier(.16, 1, .3, 1),
+                min-height 280ms cubic-bezier(.16, 1, .3, 1),
+                margin 280ms cubic-bezier(.16, 1, .3, 1),
+                opacity 160ms 45ms ease, transform 280ms cubic-bezier(.16, 1, .3, 1),
+                background-color 160ms ease, border-color 160ms ease;
+        }
+
+        [data-page="chat"] .chat-pin-drop-zone svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        [data-page="chat"] .chat-pin-drop-zone.is-visible {
+            height: 48px;
+            min-height: 48px;
+            margin-block: 6px 10px;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            border-color: color-mix(in srgb, var(--text-primary) 18%, transparent);
+            background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+        }
+
+        [data-page="chat"] .chat-pin-drop-zone.is-active {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+            background: color-mix(in srgb, var(--accent-color) 13%, transparent);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            [data-page="chat"] .chat-pin-drop-zone { transition: none; }
         }
 
         [data-page="chat"] .dropdown-menu {
@@ -3573,8 +3671,41 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             position: relative;
             /* same springy motion as .sb-new-chat-btn: overshoot easing so hover
                pops and a released press bounces back */
-            transition: background 0.15s ease,
+            transition: background 0.15s ease, opacity 220ms ease,
                         transform 0.34s var(--ease-soft);
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        [data-page="chat"] body.chat-pointer-drag-active,
+        body.chat-pointer-drag-active [data-page="chat"] .history-btn-container,
+        body[data-page="chat"].chat-pointer-drag-active,
+        body[data-page="chat"].chat-pointer-drag-active .history-btn-container {
+            cursor: grabbing;
+        }
+
+        [data-page="chat"] .chat-drag-ghost {
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: var(--z-toast);
+            max-width: 220px;
+            padding: 9px 13px;
+            overflow: hidden;
+            border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+            box-shadow: 0 8px 24px rgb(0 0 0 / .16);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            pointer-events: none;
+            box-sizing: border-box;
+            will-change: translate, width, height, opacity;
         }
 
         [data-page="chat"] .history-btn-container:hover {
@@ -4894,6 +5025,7 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             --sb-float-gap: 12px;
             --sb-radius: 26px;
             --chat-content-inset: 28px;
+            --chat-header-edge-inset: 15px;
         }
         [data-page="chat"] main { min-width: 0; min-height: 0; }
         [data-page="chat"] #sidebar {
@@ -4916,9 +5048,9 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] #sidebar .sb-profile-btn { border-top: 0; }
         [data-page="chat"] #top-left-chat-title {
             position: absolute;
-            top: calc(24px + env(safe-area-inset-top));
-            left: var(--chat-content-inset);
-            right: var(--chat-content-inset);
+            top: calc(var(--chat-header-edge-inset) + env(safe-area-inset-top));
+            left: var(--chat-header-edge-inset);
+            right: var(--chat-header-edge-inset);
             width: auto;
             max-width: none;
             min-height: 44px;
@@ -4948,6 +5080,180 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+        }
+        [data-page="chat"] #top-left-chat-title #chat-title-text[hidden] { display: none; }
+        [data-page="chat"] #top-left-chat-title .chat-model-picker {
+            --chat-model-menu-open-duration: 370ms;
+            --chat-model-menu-close-duration: 450ms;
+            --chat-model-menu-easing: cubic-bezier(.16,1,.3,1);
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 4px;
+            flex: 0 1 auto;
+            width: fit-content;
+            max-width: calc(100% - 100px);
+            min-width: 0;
+            min-height: 44px;
+            height: 44px;
+            margin-right: auto;
+            padding: 0;
+            z-index: var(--z-popover);
+            translate: 0 10px;
+        }
+        /* Only the chevron is the source of the Liquid Design morph. The
+           adjacent model name stays plain text and can update independently. */
+        [data-page="chat"] #chat-model-chevron {
+            position: relative;
+            display: inline-flex;
+            width: 36px;
+            height: 44px;
+            min-height: 44px;
+            flex: 0 0 36px;
+            padding: 0;
+            overflow: visible;
+            z-index: var(--z-popover);
+            --liquid-design-fill: var(--chat-glass-fill);
+            --liquid-design-blur: 18px;
+            --liquid-design-front-z: var(--z-popover);
+            --liquid-design-menu-gap: 8px;
+        }
+        [data-page="chat"] #top-left-chat-title #chat-model-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px !important;
+            min-width: 36px;
+            height: 44px;
+            padding: 0;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+        [data-page="chat"] #top-left-chat-title #chat-model-trigger > .lgc-content { justify-content: center; }
+        [data-page="chat"] #chat-model-trigger-name {
+            flex: none;
+            color: var(--text-primary);
+            font: 450 20px/1.2 'Satoshi', sans-serif;
+            letter-spacing: -.035em;
+            white-space: nowrap;
+            cursor: default;
+            user-select: none;
+            transition: opacity 120ms ease;
+        }
+        [data-page="chat"] #top-left-chat-title #chat-model-trigger:hover { color: var(--accent-color); }
+        [data-page="chat"] #top-left-chat-title #chat-model-trigger svg,
+        [data-page="chat"] #top-left-chat-title #chat-model-chevron > .lgc-exit svg {
+            width: 19px;
+            height: 19px;
+            flex: none;
+            transform: rotate(0deg) scale(1);
+            transform-origin: center;
+            transition: transform var(--chat-model-menu-close-duration) var(--chat-model-menu-easing);
+        }
+        [data-page="chat"] #chat-model-chevron[data-expanded="true"] :is(#chat-model-trigger, .lgc-exit) svg {
+            transform: rotate(180deg) scale(.94);
+            transition-duration: var(--chat-model-menu-open-duration);
+        }
+        [data-page="chat"] #chat-model-chevron > .lgc-exit .lgc-content {
+            width: 36px;
+            height: 44px;
+            justify-content: center;
+        }
+        [data-page="chat"] #top-left-chat-title #chat-model-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            right: auto;
+            min-height: 0;
+            width: min(280px, calc(100vw - 32px));
+            padding: 10px;
+            z-index: var(--z-popover);
+            border: 0;
+            border-radius: 20px;
+            background: transparent;
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+            box-shadow: none;
+            /* Native Liquid Design menu transforms are center-based. */
+            transform-origin: center;
+        }
+        [data-page="chat"] #chat-model-menu[hidden] { display: none; }
+        [data-page="chat"] .chat-model-menu-label {
+            margin: 2px 10px 7px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 650;
+        }
+        [data-page="chat"] #chat-model-options { display: flex; flex-direction: column; gap: 2px; }
+        [data-page="chat"] .chat-model-option {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between !important;
+            width: 100% !important;
+            min-width: 0;
+            height: 42px;
+            padding: 0 11px !important;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 550;
+            text-align: left;
+        }
+        [data-page="chat"] .chat-model-option:hover { background: color-mix(in srgb, var(--text-primary) 7%, transparent); }
+        [data-page="chat"] .chat-model-option > svg { width: 17px; height: 17px; opacity: 0; }
+        [data-page="chat"] .chat-model-option.is-active > svg { opacity: 1; color: var(--accent-color); }
+        [data-page="chat"] .chat-model-option > .lgc-content { justify-content: space-between; }
+        [data-page="chat"] .chat-model-option .lgc-content > svg { width: 17px; height: 17px; opacity: 0; }
+        [data-page="chat"] .chat-model-option.is-active .lgc-content > svg { opacity: 1; color: var(--accent-color); }
+        [data-page="chat"] .chat-model-menu-divider { height: 1px; margin: 8px 4px; background: var(--border-strong); }
+        [data-page="chat"] .chat-thinking-effort { padding: 7px 10px 9px; color: var(--text-primary); }
+        [data-page="chat"] .chat-thinking-effort-heading {
+            display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px;
+        }
+        [data-page="chat"] .chat-thinking-effort-heading label { font-size: 14px; font-weight: 600; }
+        [data-page="chat"] .chat-thinking-effort-heading output { color: var(--accent-color); font-size: 12px; font-weight: 650; }
+        [data-page="chat"] #chat-thinking-effort {
+            --thinking-effort-progress: 0%;
+            display: block; width: 100%; height: 18px; margin: 0; padding: 0;
+            appearance: none; -webkit-appearance: none; background: transparent; cursor: pointer; touch-action: pan-x;
+        }
+        [data-page="chat"] #chat-thinking-effort::-webkit-slider-runnable-track {
+            height: 4px; border-radius: 999px;
+            background: linear-gradient(to right, var(--accent-color) 0 var(--thinking-effort-progress), color-mix(in srgb, var(--text-primary) 15%, transparent) var(--thinking-effort-progress) 100%);
+        }
+        [data-page="chat"] #chat-thinking-effort::-moz-range-track {
+            height: 4px; border: 0; border-radius: 999px;
+            background: linear-gradient(to right, var(--accent-color) 0 var(--thinking-effort-progress), color-mix(in srgb, var(--text-primary) 15%, transparent) var(--thinking-effort-progress) 100%);
+        }
+        [data-page="chat"] #chat-thinking-effort::-webkit-slider-thumb {
+            width: 16px; height: 16px; margin-top: -6px; appearance: none; -webkit-appearance: none;
+            border: 2px solid var(--bg-elevated); border-radius: 50%; background: var(--accent-color);
+            box-shadow: 0 1px 4px rgb(0 0 0 / .28);
+        }
+        [data-page="chat"] #chat-thinking-effort::-moz-range-thumb {
+            width: 12px; height: 12px; border: 2px solid var(--bg-elevated); border-radius: 50%;
+            background: var(--accent-color); box-shadow: 0 1px 4px rgb(0 0 0 / .28);
+        }
+        [data-page="chat"] #chat-thinking-effort:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 3px; border-radius: 999px; }
+        [data-page="chat"] .chat-thinking-effort-labels {
+            display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 3px;
+            color: var(--text-tertiary); font-size: 9px; line-height: 1.2;
+        }
+        [data-page="chat"] .chat-thinking-effort-labels span { text-align: center; }
+        [data-page="chat"] .chat-thinking-effort-labels span:first-child { text-align: left; }
+        [data-page="chat"] .chat-thinking-effort-labels span:last-child { text-align: right; }
+        [data-page="chat"] .chat-thinking-effort-labels span.is-active { color: var(--text-primary); font-weight: 650; }
+        @media (prefers-reduced-motion: reduce) {
+            [data-page="chat"] #top-left-chat-title :is(#chat-model-trigger, #chat-model-chevron > .lgc-exit) svg { transition: none; }
+        }
+        @media (max-width: 767px) {
+            [data-page="chat"] #chat-model-trigger-name { font-size: 16px; font-weight: 450; }
         }
         [data-page="chat"] #top-left-chat-title .chat-title-inline { display: none; }
         [data-page="chat"] #top-left-chat-title #chat-title-more { display: flex; }
@@ -5020,7 +5326,7 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         @media (max-width: 767px) {
             [data-page="chat"] { --chat-content-inset: 16px; }
             body[data-page="chat"] { height: var(--chat-viewport-height, 100dvh); }
-            [data-page="chat"] #top-left-chat-title { top: calc(16px + env(safe-area-inset-top)); }
+            [data-page="chat"] #top-left-chat-title { top: calc(var(--chat-header-edge-inset) + env(safe-area-inset-top)); }
             [data-page="chat"] #top-left-chat-title #chat-title-text { font-size: 24px; }
             [data-page="chat"] #chat-mobile-navigation { position: relative; flex: none; }
             [data-page="chat"] #chat-messages { padding-top: 92px; }
@@ -5139,7 +5445,12 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             [data-page="chat"] #sidebar { margin: 12px; }
             [data-page="chat"] #sidebar.-translate-x-full { width: 60px !important; transform: none; }
             [data-page="chat"] #sidebar.-translate-x-full #sidebar-full-content { visibility: hidden; }
-            [data-page="chat"] #top-left-chat-title { left: 12px; right: 12px; gap: 8px; }
+            [data-page="chat"] #top-left-chat-title {
+                top: calc(var(--chat-header-edge-inset) + env(safe-area-inset-top));
+                left: var(--chat-header-edge-inset);
+                right: var(--chat-header-edge-inset);
+                gap: 8px;
+            }
             [data-page="chat"] #top-left-chat-title #chat-title-text { font-size: 18px; }
             [data-page="chat"] #chat-corner-actions { padding: 2px; }
         }
@@ -5384,9 +5695,101 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             --liquid-design-touch-light: var(--lgp-touch-light);
         }
         .dark [data-page="chat"] :is([data-lgp-control],#chat-more-glass) { --liquid-design-touch-light: var(--lgp-touch-light); }
-        [data-page="chat"] #chat-corner-actions { padding: 0; gap: 8px; }
-        [data-page="chat"] .chat-more-anchor { display: block; width: 44px; height: 44px; flex: none; pointer-events: none; }
-        [data-page="chat"] #chat-more-glass { position: fixed; width: 44px; height: 44px; min-height: 0; padding: 0; z-index: var(--z-popover); --liquid-design-front-z: var(--z-popover); }
+        /* Options renders at the root so its sheet can open without clipping. */
+        [data-page="chat"] #chat-corner-actions {
+            display: block;
+            width: 88px;
+            height: 44px;
+            flex: 0 0 88px;
+            margin-left: auto;
+            padding: 0;
+        }
+        [data-page="chat"] .chat-thinking-track {
+            position: relative;
+            width: 27px;
+            height: 16px;
+            flex: none;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--text-primary) 16%, transparent);
+            transition: background-color 160ms ease;
+        }
+        [data-page="chat"] .chat-thinking-track > span {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            box-shadow: 0 1px 3px rgb(0 0 0 / .24);
+            transition: translate 180ms cubic-bezier(.2,.8,.2,1);
+        }
+        [data-page="chat"] .chat-model-thinking-row.is-active .chat-thinking-track { background: var(--accent-color); }
+        [data-page="chat"] .chat-model-thinking-row.is-active .chat-thinking-track > span { translate: 11px 0; }
+        [data-page="chat"] #chat-more-glass {
+            position: fixed;
+            display: flex;
+            width: 88px;
+            height: 44px;
+            min-height: 0;
+            padding: 0;
+            border-radius: 999px;
+            z-index: var(--z-popover);
+            --liquid-design-front-z: var(--z-popover);
+        }
+        [data-page="chat"] #chat-more-glass > .chat-corner-actions-source {
+            position: relative;
+            width: 88px;
+            height: 44px;
+            flex: 0 0 88px;
+        }
+        [data-page="chat"] #chat-more-glass .chat-corner-actions-source-face {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            width: 88px;
+            height: 44px;
+            transform-origin: center;
+        }
+        [data-page="chat"] #chat-more-glass .chat-corner-actions-source-face > :is(#chat-new-button,#chat-title-more) {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            color: var(--text-primary);
+            background: transparent;
+            box-shadow: none;
+        }
+        [data-page="chat"] #chat-more-glass .chat-corner-actions-divider {
+            position: absolute;
+            left: 43.5px;
+            top: 12px;
+            width: 1px;
+            height: 20px;
+            z-index: 2;
+            border-radius: 1px;
+            background: color-mix(in srgb, var(--text-primary) 16%, transparent);
+            pointer-events: none;
+        }
+        [data-page="chat"] #chat-more-glass[data-expanded="true"] .chat-corner-actions-divider,
+        [data-page="chat"] #chat-more-glass:not([data-morph-phase="settled"]) .chat-corner-actions-divider { opacity: 0; }
+        [data-page="chat"] #chat-more-glass .lgc-compound-source-face { justify-content: flex-start; }
+        [data-page="chat"] #chat-more-glass .lgc-compound-source-face > .lgc-content {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+        }
+        [data-page="chat"] #chat-more-glass .lgc-compound-source-face::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 12px;
+            bottom: 12px;
+            width: 1px;
+            background: color-mix(in srgb, var(--text-primary) 16%, transparent);
+        }
         [data-page="chat"] #chat-more-glass #chat-title-more { width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: var(--text-primary); background: transparent; }
         [data-page="chat"] #chat-more-glass #chat-title-menu { position: absolute; width: min(252px,calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 6px; border: 0; border-radius: 28px; background: transparent; }
         [data-page="chat"] #chat-more-glass #chat-title-menu button { height: 44px; min-height: 44px; padding: 0 16px; border-radius: 999px; }
@@ -5463,7 +5866,99 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         }
         [data-page="chat"] #sidebar #chat-mobile-navigation { top: 10px; right: 8px; }
         [data-page="chat"] .chat-library-header .sb-row-text { font-size: 19px; letter-spacing: -.02em; }
-        [data-page="chat"] #sidebar .sb-search-wrap { margin: 0 16px 12px; height: 40px; min-height: 40px; flex: none; border-radius: 10px; }
+        [data-page="chat"] #sidebar .sb-search-wrap {
+            margin: 12px 16px 12px;
+            height: 40px;
+            min-height: 40px;
+            flex: none;
+            border-radius: 999px;
+        }
+        /* Search is its own responsive Liquid Design surface, rather than a
+           flat translucent fill laid over the sidebar material. */
+        [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"] {
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            --liquid-design-fill: var(--chat-glass-fill);
+            --liquid-design-blur: 14px;
+            --liquid-design-prism-opacity: var(--lgp-prism-opacity);
+            --liquid-design-tint: transparent;
+            --lgp-focus-shadow: 0 2px 8px rgb(0 0 0 / .06), 0 .5px 0 rgb(255 255 255 / .18) inset;
+        }
+        [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"] > .lgp-content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+        [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"] .sb-search-input,
+        [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"] .sb-search-input:focus {
+            height: 100%;
+            padding: 0 12px 0 42px;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+        }
+        /* Search enters as one intact control, moving smoothly from beneath
+           the header instead of animating the glass material itself. */
+        [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"]:not([hidden]) {
+            animation: chat-search-slide-down 300ms cubic-bezier(.16, 1, .3, 1) both;
+        }
+        [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"].is-closing {
+            animation-name: chat-search-slide-up;
+            animation-duration: 240ms;
+            animation-timing-function: cubic-bezier(.16, 1, .3, 1);
+            pointer-events: none;
+        }
+        [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"]:focus-within {
+            --liquid-design-fill: color-mix(in srgb, var(--bg-elevated) 76%, transparent);
+            --lgp-focus-shadow: 0 5px 18px rgb(0 0 0 / .11), 0 .5px 0 rgb(255 255 255 / .28) inset;
+        }
+        .dark [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"]:focus-within {
+            --liquid-design-fill: rgb(38 40 43 / .46);
+            --lgp-focus-shadow: 0 6px 20px rgb(0 0 0 / .28), 0 .5px 0 rgb(255 255 255 / .14) inset;
+        }
+        [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"]:focus-within .sb-search-icon {
+            color: var(--text-primary);
+        }
+        @keyframes chat-search-slide-down {
+            from {
+                height: 0;
+                min-height: 0;
+                margin-block: 0;
+                opacity: 0;
+                translate: 0 -14px;
+            }
+            to {
+                height: 40px;
+                min-height: 40px;
+                margin-block: 12px;
+                opacity: 1;
+                translate: 0 0;
+            }
+        }
+        @keyframes chat-search-slide-up {
+            from {
+                height: 40px;
+                min-height: 40px;
+                margin-block: 12px;
+                opacity: 1;
+                translate: 0 0;
+            }
+            to {
+                height: 0;
+                min-height: 0;
+                margin-block: 0;
+                opacity: 0;
+                translate: 0 -14px;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            [data-page="chat"] #sidebar .sb-search-wrap[data-lgp-control="surface"] {
+                animation: none;
+            }
+        }
         [data-page="chat"] #sidebar .sb-new-chat-btn { height: 44px; min-height: 44px; border-radius: 14px; font-size: 15px; }
         [data-page="chat"] #sidebar a.sb-nav-item {
             display: flex; align-items: center; gap: 12px; min-height: 44px; height: 44px;
@@ -5520,7 +6015,7 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] .profile-identity-glass .sb-nav-icon { width: 32px; flex: 0 0 32px; }
         [data-page="chat"] .profile-identity-glass .sb-row-text { min-width: 0; }
         [data-page="chat"] #profile-row-actions { margin-right: 0; }
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-lgp-control] {
+        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-button] {
             width: 56px;
             height: 56px;
             min-width: 56px;
@@ -5528,18 +6023,13 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             border-radius: 50%;
             transform: none;
         }
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-design],
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-lgp-control] {
+        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-button] {
             background: transparent;
         }
         [data-page="chat"] #profile-identity-glass:hover,
         [data-page="chat"] #profile-identity-glass:active,
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-design]:hover,
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-design]:active {
-            transform: none;
-        }
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-lgp-control]:hover,
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-lgp-control]:active {
+        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-button]:hover,
+        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-button]:active {
             transform: none;
         }
         [data-page="chat"] #sidebar #sidebar-user-name { font-size: 14px; }
@@ -5640,11 +6130,53 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] #sidebar #storage-display-sidebar { display: none; }
         [data-page="chat"] #sidebar #sidebar-user-name { font-size: 15px; }
         [data-page="chat"] #sidebar .profile-row-actions-detached { margin-top: 0; flex: none; }
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-design],
-        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-lgp-control] {
+        [data-page="chat"] #profile-row-actions > #settings-submenu-wrap > button[data-liquid-button] {
             width: 48px; height: 48px; min-width: 48px; padding: 0; border-radius: 50%;
         }
-        [data-page="chat"] .profile-row-actions-detached #settings-submenu { right: 12px; bottom: 76px; }
+
+        /* Settings is one native Liquid Options component: its resting gear
+           capsule morphs upward into the shortcut sheet. */
+        [data-page="chat"] #settings-submenu-wrap[data-lgp-component="options"] {
+            position: relative; isolation: isolate; display: inline-flex;
+            width: 48px; height: 48px; min-height: 48px; padding: 0;
+            overflow: visible; z-index: var(--z-popover);
+            --liquid-design-fill: var(--chat-glass-fill);
+            --liquid-design-blur: 18px;
+            --liquid-design-touch-light: var(--lgp-touch-light);
+            --liquid-design-menu-gap: 10px;
+            --liquid-design-front-z: var(--z-popover);
+        }
+        [data-page="chat"] #settings-submenu-wrap > [data-liquid-button][data-liquid-toggle] {
+            position: relative; z-index: 2; width: 48px; height: 48px; min-width: 48px;
+            padding: 0; border: 0; border-radius: 50%; background: transparent;
+            color: var(--text-primary); box-shadow: none;
+        }
+        [data-page="chat"] #settings-submenu-wrap[data-lgp-component="options"] > #settings-submenu {
+            position: absolute; left: auto; right: 0; width: 216px; padding: 6px;
+            border: 0; border-radius: 24px; background: transparent; box-shadow: none;
+        }
+        [data-page="chat"] #settings-submenu-wrap #settings-submenu > [data-liquid-button] {
+            width: 100%; height: 42px; min-height: 42px; padding: 0 13px;
+            border: 0; border-radius: 999px; background: transparent;
+            color: var(--text-primary); font-family: inherit; font-size: 14px;
+            font-weight: 500; text-align: left;
+        }
+        [data-page="chat"] #settings-submenu-wrap #settings-submenu > [data-liquid-button] .lgc-content {
+            justify-content: flex-start; gap: 11px;
+        }
+        [data-page="chat"] #settings-submenu-wrap #settings-submenu svg {
+            width: 17px; height: 17px; flex: 0 0 17px;
+        }
+        [data-page="chat"] #profile-row-actions:has(#settings-submenu-wrap[data-expanded="true"]) {
+            opacity: 1 !important;
+        }
+        @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+            [data-page="chat"] #settings-submenu-wrap[data-lgp-component="options"] {
+                --liquid-design-fill: var(--bg-elevated);
+                --liquid-design-blur: 0px;
+                --liquid-design-prism-opacity: 0;
+            }
+        }
 
         /* Empty folders: an open folder with nothing inside, plus a dry 404. */
         [data-page="chat"] .folders-empty {
@@ -5690,8 +6222,9 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] #sidebar #sidebar-history-area { margin-top: 0; }
         [data-page="chat"] #sidebar #folders-section .section-header-row { margin-top: 24px; }
         [data-page="chat"] #sidebar .chat-library-section-heading { margin: 16px 20px 8px; flex: none; }
+        [data-page="chat"] #sidebar .chat-pin-section .chat-library-section-heading { margin-top: 8px; }
         [data-page="chat"] #sidebar .section-header-row { padding: 0 8px 0 20px; }
-        [data-page="chat"] #sidebar #history-list { padding-inline: 8px; }
+        [data-page="chat"] #sidebar :is(#history-list,#pinned-history-list) { padding-inline: 8px; }
         [data-page="chat"] #sidebar .history-btn-container { padding: 0; }
         [data-page="chat"] #sidebar .history-btn-container > button:first-child { padding-inline: 12px; }
         [data-page="chat"] #sidebar .history-btn-container > div { padding-right: 7px; }
@@ -5779,9 +6312,6 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
                 position: absolute; right: 12px; bottom: 12px; z-index: 2;
                 display: block; width: 48px; height: 48px; margin: 0;
             }
-            [data-page="chat"] #sidebar #profile-row-actions #settings-submenu {
-                right: 0; left: auto; bottom: calc(100% + 8px);
-            }
 
             /* Rail is a full capsule: radius = half its 60px width. */
             [data-page="chat"].sidebar-collapsed #sidebar { border-radius: 30px; }
@@ -5799,9 +6329,6 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             [data-page="chat"].sidebar-collapsed #sidebar #profile-row-actions {
                 /* 8px above the vertical profile pill. */
                 right: 5px; bottom: calc(13px + var(--sb-profile-len, 116px));
-            }
-            [data-page="chat"].sidebar-collapsed #sidebar #profile-row-actions #settings-submenu {
-                left: 0; right: auto;
             }
 
             /* Library content: leaves quickly, returns once the width settles. */
@@ -6021,7 +6548,12 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] .custom-modal-overlay {
             position: fixed;
             inset: 0;
-            z-index: var(--z-dialog);
+            /* The modal card is itself an interactive Liquid Design control.
+               The engine may promote it to --z-chrome while focused, so its
+               root overlay must own a higher stacking context than chat
+               headers/sidebar instead of relying on the child's z-index. */
+            z-index: var(--z-toast);
+            isolation: isolate;
             background: rgba(20, 20, 19, 0.6); /* scrim dim stays */
             display: flex;
             align-items: center;
@@ -6138,6 +6670,163 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             background: #dc2626;
         }
 
+        /* Folder naming follows the compact iOS alert composition: one live
+           glass card, an editable glass field, then two equal action pills. */
+        [data-page="chat"] .custom-modal-overlay {
+            background: rgb(12 14 18 / .30);
+            backdrop-filter: blur(2px) saturate(.82);
+            -webkit-backdrop-filter: blur(2px) saturate(.82);
+        }
+
+        [data-page="chat"] .custom-modal-card[data-lgp-control="surface"],
+        .dark [data-page="chat"] .custom-modal-card[data-lgp-control="surface"] {
+            width: min(420px, calc(100vw - 32px));
+            max-width: 420px;
+            box-sizing: border-box;
+            padding: 24px;
+            border: 0;
+            border-radius: 36px;
+            background: transparent;
+            box-shadow: none;
+            --liquid-design-fill: rgb(246 246 244 / .84);
+            --liquid-design-blur: 32px;
+            --liquid-design-prism-opacity: calc(var(--lgp-prism-opacity) * 1.12);
+        }
+
+        .dark [data-page="chat"] .custom-modal-card[data-lgp-control="surface"] {
+            --liquid-design-fill: rgb(31 33 36 / .86);
+        }
+
+        [data-page="chat"] .custom-modal-card[data-lgp-control="surface"] > .lgp-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        [data-page="chat"] .custom-modal-card .custom-modal-title {
+            margin: 0 0 18px;
+            color: var(--text-primary);
+            font-size: 21px;
+            font-weight: 600;
+            line-height: 1.25;
+            letter-spacing: -.025em;
+        }
+
+        [data-page="chat"] .custom-modal-card .custom-modal-message {
+            margin: -4px 0 20px;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.45;
+        }
+
+        [data-page="chat"] .custom-modal-input-shell[data-lgp-control="surface"] {
+            width: 100%;
+            height: 52px;
+            margin: 0 0 16px;
+            border: 0;
+            border-radius: 18px;
+            background: transparent;
+            --liquid-design-fill: rgb(255 255 255 / .82);
+            --liquid-design-blur: 18px;
+        }
+
+        .dark [data-page="chat"] .custom-modal-input-shell[data-lgp-control="surface"] {
+            --liquid-design-fill: rgb(12 13 15 / .72);
+        }
+
+        [data-page="chat"] .custom-modal-input-shell[data-lgp-control="surface"] > .lgp-content {
+            width: 100%;
+            height: 100%;
+        }
+
+        [data-page="chat"] .custom-modal-input-shell .custom-modal-input,
+        .dark [data-page="chat"] .custom-modal-input-shell .custom-modal-input,
+        [data-page="chat"] .custom-modal-input-shell .custom-modal-input:focus,
+        .dark [data-page="chat"] .custom-modal-input-shell .custom-modal-input:focus {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            margin: 0;
+            padding: 0 17px;
+            border: 0;
+            outline: 0;
+            border-radius: inherit;
+            background: transparent;
+            box-shadow: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        [data-page="chat"] .custom-modal-input-shell:focus-within {
+            --lgp-focus-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 38%, transparent);
+        }
+
+        [data-page="chat"] .custom-modal-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+
+        [data-page="chat"] .custom-modal-card .modal-btn[data-lgp-control] {
+            width: 100%;
+            min-width: 0;
+            min-height: 52px;
+            padding: 0 18px;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            box-shadow: none;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        [data-page="chat"] .custom-modal-card .modal-btn-confirm[data-lgp-control] {
+            color: var(--accent-contrast);
+            --liquid-design-tint: color-mix(in srgb, var(--accent-color) 84%, transparent);
+        }
+
+        [data-page="chat"] .custom-modal-card .modal-btn-danger[data-lgp-control] {
+            color: #fff;
+            --liquid-design-tint: rgb(239 68 68 / .88);
+        }
+
+        [data-page="chat"] .folder-create-btn[data-lgp-control] {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            box-shadow: none;
+            color: var(--text-secondary);
+        }
+
+        [data-page="chat"] .folder-create-btn[data-lgp-control]:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 480px) {
+            [data-page="chat"] .custom-modal-overlay { padding: 16px; }
+            [data-page="chat"] .custom-modal-card[data-lgp-control="surface"] {
+                width: 100%;
+                padding: 20px;
+                border-radius: 32px;
+            }
+        }
+
+        @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+            [data-page="chat"] .custom-modal-card[data-lgp-control="surface"],
+            [data-page="chat"] .custom-modal-input-shell[data-lgp-control="surface"] {
+                --liquid-design-fill: var(--bg-elevated);
+                --liquid-design-blur: 0px;
+                --liquid-design-prism-opacity: 0;
+            }
+        }
+
         [data-page="chat"] .chat-menu-item {
             display: flex;
             align-items: center;
@@ -6169,6 +6858,106 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] .chat-menu-item i {
             width: 14px;
             height: 14px;
+        }
+
+        /* The sidebar trigger is a normal persistent three-dot button. Only
+           the independently opened panel receives the Liquid Glass surface. */
+        [data-page="chat"] #chat-library-action-menu-motion[data-lgp-component] {
+            position: fixed;
+            min-height: 0;
+            padding: 0;
+            z-index: calc(var(--z-popover) + 1);
+            overflow: visible;
+            --liquid-design-front-z: calc(var(--z-popover) + 1);
+            --liquid-design-fill: var(--chat-glass-fill);
+            --liquid-design-blur: 12px;
+            --liquid-design-touch-light: var(--lgp-touch-light);
+            --liquid-design-menu-gap: 8px;
+        }
+
+        /* The native controller is initialized before its synthetic trigger is
+           clicked. Do not paint that trigger as a resting glass circle. */
+        [data-page="chat"] #chat-library-action-menu-motion[data-morph-phase="settled"]:not([data-expanded="true"])>
+        :is(.lgc-material, .lgc-outline, .lgc-highlights) {
+            opacity: 0;
+        }
+
+        [data-page="chat"] .chat-library-action-trigger-overlay {
+            position: fixed;
+            z-index: calc(var(--z-popover) + 2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            opacity: .8;
+            pointer-events: none;
+        }
+
+        [data-page="chat"] .chat-library-action-trigger-overlay svg {
+            width: 1.1rem;
+            height: 1.1rem;
+        }
+
+        [data-page="chat"] .chat-library-liquid-proxy {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: transparent;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Keep chat-row actions over the library. The Liquid Options default
+           sets left:24px with higher specificity, which otherwise grows this
+           sheet through the sidebar's right edge and across the conversation. */
+        [data-page="chat"] #chat-library-action-menu-motion[data-lgp-component="options"] > .chat-library-action-menu {
+            position: absolute;
+            left: auto;
+            right: 0;
+            width: min(200px, calc(100vw - 24px));
+            padding: 6px;
+            background: transparent;
+            border: 0;
+            border-radius: 24px;
+        }
+
+        [data-page="chat"] .chat-library-action-menu .chat-menu-item {
+            min-height: 40px;
+            padding: 0 12px;
+            border: 0;
+            background: transparent;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        [data-page="chat"] .chat-library-action-menu .chat-menu-item:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: -2px;
+            background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+            color: var(--accent-color);
+        }
+
+        [data-page="chat"] .chat-library-action-menu .chat-menu-item.danger:focus-visible {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        [data-page="chat"] .chat-library-action-menu .chat-menu-item.is-pinned svg {
+            color: var(--accent-color);
+            fill: currentColor;
+        }
+
+        @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+            [data-page="chat"] #chat-library-action-menu-motion {
+                --liquid-design-fill: var(--bg-elevated);
+                --liquid-design-blur: 0px;
+                --liquid-design-prism-opacity: 0;
+            }
         }
 
         [data-page="chat"] .section-header-row {
@@ -9487,6 +10276,228 @@ font-family: 'Satoshi', 'Inter', sans-serif;
             [data-page="word"] .doc-scroll { overflow: visible !important; padding: 0 !important; }
             [data-page="word"] .editor-paper { min-height: auto !important; padding: 0 !important; border: 0 !important; }
         }
+
+/* ── Chat composer: compact field → writing palette ───────────────────
+   Claude reference (2026-10-10): a line break changes one compact writing
+   row into a two-row palette. Copy owns the top row; Add and Send remain
+   pinned to the bottom edge while the same glass shell grows upward. */
+[data-page="chat"] #chat-composer-dock .input-box-wrap {
+    border-radius: 29px;
+    --liquid-design-fill: rgb(240 240 240 / .72);
+    --liquid-design-blur: 12px;
+    transition: border-radius 300ms cubic-bezier(.2,.8,.2,1);
+}
+.dark [data-page="chat"] #chat-composer-dock .input-box-wrap {
+    --liquid-design-fill: rgb(28 30 33 / .42);
+}
+[data-page="chat"] #input-inner,
+[data-page="chat"] #input-inner.is-multiline {
+    --composer-field-height: 40px;
+    --composer-compact-height: 56px;
+    --composer-control-reserve: 56px;
+    --composer-inline-chrome: 121px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 40px 1px minmax(0, 1fr) 40px;
+    align-items: end;
+    gap: 8px;
+    min-height: 56px;
+    padding: 8px;
+    /* Popovers and liquid-button deformation may extend beyond this layout
+       box. The outer glass shell owns the visual boundary; clipping here made
+       the Plus menu appear broken and cut stretched controls in half. */
+    overflow: visible;
+    transition: height 300ms cubic-bezier(.2,.8,.2,1);
+}
+[data-page="chat"] #plus-menu-container { grid-column: 1; align-self: end; }
+[data-page="chat"] .composer-control-divider {
+    grid-column: 2;
+    align-self: center;
+    width: 1px;
+    height: 20px;
+    background: color-mix(in srgb, var(--text-primary) 18%, transparent);
+    border-radius: 1px;
+    opacity: .72;
+    transition: height var(--dur-2) var(--ease-smooth), opacity var(--dur-2) var(--ease-smooth);
+}
+[data-page="chat"] #input-inner .input-textarea-wrap,
+[data-page="chat"] #input-inner.is-multiline .input-textarea-wrap {
+    grid-column: 3;
+    order: initial;
+    min-width: 0;
+    align-self: stretch;
+}
+[data-page="chat"] #input-actions { grid-column: 4; margin-left: 0; align-self: end; }
+[data-page="chat"] #plus-menu-btn,
+[data-page="chat"] #send-btn {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: none;
+}
+[data-page="chat"] #plus-menu-btn { color: var(--text-secondary); }
+[data-page="chat"] #send-btn {
+    color: var(--text-secondary);
+    transition: color var(--dur-2) var(--ease-smooth), transform var(--dur-1) var(--ease-soft), opacity var(--dur-2) var(--ease-smooth);
+}
+[data-page="chat"] #send-btn[aria-disabled="false"] { color: var(--accent-contrast); }
+[data-page="chat"] #input-inner #user-input {
+    min-height: 40px;
+    padding: 8px 0;
+    line-height: 24px;
+    font-size: 15px;
+    text-align: left;
+    transition: height 300ms cubic-bezier(.2,.8,.2,1), color var(--dur-2) var(--ease-smooth);
+}
+[data-page="chat"] #user-input::placeholder { color: var(--text-tertiary); opacity: .9; }
+[data-page="chat"] #user-input:placeholder-shown {
+    white-space: nowrap;
+    overflow-x: hidden;
+}
+[data-page="chat"] #input-inner:focus-within .composer-control-divider {
+    height: 24px;
+    opacity: 1;
+}
+/* The capsule's ends tighten into the softer corners of a writing surface. */
+[data-page="chat"] #chat-composer-dock .input-box-wrap.is-multiline { border-radius: 22px; }
+[data-page="chat"] #input-inner.is-multiline {
+    display: block;
+    position: relative;
+    padding: 8px 8px 48px;
+}
+[data-page="chat"] #input-inner.is-multiline .input-textarea-wrap {
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+[data-page="chat"] #input-inner.is-multiline #user-input {
+    display: block;
+    width: 100%;
+    padding: 8px 0;
+    text-align: left;
+}
+[data-page="chat"] #input-inner.is-multiline #plus-menu-container,
+[data-page="chat"] #input-inner.is-multiline #input-actions {
+    position: absolute;
+    bottom: 8px;
+    z-index: 1;
+}
+[data-page="chat"] #input-inner.is-multiline #plus-menu-container { left: 8px; }
+[data-page="chat"] #input-inner.is-multiline #input-actions { right: 8px; }
+[data-page="chat"] #input-inner.is-multiline .composer-control-divider { display: none; }
+/* Plus uses the same native Liquid Options morph as Settings. The component
+   keeps a 40px resting source while its material expands into the existing
+   208px tools palette; only the controller defaults are overridden here. */
+[data-page="chat"] #plus-menu-container[data-lgp-component="options"] {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    overflow: visible;
+    z-index: var(--z-popover);
+    /* Resting Add is a real glass button inside the composer, not a bare icon
+       borrowing the menu sheet's nearly transparent material. */
+    --liquid-design-fill: rgb(255 255 255 / .82);
+    --liquid-design-blur: 18px;
+    --liquid-design-tint: color-mix(in srgb, var(--accent-color) 5%, transparent);
+    --liquid-design-rim-top: .64;
+    --liquid-design-rim-bottom: .16;
+    /* The source button sits 8px inside the composer. A 24px source gap
+       produces 16px of visible space between the menu and composer shell. */
+    --liquid-design-menu-gap: 24px;
+    --liquid-design-menu-radius: 18px;
+    --liquid-design-front-z: var(--z-popover);
+}
+[data-page="chat"] #plus-menu-container[data-lgp-component="options"] > #plus-menu-btn {
+    position: relative;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-primary);
+    box-shadow: none;
+}
+.dark [data-page="chat"] #plus-menu-container[data-lgp-component="options"] {
+    --liquid-design-fill: rgb(44 46 50 / .74);
+    --liquid-design-tint: color-mix(in srgb, var(--accent-color) 7%, transparent);
+}
+[data-page="chat"] #plus-menu-container[data-lgp-component="options"] > #plus-menu {
+    position: absolute;
+    left: 0;
+    right: auto;
+    width: 208px;
+    padding: 6px;
+    border: 0;
+    border-radius: 18px;
+    background: transparent;
+    box-shadow: none;
+}
+[data-page="chat"] #plus-menu-container #plus-menu > .p-2 {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+}
+[data-page="chat"] #plus-menu-container #plus-menu button {
+    position: relative;
+    z-index: 2;
+}
+[data-page="chat"] #send-icon-wrapper {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+}
+[data-page="chat"] #send-icon-wrapper > * { animation: chat-composer-icon-in var(--dur-2) var(--ease-soft) both; }
+@keyframes chat-composer-icon-in {
+    from { opacity: 0; transform: scale(.72) rotate(-12deg); }
+    to { opacity: 1; transform: scale(1) rotate(0); }
+}
+@media (max-width: 767px) {
+    [data-page="chat"] #chat-composer-dock .input-box-wrap { border-radius: 27px; }
+    [data-page="chat"] #chat-composer-dock .input-box-wrap.is-multiline { border-radius: 20px; }
+    [data-page="chat"] #input-inner,
+    [data-page="chat"] #input-inner.is-multiline {
+        --composer-field-height: 36px;
+        --composer-compact-height: 52px;
+        --composer-control-reserve: 52px;
+        --composer-inline-chrome: 107px;
+        grid-template-columns: 36px 1px minmax(0, 1fr) 36px;
+        gap: 6px;
+        min-height: 52px;
+        padding: 8px;
+    }
+    [data-page="chat"] #plus-menu-btn,
+    [data-page="chat"] #send-btn { width: 36px; height: 36px; min-height: 36px; }
+    [data-page="chat"] #plus-menu-container[data-lgp-component="options"] {
+        width: 36px; height: 36px; min-height: 36px;
+    }
+    [data-page="chat"] #plus-menu-container[data-lgp-component="options"] > #plus-menu-btn {
+        width: 36px; height: 36px; min-width: 36px;
+    }
+    [data-page="chat"] .composer-control-divider { height: 18px; }
+    [data-page="chat"] #input-inner #user-input { min-height: 36px; padding-block: 6px; }
+    [data-page="chat"] #input-inner.is-multiline { padding: 8px 8px 44px; }
+    [data-page="chat"] #input-inner.is-multiline #user-input { padding-block: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    [data-page="chat"] #input-inner,
+    [data-page="chat"] .composer-control-divider,
+    [data-page="chat"] #user-input,
+    [data-page="chat"] #send-btn,
+    [data-page="chat"] #chat-composer-dock .input-box-wrap { transition: none; }
+    [data-page="chat"] #send-icon-wrapper > * { animation: none; }
+}
 
         /* ── Scrollbars ──────────────────────────────────────────── */
         [data-page="word"] ::-webkit-scrollbar {

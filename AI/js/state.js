@@ -393,6 +393,7 @@ window.currentJobId = null;
 
 window.isWebSearch = false;
 window.isThinkingEnabled = false;
+window.thinkingEffort = 'none';
 window.isDeepResearch = false;
 
 window.tokenClient = null;

@@ -18,6 +18,7 @@ window.initChatUI = () => {
     window.isWebSearch = false;
     window.isDeepResearch = false;
     window.isThinkingEnabled = false;
+    window.thinkingEffort = 'none';
     window.canvasEnabled = false;
 
     // 1. Generate random greeting
@@ -82,6 +83,8 @@ window.initChatUI = () => {
     window.els.welcome = document.getElementById("welcome-state");
     window.els.welcomeLogo = document.getElementById("welcome-logo-container");
     window.els.hist = document.getElementById("history-list");
+    window.els.pinnedHist = document.getElementById("pinned-history-list");
+    window.els.pinnedSection = document.getElementById("chat-pin-section");
     window.els.foldersList = document.getElementById("folders-list");
     window.els.modMenu = document.getElementById("model-menu-input");
     window.els.noteMenu = document.getElementById("notes-menu");
@@ -119,15 +122,94 @@ window.initChatUI = () => {
     window.renderThemes();
 
     // 5. Input Listeners
+    function measureComposerCopy(ta, width, value = ta.value) {
+        let mirror = ta._composerMirror;
+        if (!mirror) {
+            mirror = document.createElement('div');
+            mirror.setAttribute('aria-hidden', 'true');
+            Object.assign(mirror.style, {
+                position: 'fixed',
+                left: '-10000px',
+                top: '0',
+                visibility: 'hidden',
+                pointerEvents: 'none',
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'break-word',
+                boxSizing: 'border-box'
+            });
+            document.body.appendChild(mirror);
+            ta._composerMirror = mirror;
+        }
+        const style = getComputedStyle(ta);
+        Object.assign(mirror.style, {
+            width: width + 'px',
+            fontFamily: style.fontFamily,
+            fontSize: style.fontSize,
+            fontWeight: style.fontWeight,
+            fontStyle: style.fontStyle,
+            letterSpacing: style.letterSpacing,
+            lineHeight: style.lineHeight,
+            padding: style.padding,
+            tabSize: style.tabSize
+        });
+        // The extra zero-width character makes a trailing newline count as a
+        // real empty line, just as it does in the textarea.
+        mirror.textContent = (value || ' ') + '\u200b';
+        return Math.ceil(mirror.getBoundingClientRect().height);
+    }
+
     window.refreshInputLayout = () => {
         const ta = window.els.input;
-        if (!ta) return;
-        ta.style.height = 'auto';
-        const newHeight = Math.min(ta.scrollHeight, 200);
-        ta.style.height = newHeight + 'px';
+        const inner = document.getElementById('input-inner');
+        if (!ta || !inner) return;
+        const composer = ta.closest('.input-box-wrap');
+        const textareaWrap = ta.closest('.input-textarea-wrap');
+        const innerStyle = getComputedStyle(inner);
+        const compactFieldHeight = parseFloat(innerStyle.getPropertyValue('--composer-field-height')) || 40;
+        const compactInnerHeight = parseFloat(innerStyle.getPropertyValue('--composer-compact-height')) || 56;
+        const controlReserve = parseFloat(innerStyle.getPropertyValue('--composer-control-reserve')) || 56;
+        const inlineChrome = parseFloat(innerStyle.getPropertyValue('--composer-inline-chrome')) || 121;
+        const compactFieldWidth = Math.max(80, inner.clientWidth - inlineChrome);
+        const empty = ta.value.length === 0;
+        const oneLineHeight = measureComposerCopy(ta, compactFieldWidth, 'M');
+        const measuredHeight = empty ? oneLineHeight : measureComposerCopy(ta, compactFieldWidth);
+        // One rendered line is the canonical compact state. Measuring its real
+        // line box also absorbs inherited padding/min-height, instead of
+        // mistaking that chrome for a second line.
+        const multiline = !empty && measuredHeight > oneLineHeight + 1;
+        const fieldHeight = multiline
+            ? Math.min(Math.max(oneLineHeight, measuredHeight), 200)
+            : oneLineHeight;
+        const targetInnerHeight = multiline ? fieldHeight + controlReserve : compactInnerHeight;
+        const currentInnerHeight = inner.getBoundingClientRect().height || compactInnerHeight;
+        const currentFieldHeight = ta.getBoundingClientRect().height || compactFieldHeight;
+        const before = textareaWrap?.getBoundingClientRect();
+        const stateChanged = inner.classList.contains('is-multiline') !== multiline;
+
+        // Freeze the currently painted geometry before changing layout state.
+        // The following frame then interpolates the whole shell to its target,
+        // so Return and Backspace are exact reverses rather than two snaps.
+        inner.style.height = currentInnerHeight + 'px';
+        ta.style.height = currentFieldHeight + 'px';
+        inner.classList.toggle('is-multiline', multiline);
+        composer?.classList.toggle('is-multiline', multiline);
+
+        if (stateChanged && before && textareaWrap && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            const after = textareaWrap.getBoundingClientRect();
+            textareaWrap.getAnimations().forEach(animation => animation.cancel());
+            textareaWrap.animate([
+                { transform: `translate(${before.left - after.left}px, ${before.top - after.top}px)` },
+                { transform: 'translate(0, 0)' }
+            ], { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' });
+        }
+
+        cancelAnimationFrame(ta._layoutFrame);
+        ta._layoutFrame = requestAnimationFrame(() => {
+            inner.style.height = targetInnerHeight + 'px';
+            ta.style.height = fieldHeight + 'px';
+        });
         // Overflowing text needs native touch scrolling; otherwise the glass owns the drag.
-        ta.classList.toggle('is-scrollable', ta.scrollHeight > ta.clientHeight + 1);
-        // The compact pill keeps tools beside the field while native lines grow.
+        ta.classList.toggle('is-scrollable', measuredHeight > 200);
     };
     if (window.els.input) {
         window.els.input.oninput = () => {

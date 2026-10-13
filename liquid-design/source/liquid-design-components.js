@@ -572,6 +572,7 @@
       panel.prepend(selectionPill);
       var menuMotion = root.LiquidDesignLiveDemo.create(group, {
         button: panel, slab: panel, track: group,
+        editableSurface: true,
         deformationScale: .28, centerCoupling: .045, centerLimit: 10,
         measureRect: function () {
           // Never feed our stretched render transform back into the solver.
@@ -585,10 +586,62 @@
       });
       cleanups.push(function () { menuMotion.destroy(); });
       var items = Array.from(panel.querySelectorAll('button:not(:disabled)'));
+      var sourceItems = Array.from(group.querySelectorAll('[data-liquid-menu-source]'));
+      if (!sourceItems.length) sourceItems = [trigger];
+      var sourceGroup = sourceItems.length > 1 ? sourceItems[0].closest('[data-liquid-menu-source-group]') : null;
+      var sourceFace = sourceGroup && sourceGroup.querySelector('.chat-corner-actions-source-face');
+      var sourceState = null;
+      if (sourceGroup) {
+        sourceItems.forEach(function (el) {
+          var record = records.get(el);
+          if (record && record.motion) { record.motion.destroy(); record.motion = null; record.state = null; }
+        });
+        var sourceMotion = root.LiquidDesignLiveDemo.create(group, {
+          button: sourceGroup, slab: sourceGroup, track: group,
+          editableSurface: true, staticActionSurface: true,
+          releaseFrequency: 15,
+          render: function (state) { sourceState = state; refresh(); },
+        });
+        cleanups.push(function () { sourceMotion.destroy(); });
+      }
       group.dataset.morphPhase = 'settled';
       function box(el) {
         var a = el.getBoundingClientRect(), g = group.getBoundingClientRect();
         return { x: a.left - g.left, y: a.top - g.top, w: a.width, h: a.height, r: 26 };
+      }
+      function sourceBox() {
+        var g = group.getBoundingClientRect();
+        if (sourceGroup) {
+          var sourceBounds = sourceGroup.getBoundingClientRect();
+          return { x: sourceBounds.left - g.left, y: sourceBounds.top - g.top, w: sourceBounds.width,
+            h: sourceBounds.height, r: Math.min(sourceBounds.width, sourceBounds.height) / 2 };
+        }
+        var bounds = sourceItems.map(function (el) { return el.getBoundingClientRect(); });
+        var left = Math.min.apply(null, bounds.map(function (b) { return b.left; }));
+        var top = Math.min.apply(null, bounds.map(function (b) { return b.top; }));
+        var right = Math.max.apply(null, bounds.map(function (b) { return b.right; }));
+        var bottom = Math.max.apply(null, bounds.map(function (b) { return b.bottom; }));
+        return { x: left - g.left, y: top - g.top, w: right - left, h: bottom - top, r: Math.min(right - left, bottom - top) / 2 };
+      }
+      function sourceVisualBox() {
+        // Compound sources own one shared motion solver. A single Options
+        // trigger already has a normal button record, so reuse that record's
+        // live geometry instead of replacing its moving glass with sourceBox().
+        var triggerRecord = records.get(trigger);
+        var native = sourceBox(), state = sourceState || (triggerRecord && triggerRecord.state);
+        if (!state || !state.geometry.slabHalfWidth || !state.geometry.slabHalfHeight) {
+          if (sourceFace) sourceFace.style.transform = 'none';
+          return native;
+        }
+        var dx = state.bounds.centerX - state.geometry.slabCenterX;
+        var dy = state.bounds.centerY - state.geometry.slabCenterY;
+        var sx = state.bounds.halfWidth / state.geometry.slabHalfWidth;
+        var sy = state.bounds.halfHeight / state.geometry.slabHalfHeight;
+        var nativeCenterX = native.x + native.w / 2;
+        var nativeCenterY = native.y + native.h / 2;
+        if (sourceFace) sourceFace.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
+        return { x: nativeCenterX + dx - native.w * sx / 2, y: nativeCenterY + dy - native.h * sy / 2,
+          w: native.w * sx, h: native.h * sy, rx: native.r * sx, ry: native.r * sy, r: native.r };
       }
       function menuRadius() {
         // Highlight radius + its row inset + the sheet's outer padding.
@@ -632,10 +685,14 @@
       }
       function set(value, focus) {
         if (open === value) return;
+        if (!value) {
+          var beforeClose = new CustomEvent('liquid-design-before-close', { cancelable: true });
+          if (!group.dispatchEvent(beforeClose)) return;
+        }
         cancelHold();
         var interrupted = !!start;
         if (interrupted) paint();
-        source = current || box(open ? panel : trigger);
+        source = current || (open ? box(panel) : sourceBox());
         open = value; closing = !value;
         menuState = null;
         panelState(panel, value);
@@ -663,10 +720,10 @@
         trigger.setAttribute('aria-expanded', String(value));
         trigger.style.visibility = value ? 'hidden' : '';
         group.dataset.expanded = String(value);
-        target = box(value ? panel : trigger);
-        target.r = value ? menuRadius() : 26;
+        target = value ? box(panel) : sourceBox();
+        target.r = value ? menuRadius() : target.r;
         if (value && (!interrupted || pathPosition === 0)) {
-          if (!interrupted) { pathPill = box(trigger); pathMenu = target; }
+          if (!interrupted) { pathPill = sourceBox(); pathMenu = target; }
           openingOffset = { x: source.x + source.w / 2 - pathPill.x - pathPill.w / 2,
             y: source.y + source.h / 2 - pathPill.y - pathPill.h / 2 };
         }
@@ -678,9 +735,28 @@
           morphFace = document.createElement('span');
           morphFace.className = 'lgc-exit';
           morphFace.setAttribute('aria-hidden', 'true');
-          var originalFace = records.get(trigger).content.cloneNode(true);
-          originalFace.style.transform = 'none';
-           morphFace.append(originalFace);
+          if (sourceItems.length > 1) {
+            morphFace.classList.add('lgc-compound-source-face');
+            sourceItems.forEach(function (el) {
+              var face = records.get(el).content.cloneNode(true);
+              face.style.transform = 'none';
+              // The resting originals are hidden while the menu is open. A
+              // closing clone must not inherit that inline opacity, otherwise
+              // its visible parent still contains two fully transparent icons.
+              face.style.opacity = '1';
+              face.style.filter = 'none';
+              morphFace.append(face);
+            });
+          } else {
+            var originalFace = records.get(trigger).content.cloneNode(true);
+            originalFace.style.transform = 'none';
+            // The live source is transparent while its menu is open. Do not
+            // copy that resting state into the retracting face: single-icon
+            // sources must return exactly like each icon in a compound source.
+            originalFace.style.opacity = '1';
+            originalFace.style.filter = 'none';
+            morphFace.append(originalFace);
+          }
            group.append(morphFace);
            trigger.style.visibility = 'hidden';
            // Message menus live in a root-level fixed cluster. During the
@@ -697,12 +773,15 @@
       menuPaint = function (boxes, rect) {
         panel.style.transform = 'none';
         if (!open && !start) {
-          current = boxes[0] || box(trigger);
+          current = sourceVisualBox();
           group.dataset.morphPhase = 'settled';
           material.dataset.menu = 'false';
           return [current];
         }
         var now = performance.now(), elapsed = start ? now - start : pathDuration + 1;
+        if (open || start) {
+          if (sourceFace) sourceFace.style.transform = 'none';
+        }
         var progress = Math.min(1, elapsed / pathDuration);
         var easedProgress = interruptedEase(progress);
         var pathTime = start ? pathFrom + (pathTo - pathFrom) * easedProgress : (open ? 1 : 0);
@@ -720,17 +799,24 @@
           trajectory.x += openingOffset.x * offsetDecay;
           trajectory.y += openingOffset.y * offsetDecay;
         }
-        if (elapsed < pathDuration || (springMotion && !springMotion.settled)) {
+        // Plain icon sources still use the complete reverse morph, but stop at
+        // its source frame. They have no resting glass control to receive the
+        // extra spring tail, which otherwise reads as a detached end blob.
+        var continueClosingSpring = springMotion && !springMotion.settled &&
+          !group.hasAttribute('data-liquid-design-plain-source');
+        if (elapsed < pathDuration || continueClosingSpring) {
           current = trajectory;
            group.dataset.morphPhase = open ? (elapsed < pathDuration ? 'expand' : 'overshoot') : 'collapse';
           if (!open && elapsed >= pathDuration) panelState(panel, false);
           if (morphFace) {
             morphFace.style.left = current.x + 'px'; morphFace.style.top = current.y + 'px';
             morphFace.style.width = current.w + 'px'; morphFace.style.height = current.h + 'px';
-            morphFace.style.opacity = trajectory.face;
+            // The source controls ride the exact material geometry while their
+            // opacity follows the same morph clock as the scale transition.
+            morphFace.style.opacity = sourceFaceOpacity(progress, trajectory);
           }
         } else {
-          current = box(open ? panel : trigger); current.r = open ? menuRadius() : 26;
+          current = open ? box(panel) : sourceBox(); current.r = open ? menuRadius() : current.r;
           group.dataset.morphPhase = 'settled'; start = 0;
           if (morphFace) { morphFace.remove(); morphFace = null; }
           trigger.style.visibility = open ? 'hidden' : '';
@@ -747,18 +833,22 @@
               r: base.r, rx: base.r * width / base.w, ry: base.r * height / base.h };
         }
         if (morphFace) {
-          var nativePill = pathPill || box(trigger);
+          var nativePill = pathPill || sourceBox();
           morphFace.style.left = nativePill.x + 'px'; morphFace.style.top = nativePill.y + 'px';
           morphFace.style.width = nativePill.w + 'px'; morphFace.style.height = nativePill.h + 'px';
           morphFace.style.transform = 'translate(' + (current.x + current.w / 2 - nativePill.x - nativePill.w / 2) + 'px,' +
             (current.y + current.h / 2 - nativePill.y - nativePill.h / 2) + 'px) scale(' + current.w / nativePill.w + ',' + current.h / nativePill.h + ')';
-          morphFace.style.opacity = trajectory ? trajectory.face : (open ? 0 : 1);
+          morphFace.style.opacity = sourceFaceOpacity(progress, trajectory);
           if (!start) {
             morphFace.remove(); morphFace = null;
             trigger.style.visibility = open ? 'hidden' : '';
           }
         }
         var reveal = trajectory ? trajectory.reveal : (open ? 1 : 0);
+        sourceItems.forEach(function (el) {
+          var record = records.get(el);
+          if (record) record.content.style.opacity = morphFace || open ? 0 : 1;
+        });
         if (group.hasAttribute('data-lgp-component') && !open && start) {
           // Rows leave before the sheet becomes a circle; never squeeze stale
           // selection/text into the returning Options identity.
@@ -787,6 +877,7 @@
         }
         panel.style.opacity = reduced() && open ? 1 : reveal;
         panel.style.filter = !reduced() ? 'blur(' + ((1 - reveal) * 5).toFixed(2) + 'px)' : 'none';
+        paintPlainSourceReturn(progress);
         var panelBox = !panel.hidden ? box(panel) : null;
         if (panelBox) {
           panel.style.transform = 'translate(' + (current.x + current.w / 2 - panelBox.x - panelBox.w / 2) + 'px,' +
@@ -804,6 +895,32 @@
         // Opening retains its approved clock. Closing moves through the
         // reversed arrival promptly, then glides into the Options anchor.
         return open ? t : 1 - Math.pow(1 - t, 2);
+      }
+      function sourceFaceOpacity(progress, trajectory) {
+        if (open) return trajectory ? trajectory.face : 0;
+        // Keep the controls absent while the menu is still a large sheet.
+        // Bring them back only once the material is visibly reforming into its
+        // compact source capsule, then reach full opacity before it settles.
+        var t = Math.max(0, Math.min(1, progress));
+        var delayed = Math.max(0, Math.min(1, (t - .46) / .44));
+        return delayed * delayed * (3 - 2 * delayed);
+      }
+      function paintPlainSourceReturn(progress) {
+        if (!group.hasAttribute('data-liquid-design-plain-source')) return;
+        if (open || !start) {
+          material.style.removeProperty('opacity');
+          drawing.style.removeProperty('opacity');
+          highlights.style.removeProperty('opacity');
+          return;
+        }
+        // Ordinary Options menus land on another glass control. A plain
+        // source has no resting glass underneath, so blend away the compact
+        // material instead of removing an opaque circle on the settle frame.
+        var t = Math.max(0, Math.min(1, (progress - .68) / .32));
+        var opacity = 1 - t * t * (3 - 2 * t);
+        material.style.opacity = opacity;
+        drawing.style.opacity = opacity;
+        highlights.style.opacity = opacity;
       }
       function cancelHold() {
         clearTimeout(holdTimer); holdTimer = 0;
@@ -870,8 +987,11 @@
           return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
         }) || null;
       }
+      function isNativeInteractiveTarget(target) {
+        return !!target.closest('input,select,textarea,[data-liquid-native-interaction]');
+      }
       listen(panel, 'pointerdown', function (e) {
-        if (!open || start || e.button !== 0) return;
+        if (!open || start || e.button !== 0 || isNativeInteractiveTarget(e.target)) return;
         menuPointer = e.pointerId;
         menuStartX = e.clientX; menuStartY = e.clientY; menuDragged = false;
         ignoreReleaseClick = false;
@@ -879,6 +999,7 @@
         highlight(pointItem(e));
       });
       listen(panel, 'pointermove', function (e) {
+        if (isNativeInteractiveTarget(e.target)) return;
         if (e.pointerId === menuPointer && Math.hypot(e.clientX - menuStartX, e.clientY - menuStartY) > 2) menuDragged = true;
         if (open && (menuPointer === null || menuPointer === e.pointerId)) {
           var item = pointItem(e);
@@ -886,6 +1007,7 @@
         }
       });
       listen(panel, 'pointerup', function (e) {
+        if (isNativeInteractiveTarget(e.target)) return;
         if (e.pointerId !== menuPointer) return;
         var choice = pointItem(e);
         if (Math.hypot(e.clientX - menuStartX, e.clientY - menuStartY) > 2) menuDragged = true;
@@ -913,7 +1035,13 @@
       });
       listen(document, 'pointerdown', function (e) { if (!group.contains(e.target) && open) set(false, false); });
       listen(document, 'focusin', function (e) { if (!group.contains(e.target) && open && held === null) set(false, false); });
-        cleanups.push(function () { if (morphFace) morphFace.remove(); selectionPill.remove(); trigger.style.visibility = ''; });
+        cleanups.push(function () {
+          if (morphFace) morphFace.remove();
+          selectionPill.remove();
+          trigger.style.visibility = '';
+          if (sourceFace) sourceFace.style.transform = '';
+          sourceItems.forEach(function (el) { var record = records.get(el); if (record) record.content.style.opacity = ''; });
+        });
     }
     group.querySelectorAll('[data-liquid-toggle]').forEach(function (trigger) {
       var panel = document.getElementById(trigger.getAttribute('data-liquid-toggle'));
