@@ -115,6 +115,15 @@
   touch-action: none; -webkit-user-select: none; user-select: none; box-shadow: none;
   background: transparent; border-color: transparent; transform: none;
 }
+/* Liquid Glass draws its own material rim. Do not layer the browser/site
+   keyboard-focus highlight over that rim on button-like controls. */
+[data-lgp-control]:not([data-lgp-control="surface"]):is(:focus, :focus-visible),
+[data-lgp-component] [data-liquid-button]:is(:focus, :focus-visible) {
+  --lgp-focus-shadow: none;
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+}
 [data-lgp-component] [data-liquid-button][aria-disabled="true"] { cursor: not-allowed; }
 [data-lgp-component] [data-liquid-button][aria-disabled="true"] > .lgc-content { opacity: .5; }
 [data-lgp-component] .lgc-content {
