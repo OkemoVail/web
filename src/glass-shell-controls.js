@@ -13,6 +13,9 @@
   }
   function descriptors(win, config) {
     var doc = win.document, nav = doc.querySelector('.ov-nav'), result = [];
+    // Okemo Word owns all of its document chrome. Do not layer the persistent
+    // site's menu, brand, theme, or back controls over the editor.
+    if (doc.querySelector('[data-page="word"]')) return result;
     function add(role, el, opts) {
       if (!el) return; var b = rect(el); if (!b.w || !b.h) return;
       result.push(Object.assign({ role: role, key: el.getAttribute('data-glass-key') || role, morphTo: el.getAttribute('data-glass-to'), rect: b, label: el.getAttribute('aria-label') || el.textContent.trim(), glyph: glyph(el), href: el.getAttribute('href'), circle: b.w < b.h * 1.3 }, opts || {}));
@@ -37,9 +40,10 @@
     add('leading', leading, leading && leading.matches('.ov-nav__socials-toggle') ? { label: 'Socials', items: Array.from(doc.querySelectorAll('#ov-nav-socials [data-social-href]')).map(function (item) {
       return { label: item.textContent.trim(), href: item.getAttribute('data-social-href'), glyph: glyph(item) };
     }) } : { label: 'Back', action: 'back', href: '/index.html' });
-    // Chat owns its top-left sidebar control; Search intentionally has no
-    // leading shell control so its landing page stays visually open.
-    if (!leading && !doc.querySelector('[data-page="chat"],[data-page="search"]')) result.push({ role: 'leading', rect: { x: 24, y: 24, w: 44, h: 44 }, circle: true, label: 'Back', action: 'back', href: '/index.html', glyph: '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>' });
+    // Chat owns its top-left sidebar control. Search stays visually open, and
+    // Word already has a complete document header, so neither needs a second
+    // floating back control from the persistent shell.
+    if (!leading && !doc.querySelector('[data-page="chat"],[data-page="search"],[data-page="word"]')) result.push({ role: 'leading', rect: { x: 24, y: 24, w: 44, h: 44 }, circle: true, label: 'Back', action: 'back', href: '/index.html', glyph: '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>' });
     return result;
   }
   function create(d) {

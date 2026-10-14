@@ -47,6 +47,35 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+const wordHtml = await fs.readFile(path.join(root, 'word/index.html'), 'utf8');
+assert.match(wordHtml, /name="okemo-word-build" content="20261014-word-stretch-6"/, 'word build marker');
+assert.doesNotMatch(wordHtml, /window\.onerror|JS ERROR/, 'word must not render an intrusive error banner');
+assert.doesNotMatch(wordHtml, /window\.NAV_CONFIG|src="\.\.\/src\/nav\.js/, 'word must not mount legacy site navigation');
+const shellControls = await fs.readFile(path.join(root, 'src/glass-shell-controls.js'), 'utf8');
+assert.match(
+  shellControls,
+  /if \(doc\.querySelector\('\[data-page="word"\]'\)\) return result/,
+  'word suppresses all persistent shell controls',
+);
+const shellHtml = await fs.readFile(path.join(root, 'glass-shell.html'), 'utf8');
+assert.match(shellHtml, /glass-shell-controls\.js\?v=20261014-word-stretch-6/, 'shell control cache version');
+const wordScript = await fs.readFile(path.join(root, 'word/word.js'), 'utf8');
+assert.doesNotThrow(() => new Function(wordScript), 'word application script must parse completely');
+const liquidDesign = await fs.readFile(path.join(root, 'liquid-design/liquid-design.js'), 'utf8');
+assert.match(
+  liquidDesign,
+  /\[data-page="chat"\],\[data-page="word"\]/,
+  'Word controls retain live Liquid Glass stretch inside the shell',
+);
+const inlineScripts = [...wordHtml.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
+  .filter(match => !/\bsrc\s*=/.test(match[0].slice(0, match[0].indexOf('>') + 1)));
+for (const [index, match] of inlineScripts.entries()) {
+  assert.doesNotThrow(
+    () => new Function(match[1]),
+    `word inline script ${index + 1} must parse completely`,
+  );
+}
+
 let browser;
 
 try {
@@ -82,7 +111,7 @@ try {
       assert.equal(await page.locator('.format-capsule').count(), 1, `${viewport.name}: format capsule`);
       assert.equal(await page.locator('#document-menu-btn[aria-haspopup="menu"]').count(), 1, `${viewport.name}: document menu button`);
       assert.equal(await page.locator('#ai-toggle-btn[aria-controls="ai-panel"]').count(), 1, `${viewport.name}: AI toggle`);
-      assert.equal(await page.locator('#ai-edge-tab[aria-controls="ai-panel"]').count(), 1, `${viewport.name}: AI edge tab`);
+      assert.equal(await page.locator('#ai-edge-tab, #ai-fab').count(), 0, `${viewport.name}: no duplicate AI controls`);
       assert.equal(await page.locator('#workspace-status[aria-live="polite"]').count(), 1, `${viewport.name}: workspace status`);
       assert.equal(await page.locator('.ai-quick-actions button').count(), 9, `${viewport.name}: quick action count`);
       assert.equal(
@@ -94,31 +123,29 @@ try {
       const bodyOverflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
       assert.ok(bodyOverflow <= 1, `${viewport.name}: horizontal overflow ${bodyOverflow}px`);
 
-      if (viewport.width > 768) {
-        await assertPanelState(page, false);
-        await page.locator('#ai-edge-tab').click();
-        await assertPanelState(page, true);
+      await assertPanelState(page, false);
+      await page.locator('#ai-toggle-btn').click();
+      await assertPanelState(page, true);
 
-        // Verify graceful recovery from a failed AI request (desktop only)
-        if (viewport.name === 'desktop') {
-          await page.locator('#ai-input').fill('Improve this');
-          await page.locator('#ai-send-btn').click();
-          await page.locator('.msg-ai-bubble.is-error').waitFor();
-          assert.equal(await page.locator('#ai-send-btn').isEnabled(), true, 'desktop: send re-enabled after failure');
-          assert.equal(await page.locator('#ai-panel').getAttribute('aria-busy'), 'false', 'desktop: aria-busy cleared after failure');
-          assert.equal(await page.locator('.msg-ai .msg-insert-btn').count(), 0, 'desktop: no insert buttons on error');
-        }
-
-        await page.locator('#ai-toggle-btn').click();
-        await assertPanelState(page, false);
-      } else {
-        await page.locator('#ai-fab').click();
-        await assertPanelState(page, true);
-        await page.locator('.ai-mobile-close').click();
-        await assertPanelState(page, false);
-        const paper = await page.locator('.editor-paper').boundingBox();
-        assert.ok(paper && paper.width >= viewport.width - 2, `${viewport.name}: edge-to-edge paper`);
+      // Verify graceful recovery from a failed AI request (desktop only)
+      if (viewport.name === 'desktop') {
+        await page.locator('#ai-input').fill('Improve this');
+        await page.locator('#ai-send-btn').click();
+        await page.locator('.msg-ai-bubble.is-error').waitFor();
+        assert.equal(await page.locator('#ai-send-btn').isEnabled(), true, 'desktop: send re-enabled after failure');
+        assert.equal(await page.locator('#ai-panel').getAttribute('aria-busy'), 'false', 'desktop: aria-busy cleared after failure');
+        assert.equal(await page.locator('.msg-ai .msg-insert-btn').count(), 0, 'desktop: no insert buttons on error');
       }
+
+      if (viewport.width <= 768) {
+        await page.locator('.ai-mobile-close').click();
+        const paper = await page.locator('.editor-paper').boundingBox();
+        const expectedPaperWidth = viewport.name === 'mobile' ? viewport.width - 2 : 720;
+        assert.ok(paper && paper.width >= expectedPaperWidth, `${viewport.name}: responsive paper width`);
+      } else {
+        await page.locator('#ai-toggle-btn').click();
+      }
+      await assertPanelState(page, false);
 
       await page.locator('#document-menu-btn').click();
       assert.equal(await page.locator('#document-menu').getAttribute('aria-hidden'), 'false', `${viewport.name}: open menu state`);
@@ -151,5 +178,4 @@ async function assertPanelState(page, open) {
   assert.equal(await page.locator('#ai-panel').getAttribute('aria-hidden'), String(!open));
   assert.equal(await page.locator('#ai-panel').evaluate(panel => panel.inert), !open);
   assert.equal(await page.locator('#ai-toggle-btn').getAttribute('aria-expanded'), String(open));
-  assert.equal(await page.locator('#ai-edge-tab').getAttribute('aria-expanded'), String(open));
 }

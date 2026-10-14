@@ -2934,7 +2934,7 @@ var window=Object.create(host),module=undefined;
     record.motion = root.LiquidDesignLiveDemo.create(group.el, {
       button: el, slab: el, track: group.el, editableSurface: surface,
       staticActionSurface: el.hasAttribute('data-liquid-design-static-actions'),
-      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,[data-page="home"] .hero-profile,#hero-bar,#results-bar,#hero-search,#results-search,#ai-mode-toggle,[data-page="ai-home"],[data-page="chat"]')),
+      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,[data-page="home"] .hero-profile,#hero-bar,#results-bar,#hero-search,#results-search,#ai-mode-toggle,[data-page="ai-home"],[data-page="chat"],[data-page="word"]')),
       deformationScale: surface ? .33 : undefined, centerCoupling: surface ? .025 : undefined, centerLimit: surface ? 5 : undefined,
       render: function (state) { record.state = state; schedule(); },
     });

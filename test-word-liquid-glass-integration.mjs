@@ -74,12 +74,12 @@ try {
     assert.equal(await page.locator('#document-menu button').first().evaluate(el => el === document.activeElement), true);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#document-menu-btn').evaluate(el => el === document.activeElement), true);
-    const trigger = device.hasTouch ? '#ai-fab' : '#ai-edge-tab';
+    const trigger = '#ai-toggle-btn';
     if (device.hasTouch) await page.locator(trigger).tap();
     else await page.locator(trigger).click();
     assert.equal(await page.locator('#ai-panel').evaluate(el => el.inert), false);
     assert.equal(await page.locator('#ai-toggle-btn').getAttribute('aria-expanded'), 'true');
-    for (const id of ['ai-toggle-btn', 'ai-send-btn', 'ai-fab']) assert.notEqual(await tint(page, id), 'rgba(0, 0, 0, 0)', `${id}: accent tint`);
+    for (const id of ['ai-toggle-btn', 'ai-send-btn']) assert.notEqual(await tint(page, id), 'rgba(0, 0, 0, 0)', `${id}: accent tint`);
     await page.locator('#ai-input').fill('Improve my document');
     await page.locator('#ai-send-btn').click();
     await page.waitForFunction(() => document.getElementById('ai-send-btn').disabled);
@@ -103,7 +103,7 @@ try {
       assert.ok(panel.width >= 319 && panel.width <= 321, 'mobile Oaky remains full width');
       await page.locator('.ai-mobile-close').tap();
       assert.equal(await page.locator('#ai-panel').evaluate(el => el.inert), true);
-      await page.locator('#ai-fab').tap();
+      await page.locator('#ai-toggle-btn').tap();
     }
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#ai-panel').getAttribute('aria-hidden'), 'true');

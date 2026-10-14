@@ -135,6 +135,32 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
+Okemo Word compact ribbon (2026-10-14): `word/index.html` is a document-first
+workspace based on the familiar desktop word-processor hierarchy without its
+dense ribbon. Desktop has a 54px document-title row, one flat 48px Home ribbon,
+a centered white page on a neutral canvas, and Oaky as an optional collaborator
+on the right. There is no draft rail, floating toolbar, profile ornament, or
+duplicate Oaky edge/FAB control. Word is included in the Liquid Design engine's
+interactive child-page allowlist so its glass buttons stretch when held and
+dragged inside `glass-shell.html`; keep the source and bundled plugin selectors
+in sync. Mobile keeps the page edge-to-edge, makes the
+toolbar horizontally scrollable, exposes New document in the action menu, and
+opens Oaky below the two chrome rows. The final compact-ribbon override removes
+the drafting grid, paper furniture, and oversized chrome; it lives at the end of
+the Word section in `src/site.css`. Word opts out of all persistent shell
+controls and does not load `nav.js`; its own document header is the only page
+chrome. The application logic lives in `word/word.js`, not inline, so an HTML
+parser cannot truncate it.
+Page-local visual rules live at the end of the Word section in
+`src/site.css`; regressions: `node test-word-focus.mjs`, plus
+`node test-word-liquid-glass-integration.mjs` in Chromium and with
+`WORD_GLASS_BROWSER=webkit`. The Word page includes one capture-phase stationary
+touch-to-click bridge because WebKit may cancel synthesized clicks after Liquid
+Glass pointer capture; moving more than 8px cancels activation. AI insertions use
+Range DOM insertion rather than `execCommand('insertText')`, and `captureRange`
+must ignore selections outside the editor so clicking Oaky cannot overwrite the
+saved writing position.
+
 Settings shortcut Liquid Options (2026-10-13): the sidebar footer gear and
 its General/Profile/Personality/Memories/Storage menu are one native
 `data-liquid-design-component="options"` opening upward. The component owns a
