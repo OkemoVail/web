@@ -119,6 +119,7 @@ test('publishes catalogs only through a protected manual workflow', () => {
   const workflow = text('./.github/workflows/publish-lamina-catalogs.yml');
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /permissions:\s*\n\s*contents: read/);
+  assert.equal((workflow.match(/if:\s*github\.ref == 'refs\/heads\/main'/g) ?? []).length, 3);
   assert.match(workflow, /environment:\s*lamina-bootstrap-production/);
   assert.match(workflow, /environment:\s*lamina-repo-production/);
   assert.match(workflow, /LAMINA_BOOTSTRAP_ED25519_PKCS8/);

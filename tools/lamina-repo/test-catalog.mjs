@@ -309,6 +309,15 @@ test('build and verify CLIs use an explicit pinned public key', (t) => {
   assert.equal(buildResult.status, 0, buildResult.stderr);
   assert.doesNotThrow(() => JSON.parse(readFileSync(output, 'utf8')));
 
+  const repeatedBuildResult = spawnSync(process.execPath, [
+    fileURLToPath(new URL('./build-catalog.mjs', import.meta.url)),
+    '--input', input,
+    '--output', output,
+    '--private-key-file', privateKeyPath,
+    '--public-key-output', publicKeyPath,
+  ], { encoding: 'utf8' });
+  assert.equal(repeatedBuildResult.status, 0, repeatedBuildResult.stderr);
+
   const verifyResult = spawnSync(process.execPath, [
     fileURLToPath(new URL('./verify-catalog.mjs', import.meta.url)),
     '--input', output,

@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   sign-bootstrap:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: lamina-bootstrap-production
     steps:
@@ -44,6 +45,7 @@ jobs:
           retention-days: 1
 
   sign-customizations:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: lamina-repo-production
     steps:
@@ -76,6 +78,7 @@ jobs:
           retention-days: 1
 
   publish:
+    if: github.ref == 'refs/heads/main'
     needs: [sign-bootstrap, sign-customizations]
     runs-on: ubuntu-latest
     permissions:
