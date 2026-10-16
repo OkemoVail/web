@@ -3,25 +3,26 @@
 ## Goal
 
 Host Lamina's two official package sources entirely from `OkemoVail/web` via
-GitHub Pages, under these public URLs:
+the existing Cloudflare Pages project, under these public URLs:
 
 - `https://repo.okemovail.com/bootstrap/`
 - `https://repo.okemovail.com/repo/`
 
-GitHub remains the only content host. Cloudflare remains the authoritative DNS
-provider for `okemovail.com`, but it must not become an application backend or
-source of package metadata.
+The public GitHub repository remains the source of truth. Cloudflare Pages is
+the static content host and authoritative DNS provider, but it does not become
+an application backend or source of package metadata.
 
 ## Existing deployment
 
-`OkemoVail/web` is already a public static website and has GitHub Pages enabled
-at `https://okemovail.github.io/web/`. The main `https://okemovail.com/` site is
-fronted by Cloudflare and currently serves the same content. The repository has
-no committed `CNAME` and no Pages Actions workflow.
+`OkemoVail/web` is already connected to Cloudflare Pages project `okemo` on
+production branch `main`, published at `https://okemo.pages.dev`, and attached
+to `https://okemovail.com/`. It deploys the repository root with no build
+command. GitHub Pages is separately enabled at `https://okemovail.github.io/web/`
+but is not the production origin and must not own the package custom domain.
 
 The package-hosting change must not alter the existing homepage, routes, or
-assets. It adds two isolated static directories and the GitHub Pages custom
-domain declaration.
+assets. It adds two isolated static directories. It does not commit a GitHub
+Pages `CNAME` file.
 
 ## Public URL layout
 
@@ -56,17 +57,10 @@ version-specific release URLs rather than mutable `latest` URLs.
 
 ## Domain mapping
 
-The repository root contains `CNAME` with exactly `repo.okemovail.com`.
-Cloudflare DNS contains a `CNAME` record named `repo` targeting
-`okemovail.github.io`. The record should be DNS-only while GitHub provisions and
-verifies HTTPS. It may remain DNS-only; GitHub Pages already provides HTTPS and
-CDN delivery.
-
-GitHub Pages must use `repo.okemovail.com` as this repository's custom domain.
-The existing `okemovail.com` deployment must be verified before applying that
-setting. If `okemovail.com` is itself configured as this repository's GitHub
-Pages custom domain despite the absent `CNAME`, stop rather than replace it;
-use a dedicated Pages repository instead.
+Attach `repo.okemovail.com` as a second custom domain on Cloudflare Pages
+project `okemo`. Cloudflare creates and manages the proxied DNS record and TLS
+certificate. The repository must not contain `CNAME`; GitHub Pages custom-domain
+configuration is unrelated and remains untouched.
 
 ## Trust model
 
@@ -106,14 +100,15 @@ passes the repository validator.
 
 ## Deployment
 
-GitHub Pages continues to publish the repository as static content. A contract
-test validates the custom-domain declaration and the two source descriptors.
+Cloudflare Pages continues to publish the repository as static content. A
+contract test prevents an unsafe GitHub Pages `CNAME` and validates the two
+source descriptors.
 Later release workflows in `OkemoVail/Lamina` build and sign APKs, while a
 protected publication workflow updates and signs catalogs in `OkemoVail/web`.
 
 The publishing workflow must pin third-party Actions to full commit SHAs, use
 least-privilege permissions, and generate artifact attestations for release
-APKs. GitHub Pages and Releases are transport layers only; Lamina's signatures
+APKs. Cloudflare Pages and GitHub Releases are transport layers only; Lamina's signatures
 and APK identity checks remain authoritative.
 
 ## Non-goals

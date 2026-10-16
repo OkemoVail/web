@@ -13,8 +13,9 @@ function descriptor(path) {
   return JSON.parse(text(path));
 }
 
-test('publishes the Lamina repository custom domain', () => {
-  assert.equal(text('./CNAME').trim(), 'repo.okemovail.com');
+test('leaves the custom domain to Cloudflare Pages', () => {
+  assert.equal(existsSync(new URL('./CNAME', import.meta.url)), false,
+    'a GitHub Pages CNAME could interfere with the existing Pages configuration');
 });
 
 test('publishes distinct canonical source descriptors', () => {
