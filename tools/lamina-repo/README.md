@@ -69,3 +69,31 @@ node tools/lamina-repo/verify-catalog.mjs \
 
 Every validation, parsing, canonicalization, key, or signature failure exits
 nonzero.
+
+## Production activation
+
+The committed `bootstrap/packages.json` and `repo/packages.json` files are the
+reviewed signing inputs. Until key provisioning, both source descriptors remain
+`KEYS_PENDING` and all six trust artifacts (`index.json`, `public-key.txt`, and
+`public-key.sha256` in each source) must remain absent.
+
+To activate production:
+
+1. Generate two independent Ed25519 keypairs on a protected workstation.
+2. Put each private PKCS#8 PEM in its own protected GitHub environment:
+   `lamina-bootstrap-production` or `lamina-repo-production`. Configure required
+   reviewers and restrict deployment branches.
+3. Derive each X.509 public-key DER Base64 value and lowercase SHA-256
+   fingerprint with `build-catalog.mjs`. Compile those keys into the Bootstrap
+   app as separate trust anchors.
+4. Commit both public-key files, both fingerprints, both initial signed indexes,
+   and both descriptor status changes in one reviewed activation commit. The
+   repository contract rejects partial activation and cross-signing.
+5. Thereafter, review changes to `packages.json` and manually dispatch
+   `.github/workflows/publish-lamina-catalogs.yml`. Each signing job can access
+   only its own environment secret. The publishing job re-verifies both outputs
+   against committed trust anchors before committing them.
+
+Do not run the production workflow before the activation commit exists: its
+`cmp` checks intentionally fail when a committed trust anchor is absent or does
+not match the protected private key.

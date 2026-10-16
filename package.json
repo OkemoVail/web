@@ -2,6 +2,7 @@
   "scripts": {
     "test:lamina-repositories": "node --test test-lamina-repositories.mjs",
     "test:lamina-catalogs": "node --test tools/lamina-repo/test-catalog.mjs",
+    "build:lamina-catalogs": "node tools/lamina-repo/build-catalog.mjs --input bootstrap/packages.json --output bootstrap/index.json --private-key-env LAMINA_BOOTSTRAP_ED25519_PKCS8 && node tools/lamina-repo/build-catalog.mjs --input repo/packages.json --output repo/index.json --private-key-env LAMINA_REPO_ED25519_PKCS8",
     "build:lumen-assets": "node tools/lumen-assets.mjs",
     "profile:lumen": "node tools/lumen-profile.mjs --output docs/assets/lumen-profile-2026-09-09.json",
     "profile:lumen:replace": "node tools/lumen-profile.mjs --output docs/assets/lumen-profile-2026-09-09.json --replace"
