@@ -18,6 +18,12 @@ test('leaves the custom domain to Cloudflare Pages', () => {
     'a GitHub Pages CNAME could interfere with the existing Pages configuration');
 });
 
+test('disables Cloudflare Pages SPA fallback for missing catalogs', () => {
+  const notFound = text('./404.html');
+  assert.match(notFound, /<!doctype html>/i);
+  assert.match(notFound, /not found/i);
+});
+
 test('publishes distinct canonical source descriptors', () => {
   const bootstrap = descriptor('./bootstrap/repository.json');
   const customizations = descriptor('./repo/repository.json');
