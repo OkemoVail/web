@@ -135,6 +135,14 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
+Lamina package sources (2026-10-16): this repository statically hosts the
+official Bootstrap Profile at `/bootstrap/` and optional Customizations at
+`/repo/`, intended for `https://repo.okemovail.com`. Their public descriptors
+are `repository.json`. Do not add either machine-readable `index.json` until
+independent production Ed25519 keys are provisioned and the generated envelope
+passes `npm run test:lamina-repositories`; never publish a sample key,
+placeholder signature, empty signature, or unsigned catalog.
+
 Okemo Word compact ribbon (2026-10-14): `word/index.html` is a document-first
 workspace based on the familiar desktop word-processor hierarchy without its
 dense ribbon. Desktop has a 54px document-title row, one flat 48px Home ribbon,

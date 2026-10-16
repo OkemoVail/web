@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "id": "lamina-bootstrap",
+  "name": "Lamina Bootstrap Profile",
+  "role": "BOOTSTRAP_PROFILE",
+  "description": "Lamina Config, compatibility profiles, hooks, and required infrastructure.",
+  "canonicalUrl": "https://repo.okemovail.com/bootstrap/",
+  "indexUrl": "https://repo.okemovail.com/bootstrap/index.json",
+  "status": "KEYS_PENDING"
+}
