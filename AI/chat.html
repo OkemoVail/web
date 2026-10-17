@@ -267,6 +267,10 @@
                         class="w-full flex items-center justify-center gap-2 min-h-[48px] rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all border-2 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)] hover:text-white active:scale-[0.98] mb-2">
                         Verify Email
                     </button>
+                    <button onclick="window.AccountModal._resendVerification('ob-verify-error', this)"
+                        class="w-full py-1 text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                        Send another code
+                    </button>
                     <button onclick="window.AccountModal._cancelObVerify()"
                         class="w-full py-1 text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
                         ← Back to sign up
@@ -1151,6 +1155,10 @@
                                     class="w-full flex items-center justify-center gap-2 min-h-[48px] rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all border-2 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)] hover:text-white active:scale-[0.98] mb-2">
                                     Verify Email
                                 </button>
+                                <button onclick="window.AccountModal._resendVerification('st-verify-error', this)"
+                                    class="w-full py-1 text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                                    Send another code
+                                </button>
                                 <button onclick="window.cancelStVerify()"
                                     class="w-full py-1 text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
                                     ← Back to sign up
@@ -1904,6 +1912,10 @@
                 <button id="verify-submit-btn" onclick="window.AccountModal._submitVerification()"
                     class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium mb-2">
                     Verify Email
+                </button>
+                <button onclick="window.AccountModal._resendVerification('verify-error', this)"
+                    class="w-full py-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    Send another code
                 </button>
                 <button onclick="window.AccountModal._cancelVerify()"
                     class="w-full py-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">

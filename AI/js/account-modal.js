@@ -89,6 +89,34 @@ window.AccountModal = (() => {
         if (errEl) errEl.textContent = '';
     };
 
+    const _resendVerification = async (errorId, button) => {
+        const errEl = $(errorId);
+        if (errEl) errEl.textContent = '';
+        if (!_pendingEmail) {
+            if (errEl) errEl.textContent = 'Go back and enter your email again.';
+            return;
+        }
+        const originalText = button ? window.getButtonContent(button).textContent : '';
+        if (button) { button.disabled = true; window.getButtonContent(button).textContent = 'Sending…'; }
+        try {
+            const resp = await fetch(`${base()}/api/accounts/resend-verification`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: _pendingEmail })
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                if (errEl) errEl.textContent = data.detail || 'Could not send another code.';
+                return;
+            }
+            if (errEl) errEl.textContent = 'A new code is on its way.';
+        } catch (e) {
+            if (errEl) errEl.textContent = 'Network error. Please try again.';
+        } finally {
+            if (button) { button.disabled = false; window.getButtonContent(button).textContent = originalText || 'Send another code'; }
+        }
+    };
+
     const _submitVerification = async () => {
         const code = ($('verify-code-input')?.value || '').replace(/\s/g, '');
         const errEl = $('verify-error');
@@ -222,7 +250,11 @@ window.AccountModal = (() => {
                 body: JSON.stringify({ email, password })
             });
             const data = await resp.json();
-            if (!resp.ok) { errEl.textContent = data.detail || 'Error'; return; }
+            if (!resp.ok) {
+                if (data.verification_required) { _showVerifyPanel(data.email || email); return; }
+                errEl.textContent = data.detail || 'Error';
+                return;
+            }
             if (_mode === 'register') {
                 _showVerifyPanel(email);
             } else {
@@ -342,6 +374,7 @@ window.AccountModal = (() => {
             });
             const data = await resp.json();
             if (!resp.ok) {
+                if (data.verification_required) { _showObVerifyPanel(data.email || email); return; }
                 if (errEl) errEl.textContent = data.detail || 'Error';
                 return;
             }
@@ -522,6 +555,7 @@ window.AccountModal = (() => {
             });
             const data = await resp.json();
             if (!resp.ok) {
+                if (data.verification_required) { _showStVerifyPanel(data.email || email); return; }
                 if (errEl) errEl.textContent = data.detail || 'Error';
                 return;
             }
@@ -588,7 +622,7 @@ window.AccountModal = (() => {
         updateSidebar();
     };
 
-    return { init, showModal, hideModal, updateSidebar, onLogin, _submitVerification, _cancelVerify, _submitObVerification, _cancelObVerify };
+    return { init, showModal, hideModal, updateSidebar, onLogin, _submitVerification, _cancelVerify, _submitObVerification, _cancelObVerify, _resendVerification };
 })();
 
 window.clearAllCloudData = async () => {
