@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "id": "lamina-customizations",
+  "name": "Lamina Customizations",
+  "role": "CUSTOMIZATIONS",
+  "description": "Optional themes, clocks, status-bar layouts, launcher layouts, and overlays.",
+  "canonicalUrl": "https://repo.okemovail.com/repo/",
+  "indexUrl": "https://repo.okemovail.com/repo/index.json",
+  "status": "KEYS_PENDING"
+}
