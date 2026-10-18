@@ -747,7 +747,11 @@ var window=Object.create(host),module=undefined;
       // gesture. Capturing it here would make the parent surface deform along
       // with an Options sheet dragged above it.
       var nestedControl = options.editableSurface && event.target.closest('[data-lgp-control],[data-lgp-component]');
-      if (nestedControl && nestedControl !== button) return;
+      // A compound Options source lives inside its own component host. That
+      // host is the motion track, not a separate control. Let the source
+      // group's gesture own the whole capsule instead of handing the press
+      // back to the individual button under the pointer.
+      if (nestedControl && nestedControl !== button && nestedControl !== track) return;
       if (nestedAction || (options.editableSurface && event.target.closest('input, textarea, select, [contenteditable]'))) {
         // Let the native field place its caret/select text until the pointer
         // leaves the resting glass. Then hand that same gesture to the spring.
@@ -1385,8 +1389,64 @@ var window=Object.create(host),module=undefined;
           record.glow.style.left=lx+'px'; record.glow.style.top=ly+'px';
           record.glow.style.clipPath='path("'+pill({x:b.x-lx+glowDiameter/2,y:b.y-ly+glowDiameter/2,w:b.w,h:b.h,rx:b.rx,ry:b.ry})+'")';
         }
-      });
-      ghosts.forEach(function (ghost) {
+       });
+       // Compound menu sources (such as the chat corner pill) use one shared
+       // motion solver. Their material already spans the full source group,
+       // so the touch light must use that same full-group geometry rather than
+       // the 44px button that happened to receive the pointer.
+       var compoundSourceGroup = group.querySelector('[data-liquid-menu-source-group]');
+       var compoundState = group._liquidCompoundSourceState;
+       if (pluginMaterial && compoundSourceGroup && compoundState && compoundState.geometry &&
+           compoundState.geometry.slabHalfWidth && compoundState.geometry.slabHalfHeight) {
+         group.querySelectorAll('[data-liquid-menu-source]').forEach(function (el) {
+           var sourceRecord = records.get(el);
+           if (sourceRecord) sourceRecord.glow.style.opacity = '0';
+         });
+         var compoundRecord = records.get(group.querySelector('[data-liquid-menu-source]'));
+         if (compoundRecord) {
+           var sourceRect = compoundSourceGroup.getBoundingClientRect();
+           var sourceX = sourceRect.left - rect.left;
+           var sourceY = sourceRect.top - rect.top;
+           var sourceW = sourceRect.width;
+           var sourceH = sourceRect.height;
+           var sourceDx = compoundState.bounds.centerX - compoundState.geometry.slabCenterX;
+           var sourceDy = compoundState.bounds.centerY - compoundState.geometry.slabCenterY;
+           var sourceSx = compoundState.bounds.halfWidth / compoundState.geometry.slabHalfWidth;
+           var sourceSy = compoundState.bounds.halfHeight / compoundState.geometry.slabHalfHeight;
+           var compoundBox = {
+             x: sourceX + sourceW / 2 + sourceDx - sourceW * sourceSx / 2,
+             y: sourceY + sourceH / 2 + sourceDy - sourceH * sourceSy / 2,
+             w: sourceW * sourceSx,
+             h: sourceH * sourceSy,
+           };
+           var compoundRadius = Math.min(sourceW, sourceH) / 2;
+           compoundBox.rx = compoundRadius * sourceSx;
+           compoundBox.ry = compoundRadius * sourceSy;
+           var compoundGlowDiameter = 184 * Math.sqrt(compoundBox.w * compoundBox.h) / 52;
+           var compoundGx = rect.width / 2 + compoundState.lightPoint.x;
+           var compoundGy = rect.height / 2 + compoundState.lightPoint.y;
+           var compoundInset = Math.min(compoundBox.w, compoundBox.h) * .25;
+           var compoundLx = Math.max(compoundBox.x + compoundInset,
+             Math.min(compoundBox.x + compoundBox.w - compoundInset, compoundGx));
+           var compoundLy = Math.max(compoundBox.y + compoundInset,
+             Math.min(compoundBox.y + compoundBox.h - compoundInset, compoundGy));
+           compoundRecord.glow.style.width = compoundGlowDiameter + 'px';
+           compoundRecord.glow.style.height = compoundGlowDiameter + 'px';
+           compoundRecord.glow.style.left = compoundLx + 'px';
+           compoundRecord.glow.style.top = compoundLy + 'px';
+           compoundRecord.glow.style.clipPath = 'path("' + pill({
+             x: compoundBox.x - compoundLx + compoundGlowDiameter / 2,
+             y: compoundBox.y - compoundLy + compoundGlowDiameter / 2,
+             w: compoundBox.w,
+             h: compoundBox.h,
+             rx: compoundBox.rx,
+             ry: compoundBox.ry,
+           }) + '")';
+           compoundRecord.glow.style.zIndex = '2';
+           compoundRecord.glow.style.opacity = compoundState.touch;
+         }
+       }
+       ghosts.forEach(function (ghost) {
         var r = ghost.getBoundingClientRect();
         boxes.push({ x: r.left - rect.left, y: r.top - rect.top, w: r.width, h: r.height });
       });
@@ -1715,9 +1775,19 @@ var window=Object.create(host),module=undefined;
           button: sourceGroup, slab: sourceGroup, track: group,
           editableSurface: true, staticActionSurface: true,
           releaseFrequency: 15,
-          render: function (state) { sourceState = state; refresh(); },
+          render: function (state) {
+            sourceState = state;
+            // The compound source has one shared light field. Keep the state
+            // on the component so the outer paint pass can draw one highlight
+            // over the complete capsule instead of one per icon.
+            group._liquidCompoundSourceState = state;
+            refresh();
+          },
         });
-        cleanups.push(function () { sourceMotion.destroy(); });
+        cleanups.push(function () {
+          sourceMotion.destroy();
+          delete group._liquidCompoundSourceState;
+        });
       }
       group.dataset.morphPhase = 'settled';
       function box(el) {

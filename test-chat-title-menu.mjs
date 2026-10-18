@@ -53,35 +53,39 @@ try {
   assert.ok(positions.compose < positions.more, 'new chat is left of the three-dot menu');
   assert.ok(Math.abs(positions.composeTop - positions.moreTop) < 1, 'new chat and three-dot menu share one row');
   assert.equal(positions.modelText, 'Saga', 'the full model name is visible');
-  assert.equal(await page.locator('#chat-model-picker > .lgc-material').evaluate(el => getComputedStyle(el).opacity), '0',
-    'the resting model trigger has no glass background');
+  assert.equal(await page.locator('#chat-model-chevron > .lgc-material').count(), 1,
+    'the model name and chevron share one compact glass control');
   assert.equal(await page.locator('#chat-more-glass > .lgc-material').count(), 1,
     'new chat and the three-dot menu share one glass material');
   const headerInsets = await page.evaluate(() => {
     const actions = document.getElementById('chat-more-glass').getBoundingClientRect();
-    const model = document.getElementById('chat-model-trigger-name').getBoundingClientRect();
+    const heading = document.getElementById('top-left-chat-title').getBoundingClientRect();
     const main = document.querySelector('main').getBoundingClientRect();
-    return { top: actions.top, right: innerWidth - actions.right, left: model.left - main.left };
+    return { top: actions.top, right: innerWidth - actions.right, left: heading.left - main.left };
   });
   assert.ok(Math.abs(headerInsets.top - 15) < 1 && Math.abs(headerInsets.right - 15) < 1
     && Math.abs(headerInsets.left - 15) < 1,
     `header edge insets are uniformly 15px: ${JSON.stringify(headerInsets)}`);
 
   await page.locator('#chat-model-trigger').click();
-  await page.waitForFunction(() => document.querySelector('#chat-model-picker')?.dataset.morphPhase === 'settled'
+  await page.waitForFunction(() => document.querySelector('#chat-model-chevron')?.dataset.morphPhase === 'settled'
     && document.getElementById('chat-model-trigger')?.getAttribute('aria-expanded') === 'true');
   assert.equal(await page.locator('#chat-model-menu').isVisible(), true, 'model settings open below the model name');
-  assert.equal(await page.locator('#chat-model-picker > .lgc-material').count(), 1,
+  assert.equal(await page.locator('#chat-model-chevron > .lgc-material').count(), 1,
     'the Saga trigger and its dropdown share one morphing liquid glass material');
   assert.equal(await page.locator('#chat-model-options .chat-model-option').count(), 1, 'available models are listed');
-  await page.locator('#chat-header-thinking').click();
+  await page.locator('#chat-thinking-effort').evaluate(input => {
+    input.value = '2';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
   assert.equal(await page.evaluate(() => window.isThinkingEnabled), true, 'thinking slider updates chat state');
-  await page.waitForFunction(() => document.querySelector('#chat-model-picker')?.dataset.morphPhase === 'settled'
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => document.querySelector('#chat-model-chevron')?.dataset.morphPhase === 'settled'
     && document.getElementById('chat-model-trigger')?.getAttribute('aria-expanded') === 'false');
   await page.locator('#chat-model-trigger').click();
   await page.waitForFunction(() => document.getElementById('chat-model-trigger')?.getAttribute('aria-expanded') === 'true');
   await page.keyboard.press('Escape');
-  await page.waitForFunction(() => document.querySelector('#chat-model-picker')?.dataset.morphPhase === 'settled'
+  await page.waitForFunction(() => document.querySelector('#chat-model-chevron')?.dataset.morphPhase === 'settled'
     && document.getElementById('chat-model-trigger')?.getAttribute('aria-expanded') === 'false');
   assert.equal(await page.locator('#chat-model-menu').isVisible(), false, 'Escape closes model settings');
 

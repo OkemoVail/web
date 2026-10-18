@@ -5102,15 +5102,16 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             z-index: var(--z-popover);
             translate: 0 10px;
         }
-        /* Only the chevron is the source of the Liquid Design morph. The
-           adjacent model name stays plain text and can update independently. */
+        /* The model name and chevron are one control. Keeping the label inside
+           the source makes the compact header read as three intentional toolbar
+           groups instead of a loose title plus a separate circular button. */
         [data-page="chat"] #chat-model-chevron {
             position: relative;
             display: inline-flex;
-            width: 36px;
+            width: auto;
             height: 44px;
             min-height: 44px;
-            flex: 0 0 36px;
+            flex: 0 1 auto;
             padding: 0;
             overflow: visible;
             z-index: var(--z-popover);
@@ -5122,25 +5123,33 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] #top-left-chat-title #chat-model-trigger {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            width: 36px !important;
-            min-width: 36px;
+            justify-content: flex-start;
+            gap: 6px;
+            width: auto !important;
+            min-width: 0;
+            max-width: min(180px, 42vw);
             height: 44px;
-            padding: 0;
+            padding: 0 12px;
             border: 0;
-            border-radius: 10px;
+            border-radius: 999px;
             background: transparent;
             color: var(--text-primary);
             box-shadow: none;
         }
-        [data-page="chat"] #top-left-chat-title #chat-model-trigger > .lgc-content { justify-content: center; }
+        [data-page="chat"] #top-left-chat-title #chat-model-trigger > .lgc-content {
+            justify-content: flex-start;
+            gap: 6px;
+            min-width: 0;
+        }
         [data-page="chat"] #chat-model-trigger-name {
-            flex: none;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
             color: var(--text-primary);
             font: 450 20px/1.2 'Satoshi', sans-serif;
             letter-spacing: -.035em;
             white-space: nowrap;
-            cursor: default;
+            cursor: pointer;
             user-select: none;
             transition: opacity 120ms ease;
         }
@@ -5159,9 +5168,11 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             transition-duration: var(--chat-model-menu-open-duration);
         }
         [data-page="chat"] #chat-model-chevron > .lgc-exit .lgc-content {
-            width: 36px;
+            width: auto;
             height: 44px;
-            justify-content: center;
+            justify-content: flex-start;
+            gap: 6px;
+            padding-inline: 12px;
         }
         [data-page="chat"] #top-left-chat-title #chat-model-menu {
             position: absolute;
@@ -5212,6 +5223,11 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] .chat-model-option .lgc-content > svg { width: 17px; height: 17px; opacity: 0; }
         [data-page="chat"] .chat-model-option.is-active .lgc-content > svg { opacity: 1; color: var(--accent-color); }
         [data-page="chat"] .chat-model-menu-divider { height: 1px; margin: 8px 4px; background: var(--border-strong); }
+        @property --thinking-effort-progress {
+            syntax: '<percentage>';
+            initial-value: 0%;
+            inherits: false;
+        }
         [data-page="chat"] .chat-thinking-effort { padding: 7px 10px 9px; color: var(--text-primary); }
         [data-page="chat"] .chat-thinking-effort-heading {
             display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px;
@@ -5220,29 +5236,30 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] .chat-thinking-effort-heading output { color: var(--accent-color); font-size: 12px; font-weight: 650; }
         [data-page="chat"] #chat-thinking-effort {
             --thinking-effort-progress: 0%;
-            display: block; width: 100%; height: 18px; margin: 0; padding: 0;
+            display: block; width: 100%; height: 16px; margin: 0; padding: 0;
             appearance: none; -webkit-appearance: none; background: transparent; cursor: pointer; touch-action: pan-x;
+            transition: --thinking-effort-progress 240ms var(--ease-smooth);
         }
         [data-page="chat"] #chat-thinking-effort::-webkit-slider-runnable-track {
-            height: 4px; border-radius: 999px;
+            height: 16px; border-radius: 999px;
             background: linear-gradient(to right, var(--accent-color) 0 var(--thinking-effort-progress), color-mix(in srgb, var(--text-primary) 15%, transparent) var(--thinking-effort-progress) 100%);
         }
         [data-page="chat"] #chat-thinking-effort::-moz-range-track {
-            height: 4px; border: 0; border-radius: 999px;
+            height: 16px; border: 0; border-radius: 999px;
             background: linear-gradient(to right, var(--accent-color) 0 var(--thinking-effort-progress), color-mix(in srgb, var(--text-primary) 15%, transparent) var(--thinking-effort-progress) 100%);
         }
         [data-page="chat"] #chat-thinking-effort::-webkit-slider-thumb {
-            width: 16px; height: 16px; margin-top: -6px; appearance: none; -webkit-appearance: none;
+            width: 16px; height: 16px; margin-top: 0; appearance: none; -webkit-appearance: none;
             border: 2px solid var(--bg-elevated); border-radius: 50%; background: var(--accent-color);
             box-shadow: 0 1px 4px rgb(0 0 0 / .28);
         }
         [data-page="chat"] #chat-thinking-effort::-moz-range-thumb {
-            width: 12px; height: 12px; border: 2px solid var(--bg-elevated); border-radius: 50%;
+            width: 12px; height: 12px; border: 2px solid var(--bg-elevated); border-radius: 50%; box-sizing: content-box;
             background: var(--accent-color); box-shadow: 0 1px 4px rgb(0 0 0 / .28);
         }
         [data-page="chat"] #chat-thinking-effort:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 3px; border-radius: 999px; }
         [data-page="chat"] .chat-thinking-effort-labels {
-            display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 3px;
+            display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 6px;
             color: var(--text-tertiary); font-size: 9px; line-height: 1.2;
         }
         [data-page="chat"] .chat-thinking-effort-labels span { text-align: center; }
@@ -5251,9 +5268,11 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] .chat-thinking-effort-labels span.is-active { color: var(--text-primary); font-weight: 650; }
         @media (prefers-reduced-motion: reduce) {
             [data-page="chat"] #top-left-chat-title :is(#chat-model-trigger, #chat-model-chevron > .lgc-exit) svg { transition: none; }
+            [data-page="chat"] #chat-thinking-effort { transition: none; }
         }
         @media (max-width: 767px) {
-            [data-page="chat"] #chat-model-trigger-name { font-size: 16px; font-weight: 450; }
+            [data-page="chat"] #chat-model-trigger-name { font-size: 15px; font-weight: 550; letter-spacing: -.015em; }
+            [data-page="chat"] #top-left-chat-title .chat-model-picker { translate: none; }
         }
         [data-page="chat"] #top-left-chat-title .chat-title-inline { display: none; }
         [data-page="chat"] #top-left-chat-title #chat-title-more { display: flex; }
@@ -5332,6 +5351,12 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             [data-page="chat"] #chat-messages { padding-top: 92px; }
             [data-page="chat"] #sidebar { width: min(300px, calc(100vw - 48px)); height: calc(100% - 24px); margin: 12px; border-radius: 26px; }
             [data-page="chat"] #top-right-actions { display: none; }
+            [data-page="chat"] #welcome-greeting {
+                color: var(--text-primary);
+                font-size: clamp(26px, 7.2vw, 32px);
+                line-height: 1.2;
+                letter-spacing: -.03em;
+            }
         }
         @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
             [data-page="chat"] #sidebar { background: var(--bg-elevated); backdrop-filter: none; -webkit-backdrop-filter: none; }
@@ -5441,10 +5466,79 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             [data-page="chat"].sidebar-collapsed #sidebar-full-content { visibility: hidden; }
         }
         @media (max-width: 767px) {
-            [data-page="chat"] main { margin-left: 72px; }
+            [data-page="chat"] {
+                /* Mobile is a modal drawer, not the narrow desktop library.
+                   Keep the floating 12px frame while covering the chat canvas. */
+                --sidebar-width: calc(100vw - 24px);
+            }
+            [data-page="chat"] main {
+                width: 100%;
+                margin-left: 0;
+            }
+            /* The shared glass surface disables its own transition because it
+               animates deformation in JavaScript. The drawer still needs a
+               CSS transform transition when it enters and leaves the screen. */
+            [data-page="chat"] #sidebar {
+                /* Tailwind's -translate-x-full utility uses the independent
+                   `translate` property. Liquid Glass supplies the drawer's
+                   transform separately, so reset the utility transform to
+                   avoid moving the closed drawer two viewport widths. */
+                translate: none !important;
+                will-change: transform;
+                transition: transform 300ms cubic-bezier(.22,1,.36,1) !important;
+            }
+            /* Blurring a viewport-sized surface while it moves is expensive on
+               mobile GPUs. The drawer covers the canvas, so make only its base
+               material opaque; toolbar and button glass remains unchanged. */
+            [data-page="chat"] #sidebar > .lgp-material {
+                background: var(--bg-elevated) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+            [data-page="chat"] #top-left-chat-title #chat-mobile-navigation {
+                display: block !important;
+                position: static;
+                flex: none;
+                pointer-events: auto;
+            }
+            [data-page="chat"] #top-left-chat-title #menu-toggle-btn {
+                display: flex !important;
+                position: relative;
+                z-index: var(--z-nav);
+                pointer-events: auto;
+            }
+            [data-page="chat"] #top-left-chat-title {
+                z-index: var(--z-nav);
+                pointer-events: none;
+            }
+            [data-page="chat"] #top-left-chat-title #menu-toggle-btn {
+                pointer-events: auto;
+            }
+            [data-page="chat"] #top-left-chat-title #chat-model-picker {
+                pointer-events: auto;
+            }
             [data-page="chat"] #sidebar { margin: 12px; }
-            [data-page="chat"] #sidebar.-translate-x-full { width: 60px !important; transform: none; }
+            [data-page="chat"] #sidebar:not(.-translate-x-full) {
+                z-index: calc(var(--z-popover) + 2) !important;
+            }
+            /* The drawer has its own collapse button in .chat-sidebar-actions.
+               Hide the conversation chrome as one unit instead of layering its
+               hamburger and action capsules over the library. */
+            body[data-page="chat"].sidebar-drawer-open #top-left-chat-title {
+                visibility: hidden;
+                pointer-events: none;
+            }
+            body[data-page="chat"].sidebar-drawer-open #top-right-actions,
+            body[data-page="chat"].sidebar-drawer-open #chat-more-glass {
+                visibility: hidden;
+                pointer-events: none;
+            }
+            [data-page="chat"] #sidebar.-translate-x-full {
+                width: var(--sidebar-width) !important;
+                --lg-site-layout-transform: translateX(calc(-100% - 24px)) !important;
+            }
             [data-page="chat"] #sidebar.-translate-x-full #sidebar-full-content { visibility: hidden; }
+            body[data-page="chat"]:not(.sidebar-collapsed) #top-left-chat-title #menu-toggle-btn { display: flex; }
             [data-page="chat"] #top-left-chat-title {
                 top: calc(var(--chat-header-edge-inset) + env(safe-area-inset-top));
                 left: var(--chat-header-edge-inset);
@@ -5453,6 +5547,9 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             }
             [data-page="chat"] #top-left-chat-title #chat-title-text { font-size: 18px; }
             [data-page="chat"] #chat-corner-actions { padding: 2px; }
+        }
+        @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+            [data-page="chat"] #sidebar { transition-duration: 1ms !important; }
         }
         @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
             [data-page="chat"] #sidebar { background: var(--chat-library); backdrop-filter: none; -webkit-backdrop-filter: none; }
@@ -5667,6 +5764,14 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             [data-page="chat"] .user-msg-bubble { padding: 10px 14px; }
             [data-page="chat"] .ai-msg-actions { gap: 6px; }
         }
+        /* Assistant replies are text-first rather than filled chat bubbles. */
+        [data-page="chat"] .ai-bubble-container > .prose-target {
+            padding: 0;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+        }
+
         /* Messaging composer: one writing row, native multiline growth. */
         [data-page="chat"] #chat-composer-dock .input-box-wrap { border-radius: 28px; }
         [data-page="chat"] #input-inner, [data-page="chat"] #input-inner.is-multiline { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: end; gap: 8px; padding: 8px; }
@@ -6109,12 +6214,24 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
            half-height (24px), matching the reference's ~15%-of-width radius. */
         [data-page="chat"] #sidebar { border-radius: 36px; }
         [data-page="chat"] #sidebar .chat-library-header { height: 72px; min-height: 72px; padding: 20px 12px 4px; align-items: flex-start; }
-        [data-page="chat"] #sidebar .chat-library-header > .chat-sidebar-actions {
-            margin: 0 0 0 auto; height: 48px; padding: 0 4px; border-radius: 24px;
+        [data-page="chat"] #sidebar .chat-library-header > .sb-tools-dock {
+            margin: 0 0 0 auto; width: 99px; height: 48px; padding: 0; border-radius: 24px;
         }
-        [data-page="chat"] #sidebar .chat-library-header > .chat-sidebar-actions > .lgp-content { height: 100%; }
-        [data-page="chat"] #sidebar .chat-library-header > .chat-sidebar-actions > .lgp-content > .sb-icon-btn {
-            position: relative; z-index: 3; pointer-events: auto;
+        [data-page="chat"] #sidebar .chat-library-header > .sb-tools-dock > .chat-sidebar-actions {
+            width: 99px;
+            height: 48px;
+            margin: 0;
+            padding: 0;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        [data-page="chat"] #sidebar .chat-library-header > .sb-tools-dock > .chat-sidebar-actions > .lgp-material,
+        [data-page="chat"] #sidebar .chat-library-header > .sb-tools-dock > .chat-sidebar-actions > .lgp-glow {
+            border-radius: inherit;
+        }
+        [data-page="chat"] #sidebar .chat-library-header > .sb-tools-dock > .chat-sidebar-actions > .lgp-content { height: 100%; }
+        [data-page="chat"] #sidebar .chat-library-header > .sb-tools-dock > .chat-sidebar-actions > .lgp-content > .sb-icon-btn {
+            z-index: 3; pointer-events: auto;
         }
         [data-page="chat"] #sidebar #sidebar-bottom-actions { padding: 0; border-top: 0; }
         [data-page="chat"] #sidebar #user-profile-section { padding: 12px 12px 12px; }
@@ -10489,31 +10606,37 @@ font-family: 'Satoshi', 'Inter', sans-serif;
     to { opacity: 1; transform: scale(1) rotate(0); }
 }
 @media (max-width: 767px) {
-    [data-page="chat"] #chat-composer-dock .input-box-wrap { border-radius: 27px; }
+    [data-page="chat"] #chat-composer-dock { bottom: max(12px, env(safe-area-inset-bottom)); }
+    [data-page="chat"] #chat-composer-dock .input-box-wrap { border-radius: 29px; }
     [data-page="chat"] #chat-composer-dock .input-box-wrap.is-multiline { border-radius: 20px; }
     [data-page="chat"] #input-inner,
     [data-page="chat"] #input-inner.is-multiline {
-        --composer-field-height: 36px;
-        --composer-compact-height: 52px;
-        --composer-control-reserve: 52px;
-        --composer-inline-chrome: 107px;
-        grid-template-columns: 36px 1px minmax(0, 1fr) 36px;
-        gap: 6px;
-        min-height: 52px;
+        --composer-field-height: 44px;
+        --composer-compact-height: 60px;
+        --composer-control-reserve: 60px;
+        --composer-inline-chrome: 125px;
+        grid-template-columns: 44px 1px minmax(0, 1fr) 44px;
+        gap: 8px;
+        min-height: 60px;
         padding: 8px;
     }
     [data-page="chat"] #plus-menu-btn,
-    [data-page="chat"] #send-btn { width: 36px; height: 36px; min-height: 36px; }
+    [data-page="chat"] #send-btn { width: 44px; height: 44px; min-height: 44px; }
     [data-page="chat"] #plus-menu-container[data-lgp-component="options"] {
-        width: 36px; height: 36px; min-height: 36px;
+        width: 44px; height: 44px; min-height: 44px;
     }
     [data-page="chat"] #plus-menu-container[data-lgp-component="options"] > #plus-menu-btn {
-        width: 36px; height: 36px; min-width: 36px;
+        width: 44px; height: 44px; min-width: 44px;
     }
-    [data-page="chat"] .composer-control-divider { height: 18px; }
-    [data-page="chat"] #input-inner #user-input { min-height: 36px; padding-block: 6px; }
-    [data-page="chat"] #input-inner.is-multiline { padding: 8px 8px 44px; }
-    [data-page="chat"] #input-inner.is-multiline #user-input { padding-block: 6px; }
+    [data-page="chat"] .composer-control-divider { height: 20px; }
+    [data-page="chat"] #input-inner #user-input {
+        min-height: 44px;
+        padding-block: 10px;
+        font-size: 16px;
+    }
+    [data-page="chat"] #user-input::placeholder { color: var(--text-secondary); opacity: .82; }
+    [data-page="chat"] #input-inner.is-multiline { padding: 8px 8px 52px; }
+    [data-page="chat"] #input-inner.is-multiline #user-input { padding-block: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
     [data-page="chat"] #input-inner,

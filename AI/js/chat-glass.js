@@ -163,10 +163,10 @@
     const search = document.querySelector('.sb-search-wrap');
     const sidebar = document.getElementById('sidebar-full-content');
     if (search && sidebar) sidebar.insertBefore(search, sidebar.children[1]);
-    // The sidebar owns both collapse and reopen, including its narrow rail.
+    // Keep the mobile menu button in the conversation header. The sidebar is
+    // an off-canvas drawer on phones, not a permanently visible rail.
     const sidebarNavigation = document.getElementById('chat-mobile-navigation');
     const sidebarPanel = document.getElementById('sidebar');
-    sidebarPanel.insertBefore(sidebarNavigation, sidebarPanel.firstChild);
     sidebarPanel.setAttribute('data-liquid-design', 'surface');
     sidebarPanel.setAttribute('data-liquid-design-independent', '');
     window.LiquidDesign?.refresh(sidebarPanel);
@@ -174,6 +174,7 @@
         const collapsed = innerWidth < 768
             ? sidebarPanel.classList.contains('-translate-x-full')
             : document.body.classList.contains('sidebar-collapsed');
+        document.body.classList.toggle('sidebar-drawer-open', innerWidth < 768 && !collapsed);
         const button = document.getElementById('menu-toggle-btn');
         button.setAttribute('aria-label', collapsed ? 'Open sidebar' : 'Collapse sidebar');
         button.setAttribute('aria-expanded', String(!collapsed));

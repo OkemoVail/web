@@ -275,7 +275,11 @@
       // gesture. Capturing it here would make the parent surface deform along
       // with an Options sheet dragged above it.
       var nestedControl = options.editableSurface && event.target.closest('[data-lgp-control],[data-lgp-component]');
-      if (nestedControl && nestedControl !== button) return;
+      // A compound Options source lives inside its own component host. That
+      // host is the motion track, not a separate control. Let the source
+      // group's gesture own the whole capsule instead of handing the press
+      // back to the individual button under the pointer.
+      if (nestedControl && nestedControl !== button && nestedControl !== track) return;
       if (nestedAction || (options.editableSurface && event.target.closest('input, textarea, select, [contenteditable]'))) {
         // Let the native field place its caret/select text until the pointer
         // leaves the resting glass. Then hand that same gesture to the spring.

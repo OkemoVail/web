@@ -20,6 +20,7 @@
         const mobile = innerWidth < 768;
         if (mobile) sidebar.classList.toggle('-translate-x-full', collapsed);
         else document.body.classList.toggle('sidebar-collapsed', collapsed);
+        document.body.classList.toggle('sidebar-drawer-open', mobile && !collapsed);
         const library = document.getElementById('sidebar-full-content');
         if (collapsed && mobile && library.contains(document.activeElement)) {
             document.getElementById('menu-toggle-btn').focus({ preventScroll: true });
@@ -43,6 +44,9 @@
     let repaintFrame = 0;
     function repaintGlassDuringTransition(sidebar) {
         cancelAnimationFrame(repaintFrame);
+        // A mobile drawer is a transform-only compositor animation. Its glass
+        // geometry does not change, so any Liquid Glass repaint is wasted work.
+        if (innerWidth < 768) return;
         if (reducedMotion.matches || navigator.webdriver) {
             window.LiquidDesign?.repaint?.(sidebar);
             return;
@@ -80,6 +84,10 @@
             window.LiquidDesign?.refresh(sidebar);
             sidebar.dispatchEvent(new CustomEvent('liquid-color-change', { bubbles: true }));
         };
+        // A translated mobile surface keeps the same geometry. Refreshing its
+        // complete glass tree after the slide causes a second visible hitch on
+        // phones, so reserve the settle rebuild for the resizing desktop rail.
+        if (innerWidth < 768) return;
         if (reducedMotion.matches || navigator.webdriver) refresh();
         else settleTimer = setTimeout(refresh, 420);
     };
