@@ -75,10 +75,12 @@ try {
     'the Saga trigger and its dropdown share one morphing liquid glass material');
   assert.equal(await page.locator('#chat-model-options .chat-model-option').count(), 1, 'available models are listed');
   await page.locator('#chat-thinking-effort').evaluate(input => {
-    input.value = '2';
+    input.value = '4';
     input.dispatchEvent(new Event('input', { bubbles: true }));
   });
   assert.equal(await page.evaluate(() => window.isThinkingEnabled), true, 'thinking slider updates chat state');
+  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('thinking-ultra')), true,
+    'Ultra thinking activates the celestial conversation canvas');
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => document.querySelector('#chat-model-chevron')?.dataset.morphPhase === 'settled'
     && document.getElementById('chat-model-trigger')?.getAttribute('aria-expanded') === 'false');

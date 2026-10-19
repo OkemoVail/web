@@ -2,6 +2,7 @@
 
 window.updateUI = () => {
     window.dispatchEvent(new Event('chat-controls-update'));
+    document.body.classList.toggle('thinking-ultra', window.thinkingEffort === 'ultra');
     // 1. Send / Stop button transition
     const iconWrapper = document.getElementById('send-icon-wrapper');
     const sendBtn = document.getElementById('send-btn');

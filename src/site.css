@@ -5259,12 +5259,24 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         }
         [data-page="chat"] #chat-thinking-effort:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 3px; border-radius: 999px; }
         [data-page="chat"] .chat-thinking-effort-labels {
-            display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 6px;
+            position: relative;
+            height: 12px;
+            margin: 6px 8px 0;
             color: var(--text-tertiary); font-size: 9px; line-height: 1.2;
         }
-        [data-page="chat"] .chat-thinking-effort-labels span { text-align: center; }
-        [data-page="chat"] .chat-thinking-effort-labels span:first-child { text-align: left; }
-        [data-page="chat"] .chat-thinking-effort-labels span:last-child { text-align: right; }
+        [data-page="chat"] .chat-thinking-effort-labels span {
+            position: absolute;
+            top: 0;
+            left: var(--thinking-effort-stop);
+            translate: -50% 0;
+            text-align: center;
+            white-space: nowrap;
+        }
+        [data-page="chat"] .chat-thinking-effort-labels span:nth-child(1) { --thinking-effort-stop: 0%; }
+        [data-page="chat"] .chat-thinking-effort-labels span:nth-child(2) { --thinking-effort-stop: 25%; }
+        [data-page="chat"] .chat-thinking-effort-labels span:nth-child(3) { --thinking-effort-stop: 50%; }
+        [data-page="chat"] .chat-thinking-effort-labels span:nth-child(4) { --thinking-effort-stop: 75%; }
+        [data-page="chat"] .chat-thinking-effort-labels span:nth-child(5) { --thinking-effort-stop: 100%; }
         [data-page="chat"] .chat-thinking-effort-labels span.is-active { color: var(--text-primary); font-weight: 650; }
         @media (prefers-reduced-motion: reduce) {
             [data-page="chat"] #top-left-chat-title :is(#chat-model-trigger, #chat-model-chevron > .lgc-exit) svg { transition: none; }
@@ -5371,7 +5383,48 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             --chat-library: #f0efeb;
         }
         .dark [data-page="chat"] { --chat-canvas: #000; --chat-library: #191d20; }
-        [data-page="chat"] main { background: var(--chat-canvas) !important; }
+        [data-page="chat"] main {
+            background: var(--chat-canvas) !important;
+            transition: background-color 560ms var(--ease-smooth), color 560ms var(--ease-smooth);
+        }
+        /* Ultra thinking changes only the active workspace. Its sparse,
+           hand-placed field references the site's "made of stardust" line
+           without turning the canvas into repeating space wallpaper. */
+        body[data-page="chat"].thinking-ultra main {
+            --chat-canvas: #0b0b0e;
+            --chat-content-surface: #151418;
+            --chat-glass-fill: rgb(29 27 31 / .48);
+            --bg-elevated: #17161a;
+            --border-strong: rgb(245 240 242 / .14);
+            --text-primary: #f5f2f3;
+            --text-secondary: #c9c3c5;
+            --text-tertiary: #918b8e;
+            color: var(--text-primary);
+        }
+        body[data-page="chat"].thinking-ultra main #welcome-greeting {
+            color: var(--text-primary);
+            transition: color 560ms var(--ease-smooth);
+        }
+        [data-page="chat"] #chat-ultra-sky {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0;
+            color: #f5f2f3;
+            pointer-events: none;
+            transition: opacity 560ms var(--ease-smooth);
+        }
+        [data-page="chat"] #chat-ultra-sky circle { fill: currentColor; opacity: .82; }
+        [data-page="chat"] #chat-ultra-sky .chat-ultra-star-dim { opacity: .48; }
+        [data-page="chat"] #chat-ultra-sky .chat-ultra-star-accent { fill: var(--accent-color); opacity: .9; }
+        body[data-page="chat"].thinking-ultra #chat-ultra-sky { opacity: .68; }
+        @media (prefers-reduced-motion: reduce) {
+            [data-page="chat"] main,
+            body[data-page="chat"].thinking-ultra main #welcome-greeting,
+            [data-page="chat"] #chat-ultra-sky { transition: none; }
+        }
         [data-page="chat"] #sidebar {
             height: 100%; margin: 0; border: 0; border-radius: 0;
             background: var(--chat-library); backdrop-filter: none;
