@@ -46,3 +46,19 @@ backend/feedback.jsonl
 # Visual snapshot artifacts (after/ shots + pixelmatch diffs)
 tools/snapshots/after/
 tools/snapshots/diff-*.png
+
+# Local dev test harnesses (CI only needs the Lamina suite)
+test-*.mjs
+!test-lamina-repositories.mjs
+test.mjs
+test_localhost.mjs
+
+# Scratch probes, screenshots, agent reports, caches
+zz-*
+*-review.md
+*-report.md
+stardust-shots/
+prototype/
+cloud/
+.pytest_cache/
+tools/snapshots/
