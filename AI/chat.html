@@ -29,10 +29,10 @@
     <!-- Monaco Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
-    <link rel="stylesheet" href="../src/site.css?v=20261021-adapt22">
-    <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261021-adapt22">
+    <link rel="stylesheet" href="../src/site.css?v=20261021-adapt24">
+    <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261021-adapt24">
     <script src="../src/glass-navigation.js?v=20261012-native-chat"></script>
-    <script defer src="../liquid-design/liquid-design.js?v=20261021-adapt22"></script>
+    <script defer src="../liquid-design/liquid-design.js?v=20261021-adapt24"></script>
     <script defer src="../src/liquid-design-site.js?v=20261013-folder-dialog-glass"></script>
     
 
@@ -328,7 +328,7 @@
     </div>
 
     <aside id="sidebar" class="-translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 flex flex-col"
-        style="width: var(--sidebar-width);" data-liquid-design-refraction="off" data-liquid-design-adapt="off">
+        style="width: var(--sidebar-width);">
 
         <!--
             Single content div — fixed width, never shrinks.
@@ -360,7 +360,7 @@
                     </span>
                 </button>
                 <div class="sb-tools-dock">
-                <div class="chat-sidebar-actions" data-liquid-design="surface" data-liquid-design-independent data-liquid-design-static-actions>
+                <div class="chat-sidebar-actions">
                     <button id="sidebar-search-toggle" type="button" onclick="window.toggleChatSearch()" title="Search chats" aria-label="Search chats"
                         class="sb-icon-btn shrink-0">
                         <i data-feather="search" class="w-[1.3rem] h-[1.3rem]"></i>
@@ -389,7 +389,7 @@
             <!-- Recents search bar + history -->
             <div id="sidebar-history-area" class="flex-1 flex flex-col overflow-hidden min-h-0 mt-3">
                 <div id="chat-search-panel" class="sb-search-wrap sb-row-text" role="search" aria-label="Search chats"
-                    data-liquid-design="surface" data-liquid-design-independent hidden>
+                    hidden>
                     <i data-feather="search" class="sb-search-icon"></i>
                     <input type="text" id="chat-search-input" class="sb-search-input" placeholder="Search chats..."
                         data-t-placeholder="ph_search_chats" oninput="window.filterChats(this.value)">
@@ -427,7 +427,7 @@
                 <div id="user-profile-section">
                     <div class="sidebar-profile-dock">
                     <div class="sb-profile-slot">
-                    <div onclick="window.toggleSettingsPanel()" class="sb-profile-btn group" style="gap: 16px;" data-liquid-design="surface" data-liquid-design-independent>
+                    <div onclick="window.toggleSettingsPanel()" class="sb-profile-btn group" style="gap: 16px;">
                         <!-- 44px avatar slot — always visible, same centering as nav icons -->
                         <div id="profile-identity-glass" class="profile-identity-glass">
                         <div class="sb-nav-icon">

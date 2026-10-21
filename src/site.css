@@ -2130,22 +2130,6 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             [data-page="chat"] :is(#top-left-chat-title, #tra-bar, #chat-title-menu) button:active,
             [data-page="chat"] #plus-menu-btn:active { transform: none; }
         }
-        /* Clear glass buttons: these two are surface hosts by structure but
-           act as buttons (search/collapse pill, profile), so they drop the
-           veil like every other untinted button. */
-        [data-page="chat"] :is(.chat-sidebar-actions, .sb-profile-btn)[data-lgp-control] > .lgp-material {
-            background: transparent !important;
-            --liquid-design-saturate: 1; --lgp-brightness: 1;
-        }
-        /* Sidebar buttons sit on the sidebar's own refracting glass. A backdrop
-           filter nested inside another one made the sidebar the one laggy
-           area, so these buttons skip refraction, sampling and blur: the
-           sidebar glass already frosts what's behind them. An open menu
-           keeps its blur so its text stays readable. */
-        [data-page="chat"] #sidebar-full-content :is([data-lgp-control], [data-lgp-component]:not(:has([aria-expanded="true"]))) :is(.lgp-material, .lgc-material) {
-            -webkit-backdrop-filter: none !important;
-            backdrop-filter: none !important;
-        }
         [data-page="chat"] .sb-new-chat-btn[data-lgp-control] {
             --liquid-design-tint: color-mix(in srgb, var(--accent-color), transparent 20%);
             color: var(--accent-contrast);
@@ -5448,6 +5432,14 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         }
         [data-page="chat"] #sidebar::after { content: none; }
         [data-page="chat"] .chat-library-header { min-height: 88px; padding-inline: 16px; }
+        /* Sidebar is plain blur, not Liquid Design glass (2026-10-21, user):
+           it sits on a flat canvas, so refraction and the glass layers only
+           cost frames. Glass stays on the composer and the top-corner controls. */
+        [data-page="chat"] #sidebar {
+            background: color-mix(in srgb, var(--chat-library) 82%, transparent);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+        }
         [data-page="chat"] .chat-library-header { gap: 8px; }
         [data-page="chat"] .chat-library-header > :first-child { flex: 1 1 auto; min-width: 0; }
         [data-page="chat"] .chat-library-header > #sidebar-search-toggle,

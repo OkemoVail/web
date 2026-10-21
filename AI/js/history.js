@@ -115,7 +115,6 @@ window.renderHistory = (query = "") => {
         <div class="section-header-row">
             <span class="section-header-text">Your Folders</span>
             <button type="button" onclick="window.createFolder()" class="sb-icon-btn folder-create-btn"
-                    data-liquid-design data-liquid-design-independent
                     title="New folder" aria-label="New folder">
                 <i data-feather="folder-plus" class="w-[1.3rem] h-[1.3rem]"></i>
             </button>

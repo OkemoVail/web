@@ -60,6 +60,18 @@
     el.addEventListener(name, callback, !!capture);
     cleanup.push(function () { el.removeEventListener(name, callback, !!capture); });
   }
+  // Writes only when the value changed. Any write to a glass layer's clip,
+  // size or path invalidates its backdrop filter, and paint() runs on every
+  // hover frame: unconditional writes re-blurred large panels (the chat
+  // sidebar) each frame even when nothing moved.
+  function setAttr(node, name, value) {
+    value = String(value);
+    if (node.getAttribute(name) !== value) node.setAttribute(name, value);
+  }
+  function setStyle(node, name, value) {
+    var cache = node._lgpStyle || (node._lgpStyle = {});
+    if (cache[name] !== value) { cache[name] = value; node.style[name] = value; }
+  }
   function theme(el) {
     var owner = el.closest('[data-liquid-design-theme]');
     var explicit = owner && owner.getAttribute('data-liquid-design-theme');
@@ -71,7 +83,7 @@
       paintFrame = 0;
       Array.from(controls.values()).forEach(function (record) { if (!record.el.isConnected) removeControl(record); });
       groups.forEach(paint);
-      document.querySelectorAll('[data-lgp-component]').forEach(function (el) { el.setAttribute('data-lgp-theme', theme(el)); });
+      document.querySelectorAll('[data-lgp-component]').forEach(function (el) { setAttr(el, 'data-lgp-theme', theme(el)); });
       root.LiquidDesignPluginComponents.prune();
       Array.from(layers.keys()).forEach(function (el) { if (!el.isConnected) { layers.get(el)(); layers.delete(el); } });
       detach();
@@ -159,13 +171,13 @@
     var ancestorScaleX = group.el.offsetWidth ? anchor.width / group.el.offsetWidth : 1;
     var ancestorScaleY = group.el.offsetHeight ? anchor.height / group.el.offsetHeight : 1;
     ancestorScaleX = Math.max(.01, ancestorScaleX); ancestorScaleY = Math.max(.01, ancestorScaleY);
-    group.el.setAttribute('data-lgp-theme', theme(group.el));
+    setAttr(group.el, 'data-lgp-theme', theme(group.el));
     group.controls.forEach(function (record) {
       // Host replacement may detach the wrapper before the adapter's queued
       // repair runs. Never paint stale foreground into this frame.
       if (record.content.parentNode !== record.el) return;
       var el = record.el, rect = localRect(el), f = record.state;
-      el.setAttribute('data-lgp-theme', theme(el));
+      setAttr(el, 'data-lgp-theme', theme(el));
       if (!rect.width || !rect.height || el.hidden || getComputedStyle(el).visibility === 'hidden') { record.glow.style.opacity = '0'; return; }
       var dx = 0, dy = 0, sx = 1, sy = 1;
       if (f && f.geometry.slabHalfWidth && f.geometry.slabHalfHeight) {
@@ -207,9 +219,9 @@
     var cs = getComputedStyle(group.el);
     w = root.LiquidDesignPluginSnap(w); h = root.LiquidDesignPluginSnap(h);
     [group.material, group.drawing, group.highlights].forEach(function (layer) {
-      layer.style.left = (minX - (parseFloat(cs.borderLeftWidth) || 0)) + 'px';
-      layer.style.top = (minY - (parseFloat(cs.borderTopWidth) || 0)) + 'px';
-      layer.style.width = w + 'px'; layer.style.height = h + 'px';
+      setStyle(layer, 'left', (minX - (parseFloat(cs.borderLeftWidth) || 0)) + 'px');
+      setStyle(layer, 'top', (minY - (parseFloat(cs.borderTopWidth) || 0)) + 'px');
+      setStyle(layer, 'width', w + 'px'); setStyle(layer, 'height', h + 'px');
     });
     lights.forEach(function (light) {
       light.record.glow.style.left = light.x - minX + 'px'; light.record.glow.style.top = light.y - minY + 'px'; light.record.glow.style.opacity = light.opacity;
@@ -238,14 +250,14 @@
       // Only actual proximity/overlap needs a blended distance-field contour.
       if (connections) d = group.contour.path;
     }
-    group.shape.setAttribute('d', d);
+    setAttr(group.shape, 'd', d);
     // An explicit local path avoids fragment-URL resolution differences when
     // layers are promoted or the page navigates to an anchor. The tinted fill
     // must share this contour too, otherwise an unresolved SVG clip paints a box.
-    group.material.style.clipPath = 'path("' + d + '")';
+    setStyle(group.material, 'clipPath', 'path("' + d + '")');
     // Rounded backdrop capture prevents a square blur tile showing through
     // outside an independent pill/circle's path-clipped material on desktop.
-    group.material.style.borderRadius = boxes.length === 1 ? boxes[0].rx + 'px / ' + boxes[0].ry + 'px' : '0px';
+    setStyle(group.material, 'borderRadius', boxes.length === 1 ? boxes[0].rx + 'px / ' + boxes[0].ry + 'px' : '0px');
     // Single rounded shapes draw their edge light as a CSS ring (all browsers);
     // blended contours keep the SVG path rim.
     group.material.toggleAttribute('data-lgp-lens', boxes.length === 1);
@@ -255,11 +267,8 @@
       // each lobe's rim, including the melted bridge between touching lobes.
       else group.refraction.updateShape(w, h, boxes, connections ? blendRange : 0);
     }
-    group.highlights.style.clipPath = 'path("' + d + '")';
-    group.maskPath.setAttribute('d', d);
-    group.rim.setAttribute('d', d);
-    group.contrastRim.setAttribute('d', d);
-    group.prism.setAttribute('d', d);
+    setStyle(group.highlights, 'clipPath', 'path("' + d + '")');
+    [group.maskPath, group.rim, group.contrastRim, group.prism].forEach(function (node) { setAttr(node, 'd', d); });
     var energy = 0, angle = 0;
     group.controls.forEach(function (record) {
       var state = record.state;
@@ -268,15 +277,15 @@
       var response = Math.min(1, Math.max(0, state.touch) + stretch * 2);
       if (response >= energy) { energy = response; angle = Math.atan2(state.lightPoint.y, state.lightPoint.x) * 180 / Math.PI; }
     });
-    group.prism.style.opacity = 'calc(var(--liquid-design-prism-opacity, var(--lgp-prism-opacity, 0)) * ' + (.45 + energy * .55) + ')';
+    setStyle(group.prism, 'opacity', 'calc(var(--liquid-design-prism-opacity, var(--lgp-prism-opacity, 0)) * ' + (.45 + energy * .55) + ')');
     var prismRotation = 'rotate(' + (angle * energy * .2 - frameAngle) + ' .5 .5)';
     if (group.prismGradient.getAttribute('gradientTransform') !== prismRotation) {
       group.prismGradient.setAttribute('gradientTransform', prismRotation);
     }
-    group.mask.setAttribute('x', '-2'); group.mask.setAttribute('y', '-2'); group.mask.setAttribute('width', w + 4); group.mask.setAttribute('height', h + 4);
-    group.drawing.setAttribute('viewBox', '0 0 ' + Math.max(1, w) + ' ' + Math.max(1, h));
-    group.drawing.setAttribute('preserveAspectRatio', 'none');
-    group.material.dataset.surfaces = boxes.length; group.material.dataset.connections = connections;
+    setAttr(group.mask, 'x', '-2'); setAttr(group.mask, 'y', '-2'); setAttr(group.mask, 'width', w + 4); setAttr(group.mask, 'height', h + 4);
+    setAttr(group.drawing, 'viewBox', '0 0 ' + Math.max(1, w) + ' ' + Math.max(1, h));
+    setAttr(group.drawing, 'preserveAspectRatio', 'none');
+    setAttr(group.material, 'data-surfaces', boxes.length); setAttr(group.material, 'data-connections', connections);
     if (!group.colors) group.colors = root.LiquidDesignColors.create(group.el, group.material, group.drawing);
     group.colors.paint(boxes, d);
   }

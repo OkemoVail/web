@@ -1,0 +1,44 @@
+- generic [active] [ref=f8e1]:
+  - generic [ref=f8e4]:
+    - generic [ref=f8e5]:
+      - paragraph [ref=f8e6]: Labs21
+      - heading "Welcome back" [level=2] [ref=f8e7]
+      - generic [ref=f8e8]:
+        - button "Sign In" [ref=f8e9]
+        - button "Register" [ref=f8e10]
+      - generic [ref=f8e11]:
+        - generic [ref=f8e12]: Email
+        - textbox "you@example.com" [ref=f8e13]
+      - generic [ref=f8e14]:
+        - generic [ref=f8e15]: Password
+        - generic [ref=f8e16]:
+          - textbox "••••••••" [ref=f8e17]
+          - button [ref=f8e18]
+      - paragraph [ref=f8e22]
+      - button "Sign In" [ref=f8e23]
+    - button "Continue as Guest" [ref=f8e29]
+    - generic [ref=f8e31]:
+      - generic [ref=f8e32]: Language
+      - generic [ref=f8e33]:
+        - button "English" [ref=f8e34]
+        - button "中文" [ref=f8e36]
+    - generic [ref=f8e38]:
+      - generic [ref=f8e39]: Appearance
+      - generic [ref=f8e40]:
+        - button "Light" [ref=f8e41]
+        - button "System" [ref=f8e49]
+        - button "Dark" [ref=f8e53]
+  - main [ref=f8e57]:
+    - generic:
+      - button "Open sidebar" [ref=f8e59]
+      - button "Choose model, current model Saga" [ref=f8e62]:
+        - generic: Saga
+    - heading "Hi Guest." [level=2] [ref=f8e66]
+    - generic [ref=f8e71]:
+      - button "Add tools" [ref=f8e73] [cursor=pointer]
+      - textbox "What do you want to know?" [ref=f8e76]
+      - button "Send message" [disabled] [ref=f8e78]
+  - text: › › › ›
+  - generic [ref=f8e81]:
+    - button "New chat" [ref=f8e82]
+    - button "Title actions" [ref=f8e83]

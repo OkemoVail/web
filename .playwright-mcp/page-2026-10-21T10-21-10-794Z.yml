@@ -1,0 +1,93 @@
+- generic [active] [ref=f59e1]:
+  - navigation "Socials" [ref=f59e2]:
+    - button "Socials" [ref=f59e4] [cursor=pointer]
+  - navigation "Primary":
+    - button "More" [ref=f59e6] [cursor=pointer]
+    - link "Labs21" [ref=f59e7] [cursor=pointer]:
+      - /url: /AI/index.html
+  - link "Skip to content" [ref=f59e8] [cursor=pointer]:
+    - /url: "#main-content"
+  - main [ref=f59e9]:
+    - region [ref=f59e10]:
+      - 'heading "OkemoVail: AION, Astra, Word and Labs21" [level=1] [ref=f59e11]'
+      - generic [ref=f59e12]:
+        - link "AION Learn more" [ref=f59e13] [cursor=pointer]:
+          - /url: /AI/chat.html
+          - generic [ref=f59e14]: AION
+          - generic [ref=f59e15]: Learn more
+        - link "ASTRA Learn more" [ref=f59e19] [cursor=pointer]:
+          - /url: /search/
+          - generic [ref=f59e20]: ASTRA
+          - generic [ref=f59e21]: Learn more
+        - link "WORD Learn more" [ref=f59e25] [cursor=pointer]:
+          - /url: /word/index.html
+          - generic [ref=f59e26]: WORD
+          - generic [ref=f59e27]: Learn more
+        - link "LABS21 Learn more" [ref=f59e31] [cursor=pointer]:
+          - /url: /AI/index.html
+          - generic [ref=f59e32]: LABS21
+          - generic [ref=f59e33]: Learn more
+      - paragraph [aria-hidden]: OKEMOVAIL
+      - complementary [ref=f59e37]:
+        - generic [ref=f59e38]:
+          - heading "Now building" [level=2] [ref=f59e39]
+          - list [ref=f59e40]:
+            - listitem [ref=f59e41]:
+              - generic [ref=f59e42]: OkemoAI Labs
+              - generic [ref=f59e43]: Coming soon
+            - listitem [ref=f59e44]:
+              - generic [ref=f59e45]: Liquid Design
+              - generic [ref=f59e46]: Glass that stretches
+            - listitem [ref=f59e47]:
+              - generic [ref=f59e48]: Saga
+              - generic [ref=f59e49]: Training the next one
+    - generic "Site" [ref=f59e50]:
+      - paragraph [ref=f59e51]: o.
+      - navigation "Footer" [ref=f59e52]:
+        - list [ref=f59e53]:
+          - listitem [ref=f59e54]:
+            - link "AION" [ref=f59e55] [cursor=pointer]:
+              - /url: /AI/chat.html
+          - listitem [ref=f59e56]:
+            - link "Astra" [ref=f59e57] [cursor=pointer]:
+              - /url: /search/
+          - listitem [ref=f59e58]:
+            - link "Word" [ref=f59e59] [cursor=pointer]:
+              - /url: /word/index.html
+        - list [ref=f59e60]:
+          - listitem [ref=f59e61]:
+            - link "Labs21" [ref=f59e62] [cursor=pointer]:
+              - /url: /AI/index.html
+          - listitem [ref=f59e63]:
+            - link "Research" [ref=f59e64] [cursor=pointer]:
+              - /url: /AI/research.html
+          - listitem [ref=f59e65]:
+            - link "Goals" [ref=f59e66] [cursor=pointer]:
+              - /url: /AI/goals.html
+        - list [ref=f59e67]:
+          - listitem [ref=f59e68]:
+            - link "Design" [ref=f59e69] [cursor=pointer]:
+              - /url: /design.html
+          - listitem [ref=f59e70]:
+            - link "Versions" [ref=f59e71] [cursor=pointer]:
+              - /url: /AI/version.html
+        - list [ref=f59e72]:
+          - listitem [ref=f59e73]:
+            - link "GitHub" [ref=f59e74] [cursor=pointer]:
+              - /url: https://github.com/okemovail
+          - listitem [ref=f59e75]:
+            - link "YouTube" [ref=f59e76] [cursor=pointer]:
+              - /url: https://www.youtube.com/@SochiVail
+      - generic [ref=f59e77]:
+        - navigation "Legal" [ref=f59e78]:
+          - link "Privacy Policy" [ref=f59e79] [cursor=pointer]:
+            - /url: /AI/privacy.html
+          - link "Terms of Service" [ref=f59e80] [cursor=pointer]:
+            - /url: /AI/tos.html
+          - generic [ref=f59e81]: © 2026 OkemoVail
+        - navigation "Connect" [ref=f59e82]:
+          - strong [ref=f59e83]: "Connect:"
+          - link "GitHub" [ref=f59e84] [cursor=pointer]:
+            - /url: https://github.com/okemovail
+          - link "YouTube" [ref=f59e85] [cursor=pointer]:
+            - /url: https://www.youtube.com/@SochiVail

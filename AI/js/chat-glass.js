@@ -167,9 +167,6 @@
     // an off-canvas drawer on phones, not a permanently visible rail.
     const sidebarNavigation = document.getElementById('chat-mobile-navigation');
     const sidebarPanel = document.getElementById('sidebar');
-    sidebarPanel.setAttribute('data-liquid-design', 'surface');
-    sidebarPanel.setAttribute('data-liquid-design-independent', '');
-    window.LiquidDesign?.refresh(sidebarPanel);
     function syncSidebarControl() {
         const collapsed = innerWidth < 768
             ? sidebarPanel.classList.contains('-translate-x-full')
