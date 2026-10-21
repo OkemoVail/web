@@ -2130,6 +2130,22 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             [data-page="chat"] :is(#top-left-chat-title, #tra-bar, #chat-title-menu) button:active,
             [data-page="chat"] #plus-menu-btn:active { transform: none; }
         }
+        /* Clear glass buttons: these two are surface hosts by structure but
+           act as buttons (search/collapse pill, profile), so they drop the
+           veil like every other untinted button. */
+        [data-page="chat"] :is(.chat-sidebar-actions, .sb-profile-btn)[data-lgp-control] > .lgp-material {
+            background: transparent !important;
+            --liquid-design-saturate: 1; --lgp-brightness: 1;
+        }
+        /* Sidebar buttons sit on the sidebar's own refracting glass. A backdrop
+           filter nested inside another one made the sidebar the one laggy
+           area, so these buttons skip refraction, sampling and blur: the
+           sidebar glass already frosts what's behind them. An open menu
+           keeps its blur so its text stays readable. */
+        [data-page="chat"] #sidebar-full-content :is([data-lgp-control], [data-lgp-component]:not(:has([aria-expanded="true"]))) :is(.lgp-material, .lgc-material) {
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+        }
         [data-page="chat"] .sb-new-chat-btn[data-lgp-control] {
             --liquid-design-tint: color-mix(in srgb, var(--accent-color), transparent 20%);
             color: var(--accent-contrast);
@@ -8073,25 +8089,14 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
       color: var(--text-primary);
     }
 
-    [data-page="home"] .serif-text {
-      font-family: 'Century', 'Century Schoolbook', Georgia, serif;
-    }
-
-    [data-page="home"] .eyebrow {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--text-tertiary);
-    }
 
     /* Apple content-first hierarchy; existing site palette, real plugin controls. */
     .home-base {
       /* Uniform white glass: backdrop content supplies variation, not shading. */
       --liquid-design-fill: rgb(240 240 240 / .64);
       --liquid-design-edge-contrast: rgb(58 54 52 / .18);
-      --home-glass-rim-top: .85;
-      --home-glass-rim-bottom: .62;
+      --home-glass-rim-top: .5;
+      --home-glass-rim-bottom: .32;
       --liquid-design-touch-light: radial-gradient(circle, rgb(255 255 255 / .68), rgb(255 255 255 / .30) 35%, transparent 70%);
       --liquid-design-blur: 12px;
       --liquid-design-prism-opacity: .28;
@@ -8152,19 +8157,7 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
     }
     .home-base .home-skip:focus { transform: none; }
 
-    [data-page="home"] .home-hero {
-      padding: clamp(144px, 16vw, 192px) 0 104px;
-      text-align: center;
-    }
-    [data-page="home"] .home-intro {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      color: var(--text-secondary);
-      font-size: 15px;
-      font-weight: 500;
-    }
+    .home-base .home-title-dot { color: var(--accent); }
     .home-base .home-title {
       margin: 32px 0 24px;
       font-size: clamp(64px, 8.8vw, 104px);
@@ -8173,46 +8166,7 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
       letter-spacing: -.065em;
       text-wrap: balance;
     }
-    .home-base .home-title-dot { color: var(--accent); }
-    /* A deliberate purple nebula inside the word, not a page-wide palette change. */
-    [data-page="home"] .home-stardust {
-      display: inline-block;
-      padding-right: .08em;
-      margin-right: -.08em;
-      color: #54268b;
-      --stardust-stars:
-        radial-gradient(circle at 12% 42%, rgb(240 217 255 / .38) 0 .65px, transparent 1.25px),
-        radial-gradient(circle at 61% 36%, rgb(230 222 255 / .32) 0 .55px, transparent 1.1px),
-        radial-gradient(circle at 86% 68%, rgb(225 203 255 / .28) 0 .7px, transparent 1.3px),
-        radial-gradient(circle at 35% 76%, rgb(255 255 255 / .25) 0 .5px, transparent 1px),
-        radial-gradient(circle at 78% 18%, rgb(226 219 255 / .30) 0 .6px, transparent 1.1px);
-      background-image:
-        var(--stardust-stars),
-        radial-gradient(ellipse at 26% 60%, #9149b9, transparent 45%),
-        radial-gradient(ellipse at 72% 28%, #6250b9, transparent 42%),
-        linear-gradient(115deg, #24103e, #64328f 43%, #2b174e 78%, #4c256f);
-      background-size: 29px 23px, 37px 31px, 43px 27px, 51px 39px, 33px 47px, 100% 100%, 100% 100%, 100% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .dark [data-page="home"] .home-stardust {
-      background-image:
-        var(--stardust-stars),
-        radial-gradient(ellipse at 26% 60%, #e0afff, transparent 45%),
-        radial-gradient(ellipse at 72% 28%, #a6a4ff, transparent 42%),
-        linear-gradient(115deg, #a78acf, #c39de7 43%, #958bdd 78%, #c594e2);
-    }
-    @media (forced-colors: active) {
-      [data-page="home"] .home-stardust { background: none; -webkit-text-fill-color: CanvasText; }
-    }
-    [data-page="home"] .home-search-icon { flex: none; color: var(--text-secondary); }
-    [data-page="home"] .home-search-note {
-      margin-top: 16px;
-      font-size: 13px;
-      line-height: 1.5;
-      color: var(--text-secondary);
-    }
+
     .home-base .home-work { padding-bottom: 80px; scroll-margin-top: 104px; }
     .home-base .home-section-heading {
       display: flex;
@@ -8234,53 +8188,9 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
       color: var(--text-secondary);
       white-space: nowrap;
     }
-    [data-page="home"] .home-design-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      padding-top: 32px;
-      border-top: 1px solid var(--border-strong);
-    }
-    [data-page="home"] .home-design-link p {
-      color: var(--text-secondary);
-      font-size: 15px;
-      line-height: 1.5;
-    }
-    [data-page="home"] .home-liquid-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      min-height: 48px;
-      padding: 0 24px;
-      white-space: nowrap;
-      font-size: 15px;
-    }
     .home-base .home-words {
       padding: 64px 0 80px;
       border-top: 1px solid var(--border-strong);
-    }
-    [data-page="home"] .home-quotes {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      margin-top: 40px;
-    }
-    [data-page="home"] .home-quotes figure { margin: 0; }
-    [data-page="home"] .home-quotes blockquote {
-      margin: 0;
-      max-width: 400px;
-      font-size: clamp(24px, 3vw, 30px);
-      line-height: 1.35;
-      font-weight: 500;
-      letter-spacing: -.025em;
-      text-wrap: balance;
-    }
-    [data-page="home"] .home-quotes figcaption {
-      margin-top: 24px;
-      color: var(--text-secondary);
-      font-size: 14px;
     }
     .home-base .home-footer {
       display: flex;
@@ -8548,15 +8458,11 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
     .dark .home-base .work-chevron { color: #636366; }
 
     @media (max-width: 767px) {
-      [data-page="home"] .home-hero { padding-bottom: 72px; }
       .home-base .home-work { padding-bottom: 56px; }
       .home-base .home-section-heading h2,
       .home-base .home-section-title { font-size: 24px; }
-      [data-page="home"] .home-quotes { grid-template-columns: 1fr; gap: 40px; }
       .home-base .home-words { padding: 48px 0 56px; }
       .home-base .home-footer { flex-direction: column; align-items: flex-start; gap: 8px; }
-      [data-page="home"] .home-design-link { align-items: flex-start; flex-direction: column; gap: 16px; }
-      [data-page="home"] .home-design-link p { margin: 0; }
       .home-base :is(.work-title, .work-detail) { font-size: 18px; }
     }
 
@@ -8576,11 +8482,9 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
       .home-base .ov-nav--tools { top: 16px; left: calc(100vw - 16px); }
       .home-base .ov-social-nav { top: 16px; left: 16px; }
       .home-base .home-main { width: calc(100% - 32px); }
-      [data-page="home"] .home-title { font-size: 60px; }
       [data-page="home"] .hero-search { gap: 8px; padding-left: 16px; }
       [data-page="home"] .hero-search input { font-size: 15px; }
       [data-page="home"] .hero-search .skuo { padding-inline: 16px; }
-      [data-page="home"] .home-search-icon { width: 18px; }
       .home-base .work-row { padding-inline: 16px; gap: 10px; }
       .home-base .work-list > li + li::before { left: 16px; right: 16px; }
       .home-base :is(.work-title, .work-detail) { font-size: 16px; }
@@ -8607,6 +8511,276 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
     }
 
   
+
+    /* ── Homepage rebuild (2026-10-19): type-led hero, one picture per project ──
+       Frame: one 1024px column (.home-wrap) shared with the floating nav edges;
+       colour fields (.home-next, .home-creed) run full width with the same
+       inner column. No hairlines, no gradients, no accent words. */
+    html:has(> body[data-page="home"]) { color-scheme: light; }
+    html.dark:has(> body[data-page="home"]) { color-scheme: dark; }
+    [data-page="home"] .home-main { width: 100%; margin: 0; }
+    [data-page="home"] .home-wrap { width: min(100% - 48px, 1024px); margin-inline: auto; }
+    /* links only: glass controls own their touch-action (stretch gestures) */
+    [data-page="home"] .home-main a { touch-action: manipulation; }
+    [data-page="home"] :is(h1, h2, h3) { text-wrap: balance; }
+
+    /* Hero: the title at poster size, then who + the live search on one line. */
+    [data-page="home"] .home-hero { padding: clamp(136px, 15vw, 184px) 0 0; }
+    [data-page="home"] .home-title {
+      margin: 0;
+      font-size: clamp(76px, 13vw, 196px);
+      line-height: .9;
+      letter-spacing: -.055em;
+      color: var(--text-primary);
+    }
+    [data-page="home"] .home-title-dot { color: inherit; }
+    [data-page="home"] .home-stardust { color: inherit; }
+    [data-page="home"] .home-hero-foot {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 32px 48px;
+      margin-top: 40px;
+    }
+    [data-page="home"] .home-who { display: flex; align-items: center; gap: 20px; }
+    [data-page="home"] .hero-profile { width: 56px; height: 56px; }
+    [data-page="home"] .home-lead {
+      margin: 0;
+      max-width: 30ch;
+      font-size: clamp(19px, 1.6vw, 22px);
+      line-height: 1.45;
+      color: var(--text-primary);
+    }
+    [data-page="home"] .hero-search { width: 100%; margin: 0; }
+    [data-page="home"] .hero-search input[type="search"] { -webkit-appearance: none; appearance: none; }
+    [data-page="home"] .hero-search input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+    /* Work: alternating picture/text splits, each project its own screen. */
+    /* Work: its own full-bleed flat field (rosewood tint in light, deep plum
+       in dark), content kept on the shared .home-wrap column. */
+    [data-page="home"] .home-projects {
+      --work-field: color-mix(in oklab, var(--accent) 16%, var(--bg));
+      --work-link: color-mix(in oklab, var(--accent) 62%, #141413);
+      margin-top: clamp(120px, 14vw, 200px);
+      padding: clamp(104px, 11vw, 160px) 0 clamp(56px, 6vw, 112px);
+      background: var(--work-field);
+      color: var(--text-primary);
+      scroll-margin-top: 0;
+    }
+    .dark [data-page="home"] .home-projects {
+      --work-field: color-mix(in oklab, var(--accent) 20%, #141413);
+      --work-link: color-mix(in oklab, var(--accent) 72%, #faf9f5);
+    }
+    [data-page="home"] .home-projects .project-frame { background: color-mix(in oklab, var(--work-field) 80%, var(--bg)); }
+    [data-page="home"] .home-h2 {
+      margin: 0;
+      font-size: clamp(36px, 4.6vw, 60px);
+      font-weight: 650;
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+    [data-page="home"] .home-projects-head p {
+      margin: 16px 0 0;
+      font-size: clamp(19px, 1.6vw, 22px);
+      line-height: 1.45;
+    }
+    [data-page="home"] .project {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: center;
+      gap: 48px;
+      /* padding holds the scroll-transformed frame inside the row box */
+      padding-block: 48px;
+      margin-top: clamp(24px, 5vw, 80px);
+      color: inherit;
+      text-decoration: none;
+      border-radius: 24px;
+    }
+    [data-page="home"] .project--flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    [data-page="home"] .project--flip .project-frame { order: 2; }
+    [data-page="home"] .project-frame {
+      display: block;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      border-radius: 24px;
+      background: var(--bg-elevated);
+      transition: transform var(--dur-1) var(--ease-soft);
+    }
+    [data-page="home"] .project-zoom {
+      display: block;
+      width: 100%;
+      height: 100%;
+      transition: transform 1200ms var(--ease-soft);
+    }
+    [data-page="home"] .project-zoom img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: left top; }
+    [data-page="home"] .project-zoom .shot-dark { display: none; }
+    .dark [data-page="home"] .project-zoom .shot-dark { display: block; }
+    .dark [data-page="home"] .project-zoom .shot-light { display: none; }
+    [data-page="home"] .project-text { display: block; }
+    [data-page="home"] .project-title {
+      margin: 0;
+      font-size: clamp(28px, 2.6vw, 36px);
+      font-weight: 650;
+      line-height: 1.05;
+      letter-spacing: -.04em;
+    }
+    [data-page="home"] .project-desc {
+      display: block;
+      margin-top: 16px;
+      font-size: 19px;
+      line-height: 1.5;
+      color: var(--text-primary);
+    }
+    [data-page="home"] .project-go {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      margin-top: 20px;
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--work-link, var(--accent));
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      text-underline-offset: .2em;
+      transition: text-decoration-color var(--dur-2) var(--ease-soft);
+    }
+    [data-page="home"] .project-go svg {
+      width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+      transition: transform var(--dur-2) var(--ease-soft);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      [data-page="home"] .project:hover .project-zoom { transform: scale(1.04); }
+      [data-page="home"] .project:hover .project-go { text-decoration-color: currentColor; }
+      [data-page="home"] .project:hover .project-go svg { transform: translateX(4px); }
+      [data-page="home"] .home-close nav a:hover { text-decoration-color: currentColor; }
+    }
+    [data-page="home"] .project:active .project-frame { transform: scale(.99); }
+    [data-page="home"] .project:focus-visible { outline-offset: 8px; border-radius: 24px; }
+
+    /* Next: the unbuilt project on the one full accent field. */
+    [data-page="home"] .home-next {
+      margin-top: 0;
+      padding: clamp(96px, 11vw, 160px) 0;
+      background: var(--accent);
+      color: #141413;
+    }
+    [data-page="home"] .home-next-inner { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; }
+    [data-page="home"] .home-next p { margin: 0; font-size: clamp(19px, 1.6vw, 22px); line-height: 1.5; }
+
+    /* Words: two statement-sized quotations on a tone step. */
+    [data-page="home"] .home-creed { padding: clamp(112px, 12vw, 176px) 0; background: var(--bg-elevated); }
+    [data-page="home"] .home-creed-quotes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px 64px;
+      margin-top: 56px;
+    }
+    [data-page="home"] .home-creed figure { margin: 0; }
+    [data-page="home"] .home-creed blockquote {
+      margin: 0;
+      font-size: clamp(28px, 2.6vw, 36px);
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: -.03em;
+      text-wrap: balance;
+    }
+    [data-page="home"] .home-creed figcaption { margin-top: 20px; font-size: 19px; color: var(--text-secondary); }
+
+    /* Close: links, then the all-caps name spanning the column edge to edge,
+       clipped by the page's bottom edge so only its top half shows.
+       Satoshi 650 at -.04em: "OKEMOVAIL" ink = 5.385em wide (starting .03em
+       in), cap height .75em. */
+    [data-page="home"] .home-close { padding: clamp(96px, 11vw, 160px) 0 0; overflow: hidden; }
+    [data-page="home"] .home-close-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px 32px;
+    }
+    [data-page="home"] .home-mark {
+      container-type: inline-size;
+      margin-top: clamp(48px, 6vw, 88px);
+    }
+    /* line-height .73 puts the cap top on the box top (Satoshi content box is
+       1.01 ascent + .24 descent; (.73 - 1.25) / 2 + 1.01 - .75 = 0). */
+    [data-page="home"] .home-mark span {
+      display: block;
+      height: .375em;           /* top half of the .75em cap height */
+      overflow: hidden;
+      margin-left: -.03em;      /* ink, not the side bearing, sits on the margin */
+      font-size: calc(100cqi / 5.4);
+      font-weight: 650;
+      line-height: .73;
+      letter-spacing: -.04em;
+      white-space: nowrap;
+      color: var(--text-primary);
+      user-select: none;
+    }
+    [data-page="home"] .home-close nav { display: flex; flex-wrap: wrap; gap: 4px 28px; }
+    [data-page="home"] .home-close nav a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      font-size: 19px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      text-underline-offset: .2em;
+      transition: text-decoration-color var(--dur-2) var(--ease-soft);
+    }
+    [data-page="home"] .home-close p { margin: 0; font-size: 16px; color: var(--text-secondary); }
+
+    /* Entrances: each part rises as its section scrolls in. Scroll-driven
+       CSS, transform only (never opacity: content is always readable at any
+       scroll position), static where unsupported or with reduced motion. */
+    [data-page="home"] .project-text .home-rise { display: block; }
+    [data-page="home"] .project-text .project-go.home-rise { display: inline-flex; }
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        [data-page="home"] .home-rise {
+          animation: home-rise linear both;
+          animation-timeline: view();
+          animation-range: entry 0% entry 90%;
+        }
+        [data-page="home"] .home-rise--2 { animation-range: entry 10% entry 100%; }
+        [data-page="home"] .home-rise--3 { animation-range: entry 20% cover 30%; }
+        [data-page="home"] .project-frame {
+          animation: home-frame linear both;
+          animation-timeline: view();
+          animation-range: entry 0% cover 40%;
+        }
+        [data-page="home"] .project-zoom img {
+          animation: home-settle linear both;
+          animation-timeline: view();
+          animation-range: entry 0% exit 100%;
+        }
+      }
+    }
+    @keyframes home-rise { from { transform: translateY(28px); } to { transform: none; } }
+    @keyframes home-frame { from { transform: translateY(40px) scale(.97); } to { transform: none; } }
+    @keyframes home-settle { from { transform: scale(1.08); } to { transform: scale(1); } }
+
+    @media (max-width: 767px) {
+      [data-page="home"] .home-hero-foot { grid-template-columns: 1fr; gap: 28px; margin-top: 32px; }
+      [data-page="home"] .project,
+      [data-page="home"] .project--flip { grid-template-columns: 1fr; gap: 24px; }
+      [data-page="home"] .project--flip .project-frame { order: 0; }
+      [data-page="home"] .project-frame { border-radius: 16px; }
+      [data-page="home"] .home-next-inner { grid-template-columns: 1fr; gap: 20px; }
+      [data-page="home"] .home-creed-quotes { grid-template-columns: 1fr; gap: 48px; margin-top: 40px; }
+      [data-page="home"] .home-close-row { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 400px) {
+      [data-page="home"] .home-wrap { width: calc(100% - 32px); }
+      [data-page="home"] .home-title { font-size: 19vw; }
+      [data-page="home"] .home-who { gap: 16px; align-items: flex-start; }
+      [data-page="home"] .hero-profile { width: 48px; height: 48px; }
+    }
+
 
 /* ═══════════════════════════════════════════════════════════════════
    PAGE: MANAGE  —  scoped to [data-page="manage"]
@@ -10601,7 +10775,6 @@ font-family: 'Satoshi', 'Inter', sans-serif;
        borrowing the menu sheet's nearly transparent material. */
     --liquid-design-fill: rgb(255 255 255 / .82);
     --liquid-design-blur: 18px;
-    --liquid-design-tint: color-mix(in srgb, var(--accent-color) 5%, transparent);
     --liquid-design-rim-top: .64;
     --liquid-design-rim-bottom: .16;
     /* The source button sits 8px inside the composer. A 24px source gap
@@ -10625,7 +10798,6 @@ font-family: 'Satoshi', 'Inter', sans-serif;
 }
 .dark [data-page="chat"] #plus-menu-container[data-lgp-component="options"] {
     --liquid-design-fill: rgb(44 46 50 / .74);
-    --liquid-design-tint: color-mix(in srgb, var(--accent-color) 7%, transparent);
 }
 [data-page="chat"] #plus-menu-container[data-lgp-component="options"] > #plus-menu {
     position: absolute;
@@ -11434,3 +11606,437 @@ body[data-page="word"] button.hdr-btn[data-lgp-control]:focus-visible {
     [data-page="word"] .ow-status { min-height: 28px; padding-inline: 10px; }
 }
     
+
+/* ── Homepage scroll edge (2026-10-19) ─────────────────────────────
+   Content scrolled under the transparent floating glass navigation
+   collided with it (e.g. "Selected work" over the buttons at 390px).
+   src/nav.js injects .home-scroll-edge for the 'tools' variant: a flat
+   canvas-coloured band (no gradient, no backdrop blur) sized to the nav
+   row, layered under the nav (--z-chrome < --z-nav), fading in only once
+   scrolled. In the persistent shell it lives in the child document, so it
+   sits beneath the shell's own chrome layer. scroll-padding keeps anchor
+   and focus targets clear of the band. */
+/* 2026-10-19 (user): the bar stays transparent; scrolling only adds a black
+   tint that fades from opaque at the top edge to transparent below the nav.
+   Solid black fill shaped by a mask, so no colour gradient is painted. */
+.home-scroll-edge {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: calc(var(--home-nav-edge, 88px) + 32px);
+  background-color: rgb(0 0 0 / var(--home-scroll-tint, .24));
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
+  z-index: var(--z-chrome);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-soft);
+}
+.home-scroll-edge.is-visible { opacity: 1; }
+.dark .home-scroll-edge { --home-scroll-tint: .72; }
+html:has(body[data-page="home"]) { scroll-padding-top: calc(var(--home-nav-edge, 88px) + 16px); }
+html:has(body[data-page="home"]),
+body[data-page="home"] { --home-nav-edge: 88px; }          /* 24px inset + 52px controls + 12px */
+@media (max-width: 600px) {
+  html:has(body[data-page="home"]),
+  body[data-page="home"] { --home-nav-edge: 80px; }        /* 24 + 44 + 12 */
+}
+@media (max-width: 400px) {
+  html:has(body[data-page="home"]),
+  body[data-page="home"] { --home-nav-edge: 72px; }        /* 16 + 44 + 12 */
+}
+@media (min-width: 1024px) {
+  html:has(body[data-page="home"]),
+  body[data-page="home"] { --home-nav-edge: 96px; }        /* 32 + 52 + 12 */
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-scroll-edge { transition: none; }
+}
+@media print {
+  .home-scroll-edge { display: none; }
+}
+
+/* ── Homepage pillars (2026-10-21): C2MTL-poster hero ──
+   Four full-height poster pillars (AION, Astra, Word, Labs21) with flat
+   abstract SVG art from images/pillars/. Hovering or focusing one widens it
+   (flex-grow) and reveals Learn more; the OKEMOVAIL footer mark sits below.
+   Mobile stacks them as bands with Learn more always shown. */
+[data-page="home"] .home-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+[data-page="home"] .home-pillars {
+  padding: var(--home-nav-edge, 88px) 16px 0;
+}
+[data-page="home"] .pillars {
+  display: flex;
+  gap: 10px;
+  height: calc(100svh - var(--home-nav-edge, 88px) - 16px);
+  min-height: 520px;
+}
+[data-page="home"] .pillar {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: clamp(18px, 2.2vw, 32px);
+  border-radius: 28px;
+  overflow: hidden;
+  color: #fff;
+  text-decoration: none;
+  background: #1a0b2e center / cover no-repeat;
+  transition: flex-grow var(--dur-4) var(--ease-smooth);
+  isolation: isolate;
+}
+[data-page="home"] .pillar::before {
+  content: "";
+  position: absolute; inset: 0; z-index: -1;
+  background: inherit;
+  transform: scale(1.04);
+  transition: transform var(--dur-4) var(--ease-smooth);
+}
+[data-page="home"] .pillar--aion  { background-image: url("../images/pillars/aion.svg"); }
+[data-page="home"] .pillar--astra { background-image: url("../images/pillars/astra.svg"); }
+[data-page="home"] .pillar--word  { background-image: url("../images/pillars/word.svg"); }
+[data-page="home"] .pillar--labs  { background-image: url("../images/pillars/labs21.svg"); }
+[data-page="home"] .pillar:is(:hover, :focus-visible) { flex-grow: 2.4; }
+[data-page="home"] .pillar:is(:hover, :focus-visible)::before { transform: scale(1); }
+[data-page="home"] .pillar:focus-visible { outline: 3px solid #fff; outline-offset: -6px; }
+[data-page="home"] .pillar-name {
+  font-size: clamp(30px, 3.6vw, 56px);
+  font-weight: 700;
+  line-height: .95;
+  letter-spacing: -.035em;
+  white-space: nowrap;
+}
+[data-page="home"] .pillar-tag {
+  font-size: clamp(14px, 1.1vw, 17px);
+  line-height: 1.35;
+  opacity: .85;
+}
+[data-page="home"] .pillar-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--dur-3) var(--ease-soft), transform var(--dur-3) var(--ease-soft);
+}
+[data-page="home"] .pillar-more svg {
+  width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+[data-page="home"] .pillar:is(:hover, :focus-visible) .pillar-more { opacity: 1; transform: none; }
+@media (max-width: 767px) {
+  [data-page="home"] .home-pillars { padding-inline: 12px; }
+  [data-page="home"] .pillars { flex-direction: column; height: auto; min-height: 0; gap: 8px; }
+  [data-page="home"] .pillar { flex: none; height: 240px; border-radius: 22px; }
+  [data-page="home"] .pillar-more { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-page="home"] :is(.pillar, .pillar::before, .pillar-more) { transition: none; }
+}
+/* Label legibility: a soft dark scrim behind the name/tag, mainly for the
+   mobile bands where the busy middle of the art sits under the text. */
+[data-page="home"] .pillar::after {
+  content: "";
+  position: absolute; inset: auto 0 0 0; height: 60%; z-index: -1;
+  background: linear-gradient(to top, rgb(10 4 20 / .62), transparent);
+  pointer-events: none;
+}
+@media (max-width: 767px) {
+  [data-page="home"] .pillar::after { height: 75%; background: linear-gradient(to top, rgb(10 4 20 / .7), transparent); }
+}
+
+/* Pillars, full bleed (2026-10-21, user revision): the four pillars fill the
+   whole first screen edge to edge with no gaps or rounding, labels appear
+   only on hover/focus, and OKEMOVAIL sits bottom-left like the C2MTL cover. */
+[data-page="home"] .home-pillars { position: relative; padding: 0; }
+[data-page="home"] .pillars { gap: 0; height: 100svh; min-height: 560px; }
+[data-page="home"] .pillar {
+  border-radius: 0;
+  justify-content: flex-start;
+  padding: calc(var(--home-nav-edge, 88px) + 12px) clamp(20px, 2.4vw, 36px) 24px;
+}
+[data-page="home"] .pillar :is(.pillar-name, .pillar-tag, .pillar-more) {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity var(--dur-3) var(--ease-soft), transform var(--dur-3) var(--ease-soft);
+}
+[data-page="home"] .pillar:is(:hover, :focus-visible) :is(.pillar-name, .pillar-tag, .pillar-more) { opacity: 1; transform: none; }
+[data-page="home"] .pillar:is(:hover, :focus-visible) .pillar-tag { opacity: .85; }
+[data-page="home"] .pillar::after {
+  inset: 0 0 auto 0; height: 55%;
+  background: linear-gradient(to bottom, rgb(10 4 20 / .55), transparent);
+  opacity: 0;
+  transition: opacity var(--dur-3) var(--ease-soft);
+}
+[data-page="home"] .pillar:is(:hover, :focus-visible)::after { opacity: 1; }
+[data-page="home"] .pillar:focus-visible { outline-offset: -4px; }
+[data-page="home"] .pillars-mark {
+  position: absolute;
+  left: clamp(20px, 2.4vw, 36px);
+  bottom: clamp(16px, 2.4vw, 36px);
+  margin: 0;
+  font-size: clamp(56px, 11vw, 200px);
+  font-weight: 700;
+  line-height: .8;
+  letter-spacing: -.045em;
+  color: #fff;
+  pointer-events: none;
+  user-select: none;
+}
+@media (max-width: 767px) {
+  [data-page="home"] .home-pillars { padding: 0; }
+  [data-page="home"] .pillars { height: 100svh; min-height: 560px; gap: 0; }
+  [data-page="home"] .pillar {
+    flex: 1 1 0; height: auto; border-radius: 0;
+    justify-content: center; padding: 16px 20px;
+  }
+  [data-page="home"] .pillar:first-child { padding-top: var(--home-nav-edge, 72px); }
+  /* No hover on touch: show the name only; Learn more stays tappable. */
+  [data-page="home"] .pillar .pillar-name { opacity: 1; transform: none; font-size: 30px; }
+  [data-page="home"] .pillar :is(.pillar-tag, .pillar-more) { display: none; }
+  [data-page="home"] .pillar::after { display: none; }
+  [data-page="home"] .pillars-mark { font-size: 15vw; left: 20px; bottom: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-page="home"] .pillar :is(.pillar-name, .pillar-tag, .pillar-more),
+  [data-page="home"] .pillar::after { transition: none; }
+}
+@media (max-width: 767px) {
+  /* Last band carries the OKEMOVAIL mark at its bottom; lift its name to the top. */
+  [data-page="home"] .pillar:last-child { justify-content: flex-start; padding-top: 20px; }
+}
+
+/* Pillars, half + half (2026-10-21, user revision): on desktop the pillars
+   take the left half; the right half is poster art (images/pillars/now.svg)
+   with a black "Now building" box. OKEMOVAIL sits in a black box flush to
+   the bottom-left corner, like "C2MTL 12th" on the reference cover. */
+[data-page="home"] .home-pillars { display: grid; grid-template-columns: 1fr; }
+[data-page="home"] .pillars-mark {
+  left: 0; bottom: 0;
+  padding: .14em .22em .1em .2em;
+  background: #000;
+  font-size: clamp(44px, 6.2vw, 112px);
+  line-height: .9;
+  z-index: 1;
+}
+[data-page="home"] .home-now {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  min-height: 70svh;
+  background: #ff5fa2 url("../images/pillars/now.svg") center / cover no-repeat;
+}
+[data-page="home"] .home-now-box {
+  width: min(100%, 380px);
+  padding: 24px 28px 28px;
+  background: #000;
+  color: #fff;
+}
+[data-page="home"] .home-now-box h2 {
+  margin: 0 0 14px;
+  font-size: clamp(28px, 2.6vw, 44px);
+  font-weight: 700;
+  line-height: .95;
+  letter-spacing: -.035em;
+}
+[data-page="home"] .home-now-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+[data-page="home"] .home-now-box li { display: flex; justify-content: space-between; gap: 16px; font-size: 16px; }
+[data-page="home"] .home-now-box li span:last-child { color: rgb(255 255 255 / .62); text-align: right; }
+@media (min-width: 1024px) {
+  [data-page="home"] .home-pillars { grid-template-columns: 1fr 1fr; }
+  [data-page="home"] .home-now { min-height: 0; height: 100svh; }
+  [data-page="home"] .pillar-name { font-size: clamp(30px, 2.8vw, 48px); }
+}
+@media (max-width: 767px) {
+  [data-page="home"] .pillars-mark { font-size: 13vw; left: 0; bottom: auto; top: calc(100svh - 1.04em); }
+  [data-page="home"] .pillar:last-child { padding-bottom: 72px; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Single column here too: pin the mark to the bottom of the pillar screen,
+     not the bottom of the stacked Now panel. */
+  [data-page="home"] .pillars-mark { bottom: auto; top: calc(100svh - 1.04em); }
+}
+@media (max-width: 1023px) {
+  [data-page="home"] .home-now-box { width: 100%; }
+}
+/* Exact halves: grid items default to min-width:auto, so the no-wrap pillar
+   names were widening the left column past 50%. */
+[data-page="home"] .pillars { min-width: 0; }
+@media (min-width: 1024px) {
+  [data-page="home"] .home-pillars { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+/* Pillars, arrow hover (2026-10-21, user revision): a selected pillar shows
+   only its name and a giant rightward arrow, centred vertically. The tagline
+   stays in the DOM (link text) but is not shown. "Now building" is larger,
+   vertically centred in the right panel and flush to its right wall. */
+[data-page="home"] .pillar { justify-content: center; align-items: flex-start; gap: 0; }
+[data-page="home"] .pillar .pillar-tag { display: none; }
+[data-page="home"] .pillar :is(.pillar-name, .pillar-arrow) {
+  opacity: 0;
+  transform: translateX(-16px);
+  transition: opacity var(--dur-3) var(--ease-soft), transform var(--dur-3) var(--ease-soft);
+}
+[data-page="home"] .pillar:is(:hover, :focus-visible) :is(.pillar-name, .pillar-arrow) { opacity: 1; transform: none; }
+[data-page="home"] .pillar-arrow { display: block; line-height: 0; }
+[data-page="home"] .pillar-arrow svg {
+  width: clamp(96px, 11vw, 200px);
+  height: auto;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+[data-page="home"] .pillar::after {
+  inset: 0; height: auto;
+  background: rgb(10 4 20 / .38);
+}
+@media (min-width: 1024px) {
+  [data-page="home"] .pillar-name { font-size: clamp(36px, 3.4vw, 60px); }
+}
+[data-page="home"] .home-now { align-items: center; }
+[data-page="home"] .home-now-box {
+  width: min(100%, 560px);
+  padding: clamp(28px, 3vw, 48px) clamp(28px, 3vw, 48px);
+}
+[data-page="home"] .home-now-box h2 { font-size: clamp(40px, 4.4vw, 76px); margin-bottom: 24px; }
+[data-page="home"] .home-now-box ul { gap: 16px; }
+[data-page="home"] .home-now-box li { font-size: clamp(17px, 1.5vw, 22px); }
+@media (max-width: 767px) {
+  /* No hover on touch: names show, small arrow beside them hints at a link. */
+  [data-page="home"] .pillar { flex-direction: row; align-items: center; justify-content: space-between; }
+  [data-page="home"] .pillar :is(.pillar-name, .pillar-arrow) { opacity: 1; transform: none; }
+  [data-page="home"] .pillar-arrow svg { width: 40px; }
+  [data-page="home"] .pillar:last-child { align-items: flex-start; }
+}
+@media (max-width: 1023px) {
+  [data-page="home"] .home-now { align-items: flex-end; }
+  [data-page="home"] .home-now-box { width: 100%; }
+}
+@media (max-width: 767px) {
+  /* The earlier last-child flex-start (name lifted above the wordmark) also
+     pulled the arrow next to the name; keep it on the right edge. */
+  [data-page="home"] .pillar:last-child { justify-content: space-between; }
+}
+
+/* Pillars, serif + new footer (2026-10-21, user revision).
+   Display type is Fraunces (Google Fonts, variable, SOFT=100): its rounded
+   ball terminals echo the circle-heavy art. Body text stays Satoshi. The
+   hover arrow uses round caps/joins. Footer follows the user's reference:
+   mark, four link columns, dotted rule, legal left + Connect right. */
+[data-page="home"] :is(.pillar-name, .pillars-mark, .home-now-box h2, .home-foot-mark) {
+  font-family: "Fraunces", Georgia, serif;
+  font-variation-settings: "SOFT" 100, "WONK" 0;
+  font-optical-sizing: auto;
+  letter-spacing: -.02em;
+}
+[data-page="home"] .pillar-name { font-weight: 800; }
+[data-page="home"] .pillars-mark { font-weight: 900; letter-spacing: -.025em; padding: .12em .24em .14em .2em; }
+[data-page="home"] .home-now-box h2 { font-weight: 800; }
+[data-page="home"] .pillar-arrow svg { stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; }
+
+[data-page="home"] .home-foot {
+  padding: clamp(56px, 7vw, 96px) clamp(20px, 5vw, 76px) 32px;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+[data-page="home"] .home-foot-mark {
+  margin: 0 0 clamp(40px, 5vw, 64px);
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+}
+[data-page="home"] .home-foot-cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px 24px;
+  max-width: 1240px;
+}
+[data-page="home"] .home-foot-cols ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; align-content: start; }
+[data-page="home"] .home-foot a { color: inherit; text-decoration: none; }
+[data-page="home"] .home-foot-cols a {
+  display: inline-flex; align-items: center; min-height: 32px;
+  font-size: 16px; font-weight: 600;
+}
+[data-page="home"] .home-foot a:hover { text-decoration: underline; text-underline-offset: 3px; }
+[data-page="home"] .home-foot-base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px 32px;
+  margin-top: clamp(56px, 7vw, 88px);
+  padding-top: 32px;
+  /* dotted rule, as in the reference */
+  background: radial-gradient(circle, var(--text-secondary) 1px, transparent 1.3px) top left / 8px 3px repeat-x;
+  font-size: 15px;
+}
+[data-page="home"] :is(.home-foot-legal, .home-foot-connect) { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; }
+[data-page="home"] .home-foot-legal span { color: var(--text-secondary); }
+[data-page="home"] .home-foot-base a { display: inline-flex; align-items: center; min-height: 32px; }
+@media (max-width: 767px) {
+  [data-page="home"] .home-foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-page="home"] .home-foot-base { flex-direction: column; }
+}
+/* Hover tint multiplies into the art (deepens the colours) instead of a flat
+   grey veil, which washed the hot palette out to brown. */
+[data-page="home"] .pillar::after { background: rgb(0 0 0 / .42); mix-blend-mode: multiply; }
+@media (max-width: 767px) {
+  /* Stacked bands: a sticky touch :hover must not resize one band. */
+  [data-page="home"] .pillar:is(:hover, :focus-visible) { flex-grow: 1; }
+  [data-page="home"] .pillar::after { display: none; }
+}
+@media (max-width: 767px) {
+  /* Equal bands: with flex-basis 0, extra padding on the first/last band made
+     them taller than the middle two. Keep padding uniform. */
+  [data-page="home"] .pillar,
+  [data-page="home"] .pillar:first-child,
+  [data-page="home"] .pillar:last-child { padding: 16px 20px; }
+  [data-page="home"] .pillar:last-child { padding-top: 24px; }
+}
+
+/* Display serif swap (2026-10-21, user: "more pointy serif"): Playfair Display
+   replaces Fraunces. Sharp wedge serifs and hairline contrast at 800-900. */
+[data-page="home"] :is(.pillar-name, .pillars-mark, .home-now-box h2, .home-foot-mark) {
+  font-family: "Playfair Display", Georgia, serif;
+  font-variation-settings: normal;
+  letter-spacing: -.01em;
+}
+[data-page="home"] .pillars-mark { letter-spacing: -.015em; }
+/* Playfair defaults to old-style figures, which dropped the "21" in LABS21
+   below the cap line; use lining figures for the display names. */
+[data-page="home"] :is(.pillar-name, .pillars-mark, .home-now-box h2, .home-foot-mark) {
+  font-variant-numeric: lining-nums;
+}
+@media (max-width: 767px) {
+  /* Playfair's hairlines vanish on busy/cream art: a left-to-right scrim
+     plus a soft shadow keeps the always-visible band names readable. */
+  [data-page="home"] .pillar::after {
+    display: block;
+    inset: 0;
+    height: auto;
+    opacity: 1;
+    mix-blend-mode: normal;
+    background: linear-gradient(to right, rgb(0 0 0 / .6), rgb(0 0 0 / .12) 70%, rgb(0 0 0 / .32));
+  }
+  [data-page="home"] :is(.pillar-name, .pillar-arrow svg) {
+    text-shadow: 0 2px 12px rgb(0 0 0 / .45);
+    filter: drop-shadow(0 2px 8px rgb(0 0 0 / .35));
+  }
+}

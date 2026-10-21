@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const directory = path.dirname(fileURLToPath(import.meta.url));
-const files = ['liquid-design-physics.js', 'liquid-design-union.js', 'liquid-design-live-demo.js', 'liquid-design-menu-motion.js', 'liquid-design-colors.js', 'liquid-design-components.js', 'liquid-design-plugin-components.js', 'liquid-design-plugin.js', 'liquid-design-navigation.js'];
+const files = ['liquid-design-physics.js', 'liquid-design-union.js', 'liquid-design-live-demo.js', 'liquid-design-menu-motion.js', 'liquid-design-colors.js', 'liquid-design-refraction.js', 'liquid-design-backdrop.js', 'liquid-design-components.js', 'liquid-design-plugin-components.js', 'liquid-design-plugin.js', 'liquid-design-navigation.js'];
 const source = path.join(directory, 'source');
 if (process.argv.includes('--import-approved')) {
   const approved = path.resolve(directory, '../.worktrees/liquid-glass');

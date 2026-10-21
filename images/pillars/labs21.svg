@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- LABS21, monochrome green: a flask bubbling under an orbiting atom. -->
+  <rect width="400" height="1000" fill="#1f9d55"/>
+
+  <!-- top: atom, three orbits round a nucleus -->
+  <rect width="400" height="300" fill="#0f6b37"/>
+  <g fill="none" stroke="#5fd18b" stroke-width="12">
+    <ellipse cx="200" cy="150" rx="150" ry="48"/>
+    <ellipse cx="200" cy="150" rx="150" ry="48" transform="rotate(60 200 150)"/>
+    <ellipse cx="200" cy="150" rx="150" ry="48" transform="rotate(-60 200 150)"/>
+  </g>
+  <circle cx="200" cy="150" r="34" fill="#c4f2d4"/>
+
+  <!-- the flask: dark glass, light liquid, rising bubbles -->
+  <path d="M160 340h80v140l120 230a40 40 0 0 1-36 58H76a40 40 0 0 1-36-58l120-230Z" fill="#06371c"/>
+  <rect x="146" y="320" width="108" height="30" rx="15" fill="#0f6b37"/>
+  <path d="M106 590h188l58 112a26 26 0 0 1-23 38H71a26 26 0 0 1-23-38Z" fill="#5fd18b"/>
+  <path d="M106 590h188l14 28H92Z" fill="#c4f2d4"/>
+  <circle cx="170" cy="680" r="16" fill="#c4f2d4"/>
+  <circle cx="232" cy="650" r="10" fill="#c4f2d4"/>
+  <circle cx="200" cy="540" r="14" fill="#5fd18b"/>
+  <circle cx="186" cy="470" r="9" fill="#5fd18b"/>
+  <circle cx="214" cy="410" r="6" fill="#5fd18b"/>
+
+  <!-- bottom: test-tube rack in flat tones -->
+  <rect x="0" y="860" width="400" height="140" fill="#0f6b37"/>
+  <rect x="40" y="820" width="40" height="150" rx="20" fill="#c4f2d4"/>
+  <rect x="110" y="840" width="40" height="130" rx="20" fill="#5fd18b"/>
+  <rect x="250" y="830" width="40" height="140" rx="20" fill="#5fd18b"/>
+  <rect x="320" y="850" width="40" height="120" rx="20" fill="#c4f2d4"/>
+  <rect x="0" y="930" width="400" height="20" fill="#06371c"/>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- WORD, monochrome saffron: a tilted page with its lines and a cursor. -->
+  <rect width="400" height="1000" fill="#ffb800"/>
+
+  <!-- top: a giant half circle and a ruler of ticks -->
+  <circle cx="200" cy="0" r="240" fill="#ffd45c"/>
+  <circle cx="200" cy="0" r="130" fill="#b87400"/>
+  <g fill="#6b4300">
+    <rect x="20" y="250" width="8" height="34"/><rect x="60" y="250" width="8" height="18"/>
+    <rect x="100" y="250" width="8" height="34"/><rect x="140" y="250" width="8" height="18"/>
+    <rect x="180" y="250" width="8" height="34"/><rect x="220" y="250" width="8" height="18"/>
+    <rect x="260" y="250" width="8" height="34"/><rect x="300" y="250" width="8" height="18"/>
+    <rect x="340" y="250" width="8" height="34"/><rect x="380" y="250" width="8" height="18"/>
+  </g>
+
+  <!-- the page: its shadow is just a darker tone, not a blur -->
+  <g transform="rotate(-7 200 520)">
+    <rect x="76" y="330" width="260" height="380" fill="#b87400"/>
+    <rect x="60" y="314" width="260" height="380" fill="#fff0c2"/>
+    <path d="M270 314h50v50Z" fill="#ffd45c"/>
+    <rect x="92" y="360" width="150" height="26" fill="#6b4300"/>
+    <rect x="92" y="420" width="196" height="14" fill="#ffb800"/>
+    <rect x="92" y="450" width="176" height="14" fill="#ffb800"/>
+    <rect x="92" y="480" width="196" height="14" fill="#ffb800"/>
+    <rect x="92" y="510" width="120" height="14" fill="#ffb800"/>
+    <rect x="92" y="560" width="196" height="14" fill="#ffd45c"/>
+    <rect x="92" y="590" width="150" height="14" fill="#ffd45c"/>
+    <rect x="246" y="584" width="8" height="30" fill="#6b4300"/>
+  </g>
+
+  <!-- bottom: the pen nib and thick stripes -->
+  <path d="M300 760l60 90-60 110-60-110Z" fill="#6b4300"/>
+  <circle cx="300" cy="850" r="10" fill="#ffb800"/>
+  <rect x="0" y="880" width="220" height="30" fill="#b87400"/>
+  <rect x="0" y="930" width="160" height="30" fill="#ffd45c"/>
+  <rect x="0" y="980" width="400" height="20" fill="#6b4300"/>
+</svg>

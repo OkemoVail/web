@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- ASTRA, monochrome cobalt: a telescope on a tripod sighting a ringed planet. -->
+  <rect width="400" height="1000" fill="#2340ff"/>
+
+  <!-- sky: deep field top, stars in pale tones -->
+  <rect width="400" height="260" fill="#1527b8"/>
+  <path d="M0 0H400V120A400 120 0 0 1 0 120Z" fill="#0a1466"/>
+  <g fill="#c2ceff">
+    <circle cx="48" cy="60" r="5"/><circle cx="140" cy="36" r="3"/><circle cx="350" cy="80" r="6"/>
+    <circle cx="90" cy="190" r="4"/><circle cx="60" cy="330" r="3"/><circle cx="130" cy="400" r="4"/>
+  </g>
+  <path d="M200 40l8 22 22 8-22 8-8 22-8-22-22-8 22-8Z" fill="#6b85ff"/>
+
+  <!-- the planet: ring passes behind, then in front -->
+  <g transform="rotate(-18 225 300)">
+    <path d="M149 300A76 18 0 0 1 301 300" fill="none" stroke="#0a1466" stroke-width="12"/>
+    <circle cx="225" cy="300" r="50" fill="#c2ceff"/>
+    <path d="M173 300a52 52 0 0 0 104 0Z" fill="#6b85ff"/>
+    <path d="M149 300A76 18 0 0 0 301 300" fill="none" stroke="#0a1466" stroke-width="12"/>
+  </g>
+
+  <!-- tripod -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M200 580L125 890M200 580L275 890" stroke="#0a1466" stroke-width="18"/>
+    <path d="M200 580V905" stroke="#1527b8" stroke-width="14"/>
+    <path d="M150 750H250" stroke="#6b85ff" stroke-width="10"/>
+  </g>
+
+  <!-- the telescope, sighting the planet: eyepiece, tube, bands, finder, dew shield -->
+  <g transform="rotate(-62 200 560)">
+    <rect x="62" y="546" width="36" height="28" fill="#c2ceff"/>
+    <rect x="88" y="528" width="200" height="64" rx="8" fill="#0a1466"/>
+    <rect x="276" y="514" width="44" height="92" rx="6" fill="#6b85ff"/>
+    <rect x="310" y="526" width="10" height="68" fill="#c2ceff"/>
+    <rect x="146" y="528" width="14" height="64" fill="#6b85ff"/>
+    <rect x="240" y="528" width="14" height="64" fill="#1527b8"/>
+    <rect x="146" y="504" width="100" height="18" rx="9" fill="#1527b8"/>
+  </g>
+  <circle cx="200" cy="572" r="22" fill="#c2ceff"/>
+  <circle cx="200" cy="572" r="8" fill="#0a1466"/>
+
+  <!-- ground: a dark hill the tripod stands on -->
+  <rect x="-40" y="880" width="480" height="160" rx="80" fill="#1527b8"/>
+  <circle cx="330" cy="950" r="30" fill="#0a1466"/>
+</svg>

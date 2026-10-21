@@ -135,6 +135,30 @@ The app talks to a self-hosted OpenAI-compatible backend at `https://api.okemova
 
 Starting now, if you learn something new, or I prompt you something new, note it down here.
 
+Liquid Design refraction (2026-10-21): `liquid-design/source/liquid-design-refraction.js`
+(in `build.mjs` before components) adds lens refraction to single rounded
+glass shapes in both engines (plugin `lgp-material` and component
+`lgc-material`, e.g. collapsed share/back/tools triggers). A canvas-generated
+displacement map (rounded-rect SDF, smoothstep bend in a rim bezel only,
+cached by resting size, max 512px, LRU 48) feeds an SVG `feDisplacementMap`
+via `backdrop-filter: url(#lgr-N)` (one displacement pass; the RGB-fringe
+three-pass variant was removed for performance, scale = 2.6x bezel).
+Only Chromium supports `url()` in backdrop-filter; Safari/iOS keep blur glass.
+Refracting material gets `data-lgp-refracting`: 14% veil
+(`--liquid-design-refraction-veil`), 2px blur (`--liquid-design-refraction-blur`),
+strength `--liquid-design-refraction`. Opt out with
+`data-liquid-design-refraction="off"`; webdriver is off unless
+`<html data-liquid-design-refraction="on">`.
+Perf (2026-10-21): filter attributes are written only on change, strength is
+read once per resting shape, and `liquid-design-backdrop.js` samples at most
+every 120ms (1500ms idle poll, 5s scrim-scan cache, rescanned on resize).
+Edge light (user asked to follow Apple, no highlights leaking onto the face):
+every single rounded shape gets `data-lgp-lens`, whose `::before` is a masked
+perimeter ring only (`--lgp-edge-width`, `--lgp-edge-light`, a 135deg gradient
+brighter at top-left/bottom-right). It replaces the SVG rim/contrast/prism
+strokes and the old specular/caustic face gradients, which were removed.
+Blended or tailed contours (open menus, groups) keep the SVG path rim.
+
 Lamina package sources (2026-10-16): this repository statically hosts the
 official Bootstrap Profile at `/bootstrap/` and optional Customizations at
 `/repo/`, intended for `https://repo.okemovail.com`. Their public descriptors
@@ -1095,6 +1119,90 @@ removed at the user's request. Stardust is an explicit purple color source for
 the plugin's nearby-color spill; the search surface uses a 160px proximity range
 to softly reflect that nearby heading, with the default 80px elsewhere retained.
 
+### Homepage pillars (2026-10-21) — supersedes the 2026-10-19 hero/work below
+
+User asked for a C2MTL-poster-style front page (flat abstract shapes, hot
+magenta/orange/cobalt/violet). Root `index.html` hero is now four full-height
+poster pillars, `.pillars > a.pillar--{aion,astra,word,labs}`, linking to
+`/AI/chat.html`, `/search/`, `/word/index.html`, `/AI/index.html`. Art is
+subagent-drawn SVG in `images/pillars/{aion,astra,word,labs21}.svg` (400x1000
+viewBox, calm dark bottom 20% for labels). Hover/focus widens a pillar
+(`flex-grow: 2.4`) and reveals a white "Learn more" pill; mobile (<768px)
+stacks 240px bands with Learn more always visible and a stronger label scrim.
+A visually hidden h1 names the four services. The Work rows, Next up, quotes
+and the hero search were removed; the footer + `OKEMOVAIL` `.home-mark` stays
+as the bottom. Old markup backed up only in Temp. CSS: "Homepage pillars
+(2026-10-21)" block at the end of `src/site.css`. "AION" is the user's name
+for the AI pillar (the model is still Saga elsewhere).
+Revision same day (user, second C2MTL reference): pillars are full bleed
+(100svh, no gaps, no rounding) and the name/tag/Learn more appear ONLY on
+hover/focus, top-left of the pillar with a top scrim. A large white
+`.pillars-mark` "OKEMOVAIL" sits bottom-left over the art (the old footer
+`.home-mark` was removed). Mobile: four equal bands filling the screen, names
+always visible, tag/Learn more hidden, LABS21's name lifted to the top of its
+band so it clears the wordmark. CSS: "Pillars, full bleed" block after the
+pillars block.
+Second revision same day: OKEMOVAIL `.pillars-mark` is white type in a solid
+black box flush to the bottom-left corner. At >=1024px `.home-pillars` is a
+`minmax(0,1fr) minmax(0,1fr)` grid: pillars left half, `.home-now` right half
+(art `images/pillars/now.svg`, stacked red-orange discs on cobalt) with a
+black "Now building" box bottom-right (OkemoAI Labs, Liquid Design, Saga).
+The `minmax(0, …)` matters: plain `1fr` let the no-wrap pillar names push the
+left column past 50%. Below 1024px the Now panel stacks under the pillars.
+Third revision same day: a hovered/focused pillar shows ONLY its name plus a
+giant white rightward arrow (`.pillar-arrow` SVG; "Learn more" kept as
+visually hidden text), vertically centred over a flat dark tint. Tagline is
+in the DOM but hidden. "Now building" box is larger, vertically centred in
+the right panel and flush to its right edge. Mobile bands show name left and
+a 40px arrow right.
+Fourth revision same day: display type (pillar names, OKEMOVAIL mark,
+"Now building", footer "o.") is Fraunces from Google Fonts (variable, SOFT
+100, weights 800-900); body stays Satoshi. Arrow uses round caps/joins. Hover
+tint is a multiply-blended plum so the hot colours deepen rather than go
+brown. All five SVGs were redrawn denser/more chaotic under one shared system
+(fixed 10-colour palette, circles/half/quarter circles, thick rings, hard
+stripes, dot grids, one wavy band, one huge hero shape each, max one lime
+accent). Footer `.home-foot` replaces `.home-close`: "o." mark, four link
+columns, dotted rule, legal left + "Connect:" right (reference-style).
+Mobile bands use uniform padding so all four are equal height.
+Fifth revision same day (user: "represent the different products, not random
+shapes"): all five SVGs redrawn with product motifs in the same palette/style.
+AION = chat bubbles + typing dots + Saga open book + thought rings; ASTRA =
+magnifying lens over a ringed planet + search pill + result rows + stars;
+WORD = tilted cream page with text-line bars, lime cursor, format capsule,
+ruler, pen nib; LABS21 = cream-outlined flask with bubbling liquid, neural-net
+nodes, test tubes, atom; now.svg = stacked discs + stretchy glass pills
+(Liquid Design) + Saga progress bar/loss curve/book + gears + hazard stripe.
+Hero motifs sit in x100-300 / y~350-650 so they survive the narrow desktop
+crop and the mobile band crop.
+Sixth revision same day (user: "more pointy serif"): display font is now
+Playfair Display 700-900 (Google Fonts), replacing Fraunces, with
+`font-variant-numeric: lining-nums` so LABS21's "21" sits on the cap line.
+Mobile bands get a left-to-right dark scrim + soft text shadow because
+Playfair's hairlines disappear on the busy art.
+
+### Homepage rebuild (2026-10-19) — supersedes the 2026-10-03 layout below
+
+Root `index.html` was rebuilt to pass the taste skill (`lint.mjs` 0/0,
+`inspect.mjs` 0 FAIL; accepted WARNs: glass = house Liquid Glass controls,
+palette-cream = existing parchment, no-footage) and the Vercel Web Interface
+Guidelines. Structure: solid "Made of stardust." h1 (no gradient texture, no
+eyebrow, no `data-liquid-color-source`), a lead sentence beside the
+`.hero-profile` glass button, the native Astra GET form (`type="search"`);
+`#work` "Things I've made" on a full-bleed flat accent-mixed band (rosewood
+tint light / deep plum dark) with alternating screenshot rows for Saga, Astra,
+Okemo Word, Liquid Design using `images/work/*.webp` + `-dark.webp` (swapped
+by `.dark`); an accent "Next up: OkemoAI Labs" field; quotes on
+`--bg-elevated`; footer links + © and a giant `OKEMOVAIL` wordmark cut to its
+top half (`.home-mark`, container-query sized edge to edge, aria-hidden).
+Motion is CSS scroll-driven (`animation-timeline: view()`), off for reduced
+motion. No hairlines, monospace, index numbers or emoji in meta. GitHub is
+`github.com/okemovail`. CSS: "Homepage rebuild (2026-10-19)" block in the
+PAGE: HOME section of `src/site.css`. `okemollm/index.html` was already out of
+sync and was not updated. `test-glass-home.mjs` still targets the old
+`.work-row` list/stardust markup and needs rewriting. The stardust and
+Selected-work notes below are historical.
+
 ### Homepage Liquid Design redesign (2026-10-03)
 
 The root `index.html` landing page follows Apple content-first hierarchy with the
@@ -1175,6 +1283,23 @@ around the homepage search surface; submit-button keyboard focus remains visible
 Nested plugin controls convert viewport measurements back to their group's local
 CSS space before painting. Parent surface stretch must affect child material,
 rim, touch light and label exactly once, including independent child presses.
+Homepage scroll edge (2026-10-19): at 390px, scrolled content (e.g. the
+"Selected work" heading) collided with the transparent floating glass nav.
+`src/nav.js` (variant `tools` only) injects `.home-scroll-edge`: a flat
+`var(--bg)` band (no gradient, no backdrop blur) at `--z-chrome`, under the
+`--z-nav` controls, sized by `--home-nav-edge` (72/80/88/96px across the nav's
+400/600/default/1024px breakpoints = inset + control + 12px). It fades in once
+`scrollY > 2`. `html` gets `scroll-padding-top` so anchor/focus targets land
+below it. In the persistent shell the band lives in the child document
+(beneath the shell's `#glass-shell-chrome`), so it works in both modes. CSS is
+the "Homepage scroll edge" block at the end of `src/site.css`. User revision
+same day: the top bar stays transparent; the band is no longer canvas-coloured
+but a solid black tint (`--home-scroll-tint` .24 light / .72 dark) shaped by a
+mask that fades it from opaque at the top edge to transparent 32px below the
+nav row (mask, not a painted colour gradient). Pre-existing
+failures at that time, unrelated: `test-glass-recording.mjs` (More click
+timeout after Escape), `test-glass-home.mjs` (expects github.com/ar12c, but
+Socials now targets okemovail), and `test-z-index.mjs` ("chat overlays").
 
 ### Liquid-glass interaction correction (2026-09-29)
 
@@ -1490,3 +1615,100 @@ guard (`liquid-design-plugin.js`) swallows any click whose press moved >2px as
 a "drag", which a normal hand click easily does. Webdriver runs skipped the
 physics, so tests passed. The row is a plain button again (it already renders
 as the soft-circle Perplexity row). Check: `node test-chat-glass-collapse-click.mjs`.
+
+Repo cleanup (2026-10-21): the root `test-*.mjs` Playwright/contract harnesses
+are local-only and gitignored (still on disk; run them as before). Only
+`test-lamina-repositories.mjs` stays tracked because CI runs it. Also
+untracked/ignored: `.superpowers/` agent reports, `tools/snapshots/`,
+`.DS_Store`, `zz-*` probes, `*-review.md`/`*-report.md`, `.pytest_cache/`.
+The `zz-nc-*` screenshots, four root review reports and `voidai/claude.svg`
+were deleted (recoverable from git history).
+
+Homepage pillars, monochrome (2026-10-21, user: "still looks AI generated"):
+every panel is now ONE hue built from 3-5 flat tones of it, no gradients:
+AION red `#e8352b`, ASTRA cobalt `#2340ff`, WORD saffron `#ffb800`, LABS21
+green `#1f9d55`, Now panel pink `#ff5fa2` (also its CSS fallback colour).
+Product motifs are kept (bubbles, page, flask, pills/gear); ASTRA is a telescope on a tripod sighting a ringed planet (replaced the magnifying glass). Desktop shows only about the middle 45% of each panel (x~110-290 of 400), so keep hero motifs inside it. The
+hover tint and mobile scrim became neutral black so they don't shift hues.
+
+Liquid Design faked optics (2026-10-21): user chose "fake it everywhere"
+over real refraction (SVG `backdrop-filter: url()` is Chromium-only; iOS is
+all WebKit). The glass look is pure CSS in `liquid-design/liquid-design.css`,
+so the per-frame physics cost is unchanged: backdrop vibrancy
+(`saturate(var(--liquid-design-saturate, --lgp-saturate))` 1.7 light / 1.5
+dark, plus `brightness`) and a `::before` lens layer on `.lgp-material` /
+`.lgc-material` (top specular band + corner hotspot, bottom caustic, inner
+lens glow, thickness shade, red/blue side dispersion fringe). Extents are in
+fixed px so large surfaces stay clear over text. Tokens: `--lgp-specular`,
+`--lgp-caustic`, `--lgp-lens-edge`, `--lgp-lens-shade`, `--lgp-fringe-warm/cool`;
+`--liquid-design-optics` (0-1) scales or disables it per page. Hidden under
+reduced transparency, more contrast and forced colors. CSS-only change, so no
+`build.mjs` rebuild; all page links were bumped to `?v=20261021-optics`.
+
+Liquid Design refraction + backdrop adaptation (2026-10-21): single rounded
+glass shapes get Chromium-only lens refraction
+(`liquid-design/source/liquid-design-refraction.js`, SVG displacement map in
+`backdrop-filter`; bezel up to 26px, scale 1.7x bezel) and a CSS perimeter
+edge ring (`data-lgp-lens` `::before`). The ring's light is vertical (180deg:
+bright top and bottom, faint sides), not 45deg, per user. New
+`liquid-design-backdrop.js` samples five points under each glass host
+(page colours, same-origin `<img>` and CSS background images, same-origin
+iframes) and sets `data-lgp-backdrop="dark|light"` plus `data-lgp-ink` only
+when the theme ink would clash (skipped on tinted glass like Labs21). CSS at
+the end of `liquid-design.css` flips ink, lifts the veil over dark backdrops
+and adds a grey contour over light ones. Re-samples on scroll/resize/
+transitionend and a 700ms poll. Disabled under webdriver unless
+`data-liquid-design-adapt="on"`; opt out per subtree with `="off"`. Inside the
+build bundle use bare `setInterval`, not `root.setInterval` (the sandboxed
+window throws Illegal invocation). The sampler also sets `--lgp-backdrop-color`
+(average of the five samples); the material fill is mixed from it (lifted 42%
+toward white at 26% alpha over dark, darkened 18% at 30% alpha over light,
+veil 100%), easing over 320ms. Debug view: `<html data-liquid-design-refraction-debug>` paints each lens's
+displacement map on its glass (exposed as `--lgp-refraction-map`). Cache
+version `20261021-adapt4`. Map profile (user: "copy Apple", not a dome): squircle
+rim height (1-(1-x)^4)^(1/4) refracted by Snell n=1.5, precomputed into a
+256-step PROFILE table; bend peaks just inside the rim and eases out to zero
+so the centre is untouched. Bezel = 22% of short side (6-20px), scale 2.2x.
+All glass now refracts (2026-10-21), not only single shapes: `updateShape(w,h,boxes,blend)`
+builds the map from a union SDF of every lobe (polynomial smooth-min when the
+contour is blended), using the SDF gradient as the outward normal. Used by
+plugin groups (button rows, toolbars) and component menus; tailed lobes still
+skip refraction. Compound maps rebuild at most every 90ms while morphing.
+Compound shapes keep the SVG path rim; only single shapes use the CSS ring.
+Adaptation fades (user asked, 2026-10-21): ink, fill, rim and contour all
+crossfade over `--lgp-adapt-duration` (480ms, `--lgp-adapt-ease`); rim
+brightness and contour strength are `@property` numbers (`--lgp-rim-lift`,
+`--lgp-contour`) so the gradient and shadow interpolate. The first reading on
+load is instant (no fade-in from the wrong shade). Reduced motion sets the
+duration to 0.
+Consistency pass (user: outlines inconsistent, top shadow should turn the
+whole row white): one set of edge numbers (`--lgp-edge-top/upper/mid/lower/
+bottom`) drives both the CSS ring and the SVG rim stops; tools trigger rim
+hidden; component rim erode = `--lgp-edge-width`. Sampler is now a 3x3 grid,
+ink chosen by worst-case WCAG contrast, pooled per cluster of pinned
+controls on one line within 48px (`data-liquid-design-adapt-group` to force a
+group). Pointer-events-none fixed scrims (e.g. `.home-scroll-edge`) are
+composited over samples incl. vertical gradient masks; a dark scrim forces
+white ink for the cluster. Mark custom scrims `data-liquid-design-scrim`.
+Cache version `20261021-adapt11`.
+
+Clear glass buttons (2026-10-21, user): every glass button has no fill/veil,
+only blur (refraction blur 2px), refraction and the edge ring. Rule at the end
+of `liquid-design.css` clears `.lgp-material` on `[data-lgp-control="button"]`,
+`[data-lgp-group]`, Tools, and closed Options triggers (`:not(:has([aria-expanded="true"]))`;
+the open menu fades its fill back for legibility). Surfaces (fields, sidebar,
+composer) keep their fill. Only buttons that set `--liquid-design-tint` keep
+colour (Labs21 pill, New chat accent, Search submit, Discord/danger); the Add
+button's faint 5%/7% accent tint was removed. Reduced transparency / more
+contrast restores the fill. Clear buttons also drop the saturate/brightness
+boost (it tinted warm canvases yellow). Surface hosts that are also groups (chat sidebar, composer) are excluded via
+`:not([data-lgp-control="surface"])`. Chat sidebar search/collapse pill and profile button are cleared in site.css.
+Cache version `20261021-adapt21`.
+
+Chat sidebar glass (2026-10-21, user): only the sidebar lagged. Its buttons sat
+on the sidebar's own refracting glass, so each was a backdrop filter nested in
+another. `#sidebar-full-content` carries `data-liquid-design-refraction="off"
+data-liquid-design-adapt="off"`, and site.css drops `backdrop-filter` on its
+controls (open menus keep blur). The sidebar panel itself keeps full glass; the
+title bar, top-right actions and composer keep refraction (an earlier opt-out
+there was reverted). Cache version `20261021-adapt22`.

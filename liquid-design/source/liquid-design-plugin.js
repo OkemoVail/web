@@ -111,7 +111,9 @@
     el.prepend(material, drawing, highlights);
     var record = { el: el, owned: owned, material: material, highlights: highlights, drawing: drawing, shape: shape,
       maskPath: maskPath, mask: edgeMask, rim: rim, lightGradient: gradient, prism: prism,
-      prismGradient: prismGradient, contrastRim: contrastRim, controls: new Set(), key: '', contour: null };
+      prismGradient: prismGradient, contrastRim: contrastRim, controls: new Set(), key: '', contour: null,
+      refraction: root.LiquidDesignRefraction ? root.LiquidDesignRefraction.attach(material) : null,
+      backdrop: root.LiquidDesignBackdrop ? root.LiquidDesignBackdrop.watch(el) : null };
     groups.set(el, record); return record;
   }
   function pathFor(b) {
@@ -181,7 +183,8 @@
       record.glow.style.height = glowDiameter + 'px';
       boxes.push({ x: (rect.left - anchor.left) / ancestorScaleX + localWidth / 2 + dx - localWidth * sx / 2,
         y: (rect.top - anchor.top) / ancestorScaleY + localHeight / 2 + dy - localHeight * sy / 2,
-        w: localWidth * sx, h: localHeight * sy, rx: radius.x * sx, ry: radius.y * sy });
+        w: localWidth * sx, h: localHeight * sy, rx: radius.x * sx, ry: radius.y * sy,
+        restW: localWidth, restH: localHeight });
       var last = boxes[boxes.length - 1];
       ['x','y','w','h','rx','ry'].forEach(function (key) { last[key] = root.LiquidDesignPluginSnap(last[key]); });
       foreground.push({ content: record.content, touch: f ? f.touch : 0,
@@ -243,6 +246,15 @@
     // Rounded backdrop capture prevents a square blur tile showing through
     // outside an independent pill/circle's path-clipped material on desktop.
     group.material.style.borderRadius = boxes.length === 1 ? boxes[0].rx + 'px / ' + boxes[0].ry + 'px' : '0px';
+    // Single rounded shapes draw their edge light as a CSS ring (all browsers);
+    // blended contours keep the SVG path rim.
+    group.material.toggleAttribute('data-lgp-lens', boxes.length === 1);
+    if (group.refraction) {
+      if (boxes.length === 1) { var lens = boxes[0]; group.refraction.update(w, h, lens.rx, lens.ry, lens.restW, lens.restH); }
+      // Rows and blended menus refract as one compound lens; the map follows
+      // each lobe's rim, including the melted bridge between touching lobes.
+      else group.refraction.updateShape(w, h, boxes, connections ? blendRange : 0);
+    }
     group.highlights.style.clipPath = 'path("' + d + '")';
     group.maskPath.setAttribute('d', d);
     group.rim.setAttribute('d', d);
@@ -365,6 +377,8 @@
     controls.delete(record.el); record.group.controls.delete(record);
     if (!record.group.controls.size) {
       if (record.group.colors) record.group.colors.destroy();
+      if (record.group.refraction) record.group.refraction.destroy();
+      if (record.group.backdrop) record.group.backdrop.destroy();
       record.group.material.remove(); record.group.drawing.remove(); record.group.highlights.remove();
       record.group.owned.slice().reverse().forEach(function (fn) { fn(); });
       groups.delete(record.group.el);

@@ -3,10 +3,22 @@
   --lgp-material-fill: rgb(240 240 240 / .64);
   --lgp-edge-contrast: rgb(58 54 52 / .18);
   --lgp-touch-light: radial-gradient(circle, rgb(255 255 255 / .68), rgb(255 255 255 / .30) 35%, transparent 70%);
-  --lgp-rim-top: .85;
-  --lgp-rim-bottom: .62;
+  --lgp-rim-top: .5;
+  --lgp-rim-bottom: .32;
   --lgp-rim-width: 1.25px;
   --lgp-prism-opacity: .28;
+  /* Faked optics: vibrancy plus a static lens layer. Pure CSS, painted once,
+     so the stretch physics pays nothing extra per frame. */
+  --lgp-saturate: 1.7;
+  --lgp-brightness: 1.04;
+  --lgp-specular: rgb(255 255 255 / .22);
+  --lgp-caustic: rgb(255 255 255 / .08);
+  --lgp-lens-edge: rgb(255 255 255 / .38);
+  --lgp-lens-shade: rgb(40 36 34 / .10);
+  --lgp-fringe-warm: rgb(255 96 168 / .24);
+  --lgp-fringe-cool: rgb(84 172 255 / .24);
+  --lgp-edge-width: 1.25px;
+  --lgp-edge-top: .9; --lgp-edge-upper: .22; --lgp-edge-mid: .06; --lgp-edge-lower: .22; --lgp-edge-bottom: .62;
 }
 [data-lgp-theme="dark"] {
   --lgp-material-fill: rgb(28 30 33 / .18);
@@ -16,6 +28,16 @@
   --lgp-rim-bottom: .12;
   --lgp-rim-width: .75px;
   --lgp-prism-opacity: .18;
+  --lgp-saturate: 1.5;
+  --lgp-brightness: 1;
+  --lgp-specular: rgb(255 255 255 / .07);
+  --lgp-caustic: rgb(255 255 255 / .03);
+  --lgp-lens-edge: rgb(255 255 255 / .12);
+  --lgp-lens-shade: rgb(0 0 0 / .28);
+  --lgp-fringe-warm: rgb(255 96 168 / .16);
+  --lgp-fringe-cool: rgb(84 172 255 / .16);
+  --lgp-edge-width: 1px;
+  --lgp-edge-top: .55; --lgp-edge-upper: .12; --lgp-edge-mid: .03; --lgp-edge-lower: .12; --lgp-edge-bottom: .36;
 }
 [data-lgp-control], [data-lgp-group] {
   --lgp-default-fill: rgba(255,255,255,.38);
@@ -63,18 +85,61 @@
 }
 [data-lgp-control] > .lgp-material, [data-lgp-group] > .lgp-material {
   overflow: hidden; background: var(--liquid-design-fill, var(--lgp-material-fill));
-  -webkit-backdrop-filter: blur(var(--liquid-design-blur, 12px)) saturate(1.05);
-  backdrop-filter: blur(var(--liquid-design-blur, 12px)) saturate(1.05);
+  -webkit-backdrop-filter: blur(var(--liquid-design-blur, 12px)) saturate(var(--liquid-design-saturate, var(--lgp-saturate))) brightness(var(--lgp-brightness));
+  backdrop-filter: blur(var(--liquid-design-blur, 12px)) saturate(var(--liquid-design-saturate, var(--lgp-saturate))) brightness(var(--lgp-brightness));
+}
+/* Refracting glass (Chromium): nearly clear, like Apple's. The bent backdrop
+   and the edge ring carry the shape, so only a faint veil remains. */
+:is(.lgp-material, .lgc-material)[data-lgp-refracting] {
+  background: color-mix(in srgb, var(--liquid-design-fill, var(--lgp-material-fill)) var(--liquid-design-refraction-veil, 14%), transparent) !important;
 }
 [data-lgp-control] > .lgp-material::after, [data-lgp-group] > .lgp-material::after {
   content: ''; position: absolute; inset: 0; background: var(--liquid-design-tint, transparent); pointer-events: none;
 }
 [data-lgp-control] > .lgp-outline, [data-lgp-group] > .lgp-outline { overflow: visible; z-index: 1; }
+/* Edge light: a thin ring masked to the perimeter, never onto the face.
+   Light falls straight down: bright along the top and bottom, faint at the sides. Applies to
+   single rounded shapes (data-lgp-lens) in every browser; compound contours
+   keep the SVG path rim, which follows their blended outline. */
+/* One set of edge numbers drives both rims: the CSS ring on single shapes and
+   the SVG rim on rows and open menus, so every outline has the same weight. */
+[data-lgp-control], [data-lgp-group], [data-lgp-component] {
+  --lgp-edge-light: linear-gradient(180deg,
+    rgb(255 255 255 / var(--lgp-edge-top)),
+    rgb(255 255 255 / var(--lgp-edge-upper)) 22%,
+    rgb(255 255 255 / var(--lgp-edge-mid)) 50%,
+    rgb(255 255 255 / var(--lgp-edge-lower)) 78%,
+    rgb(255 255 255 / var(--lgp-edge-bottom)));
+}
+:is(.lgp-outline, .lgc-outline) linearGradient[id$="-light"]:not([id$="trigger-light"]) > stop:nth-child(1) { stop-opacity: var(--lgp-edge-top) !important; }
+:is(.lgp-outline, .lgc-outline) linearGradient[id$="-light"]:not([id$="trigger-light"]) > stop:nth-child(2) { stop-opacity: var(--lgp-edge-upper) !important; offset: 22%; }
+:is(.lgp-outline, .lgc-outline) linearGradient[id$="-light"]:not([id$="trigger-light"]) > stop:nth-child(3) { stop-opacity: var(--lgp-edge-mid) !important; offset: 40%; }
+:is(.lgp-outline, .lgc-outline) linearGradient[id$="-light"]:not([id$="trigger-light"]) > stop:nth-child(4) { stop-opacity: var(--lgp-edge-mid) !important; offset: 60%; }
+:is(.lgp-outline, .lgc-outline) linearGradient[id$="-light"]:not([id$="trigger-light"]) > stop:nth-child(5) { stop-opacity: var(--lgp-edge-lower) !important; offset: 78%; }
+:is(.lgp-outline, .lgc-outline) linearGradient[id$="-light"]:not([id$="trigger-light"]) > stop:nth-child(6) { stop-opacity: var(--lgp-edge-bottom) !important; }
+/* The rim width matches the ring's on both engines. */
+.lgp-outline > .lgp-rim { stroke-width: calc(var(--liquid-design-edge-width, var(--lgp-edge-width)) * 2) !important; }
+/* The top-reflection extra on the tools trigger doubled the rim; one rim only. */
+[data-lgp-component] .lgc-tools-trigger-rim { display: none !important; }
+:is(.lgp-material, .lgc-material)[data-lgp-lens]::before {
+  content: ''; position: absolute; inset: 0; box-sizing: border-box; pointer-events: none;
+  border-radius: inherit;
+  padding: var(--liquid-design-edge-width, var(--lgp-edge-width));
+  background: var(--liquid-design-edge-light, var(--lgp-edge-light));
+  opacity: var(--liquid-design-optics, 1);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+:is([data-lgp-control], [data-lgp-group]):has(> .lgp-material[data-lgp-lens]) > .lgp-outline > :is(.lgp-rim, .lgp-contrast-rim, .lgp-prism-rim),
+[data-lgp-component]:has(> .lgc-material[data-lgp-lens]) > .lgc-outline > :is(.lgc-rim, .lgc-contrast-rim, .lgc-prism-rim, .lgc-tools-trigger-rim) { display: none; }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  :is(.lgp-material, .lgc-material)::before { display: none !important; }
+  :is(.lgp-outline, .lgc-outline) > :is(.lgp-rim, .lgp-contrast-rim, .lgc-rim, .lgc-contrast-rim) { display: inline !important; }
+}
 .lgp-outline > .lgp-rim { opacity: var(--liquid-design-rim, 1); }
 .lgp-contrast-rim, [data-lgp-component] .lgc-contrast-rim { stroke: var(--liquid-design-edge-contrast, var(--lgp-edge-contrast)); stroke-width: .5px; }
 .lgp-rim, .lgc-rim { stroke-width: var(--liquid-design-rim-width, var(--lgp-rim-width)); }
-:is(.lgp-outline, .lgc-outline) linearGradient:not([id$="-prism"]) stop:first-child { stop-opacity: var(--liquid-design-rim-top, var(--lgp-rim-top)); }
-:is(.lgp-outline, .lgc-outline) linearGradient:not([id$="-prism"]) stop:last-child { stop-opacity: var(--liquid-design-rim-bottom, var(--lgp-rim-bottom)); }
 [data-lgp-theme="dark"] :is(.lgp-outline, .lgc-outline) linearGradient:not([id$="-prism"]) stop:not(:first-child):not(:last-child) { stop-opacity: .025; }
 .lgp-prism-rim, .lgc-prism-rim { opacity: 0; pointer-events: none; }
 .lgp-highlights > .lgp-glow {
@@ -98,8 +163,8 @@
 }
 [data-lgp-component] .lgc-material {
   overflow: hidden; background: var(--liquid-design-fill,var(--lgp-material-fill));
-  -webkit-backdrop-filter: blur(var(--liquid-design-blur,12px)) saturate(1.05);
-  backdrop-filter: blur(var(--liquid-design-blur,12px)) saturate(1.05);
+  -webkit-backdrop-filter: blur(var(--liquid-design-blur, 12px)) saturate(var(--liquid-design-saturate, var(--lgp-saturate))) brightness(var(--lgp-brightness));
+  backdrop-filter: blur(var(--liquid-design-blur, 12px)) saturate(var(--liquid-design-saturate, var(--lgp-saturate))) brightness(var(--lgp-brightness));
 }
 [data-lgp-component][data-lgp-theme="dark"] .lgc-material { background: var(--liquid-design-fill,var(--lgp-material-fill)); }
 [data-lgp-component] .lgc-outline { overflow: visible; z-index: 1; }
@@ -184,3 +249,89 @@
 [data-liquid-color-scene] > .lg-color-object--2 { width: 36px; height: 36px; }
 [data-liquid-color-scene] > .lg-color-object:active { cursor: grabbing; }
 [data-liquid-color-scene] > .lg-color-object:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+/* Backdrop-adaptive glass (liquid-design-backdrop.js). Clear glass inherits
+   whatever is behind it, so ink and veil follow the sampled backdrop rather
+   than the page theme alone. Opt out with data-liquid-design-adapt="off".
+   Every adaptation fades rather than snapping: ink and shade are plain colour
+   transitions, and the rim brightness and contour strength are registered
+   numbers so the gradient and shadow built from them interpolate too. */
+@property --lgp-rim-lift { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --lgp-contour { syntax: '<number>'; inherits: true; initial-value: 0; }
+:root { --lgp-adapt-duration: 480ms; --lgp-adapt-ease: cubic-bezier(.33, 0, .2, 1); }
+[data-lgp-backdrop] :is(.lgp-content, [data-liquid-button], .lgc-exit),
+[data-lgp-backdrop] :is(.lgp-content, [data-liquid-button], .lgc-exit) svg {
+  transition: color var(--lgp-adapt-duration) var(--lgp-adapt-ease), fill var(--lgp-adapt-duration) var(--lgp-adapt-ease), stroke var(--lgp-adapt-duration) var(--lgp-adapt-ease);
+}
+[data-lgp-ink="light"] .lgp-content,
+[data-lgp-component][data-lgp-ink="light"] :is([data-liquid-button], .lgc-exit) { color: #f7f7f5 !important; }
+[data-lgp-ink="dark"] .lgp-content,
+[data-lgp-component][data-lgp-ink="dark"] :is([data-liquid-button], .lgc-exit) { color: #141413 !important; }
+/* The glass shade follows the sampled backdrop colour: lifted toward white
+   over dark surfaces so the body stays visible, deepened slightly over light
+   ones so the shape keeps definition. The veil is set to 100% because the
+   fill already carries its own alpha, so refracting and blur-only glass
+   (Safari) end up the same shade. */
+:is([data-lgp-control], [data-lgp-group], [data-lgp-component])[data-lgp-backdrop] {
+  --lgp-edge-top: calc(.55 + .2 * var(--lgp-rim-lift));
+  --lgp-edge-upper: calc(.12 + .08 * var(--lgp-rim-lift));
+  --lgp-edge-mid: calc(.03 + .03 * var(--lgp-rim-lift));
+  --lgp-edge-lower: calc(.12 + .08 * var(--lgp-rim-lift));
+  --lgp-edge-bottom: calc(.36 + .14 * var(--lgp-rim-lift));
+  transition: --lgp-rim-lift var(--lgp-adapt-duration) var(--lgp-adapt-ease),
+    --lgp-contour var(--lgp-adapt-duration) var(--lgp-adapt-ease);
+}
+:is([data-lgp-control], [data-lgp-group], [data-lgp-component])[data-lgp-backdrop] > :is(.lgp-material, .lgc-material) {
+  --liquid-design-refraction-veil: 100%;
+  transition: background-color var(--lgp-adapt-duration) var(--lgp-adapt-ease);
+}
+/* The grey contour over light backdrops: an inset shadow on single shapes,
+   the SVG contrast rim on compound ones (a box shadow would follow the
+   bounding box, not the blended outline). Same weight either way. */
+[data-lgp-backdrop] > :is(.lgp-material, .lgc-material)[data-lgp-lens] {
+  box-shadow: inset 0 0 0 .5px rgb(40 36 34 / calc(.16 * var(--lgp-contour)));
+}
+[data-lgp-backdrop] > :is(.lgp-outline, .lgc-outline) > :is(.lgp-contrast-rim, .lgc-contrast-rim) {
+  stroke: rgb(40 36 34 / calc(.16 * var(--lgp-contour))) !important; stroke-width: 1px;
+}
+[data-lgp-backdrop="dark"] { --lgp-rim-lift: 1; --lgp-contour: 0; }
+[data-lgp-backdrop="dark"] > :is(.lgp-material, .lgc-material) {
+  --liquid-design-fill: color-mix(in srgb, color-mix(in srgb, var(--lgp-backdrop-color, #000) 58%, #fff) 26%, transparent);
+}
+[data-lgp-backdrop="light"] { --lgp-rim-lift: 0; --lgp-contour: 1; }
+[data-lgp-backdrop="light"] > :is(.lgp-material, .lgc-material) {
+  --liquid-design-fill: color-mix(in srgb, color-mix(in srgb, var(--lgp-backdrop-color, #fff) 82%, #000) 30%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --lgp-adapt-duration: 0ms; }
+}
+
+/* Clear buttons: single buttons, button rows and Tools carry no veil, only
+   blur, refraction and the edge ring. A button keeps colour only when its
+   page specifies --liquid-design-tint (the Labs21 pill, Search submit,
+   danger), painted by the tint layer above the cleared fill. Menus and
+   surfaces (fields, panels) keep their fill so text stays readable. */
+[data-lgp-control="button"] > .lgp-material,
+[data-lgp-group]:not([data-lgp-control="surface"]) > .lgp-material,
+[data-lgp-component="tools"] .lgc-material,
+[data-lgp-component="options"]:not(:has([aria-expanded="true"])) .lgc-material {
+  background: transparent !important;
+  /* The vibrancy boost (saturate 1.7) turns a warm canvas yellow behind a
+     clear button; with no veil to balance it, it reads as a tint. */
+  --liquid-design-saturate: 1; --lgp-brightness: 1;
+}
+/* A closed Options trigger is a button too; its menu fades the fill back in. */
+[data-lgp-component="options"] .lgc-material { transition: background-color 200ms var(--lgp-adapt-ease, ease); }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  [data-lgp-control="button"] > .lgp-material,
+  [data-lgp-group]:not([data-lgp-control="surface"]) > .lgp-material,
+  [data-lgp-component="tools"] .lgc-material,
+  [data-lgp-component="options"] .lgc-material {
+    background: var(--liquid-design-fill, var(--lgp-material-fill)) !important;
+  }
+}
+
+/* Refraction debug view: the displacement map drawn on the glass itself. */
+[data-liquid-design-refraction-debug] :is(.lgp-material, .lgc-material)[data-lgp-refracting] {
+  background: var(--lgp-refraction-map) center / 100% 100% no-repeat !important;
+}

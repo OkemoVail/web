@@ -138,6 +138,8 @@
     }
     group.prepend(material, drawing, highlights);
     var colors = root.LiquidDesignColors && root.LiquidDesignColors.create(group, material, drawing);
+    var refraction = root.LiquidDesignRefraction ? root.LiquidDesignRefraction.attach(material) : null;
+    var backdrop = root.LiquidDesignBackdrop ? root.LiquidDesignBackdrop.watch(group) : null;
     var records = new Map();
     var cleanups = [];
     var frame = 0;
@@ -229,7 +231,7 @@
       var stops = gradient.querySelectorAll('stop');
        var pluginMaterial = group.hasAttribute('data-lgp-component');
        (pluginMaterial ? [.275, .125, .015, .01, .05, .15] : [.12, .05, .006, .004, .0175, .06]).forEach(function (v, i) { stops[i].setAttribute('stop-opacity', v); });
-       if (pluginMaterial) filter.querySelector('feMorphology').setAttribute('radius', '1.1');
+       if (pluginMaterial) filter.querySelector('feMorphology').setAttribute('radius', String(parseFloat(getComputedStyle(group).getPropertyValue('--lgp-edge-width')) || 1.25));
       records.forEach(function (record, el) {
         var measured = measurements.get(el);
         if (!measured) { record.glow.style.opacity = 0; return; }
@@ -372,6 +374,14 @@
         el.style.left = minX + 'px'; el.style.top = minY + 'px';
         el.style.width = width + 'px'; el.style.height = height + 'px';
       });
+      // A lone rounded lobe (collapsed share/back/menu triggers) gets the CSS
+      // edge ring and lens refraction; blended or tailed contours keep the
+      // SVG path rim.
+      var lone = boxes.length === 1 && !boxes[0].tail && (boxes[0].rx || boxes[0].r) ? boxes[0] : null;
+      var loneRx = lone ? (lone.rx || lone.r) : 0, loneRy = lone ? (lone.ry || lone.r || loneRx) : 0;
+      material.toggleAttribute('data-lgp-lens', !!lone);
+      if (lone) material.style.borderRadius = loneRx + 'px / ' + loneRy + 'px';
+      else material.style.removeProperty('border-radius');
       lights.style.transform = 'translate(' + -minX + 'px,' + -minY + 'px)';
        var individualOutline = boxes.map(pill).join(' ');
        var d = individualOutline, count = 0;
@@ -383,6 +393,12 @@
         }
         count = unionOutline.connections;
         if (count) d = unionOutline.path;
+      }
+      if (refraction) {
+        // Tailed lobes (speech-bubble pointers) have no rounded-box field yet.
+        if (lone) refraction.update(width, height, loneRx, loneRy);
+        else if (boxes.length && !boxes.some(function (b) { return b.tail; })) refraction.updateShape(width, height, boxes, count ? blendRange : 0);
+        else refraction.disable();
       }
       shape.setAttribute('d', d);
       // HTML backdrop layers must own their clip locally. SVG fragment clips
@@ -1276,6 +1292,8 @@
         ghosts.forEach(function (ghost) { ghost.remove(); });
         observer.disconnect();
         if (colors) colors.destroy();
+        if (refraction) refraction.destroy();
+        if (backdrop) backdrop.destroy();
         cleanups.forEach(function (fn) { fn(); });
         records.forEach(function (r, el) {
           if (r.motion) r.motion.destroy();

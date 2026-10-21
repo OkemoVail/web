@@ -6,16 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OkemoVail</title>
   <meta name="description"
-    content="poop dev">
-  <meta name="theme-color" content="#c96478">
+    content="A one-person corner of the internet: an AI named Saga, a search engine with a telescope, and whatever experiment hatches next. Made of stardust.">
+  <meta name="theme-color" content="#f5f4ed" media="(prefers-color-scheme: light)"><!-- taste-skill-ignore: existing brand --bg token -->
+  <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://okemovail.com/">
-  <meta property="og:title" content="OkemoVail ✦">
-  <meta property="og:description" content="A one-person corner of the internet: an AI named Saga, a search engine with a telescope, and whatever experiment hatches next. Made of stardust ✦">
+  <meta property="og:title" content="OkemoVail">
+  <meta property="og:description" content="A one-person corner of the internet: an AI named Saga, a search engine with a telescope, and whatever experiment hatches next. Made of stardust.">
   <meta property="og:image" content="https://avatars.githubusercontent.com/u/179893130?v=4">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="OkemoVail ✦">
-  <meta name="twitter:description" content="A one-person corner of the internet: an AI named Saga, a search engine with a telescope, and whatever experiment hatches next. Made of stardust ✦">
+  <meta name="twitter:title" content="OkemoVail">
+  <meta name="twitter:description" content="A one-person corner of the internet: an AI named Saga, a search engine with a telescope, and whatever experiment hatches next. Made of stardust.">
+  <link rel="preconnect" href="https://avatars.githubusercontent.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700..900&display=swap">
   <link rel="stylesheet" href="src/output.css">
   <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
   <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
@@ -63,19 +68,18 @@
           fontFamily: {
             serif: ['Century', '"Century Schoolbook"', 'Georgia', 'serif'],
             sans: ['Satoshi', 'Inter', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
           },
         }
       }
     } };
   </script>
-  <link rel="stylesheet" href="src/site.css?v=20261007-api-audit">
+  <link rel="stylesheet" href="src/site.css?v=20261021-adapt22">
   <script src="src/glass-navigation.js"></script>
   <link rel="expect" href="#site-navigation-ready" blocking="render">
-  <link rel="stylesheet" href="liquid-design/liquid-design.css?v=20261007-api-audit">
-  <script defer src="liquid-design/liquid-design.js?v=20261011-nested-glass"></script>
+  <link rel="stylesheet" href="liquid-design/liquid-design.css?v=20261021-adapt22">
+  <script defer src="liquid-design/liquid-design.js?v=20261021-adapt22"></script>
   <script defer src="src/liquid-design-site.js?v=20261007-api-audit"></script>
-    
+
 </head>
 
 <body data-page="home" class="home-base font-sans antialiased">
@@ -83,96 +87,82 @@
   <a href="#main-content" class="home-skip">Skip to content</a>
   <main id="main-content" class="home-main">
 
-    <!-- ── Hero ────────────────────────────────────────────────── -->
-    <section class="home-hero" aria-labelledby="hero-title">
-      <div class="home-intro" data-reveal>
-        <button type="button" class="skuo skuo-icon hero-profile" aria-label="Stretch OkemoVail’s profile picture" title="Hold and pull">
-        <img
-          src="https://avatars.githubusercontent.com/u/179893130?s=400&u=d8a0d805e4137f21f0dd19fcf5163a1c746f02fd&v=4"
-           alt="" draggable="false"
-           class="hero-pfp">
-        </button>
-        <p>Hej! I'm OkemoVail</p>
+    <!-- ── Hero: four pillars, one per service; hover widens one and shows Learn more ── -->
+    <section class="home-pillars" aria-labelledby="pillars-title">
+      <h1 id="pillars-title" class="home-sr">OkemoVail: AION, Astra, Word and Labs21</h1>
+      <div class="pillars">
+        <a href="/AI/chat.html" class="pillar pillar--aion">
+          <span class="pillar-name" translate="no">AION</span>
+          <span class="pillar-tag">An AI that talks back.</span>
+          <span class="pillar-arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12h16.5m-6.5-6.5L20 12l-6.5 6.5"/></svg><span class="home-sr">Learn more</span></span>
+        </a>
+        <a href="/search/" class="pillar pillar--astra">
+          <span class="pillar-name" translate="no">ASTRA</span>
+          <span class="pillar-tag">Search with a telescope.</span>
+          <span class="pillar-arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12h16.5m-6.5-6.5L20 12l-6.5 6.5"/></svg><span class="home-sr">Learn more</span></span>
+        </a>
+        <a href="/word/index.html" class="pillar pillar--word">
+          <span class="pillar-name" translate="no">WORD</span>
+          <span class="pillar-tag">The page comes first.</span>
+          <span class="pillar-arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12h16.5m-6.5-6.5L20 12l-6.5 6.5"/></svg><span class="home-sr">Learn more</span></span>
+        </a>
+        <a href="/AI/index.html" class="pillar pillar--labs">
+          <span class="pillar-name" translate="no">LABS21</span>
+          <span class="pillar-tag">Where the experiments live.</span>
+          <span class="pillar-arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12h16.5m-6.5-6.5L20 12l-6.5 6.5"/></svg><span class="home-sr">Learn more</span></span>
+        </a>
       </div>
-      <h1 id="hero-title" class="home-title" data-reveal>Made of<br><span class="home-stardust" data-liquid-color-source="#8b5db6">stardust</span><span class="home-title-dot">.</span></h1>
-      <form action="/search/" method="get" class="hero-search" data-liquid-design="surface" data-liquid-design-independent role="search" aria-label="Astra web search">
-        <input type="text" name="q" aria-label="Search the web" placeholder="Search the web…"
-          enterkeyhint="search" autocomplete="off" spellcheck="false">
-        <button type="submit" class="skuo skuo-accent"><span class="search-submit-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span>Search</span></span></button>
-      </form>
-      <p class="home-search-note">A little curiosity goes a long way. Search with Astra.</p>
+      <!-- Decorative poster title, like the C2MTL cover: black box, bottom-left. -->
+      <p class="pillars-mark" aria-hidden="true" translate="no">OKEMOVAIL</p>
+      <!-- Right half (desktop): poster art plus what is being built now. -->
+      <aside class="home-now" aria-labelledby="now-title">
+        <div class="home-now-box">
+          <h2 id="now-title">Now building</h2>
+          <ul>
+            <li><span translate="no">OkemoAI Labs</span><span>Coming soon</span></li>
+            <li><span translate="no">Liquid Design</span><span>Glass that stretches</span></li>
+            <li><span translate="no">Saga</span><span>Training the next one</span></li>
+          </ul>
+        </div>
+      </aside>
     </section>
 
 
-    <!-- ── Selected work ───────────────────────────────────────── -->
-    <section id="work" class="home-work" aria-labelledby="work-title" data-reveal>
-      <div class="home-section-heading">
-        <h2 id="work-title">Selected work</h2>
-        <span>04 projects</span>
-      </div>
-
-      <ul class="work-list" aria-label="Selected projects">
-        <li>
-          <a href="/AI/index.html" class="work-row">
-            <span class="work-title">Saga</span>
-            <span class="work-detail">AI model</span>
-            <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-          </a>
-        </li>
-        <li>
-          <a href="/word/index.html" class="work-row">
-            <span class="work-title">Okemo Word</span>
-            <span class="work-detail">Writing</span>
-            <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-          </a>
-        </li>
-        <li>
-          <div class="work-row is-soon">
-            <span class="work-title">OkemoAI Labs</span>
-            <span class="work-detail">Coming soon</span>
-          </div>
-        </li>
-        <li>
-          <a href="/design.html" class="work-row">
-            <span class="work-title">Liquid Design</span>
-            <span class="work-detail">UI framework</span>
-            <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-          </a>
-        </li>
-      </ul>
-    </section>
-
-
-    <!-- ── Words ───────────────────────────────────────────────── -->
-    <section class="home-words" aria-labelledby="words-title" data-reveal>
-      <h2 id="words-title" class="home-section-title">Words I build by</h2>
-      <div class="home-quotes">
-        <figure>
-          <blockquote>
-            "What I cannot create, I do not understand."
-          </blockquote>
-          <figcaption>Richard Feynman</figcaption>
-        </figure>
-        <figure>
-          <blockquote>
-            "Talk is cheap. Show me the code."
-          </blockquote>
-          <figcaption>Linus Torvalds</figcaption>
-        </figure>
-      </div>
-    </section>
-
-
-    
-    <!-- ── Footer ──────────────────────────────────────────────── -->
-    <footer class="home-footer">
-        <p>© 2026 OkemoVail</p>
-        <nav aria-label="Footer">
-          <a href="https://github.com/ar12c" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener">YouTube</a>
-          <a href="/design.html">Design</a>
-          <a href="/AI/index.html">Labs21</a>
+    <!-- ── Footer: mark, four link columns, dotted rule, legal + connect ── -->
+    <footer class="home-foot" aria-label="Site">
+      <p class="home-foot-mark" translate="no">o.</p>
+      <nav class="home-foot-cols" aria-label="Footer">
+        <ul>
+          <li><a href="/AI/chat.html" translate="no">AION</a></li>
+          <li><a href="/search/" translate="no">Astra</a></li>
+          <li><a href="/word/index.html" translate="no">Word</a></li>
+        </ul>
+        <ul>
+          <li><a href="/AI/index.html" translate="no">Labs21</a></li>
+          <li><a href="/AI/research.html">Research</a></li>
+          <li><a href="/AI/goals.html">Goals</a></li>
+        </ul>
+        <ul>
+          <li><a href="/design.html">Design</a></li>
+          <li><a href="/AI/version.html">Versions</a></li>
+        </ul>
+        <ul>
+          <li><a href="https://github.com/okemovail" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener">YouTube</a></li>
+        </ul>
+      </nav>
+      <div class="home-foot-base">
+        <nav class="home-foot-legal" aria-label="Legal">
+          <a href="/AI/privacy.html">Privacy Policy</a>
+          <a href="/AI/tos.html">Terms of Service</a>
+          <span>© 2026 <span translate="no">OkemoVail</span></span>
         </nav>
+        <nav class="home-foot-connect" aria-label="Connect">
+          <strong>Connect:</strong>
+          <a href="https://github.com/okemovail" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener">YouTube</a>
+        </nav>
+      </div>
     </footer>
 
   </main>
@@ -183,15 +173,15 @@
     window.NAV_CONFIG = {
       variant: 'tools',
       links: [
-        { label: 'Work', href: '#work' },
+        { label: 'Work', href: '#pillars-title' },
         { label: 'Design', href: '/design.html' },
-        { label: 'GitHub', href: 'https://github.com/ar12c' },
+        { label: 'GitHub', href: 'https://github.com/okemovail' },
         { label: 'YouTube', href: 'https://www.youtube.com/@SochiVail' }
       ]
       // primary + theme toggle use defaults (Labs21 pill + theme button)
     };
   </script>
-  <script src="src/nav.js?v=20261004-socials-hold"></script>
+  <script src="src/nav.js?v=20261019-scroll-edge"></script>
 </body>
 
 </html>
