@@ -1707,8 +1707,9 @@ Cache version `20261021-adapt21`.
 
 Chat sidebar glass (2026-10-21, user): only the sidebar lagged. Its buttons sat
 on the sidebar's own refracting glass, so each was a backdrop filter nested in
-another. `#sidebar-full-content` carries `data-liquid-design-refraction="off"
-data-liquid-design-adapt="off"`, and site.css drops `backdrop-filter` on its
-controls (open menus keep blur). The sidebar panel itself keeps full glass; the
+another. `aside#sidebar` carries `data-liquid-design-refraction="off"
+data-liquid-design-adapt="off"` (panel and children: plain blur, no refraction
+or backdrop sampling), and site.css drops `backdrop-filter` on its controls
+(open menus keep blur). The
 title bar, top-right actions and composer keep refraction (an earlier opt-out
 there was reverted). Cache version `20261021-adapt22`.

@@ -328,7 +328,7 @@
     </div>
 
     <aside id="sidebar" class="-translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 flex flex-col"
-        style="width: var(--sidebar-width);">
+        style="width: var(--sidebar-width);" data-liquid-design-refraction="off" data-liquid-design-adapt="off">
 
         <!--
             Single content div — fixed width, never shrinks.
@@ -337,7 +337,7 @@
             Icons center at 22px = 44/2 — stationary throughout collapse/expand.
             .sb-row-text fades via CSS; no JS needed.
         -->
-        <div id="sidebar-full-content" class="flex flex-col h-full" data-liquid-design-refraction="off" data-liquid-design-adapt="off">
+        <div id="sidebar-full-content" class="flex flex-col h-full">
 
             <!-- Header: wordmark + actions -->
             <div class="chat-library-header h-[var(--header-height)] flex items-center shrink-0 px-2">
