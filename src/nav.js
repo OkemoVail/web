@@ -156,20 +156,9 @@
     if (cfg.variant === 'tools' && themeBtn) themeBtn.setAttribute('data-liquid-design', '');
     if (bar && window.LiquidDesign) window.LiquidDesign.refresh(bar);
 
-    // Homepage scroll edge: a flat canvas band beneath the floating glass
-    // controls, shown only once content scrolls under them (2026-10-19).
-    var scrollEdge;
-    if (cfg.variant === 'tools') {
-      scrollEdge = document.createElement('div');
-      scrollEdge.className = 'home-scroll-edge';
-      scrollEdge.setAttribute('aria-hidden', 'true');
-      document.body.insertBefore(scrollEdge, document.body.firstChild);
-    }
-
     // scroll morph
     function onScroll() {
       nav.classList.toggle('scrolled', window.scrollY > 20);
-      if (scrollEdge) scrollEdge.classList.toggle('is-visible', window.scrollY > 2);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();

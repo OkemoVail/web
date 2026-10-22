@@ -1713,3 +1713,36 @@ or backdrop sampling), and site.css drops `backdrop-filter` on its controls
 (open menus keep blur). The
 title bar, top-right actions and composer keep refraction (an earlier opt-out
 there was reverted). Cache version `20261021-adapt22`.
+
+Stronger refraction (2026-10-22, user: "increase glass diffraction"): rim
+bezel widened to 28% of the short side (8-26px, was 22% / 6-20px) and
+displacement scale raised to 3.6x bezel (was 2.6x) in
+`liquid-design/source/liquid-design-refraction.js`; bundle rebuilt. Per-page
+tuning still via `--liquid-design-refraction` (multiplier, default 1).
+Cache version `20261022-diffract`.
+
+Homepage scroll tint removed (2026-10-22, user): the black transparent band
+(`.home-scroll-edge`) that `src/nav.js` injected under the floating nav on
+scroll is gone (JS and CSS). `--home-nav-edge` and `scroll-padding-top` stay
+because layout uses them. Cache versions `nav.js?v=20261022-no-scroll-tint`,
+`site.css?v=20261022-no-scroll-tint`.
+
+Sidebar fake liquid glass (2026-10-22, user): `#sidebar` is a plain `<aside>`
+(not engine glass, no `.lgp-material` child). It has the previous-generation
+fake glass back: 78% `--chat-library` fill, `blur(24px) saturate(1.4)`, and a
+static `::after` lens (top-left hotspot, top specular band, bottom caustic,
+inset rim brighter at top). Content sits above it at
+z-index 1. Off under reduced transparency / more contrast / forced colors.
+Block: "Sidebar fake liquid glass" at the end of `src/site.css`. Cache
+version `site.css?v=20261022-sidebar-glass`.
+
+Plus menu fixes (2026-10-22, user): (1) the Plus Options menu never animated
+open because every row in `#plus-menu` is `disabled` ("Coming soon"), so the
+controller's `items` list (`button:not(:disabled)`) was empty and
+`menuRadius()` threw on `items[0].offsetHeight` mid-open. The options
+controller in `liquid-design/source/liquid-design-components.js` now falls
+back to `--liquid-design-menu-radius` and guards focus/keyboard paths when a
+menu has no enabled rows; bundle rebuilt. (2) The "+" shifted 5px left in any
+thinking mode: `ui.js` showed the empty `#plus-active-icon` span when thinking
+was on, adding a flex gap. Thinking no longer toggles it (only search,
+research, canvas do). Cache version `20261022-plus-menu` (engine + `ui.js`).

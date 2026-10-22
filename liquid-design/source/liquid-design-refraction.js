@@ -141,12 +141,12 @@
       var v = parseFloat(getComputedStyle(material).getPropertyValue('--liquid-design-refraction'));
       strength = v >= 0 ? v : 1;
     }
-    // A thin rim band, not the whole face: about a fifth of the short side.
-    function bezelFor(bw, bh) { return Math.round(Math.min(20, Math.max(6, Math.min(bw, bh) * .22))); }
+    // A rim band, not the whole face: a bit over a quarter of the short side.
+    function bezelFor(bw, bh) { return Math.round(Math.min(26, Math.max(8, Math.min(bw, bh) * .28))); }
     // Attributes are written only when they change: any write invalidates
     // the filter and forces the backdrop to be filtered again.
     function place(w, h, bezel) {
-      var nextSize = w.toFixed(1) + 'x' + h.toFixed(1), nextScale = (bezel * 2.6 * strength).toFixed(2);
+      var nextSize = w.toFixed(1) + 'x' + h.toFixed(1), nextScale = (bezel * 3.6 * strength).toFixed(2);
       if (nextSize !== size) {
         size = nextSize;
         [filter, image].forEach(function (node) { node.setAttribute('width', w.toFixed(1)); node.setAttribute('height', h.toFixed(1)); });

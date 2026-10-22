@@ -1260,12 +1260,12 @@ var window=Object.create(host),module=undefined;
       var v = parseFloat(getComputedStyle(material).getPropertyValue('--liquid-design-refraction'));
       strength = v >= 0 ? v : 1;
     }
-    // A thin rim band, not the whole face: about a fifth of the short side.
-    function bezelFor(bw, bh) { return Math.round(Math.min(20, Math.max(6, Math.min(bw, bh) * .22))); }
+    // A rim band, not the whole face: a bit over a quarter of the short side.
+    function bezelFor(bw, bh) { return Math.round(Math.min(26, Math.max(8, Math.min(bw, bh) * .28))); }
     // Attributes are written only when they change: any write invalidates
     // the filter and forces the backdrop to be filtered again.
     function place(w, h, bezel) {
-      var nextSize = w.toFixed(1) + 'x' + h.toFixed(1), nextScale = (bezel * 2.6 * strength).toFixed(2);
+      var nextSize = w.toFixed(1) + 'x' + h.toFixed(1), nextScale = (bezel * 3.6 * strength).toFixed(2);
       if (nextSize !== size) {
         size = nextSize;
         [filter, image].forEach(function (node) { node.setAttribute('width', w.toFixed(1)); node.setAttribute('height', h.toFixed(1)); });
@@ -2403,6 +2403,9 @@ var window=Object.create(host),module=undefined;
       function menuRadius() {
         // Highlight radius + its row inset + the sheet's outer padding.
         var padding = parseFloat(getComputedStyle(panel).paddingTop) || 0;
+        // A menu whose rows are all disabled has no row to measure; use the
+        // declared sheet radius instead of failing mid-open.
+        if (!items.length) return parseFloat(getComputedStyle(group).getPropertyValue('--liquid-design-menu-radius')) || 18;
         return Math.max(0, items[0].offsetHeight - 8) / 2 + 4 + padding;
       }
       function mix(a, b, p) {
@@ -2523,7 +2526,7 @@ var window=Object.create(host),module=undefined;
          }
         start = reduced() ? 0 : performance.now();
          group.dataset.morphPhase = reduced() ? 'settled' : (value ? 'expand' : 'collapse');
-        if (focus) (value ? items[0] : trigger).focus({ preventScroll: true });
+        if (focus) ((value && items[0]) || trigger).focus({ preventScroll: true });
         if (!value) highlight(null);
         paint(); refresh(reduced() ? 0 : pathDuration + (value ? 60 : 1200));
       }
@@ -2720,7 +2723,7 @@ var window=Object.create(host),module=undefined;
         suppressClick = holdOpened || dragged || e.type !== 'pointerup' || !!choice;
         if (trigger.hasPointerCapture(e.pointerId)) trigger.releasePointerCapture(e.pointerId);
         if (e.type === 'pointerup' && choice) choice.click();
-        else if (e.type === 'pointerup' && open) items[0].focus({ preventScroll: true });
+        else if (e.type === 'pointerup' && open && items[0]) items[0].focus({ preventScroll: true });
         else if (e.type !== 'pointerup') set(false, false);
       }
       listen(trigger, 'pointerup', release);
@@ -2785,7 +2788,7 @@ var window=Object.create(host),module=undefined;
       listen(group, 'keydown', function (e) {
         if (e.key === 'Escape' && open) { e.preventDefault(); set(false, true); }
         if (e.target === trigger && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); set(true, true); }
-        if (!open || !panel.contains(e.target)) return;
+        if (!open || !panel.contains(e.target) || !items.length) return;
         var index = items.indexOf(document.activeElement);
         var next = { ArrowDown: (index + 1) % items.length, ArrowUp: (index + items.length - 1) % items.length, Home: 0, End: items.length - 1 }[e.key];
         if (next !== undefined) { e.preventDefault(); items[next].focus(); highlight(items[next]); }

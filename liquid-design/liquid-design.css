@@ -15,8 +15,6 @@
   --lgp-caustic: rgb(255 255 255 / .08);
   --lgp-lens-edge: rgb(255 255 255 / .38);
   --lgp-lens-shade: rgb(40 36 34 / .10);
-  --lgp-fringe-warm: rgb(255 96 168 / .24);
-  --lgp-fringe-cool: rgb(84 172 255 / .24);
   --lgp-edge-width: 1.25px;
   --lgp-edge-top: .9; --lgp-edge-upper: .22; --lgp-edge-mid: .06; --lgp-edge-lower: .22; --lgp-edge-bottom: .62;
 }
@@ -34,8 +32,6 @@
   --lgp-caustic: rgb(255 255 255 / .03);
   --lgp-lens-edge: rgb(255 255 255 / .12);
   --lgp-lens-shade: rgb(0 0 0 / .28);
-  --lgp-fringe-warm: rgb(255 96 168 / .16);
-  --lgp-fringe-cool: rgb(84 172 255 / .16);
   --lgp-edge-width: 1px;
   --lgp-edge-top: .55; --lgp-edge-upper: .12; --lgp-edge-mid: .03; --lgp-edge-lower: .12; --lgp-edge-bottom: .36;
 }

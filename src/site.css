@@ -11599,32 +11599,10 @@ body[data-page="word"] button.hdr-btn[data-lgp-control]:focus-visible {
 }
     
 
-/* ── Homepage scroll edge (2026-10-19) ─────────────────────────────
-   Content scrolled under the transparent floating glass navigation
-   collided with it (e.g. "Selected work" over the buttons at 390px).
-   src/nav.js injects .home-scroll-edge for the 'tools' variant: a flat
-   canvas-coloured band (no gradient, no backdrop blur) sized to the nav
-   row, layered under the nav (--z-chrome < --z-nav), fading in only once
-   scrolled. In the persistent shell it lives in the child document, so it
-   sits beneath the shell's own chrome layer. scroll-padding keeps anchor
-   and focus targets clear of the band. */
-/* 2026-10-19 (user): the bar stays transparent; scrolling only adds a black
-   tint that fades from opaque at the top edge to transparent below the nav.
-   Solid black fill shaped by a mask, so no colour gradient is painted. */
-.home-scroll-edge {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: calc(var(--home-nav-edge, 88px) + 32px);
-  background-color: rgb(0 0 0 / var(--home-scroll-tint, .24));
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
-  z-index: var(--z-chrome);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity var(--dur-2) var(--ease-soft);
-}
-.home-scroll-edge.is-visible { opacity: 1; }
-.dark .home-scroll-edge { --home-scroll-tint: .72; }
+/* ── Homepage nav edge (2026-10-19) ────────────────────────────────
+   --home-nav-edge is the height of the floating nav row (inset + control
+   + 12px); layout and scroll-padding use it. The black scroll tint band
+   that used to sit under the nav was removed 2026-10-22 (user). */
 html:has(body[data-page="home"]) { scroll-padding-top: calc(var(--home-nav-edge, 88px) + 16px); }
 html:has(body[data-page="home"]),
 body[data-page="home"] { --home-nav-edge: 88px; }          /* 24px inset + 52px controls + 12px */
@@ -11639,12 +11617,6 @@ body[data-page="home"] { --home-nav-edge: 88px; }          /* 24px inset + 52px 
 @media (min-width: 1024px) {
   html:has(body[data-page="home"]),
   body[data-page="home"] { --home-nav-edge: 96px; }        /* 32 + 52 + 12 */
-}
-@media (prefers-reduced-motion: reduce) {
-  .home-scroll-edge { transition: none; }
-}
-@media print {
-  .home-scroll-edge { display: none; }
 }
 
 /* ── Homepage pillars (2026-10-21): C2MTL-poster hero ──
@@ -12031,4 +12003,47 @@ body[data-page="home"] { --home-nav-edge: 88px; }          /* 24px inset + 52px 
     text-shadow: 0 2px 12px rgb(0 0 0 / .45);
     filter: drop-shadow(0 2px 8px rgb(0 0 0 / .35));
   }
+}
+
+/* Sidebar fake liquid glass (2026-10-22, user): previous-generation glass on
+   the plain <aside>: backdrop blur plus a static painted lens on ::after
+   (specular band, corner hotspot, caustic, inset rim). Painted
+   once, nothing per frame. */
+[data-page="chat"] #sidebar {
+  --sb-glass-specular: rgb(255 255 255 / .34);
+  --sb-glass-hotspot: rgb(255 255 255 / .42);
+  --sb-glass-caustic: rgb(255 255 255 / .14);
+  --sb-glass-rim-top: rgb(255 255 255 / .75);
+  --sb-glass-rim-bottom: rgb(255 255 255 / .40);
+  --sb-glass-rim-side: rgb(255 255 255 / .14);
+  background: color-mix(in srgb, var(--chat-library) 78%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+.dark [data-page="chat"] #sidebar {
+  --sb-glass-specular: rgb(255 255 255 / .09);
+  --sb-glass-hotspot: rgb(255 255 255 / .14);
+  --sb-glass-caustic: rgb(255 255 255 / .05);
+  --sb-glass-rim-top: rgb(255 255 255 / .32);
+  --sb-glass-rim-bottom: rgb(255 255 255 / .16);
+  --sb-glass-rim-side: rgb(255 255 255 / .07);
+}
+[data-page="chat"] #sidebar::after {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  border: 0; border-radius: inherit; pointer-events: none; mask-image: none;
+  background:
+    radial-gradient(160px 100px at 16% 0%, var(--sb-glass-hotspot), transparent 70%),
+    linear-gradient(180deg, var(--sb-glass-specular), transparent 72px),
+    linear-gradient(0deg, var(--sb-glass-caustic), transparent 64px);
+  box-shadow:
+    inset 0 1px 0 var(--sb-glass-rim-top),
+    inset 0 -1px 0 var(--sb-glass-rim-bottom),
+    inset 1px 0 0 var(--sb-glass-rim-side),
+    inset -1px 0 0 var(--sb-glass-rim-side);
+}
+[data-page="chat"] #sidebar > #sidebar-full-content,
+[data-page="chat"] #sidebar > #sidebar-mini-content { position: relative; z-index: 1; }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  [data-page="chat"] #sidebar { background: var(--chat-library); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  [data-page="chat"] #sidebar::after { content: none; }
 }

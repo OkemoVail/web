@@ -137,7 +137,9 @@ window.updateUI = () => {
     }
 
     if (plusActiveIcon) {
-        plusActiveIcon.style.display = (window.isWebSearch || window.isDeepResearch || window.isThinkingEnabled || window.canvasEnabled) ? 'flex' : 'none';
+        // Thinking has no indicator here (the model trigger shows it); an empty
+        // flex span still adds the button's gap and pushes "+" off centre.
+        plusActiveIcon.style.display = (window.isWebSearch || window.isDeepResearch || window.canvasEnabled) ? 'flex' : 'none';
     }
 
     // 4. Placeholder
