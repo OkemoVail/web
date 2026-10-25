@@ -201,6 +201,11 @@
 [data-lgp-component="options"] [data-liquid-menu] {
   position: absolute; left: 24px; top: 0; width: 232px; padding: 6px; display: flex; flex-direction: column; gap: 0;
   z-index: 2; transform-origin: center; touch-action: none; -webkit-user-select: none; user-select: none;
+  /* Rows are transformed/blurred while opening, closing and stretching, which
+     composites the panel and draws its text with grayscale antialiasing; at
+     rest the layer was dropped and text snapped back to subpixel AA, which
+     reads as a font-weight change. Keep one layer and one AA mode throughout. */
+  will-change: transform; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
 [data-lgp-component="options"] [data-liquid-menu] [data-liquid-button],
 [data-lgp-control="surface"] .liquid-design-menu-row {

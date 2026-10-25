@@ -6,7 +6,7 @@
   // Only Chromium can feed an SVG filter into backdrop-filter; everything else
   // (all of iOS) keeps the existing blur + lens-highlight material.
   var NS = 'http://www.w3.org/2000/svg';
-  var maps = new Map(), MAP_LIMIT = 48, MAP_MAX = 512, serial = 0, host = null;
+  var maps = new Map(), MAP_LIMIT = 48, MAP_MAX = 512, MOVING_MAP_MAX = 160, serial = 0, host = null;
   var plain = root.matchMedia('(prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active)');
 
   function chromium() {
@@ -80,11 +80,13 @@
   // gives both how deep a pixel sits inside the rim and which way is outward
   // (its gradient), so single pills, button rows and blended menus share one
   // path.
-  function field(w, h, boxes, blend, bezel) {
-    var key = w + 'x' + h + 'b' + bezel + 'm' + blend + ':' + boxes.map(function (b) { return [b.x, b.y, b.w, b.h, b.r].join(','); }).join(';');
+  function field(w, h, boxes, blend, bezel, limit) {
+    limit = limit || MAP_MAX;
+    var key = w + 'x' + h + 'b' + bezel + 'm' + blend + 'q' + limit + ':' + boxes.map(function (b) { return [b.x, b.y, b.w, b.h, b.r].join(','); }).join(';');
     if (maps.has(key)) { var hit = maps.get(key); maps.delete(key); maps.set(key, hit); return hit; }
     // Full resolution up to MAP_MAX: a downscaled map stair-steps the rim.
-    var k = Math.min(1, MAP_MAX / Math.max(w, h));
+    // Moving shapes pass a smaller limit; the settled shape rebuilds sharp.
+    var k = Math.min(1, limit / Math.max(w, h));
     var cw = Math.max(2, Math.round(w * k)), ch = Math.max(2, Math.round(h * k));
     var sdf = new Float32Array(cw * ch), i, j;
     for (j = 0; j < ch; j++) for (i = 0; i < cw; i++) sdf[j * cw + i] = distance((i + .5) / k, (j + .5) / k, boxes, blend);
@@ -193,12 +195,19 @@
         var now = performance.now();
         if (next !== key) {
           clearTimeout(pending);
-          var build = function () {
+          var build = function (limit) {
             readStrength();
-            var url = field(bw, bh, shape, Math.round(blend), bezel); image.setAttribute('href', url); key = next; built = performance.now();
+            var url = field(bw, bh, shape, Math.round(blend), bezel, limit); image.setAttribute('href', url); built = performance.now();
             material.style.setProperty('--lgp-refraction-map', 'url("' + url + '")');
           };
-          if (!key || now - built > 90) build(); else pending = setTimeout(build, 90);
+          // A stale map stretched over a moving contour (Tools expanding)
+          // bends backdrop where the new lobes are not, which reads as ghost
+          // glass ahead of the fill. While the shape moves, rebuild a coarse
+          // map every frame so it always matches the clip; once it holds
+          // still for 90ms, rebuild it at full resolution.
+          if (!key || now - built > 90) build();
+          else { build(MOVING_MAP_MAX); pending = setTimeout(function () { build(); }, 90); }
+          key = next;
         }
         place(w, h, bezel);
       },

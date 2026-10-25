@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   if (window.GlassShell || window.GlassPageBridge) return;
-  var routes = ['/index.html', '/AI/index.html', '/AI/chat.html', '/AI/goals.html', '/AI/privacy.html', '/AI/tos.html', '/AI/research.html', '/AI/manage.html', '/AI/editor.html', '/AI/version.html', '/design.html', '/Themes/Themes.html', '/word/index.html', '/search/index.html', '/whitename.html'];
+  var routes = ['/index.html', '/AI/index.html', '/AI/chat.html', '/AI/goals.html', '/AI/privacy.html', '/AI/tos.html', '/AI/research.html', '/AI/manage.html', '/AI/editor.html', '/AI/version.html', '/design.html', '/liquid-design/index.html', '/Themes/Themes.html', '/word/index.html', '/search/index.html', '/whitename.html'];
   var active = null, pending = null, outgoing = null, serial = 0, started = false, sequence = 0, slideFrame = 0, slideTime = 0;
   var pageOrder = [];
   function settled(record) {

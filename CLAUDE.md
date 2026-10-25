@@ -1829,3 +1829,28 @@ black); CSS hides `[data-state="held"]` video and the poster (final frame)
 shows. `.lv-hero-copy` is pointer-events:none (children auto) so Replay and
 the film get clicks. Media encode: crf 30 veryslow, posters webp q72.
 Cache tag `?v=aion2-fun`.
+
+Liquid Design docs (2026-10-25): `liquid-design/index.html` is the framework
+docs page (`data-page="liquid-docs"`, three columns, live examples, playground;
+CSS in the `PAGE: LIQUID-DOCS` section of `src/site.css`). The nav "Design" tab
+is now "Liquid Design" pointing there (`src/nav.js`, `glass-shell-controls.js`,
+`glass-shell.js` routes, homepage footer); `design.html` is unlinked but kept.
+`liquid-docs` is on the plugin's shell-child stretch allow-list, otherwise its
+example buttons are static inside `glass-shell.html`. Engine fixes the same day:
+explicit groups join lobes up to 24px apart (`--liquid-design-group-blend`);
+multi-lobe component outlines also set an SVG alpha `mask-image` because
+Chromium leaks backdrop-filter past a multi-lobe `clip-path: path()` (the Tools
+opening flash); moving compound refraction maps rebuild coarse (160px) every
+frame and sharp after 90ms still; Options menus pass `staticActionSurface`,
+`deformationScale: 1`, `areaScaleLimit: 1.2` and `pullFromPress: true` so open
+sheets stretch while still clicks still choose a row.
+
+Liquid Design click flash (2026-10-25): clicking Liquid Design flashed because
+browsers kept cached copies of `glass-shell.js`/`glass-shell-controls.js`
+(`?v=20261014-word-stretch-6`) and the homepage `nav.js`
+(`?v=20261022-no-scroll-tint`) from before the docs route existed. The old
+shell did not know `/liquid-design/index.html`, so it tore down and did a full
+page load (white/black flash), and the old Tools action still went to
+`/design.html`. Fix: bumped those tags to `?v=20261025-liquid-docs` in
+`glass-shell.html` and `index.html`. Rule: when changing shell routes or nav
+links, bump these query versions too.

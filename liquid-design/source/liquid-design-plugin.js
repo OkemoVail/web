@@ -210,7 +210,16 @@
     // The chat sidebar action capsule already owns its exact inset geometry;
     // the generic multi-control contour expansion would add uneven-looking
     // outer space around the compact controls.
-    var blendRange = group.el.matches('[data-page="chat"] .chat-sidebar-actions') ? 0 : 4;
+    // An explicit data-liquid-design-group is one shared piece of glass: its
+    // lobes must melt across ordinary toolbar gaps (a 4px range left a 6px
+    // flex gap as three separate pills). Automatic sibling groups keep the
+    // narrow 4px range. --liquid-design-group-blend tunes the bridge.
+    var blendRange = 4;
+    if (group.el.matches('[data-page="chat"] .chat-sidebar-actions')) blendRange = 0;
+    else if (group.el.hasAttribute('data-liquid-design-group')) {
+      var customBlend = parseFloat(getComputedStyle(group.el).getPropertyValue('--liquid-design-group-blend'));
+      blendRange = isFinite(customBlend) ? Math.max(0, customBlend) : 24;
+    }
     var pad = boxes.length > 1 ? blendRange : 0;
     var minX = boxes.length ? Math.min.apply(null, boxes.map(function (b) { return b.x; })) - pad : 0;
     var minY = boxes.length ? Math.min.apply(null, boxes.map(function (b) { return b.y; })) - pad : 0;
@@ -364,7 +373,7 @@
     record.motion = root.LiquidDesignLiveDemo.create(group.el, {
       button: el, slab: el, track: group.el, editableSurface: surface,
       staticActionSurface: el.hasAttribute('data-liquid-design-static-actions'),
-      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,[data-page="home"] .hero-profile,#hero-bar,#results-bar,#hero-search,#results-search,#ai-mode-toggle,[data-page="ai-home"],[data-page="chat"],[data-page="word"]')),
+      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,[data-page="home"] .hero-profile,#hero-bar,#results-bar,#hero-search,#results-search,#ai-mode-toggle,[data-page="ai-home"],[data-page="liquid-docs"],[data-page="chat"],[data-page="word"]')),
       deformationScale: surface ? .33 : undefined, centerCoupling: surface ? .025 : undefined, centerLimit: surface ? 5 : undefined,
       render: function (state) { record.state = state; schedule(); },
     });

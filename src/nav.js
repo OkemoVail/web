@@ -7,7 +7,7 @@
 
   var DEFAULT_LINKS = [
     { label: 'Home', href: '/index.html' },
-    { label: 'Design', href: '/design.html' },
+    { label: 'Liquid Design', href: '/liquid-design/index.html' },
     { label: 'GitHub', href: 'https://github.com/okemovail' },
     { label: 'YouTube', href: 'https://www.youtube.com/@SochiVail' }
   ];
@@ -82,7 +82,7 @@
 
   // Opt-in landing navigation uses the portable Tools split/rejoin controller.
   var toolsWork = cfg.toolsWork || { label: 'Selected work', href: '#work' };
-  var toolsSecondary = cfg.toolsSecondary || { label: 'Liquid Design', href: '/design.html' };
+  var toolsSecondary = cfg.toolsSecondary || { label: 'Liquid Design', href: '/liquid-design/index.html' };
   var secondaryIcon = toolsSecondary.icon === 'home'
     ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3Z"/><path d="M9 20v-7h6v7"/></svg>'
     : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-7 7-7 12a7 7 0 0 0 14 0c0-5-7-12-7-12Z"/><path d="M8 15a4 4 0 0 0 4 4"/></svg>';

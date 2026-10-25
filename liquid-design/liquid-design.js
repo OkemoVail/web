@@ -203,14 +203,17 @@ var window=Object.create(host),module=undefined;
     var height = geometry.slabHalfHeight * 2;
     // Small controls keep their familiar feel; broad surfaces resist the same
     // pointer pressure progressively. Use resting area, never deformed bounds.
-    var areaResistance = 1.35 * Math.max(1, Math.sqrt(width * height / (52 * 52)));
+    // areaScaleLimit (optional) caps that resistance for sheets that must
+    // still visibly pull, such as an open Options menu.
+    var areaCap = Number(config.areaScaleLimit) > 0 ? Number(config.areaScaleLimit) : Infinity;
+    var areaResistance = 1.35 * Math.min(areaCap, Math.max(1, Math.sqrt(width * height / (52 * 52))));
     var centerCoupling = clamp(config.centerCoupling, 0.05, 0.08);
     var stretchGain = clamp(Number(config.fluidStretchGain) || 1, 1, 3);
     var stretchRatio = clamp(Number(config.fluidStretchRatio) || 0.55, 0.1, 0.7);
     var facingShare = 0.88;
     var oppositeShare = 1 - facingShare;
     // stretchLimit is the maximum facing-edge extension in CSS pixels.
-    var areaScale = Math.max(1, Math.sqrt(width * height / (52 * 52)));
+    var areaScale = Math.min(areaCap, Math.max(1, Math.sqrt(width * height / (52 * 52))));
     var horizontalFacingLimit = Math.min(config.stretchLimit, width * stretchRatio) / areaScale;
     var verticalFacingLimit = Math.min(config.stretchLimit, height * stretchRatio) / areaScale;
     var horizontalPressure = Math.abs(rubberBand(
@@ -558,6 +561,7 @@ var window=Object.create(host),module=undefined;
       // Exponential rubber-band response: easy initial travel, diminishing gain near the cap.
       fluidStretchGain: 2.1,
       fluidStretchRatio: 0.30,
+      areaScaleLimit: options.areaScaleLimit || 0,
     });
     var attack = Object.assign({}, Physics.IPAD_FLUID_SPRING, {
       springFrequency: 26, springDamping: 0.98,
@@ -619,6 +623,15 @@ var window=Object.create(host),module=undefined;
       pointerX = p.x; pointerY = p.y; startX = s0.x; startY = s0.y;
       try {
       var outside = pointerId !== null ? Physics.pointerOutsideGlass(pointerX, pointerY, restingRect) : { x: 0, y: 0 };
+      // A broad sheet pressed in its middle (an open Options menu) barely
+      // leaves its own edge during a pull, so edge-distance pressure stays
+      // near zero. pullFromPress measures the pull from the press point
+      // instead, past a small dead zone so a still click never deforms.
+      if (options.pullFromPress && pointerId !== null) {
+        var pullX = pointerX - startX, pullY = pointerY - startY, dead = 4;
+        var fromPress = { x: Math.sign(pullX) * Math.max(0, Math.abs(pullX) - dead), y: Math.sign(pullY) * Math.max(0, Math.abs(pullY) - dead) };
+        outside = { x: Math.abs(fromPress.x) > Math.abs(outside.x) ? fromPress.x : outside.x, y: Math.abs(fromPress.y) > Math.abs(outside.y) ? fromPress.y : outside.y };
+      }
       var target = Physics.deriveIpadFluidState({
         // A dropdown can hide its panel before the pointer spring settles.
         // Hidden geometry has no positive stretch limit to solve against.
@@ -629,7 +642,7 @@ var window=Object.create(host),module=undefined;
       // Position is resisted relative to the gesture's original resting anchor,
       // not accumulated from the previous frame or the moving material center.
       if (pressing && !reduced && (pointerId !== null || editingPointer !== null)) {
-        var areaScale = Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52)));
+        var areaScale = Math.min(options.areaScaleLimit || Infinity, Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52))));
         target.centerOffsetX = Physics.rubberBand(pointerX - startX, (options.centerCoupling || 0.06) / areaScale, (options.centerLimit || 14) / areaScale);
         target.centerOffsetY = Physics.rubberBand(pointerY - startY, (options.centerCoupling || 0.06) / areaScale, (options.centerLimit || 14) / areaScale);
         var horizontal = Math.abs(outside.x);
@@ -1125,7 +1138,7 @@ var window=Object.create(host),module=undefined;
   // Only Chromium can feed an SVG filter into backdrop-filter; everything else
   // (all of iOS) keeps the existing blur + lens-highlight material.
   var NS = 'http://www.w3.org/2000/svg';
-  var maps = new Map(), MAP_LIMIT = 48, MAP_MAX = 512, serial = 0, host = null;
+  var maps = new Map(), MAP_LIMIT = 48, MAP_MAX = 512, MOVING_MAP_MAX = 160, serial = 0, host = null;
   var plain = root.matchMedia('(prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active)');
 
   function chromium() {
@@ -1199,11 +1212,13 @@ var window=Object.create(host),module=undefined;
   // gives both how deep a pixel sits inside the rim and which way is outward
   // (its gradient), so single pills, button rows and blended menus share one
   // path.
-  function field(w, h, boxes, blend, bezel) {
-    var key = w + 'x' + h + 'b' + bezel + 'm' + blend + ':' + boxes.map(function (b) { return [b.x, b.y, b.w, b.h, b.r].join(','); }).join(';');
+  function field(w, h, boxes, blend, bezel, limit) {
+    limit = limit || MAP_MAX;
+    var key = w + 'x' + h + 'b' + bezel + 'm' + blend + 'q' + limit + ':' + boxes.map(function (b) { return [b.x, b.y, b.w, b.h, b.r].join(','); }).join(';');
     if (maps.has(key)) { var hit = maps.get(key); maps.delete(key); maps.set(key, hit); return hit; }
     // Full resolution up to MAP_MAX: a downscaled map stair-steps the rim.
-    var k = Math.min(1, MAP_MAX / Math.max(w, h));
+    // Moving shapes pass a smaller limit; the settled shape rebuilds sharp.
+    var k = Math.min(1, limit / Math.max(w, h));
     var cw = Math.max(2, Math.round(w * k)), ch = Math.max(2, Math.round(h * k));
     var sdf = new Float32Array(cw * ch), i, j;
     for (j = 0; j < ch; j++) for (i = 0; i < cw; i++) sdf[j * cw + i] = distance((i + .5) / k, (j + .5) / k, boxes, blend);
@@ -1312,12 +1327,19 @@ var window=Object.create(host),module=undefined;
         var now = performance.now();
         if (next !== key) {
           clearTimeout(pending);
-          var build = function () {
+          var build = function (limit) {
             readStrength();
-            var url = field(bw, bh, shape, Math.round(blend), bezel); image.setAttribute('href', url); key = next; built = performance.now();
+            var url = field(bw, bh, shape, Math.round(blend), bezel, limit); image.setAttribute('href', url); built = performance.now();
             material.style.setProperty('--lgp-refraction-map', 'url("' + url + '")');
           };
-          if (!key || now - built > 90) build(); else pending = setTimeout(build, 90);
+          // A stale map stretched over a moving contour (Tools expanding)
+          // bends backdrop where the new lobes are not, which reads as ghost
+          // glass ahead of the fill. While the shape moves, rebuild a coarse
+          // map every frame so it always matches the clip; once it holds
+          // still for 90ms, rebuild it at full resolution.
+          if (!key || now - built > 90) build();
+          else { build(MOVING_MAP_MAX); pending = setTimeout(function () { build(); }, 90); }
+          key = next;
         }
         place(w, h, bezel);
       },
@@ -2105,6 +2127,20 @@ var window=Object.create(host),module=undefined;
       // can disappear across WebKit compositor layers during split/rejoin.
       material.style.clipPath = 'path("' + d + '")';
       highlights.style.clipPath = 'path("' + d + '")';
+      // Chromium does not fully contain a backdrop-filter inside a compound
+      // clip-path: the filtered backdrop of a multi-lobe contour leaks past the
+      // necks and the far end while Tools expands, reading as a ghost outline
+      // ahead of the glass. A matching alpha mask contains it exactly. Lone
+      // lobes use border-radius and need no mask.
+      var maskKey = lone ? '' : width + 'x' + height + ':' + d;
+      if (maskKey !== material._lgcMaskKey) {
+        material._lgcMaskKey = maskKey;
+        var maskImage = lone ? '' : 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height +
+          '" viewBox="0 0 ' + width + ' ' + height + '"><path d="' + d + '"/></svg>') + '")';
+        ['maskImage', 'webkitMaskImage'].forEach(function (name) { material.style[name] = maskImage; });
+        ['maskSize', 'webkitMaskSize'].forEach(function (name) { material.style[name] = lone ? '' : '100% 100%'; });
+        ['maskRepeat', 'webkitMaskRepeat'].forEach(function (name) { material.style[name] = lone ? '' : 'no-repeat'; });
+      }
        rim.setAttribute('d', d);
         // Each expanded lobe references its own contour bounds so the actions
         // and trigger carry the same local top reflection while deforming.
@@ -2344,8 +2380,15 @@ var window=Object.create(host),module=undefined;
       panel.prepend(selectionPill);
       var menuMotion = root.LiquidDesignLiveDemo.create(group, {
         button: panel, slab: panel, track: group,
-        editableSurface: true,
-        deformationScale: .28, centerCoupling: .045, centerLimit: 10,
+        // Rows are nested buttons. As a static-action surface the press on a
+        // row lights the glass and a pull past the edge stretches the sheet,
+        // while the row still activates on a stationary release. Without it
+        // every row press returned early and the open menu never stretched.
+        editableSurface: true, staticActionSurface: true,
+        // A 220x144 sheet has ~3.4x a button's area resistance, applied to
+        // both stretch gain and its limit, so a 140px pull moved the edge
+        // ~3px. Cap it so the open sheet pulls like the site's surfaces.
+        deformationScale: 1, centerCoupling: .045, centerLimit: 10, areaScaleLimit: 1.2, pullFromPress: true,
         measureRect: function () {
           // Never feed our stretched render transform back into the solver.
           var transform = panel.style.transform;
@@ -3466,7 +3509,16 @@ var window=Object.create(host),module=undefined;
     // The chat sidebar action capsule already owns its exact inset geometry;
     // the generic multi-control contour expansion would add uneven-looking
     // outer space around the compact controls.
-    var blendRange = group.el.matches('[data-page="chat"] .chat-sidebar-actions') ? 0 : 4;
+    // An explicit data-liquid-design-group is one shared piece of glass: its
+    // lobes must melt across ordinary toolbar gaps (a 4px range left a 6px
+    // flex gap as three separate pills). Automatic sibling groups keep the
+    // narrow 4px range. --liquid-design-group-blend tunes the bridge.
+    var blendRange = 4;
+    if (group.el.matches('[data-page="chat"] .chat-sidebar-actions')) blendRange = 0;
+    else if (group.el.hasAttribute('data-liquid-design-group')) {
+      var customBlend = parseFloat(getComputedStyle(group.el).getPropertyValue('--liquid-design-group-blend'));
+      blendRange = isFinite(customBlend) ? Math.max(0, customBlend) : 24;
+    }
     var pad = boxes.length > 1 ? blendRange : 0;
     var minX = boxes.length ? Math.min.apply(null, boxes.map(function (b) { return b.x; })) - pad : 0;
     var minY = boxes.length ? Math.min.apply(null, boxes.map(function (b) { return b.y; })) - pad : 0;
@@ -3620,7 +3672,7 @@ var window=Object.create(host),module=undefined;
     record.motion = root.LiquidDesignLiveDemo.create(group.el, {
       button: el, slab: el, track: group.el, editableSurface: surface,
       staticActionSurface: el.hasAttribute('data-liquid-design-static-actions'),
-      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,[data-page="home"] .hero-profile,#hero-bar,#results-bar,#hero-search,#results-search,#ai-mode-toggle,[data-page="ai-home"],[data-page="chat"],[data-page="word"]')),
+      staticMotion: !!navigator.webdriver || (document.documentElement.hasAttribute('data-glass-child') && !el.closest('.ov-nav,.ov-social-nav,.hero-search,[data-page="home"] .hero-profile,#hero-bar,#results-bar,#hero-search,#results-search,#ai-mode-toggle,[data-page="ai-home"],[data-page="liquid-docs"],[data-page="chat"],[data-page="word"]')),
       deformationScale: surface ? .33 : undefined, centerCoupling: surface ? .025 : undefined, centerLimit: surface ? 5 : undefined,
       render: function (state) { record.state = state; schedule(); },
     });

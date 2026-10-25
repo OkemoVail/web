@@ -86,6 +86,7 @@
       // Exponential rubber-band response: easy initial travel, diminishing gain near the cap.
       fluidStretchGain: 2.1,
       fluidStretchRatio: 0.30,
+      areaScaleLimit: options.areaScaleLimit || 0,
     });
     var attack = Object.assign({}, Physics.IPAD_FLUID_SPRING, {
       springFrequency: 26, springDamping: 0.98,
@@ -147,6 +148,15 @@
       pointerX = p.x; pointerY = p.y; startX = s0.x; startY = s0.y;
       try {
       var outside = pointerId !== null ? Physics.pointerOutsideGlass(pointerX, pointerY, restingRect) : { x: 0, y: 0 };
+      // A broad sheet pressed in its middle (an open Options menu) barely
+      // leaves its own edge during a pull, so edge-distance pressure stays
+      // near zero. pullFromPress measures the pull from the press point
+      // instead, past a small dead zone so a still click never deforms.
+      if (options.pullFromPress && pointerId !== null) {
+        var pullX = pointerX - startX, pullY = pointerY - startY, dead = 4;
+        var fromPress = { x: Math.sign(pullX) * Math.max(0, Math.abs(pullX) - dead), y: Math.sign(pullY) * Math.max(0, Math.abs(pullY) - dead) };
+        outside = { x: Math.abs(fromPress.x) > Math.abs(outside.x) ? fromPress.x : outside.x, y: Math.abs(fromPress.y) > Math.abs(outside.y) ? fromPress.y : outside.y };
+      }
       var target = Physics.deriveIpadFluidState({
         // A dropdown can hide its panel before the pointer spring settles.
         // Hidden geometry has no positive stretch limit to solve against.
@@ -157,7 +167,7 @@
       // Position is resisted relative to the gesture's original resting anchor,
       // not accumulated from the previous frame or the moving material center.
       if (pressing && !reduced && (pointerId !== null || editingPointer !== null)) {
-        var areaScale = Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52)));
+        var areaScale = Math.min(options.areaScaleLimit || Infinity, Math.max(1, Math.sqrt(geometry.slabHalfWidth * geometry.slabHalfHeight * 4 / (52 * 52))));
         target.centerOffsetX = Physics.rubberBand(pointerX - startX, (options.centerCoupling || 0.06) / areaScale, (options.centerLimit || 14) / areaScale);
         target.centerOffsetY = Physics.rubberBand(pointerY - startY, (options.centerCoupling || 0.06) / areaScale, (options.centerLimit || 14) / areaScale);
         var horizontal = Math.abs(outside.x);

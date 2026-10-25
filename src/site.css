@@ -8229,6 +8229,293 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
     }
 
 
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE: LIQUID-DOCS  —  scoped to [data-page="liquid-docs"]
+   liquid-design/index.html: three-column docs layout (sidebar, article,
+   "On this page"), live glass examples with generated code blocks.
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-page="liquid-docs"] {
+  --ld-top: 72px;
+  --ld-slot-l: 76px;   /* 16px inset + 44px Back + 16px */
+  --ld-slot-r: 128px;  /* 16px inset + 44 + 8 + 44 + 16px */
+  --ld-line: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  --ld-soft: color-mix(in srgb, var(--text-primary) 4%, var(--bg));
+  --ld-code-bg: #1b1a19;
+  --ld-code-ink: #ece9e2;
+  margin: 0;
+  font-family: 'Satoshi', 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+.dark [data-page="liquid-docs"] { --ld-code-bg: #0f0f0e; --ld-soft: color-mix(in srgb, white 4%, var(--bg)); }
+html:has([data-page="liquid-docs"]) { scroll-padding-top: calc(var(--ld-top) + 16px); }
+[data-page="liquid-docs"] *, [data-page="liquid-docs"] *::before, [data-page="liquid-docs"] *::after { box-sizing: border-box; }
+[data-page="liquid-docs"] a { color: var(--accent); text-underline-offset: 3px; }
+[data-page="liquid-docs"] :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+[data-page="liquid-docs"] .ld-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[data-page="liquid-docs"] .ld-skip { position: fixed; left: 12px; top: -60px; z-index: var(--z-toast); padding: 8px 14px; border-radius: 8px; background: var(--accent); color: #fff; }
+[data-page="liquid-docs"] .ld-skip:focus { top: 12px; }
+
+/* ── Top bar ──
+   The site nav (src/nav.js, variant 'pages') floats over this bar: Back in
+   the left slot, page menu + theme in the right slot. The bar pads itself
+   clear of both, so the floating glass never covers its content. */
+[data-page="liquid-docs"] .ld-top {
+  position: sticky; top: 0; z-index: var(--z-chrome);
+  display: flex; align-items: center; gap: 20px;
+  height: var(--ld-top); padding: 0 var(--ld-slot-r) 0 var(--ld-slot-l);
+  background: var(--bg);
+  box-shadow: 0 1px 0 var(--ld-line);
+}
+[data-page="liquid-docs"] .ld-brand {
+  color: var(--text-primary); text-decoration: none; white-space: nowrap;
+  font-size: 21px; font-weight: 900; letter-spacing: -.03em; line-height: 1;
+}
+[data-page="liquid-docs"] .ld-brand > span { color: var(--accent); }
+[data-page="liquid-docs"] .ld-menu-btn {
+  display: none; align-items: center; gap: 8px; margin-left: auto; padding: 8px 0;
+  border: 0; background: none; color: var(--text-secondary); font: 500 15px 'Satoshi', sans-serif; cursor: pointer;
+}
+[data-page="liquid-docs"] .ld-menu-btn:hover { color: var(--text-primary); }
+[data-page="liquid-docs"] .ld-menu-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+/* Floating site nav, page-scoped (the shared .home-base rules are not loaded
+   here because they retune the glass tokens the examples document). */
+[data-page="liquid-docs"] .ov-social-nav { position: fixed; top: 14px; left: 16px; z-index: var(--z-nav); }
+[data-page="liquid-docs"] .ov-nav--tools {
+  top: 14px; left: auto; right: 16px; margin: 0; padding: 0;
+  width: max-content; max-width: none; gap: 8px;
+}
+[data-page="liquid-docs"] :is(.ov-nav__back, .ov-nav__page-menu, .ov-nav__page-menu .ov-nav__tools-toggle, .ov-nav--pages > .ov-nav__theme) {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 44px; height: 44px; min-height: 0; padding: 0; border-radius: 50%;
+  color: var(--text-primary); text-decoration: none; pointer-events: auto;
+}
+[data-page="liquid-docs"] .ov-nav__page-menu { --liquid-design-menu-offset-y: 52px; }
+[data-page="liquid-docs"] #ov-nav-pages { width: 200px; left: auto; right: 0; color: var(--text-primary); }
+
+/* Sidebar filter (moved out of the top bar) */
+[data-page="liquid-docs"] .ld-search { position: relative; display: flex; align-items: center; margin: 0 0 24px; }
+[data-page="liquid-docs"] .ld-search > svg { position: absolute; left: 0; width: 15px; height: 15px; fill: none; stroke: var(--text-tertiary); stroke-width: 2; stroke-linecap: round; pointer-events: none; }
+[data-page="liquid-docs"] .ld-search input[type="search"] {
+  width: 100%; height: 36px; padding: 0 28px 0 24px; border: 0; border-bottom: 1px solid var(--ld-line); border-radius: 0;
+  background: transparent; box-shadow: none; font-size: 15px;
+}
+[data-page="liquid-docs"] .ld-search input[type="search"]:focus { border-bottom-color: var(--text-primary); box-shadow: none; }
+[data-page="liquid-docs"] .ld-search input[type="search"]:focus-visible { outline: none; }
+[data-page="liquid-docs"] .ld-search:focus-within > svg { stroke: var(--text-primary); }
+[data-page="liquid-docs"] .ld-search kbd { position: absolute; right: 0; border: 0; color: var(--text-tertiary); font: 13px 'Satoshi', sans-serif; pointer-events: none; }
+
+/* ── Three-column shell ── */
+[data-page="liquid-docs"] .ld-shell {
+  display: grid; grid-template-columns: 248px minmax(0, 1fr) 208px;
+  max-width: 1440px; margin: 0 auto;
+}
+[data-page="liquid-docs"] .ld-side {
+  position: sticky; top: var(--ld-top); height: calc(100vh - var(--ld-top)); overflow-y: auto;
+  padding: 32px 20px 40px var(--ld-slot-l);
+  scrollbar-width: thin;
+}
+[data-page="liquid-docs"] .ld-side nav { display: flex; flex-direction: column; }
+[data-page="liquid-docs"] .ld-side-head { margin: 26px 0 6px; color: var(--text-tertiary); font-size: 13px; font-weight: 500; }
+[data-page="liquid-docs"] .ld-side-head:first-child { margin-top: 0; }
+[data-page="liquid-docs"] .ld-side a {
+  position: relative; padding: 4px 0 4px 12px; color: var(--text-secondary);
+  text-decoration: none; font-size: 15px; line-height: 1.45;
+  box-shadow: inset 1px 0 0 var(--ld-line);
+}
+[data-page="liquid-docs"] .ld-side a:hover { color: var(--text-primary); }
+[data-page="liquid-docs"] .ld-side a.is-active { color: var(--text-primary); font-weight: 600; box-shadow: inset 2px 0 0 var(--accent); }
+[data-page="liquid-docs"] .ld-side-empty { color: var(--text-tertiary); font-size: 14px; }
+[data-page="liquid-docs"] .ld-scrim { position: fixed; inset: var(--ld-top) 0 0; z-index: var(--z-scrim); background: rgb(0 0 0 / .4); }
+
+[data-page="liquid-docs"] .ld-main { min-width: 0; max-width: 760px; width: 100%; margin: 0 auto; padding: 56px 48px 0; outline: none; }
+[data-page="liquid-docs"] .ld-main > section { padding: 0 0 72px; }
+[data-page="liquid-docs"] .ld-main > section#overview { padding-bottom: 88px; }
+[data-page="liquid-docs"] h1 { margin: 0 0 20px; font-size: clamp(44px, 7vw, 68px); line-height: .98; letter-spacing: -.045em; font-weight: 900; color: var(--text-primary); }
+[data-page="liquid-docs"] h2 { position: relative; margin: 0 0 16px; font-size: 30px; line-height: 1.15; letter-spacing: -.025em; font-weight: 800; color: var(--text-primary); }
+[data-page="liquid-docs"] h3 { margin: 32px 0 8px; font-size: 18px; font-weight: 700; color: var(--text-primary); }
+[data-page="liquid-docs"] .ld-anchor { margin-left: 10px; color: var(--text-tertiary); text-decoration: none; font-weight: 500; opacity: 0; transition: opacity .15s ease; }
+[data-page="liquid-docs"] h2:hover .ld-anchor, [data-page="liquid-docs"] .ld-anchor:focus-visible { opacity: 1; }
+[data-page="liquid-docs"] .ld-main p, [data-page="liquid-docs"] .ld-main li { color: var(--text-secondary); }
+[data-page="liquid-docs"] .ld-main strong { color: var(--text-primary); }
+[data-page="liquid-docs"] .ld-main .ld-lead { font-size: 21px; line-height: 1.5; max-width: 34ch; color: var(--text-primary); }
+[data-page="liquid-docs"] .ld-main ul { padding-left: 20px; }
+[data-page="liquid-docs"] .ld-main li { margin: 4px 0; }
+[data-page="liquid-docs"] .ld-small { font-size: 13px; }
+[data-page="liquid-docs"] :not(pre) > code, [data-page="liquid-docs"] td code, [data-page="liquid-docs"] li code {
+  padding: 1px 5px; border-radius: 5px; background: var(--ld-soft);
+  color: var(--text-primary); font-size: .86em; white-space: nowrap;
+}
+[data-page="liquid-docs"] kbd { padding: 0 5px; border: 1px solid var(--ld-line); border-bottom-width: 2px; border-radius: 5px; font: .82em 'JetBrains Mono', monospace; color: var(--text-primary); }
+
+/* Overview principles: a plain three-line list, not cards. */
+[data-page="liquid-docs"] .ld-main .ld-cards { display: grid; gap: 0; padding: 0; list-style: none; margin: 28px 0; }
+[data-page="liquid-docs"] .ld-main .ld-cards li { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 4px 24px; margin: 0; padding: 14px 0; box-shadow: inset 0 1px 0 var(--ld-line); font-size: 15px; line-height: 1.5; }
+[data-page="liquid-docs"] .ld-main .ld-cards li:last-child { box-shadow: inset 0 1px 0 var(--ld-line), inset 0 -1px 0 var(--ld-line); }
+
+/* Asides: quiet margin notes, the label set in the run of the text. */
+[data-page="liquid-docs"] .ld-note, [data-page="liquid-docs"] .ld-warn {
+  margin: 24px 0; padding: 2px 0 2px 18px; box-shadow: inset 2px 0 0 var(--ld-line);
+  color: var(--text-secondary); font-size: 15px;
+}
+[data-page="liquid-docs"] .ld-warn { box-shadow: inset 2px 0 0 var(--accent); }
+[data-page="liquid-docs"] .ld-note strong, [data-page="liquid-docs"] .ld-warn strong { font-weight: 700; }
+[data-page="liquid-docs"] .ld-note strong::after, [data-page="liquid-docs"] .ld-warn strong::after { content: '.'; }
+
+/* ── Code blocks ── */
+[data-page="liquid-docs"] .ld-code { margin: 16px 0; border-radius: 12px; overflow: hidden; background: var(--ld-code-bg); border: 1px solid rgb(255 255 255 / .06); }
+[data-page="liquid-docs"] .ld-code-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 6px 14px; border-bottom: 1px solid rgb(255 255 255 / .08); color: #a7a39b; font-size: 12px; font-weight: 600; }
+[data-page="liquid-docs"] .ld-copy { padding: 4px 10px; border: 1px solid rgb(255 255 255 / .14); border-radius: 7px; background: transparent; color: #d8d4cc; font: 600 12px 'Satoshi', sans-serif; cursor: pointer; }
+[data-page="liquid-docs"] .ld-copy:hover { background: rgb(255 255 255 / .08); }
+[data-page="liquid-docs"] .ld-code pre { margin: 0; padding: 14px 16px; overflow-x: auto; color: var(--ld-code-ink); font: 13.5px/1.65 'JetBrains Mono', monospace; tab-size: 2; }
+[data-page="liquid-docs"] .tk-t { color: #ff7b8a; }
+[data-page="liquid-docs"] .tk-a { color: #f2b46b; }
+[data-page="liquid-docs"] .tk-s { color: #9fd38a; }
+[data-page="liquid-docs"] .tk-p { color: #8b877f; }
+[data-page="liquid-docs"] .tk-c { color: #7d796f; font-style: italic; }
+[data-page="liquid-docs"] .tk-k { color: #b79cff; }
+
+/* ── Live examples ── */
+[data-page="liquid-docs"] .ex { margin: 20px 0; border: 1px solid var(--ld-line); border-radius: 14px; overflow: hidden; }
+[data-page="liquid-docs"] .ex > .ld-code { margin: 0; border: 0; border-top: 1px solid var(--ld-line); border-radius: 0; }
+[data-page="liquid-docs"] .ex-stage {
+  position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px;
+  min-height: 200px; padding: 40px 24px; isolation: isolate;
+  background: var(--ld-soft) center / cover no-repeat;
+}
+[data-page="liquid-docs"] .ex-stage--hero { min-height: 280px; }
+[data-page="liquid-docs"] .ex-stage--col { flex-direction: column; align-items: stretch; }
+[data-page="liquid-docs"] .ex-stage--tall { min-height: 300px; }
+[data-page="liquid-docs"] .ex-stage--top { align-items: flex-start; padding-top: 32px; }
+[data-page="liquid-docs"] .ex-stage--tools { justify-content: flex-start; padding-left: 32px; }
+[data-page="liquid-docs"] .ex-stage--nav { display: block; min-height: 260px; padding: 24px; }
+[data-page="liquid-docs"] .ex-stage--wrap { min-height: 160px; }
+[data-page="liquid-docs"] .ex-cap { margin: 0; padding: 10px 16px; border-top: 1px solid var(--ld-line); font-size: 14px; }
+[data-page="liquid-docs"] .ex-bar { display: flex; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--ld-line); }
+
+/* Backdrops: the homepage poster art plus two plain test patterns. */
+[data-page="liquid-docs"] .ex-stage[data-bg="astra"]  { background-image: url('../images/pillars/astra.svg'); background-color: #2340ff; }
+[data-page="liquid-docs"] .ex-stage[data-bg="aion"]   { background-image: url('../images/pillars/aion.svg'); background-color: #e8352b; }
+[data-page="liquid-docs"] .ex-stage[data-bg="word"]   { background-image: url('../images/pillars/word.svg'); background-color: #ffb800; }
+[data-page="liquid-docs"] .ex-stage[data-bg="labs21"] { background-image: url('../images/pillars/labs21.svg'); background-color: #1f9d55; }
+[data-page="liquid-docs"] .ex-stage[data-bg="now"]    { background-image: url('../images/pillars/now.svg'); background-color: #ff5fa2; }
+[data-page="liquid-docs"] .ex-stage[data-bg="stripes"] {
+  background-image: repeating-linear-gradient(90deg, #141413 0 14px, #f5f4ed 14px 28px);
+}
+[data-page="liquid-docs"] .ex-stage[data-bg="plain"] { background-image: none; background-color: var(--bg-elevated); }
+[data-page="liquid-docs"] .ex-stage[data-bg="split"] { background-image: linear-gradient(90deg, #141413 50%, #f5f4ed 50%); justify-content: space-around; }
+
+/* Demo controls: ordinary host styles, exactly what a reader would write. */
+[data-page="liquid-docs"] .demo-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 12px 22px; border: 1px solid var(--border-strong); border-radius: 999px;
+  background: var(--bg-white); color: var(--text-primary);
+  font: 600 15px/1.2 'Satoshi', sans-serif; text-decoration: none; cursor: pointer;
+}
+[data-page="liquid-docs"] .demo-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 999px; }
+[data-page="liquid-docs"] .demo-icon { width: 48px; height: 48px; padding: 0; border-radius: 50%; }
+[data-page="liquid-docs"] .ex-stage svg, [data-page="liquid-docs"] .demo-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+[data-page="liquid-docs"] .demo-big { min-height: 96px; padding: 24px 56px; font-size: 22px; }
+[data-page="liquid-docs"] .demo-toolbar { display: flex; gap: 6px; }
+[data-page="liquid-docs"] .demo-composer { width: 100%; max-width: 520px; margin: 0 auto; padding: 14px; border: 1px solid var(--border-strong); border-radius: 24px; background: var(--bg-white); }
+[data-page="liquid-docs"] .demo-composer textarea { display: block; width: 100%; padding: 6px; border: 0; border-radius: 0; background: transparent; box-shadow: none; resize: none; }
+[data-page="liquid-docs"] .demo-composer textarea:focus { box-shadow: none; }
+[data-page="liquid-docs"] .demo-composer-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+[data-page="liquid-docs"] .demo-send { width: 40px; height: 40px; min-height: 0; --liquid-design-tint: rgb(201 100 120 / 70%); --liquid-design-color: #fff; }
+[data-page="liquid-docs"] .demo-options [data-liquid-menu] { width: 220px; left: 0; }
+[data-page="liquid-docs"] .demo-nav { position: relative; height: 210px; }
+[data-page="liquid-docs"] .demo-nav-left { position: absolute; left: 0; top: 0; }
+[data-page="liquid-docs"] .demo-nav-right { position: absolute; right: 0; top: 0; --liquid-design-tools-gap: 6; }
+[data-page="liquid-docs"] .demo-nav [data-liquid-menu] { width: 200px; left: 0; }
+[data-page="liquid-docs"] .demo-nav .lgd-tools [data-liquid-button] { width: 48px; height: 48px; font-weight: 700; }
+[data-page="liquid-docs"] .demo-orb { width: 72px; height: 72px; border-radius: 50%; background: #ff5fa2; }
+
+/* Inline action buttons (plain, not glass) */
+[data-page="liquid-docs"] .ld-inline-btn {
+  padding: 7px 14px; border: 1px solid var(--border-strong); border-radius: 9px;
+  background: var(--bg-white); color: var(--text-primary); font: 600 14px 'Satoshi', sans-serif; cursor: pointer;
+}
+[data-page="liquid-docs"] .ld-inline-btn:hover { background: var(--ld-soft); }
+
+/* Playground */
+[data-page="liquid-docs"] .ld-play { display: grid; grid-template-columns: minmax(0, 1fr) 240px; border: 1px solid var(--ld-line); border-radius: 14px; overflow: hidden; }
+[data-page="liquid-docs"] .ld-play-stage { min-height: 320px; }
+[data-page="liquid-docs"] .ld-play-btn { min-height: 64px; padding: 18px 40px; font-size: 18px; }
+[data-page="liquid-docs"] .ld-play-controls { display: flex; flex-direction: column; gap: 14px; padding: 18px; border-left: 1px solid var(--ld-line); }
+[data-page="liquid-docs"] .ld-play-controls label { display: flex; flex-direction: column; gap: 6px; color: var(--text-primary); font-size: 13px; font-weight: 600; }
+[data-page="liquid-docs"] .ld-play-controls output { float: right; color: var(--text-tertiary); font: 12px 'JetBrains Mono', monospace; }
+[data-page="liquid-docs"] .ld-play-controls label:has(output) { display: grid; grid-template-columns: 1fr auto; }
+[data-page="liquid-docs"] .ld-play-controls label:has(output) input { grid-column: 1 / -1; }
+[data-page="liquid-docs"] .ld-play-controls input[type="range"] { width: 100%; accent-color: var(--accent); }
+[data-page="liquid-docs"] .ld-play-controls select { padding: 6px 8px; font-size: 14px; }
+[data-page="liquid-docs"] .ld-play-pair { display: flex; align-items: center; gap: 8px; }
+[data-page="liquid-docs"] .ld-play-pair input[type="color"] { width: 36px; height: 28px; padding: 0; border: 1px solid var(--ld-line); border-radius: 6px; background: none; }
+
+/* Tables */
+[data-page="liquid-docs"] .ld-table-wrap { margin: 16px 0; overflow-x: auto; border: 1px solid var(--ld-line); border-radius: 12px; }
+[data-page="liquid-docs"] .ld-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+[data-page="liquid-docs"] .ld-table th, [data-page="liquid-docs"] .ld-table td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--ld-line); color: var(--text-secondary); }
+[data-page="liquid-docs"] .ld-table thead th { background: var(--ld-soft); color: var(--text-primary); font-weight: 700; }
+[data-page="liquid-docs"] .ld-table th[scope="rowgroup"] { padding-top: 14px; color: var(--text-primary); font-size: 12px; font-weight: 700; }
+[data-page="liquid-docs"] .ld-table tr:last-child td { border-bottom: 0; }
+
+[data-page="liquid-docs"] .ld-next a { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; margin-top: 40px; padding: 18px 0; box-shadow: inset 0 1px 0 var(--ld-line); text-decoration: none; }
+[data-page="liquid-docs"] .ld-next span { color: var(--text-tertiary); font-size: 14px; }
+[data-page="liquid-docs"] .ld-main .ld-next strong { color: var(--text-primary); font-size: 20px; font-weight: 800; letter-spacing: -.015em; }
+[data-page="liquid-docs"] .ld-next a:hover strong { color: var(--accent); }
+[data-page="liquid-docs"] .ld-foot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 24px; padding: 32px 0 56px; box-shadow: inset 0 1px 0 var(--ld-line); color: var(--text-tertiary); font-size: 14px; }
+[data-page="liquid-docs"] .ld-foot > span:first-child { margin-right: auto; }
+[data-page="liquid-docs"] .ld-foot a { color: var(--text-secondary); text-decoration: none; }
+[data-page="liquid-docs"] .ld-foot a:hover { color: var(--text-primary); }
+
+/* On this page */
+[data-page="liquid-docs"] .ld-toc { position: sticky; top: var(--ld-top); height: calc(100vh - var(--ld-top)); overflow-y: auto; padding: 56px 24px 40px 8px; }
+[data-page="liquid-docs"] .ld-toc p { margin: 0 0 10px; color: var(--text-tertiary); font-size: 13px; font-weight: 500; }
+[data-page="liquid-docs"] .ld-toc ol { margin: 0; padding: 0; list-style: none; }
+[data-page="liquid-docs"] .ld-toc a { display: block; padding: 3px 0; color: var(--text-secondary); font-size: 13px; line-height: 1.45; text-decoration: none; }
+[data-page="liquid-docs"] .ld-toc a:hover { color: var(--text-primary); }
+[data-page="liquid-docs"] .ld-toc a.is-active { color: var(--text-primary); font-weight: 600; }
+[data-page="liquid-docs"] .ld-toc a.is-active::before { content: ''; display: inline-block; width: 5px; height: 5px; margin: 0 8px 2px -13px; border-radius: 50%; background: var(--accent); }
+
+@media (max-width: 1199px) {
+  [data-page="liquid-docs"] .ld-shell { grid-template-columns: 248px minmax(0, 1fr); }
+  [data-page="liquid-docs"] .ld-toc { display: none; }
+}
+@media (max-width: 899px) {
+  [data-page="liquid-docs"] .ld-shell { display: block; }
+  [data-page="liquid-docs"] .ld-menu-btn { display: inline-flex; }
+  [data-page="liquid-docs"] .ld-side {
+    position: fixed; left: 0; top: var(--ld-top); bottom: 0; z-index: var(--z-dialog);
+    width: min(300px, 84vw); height: auto; padding: 24px 24px 40px; background: var(--bg);
+    transform: translateX(-100%); transition: transform var(--dur-3, .3s) var(--ease-smooth, ease);
+  }
+  [data-page="liquid-docs"] .ld-side.is-open { transform: none; box-shadow: var(--shadow-float); }
+  [data-page="liquid-docs"] .ld-main { padding: 40px 20px 0; }
+  [data-page="liquid-docs"] .ld-play { grid-template-columns: 1fr; }
+  [data-page="liquid-docs"] .ld-play-controls { border-left: 0; border-top: 1px solid var(--ld-line); }
+}
+@media (max-width: 640px) {
+  [data-page="liquid-docs"] { --ld-top: 68px; --ld-slot-l: 72px; --ld-slot-r: 124px; }
+  [data-page="liquid-docs"] .ld-top { gap: 8px; }
+  [data-page="liquid-docs"] .ld-brand { font-size: 18px; }
+  [data-page="liquid-docs"] .ld-menu-btn { width: 40px; height: 40px; justify-content: center; padding: 0; color: var(--text-primary); }
+  [data-page="liquid-docs"] .ld-menu-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  [data-page="liquid-docs"] .ld-search kbd { display: none; }
+  [data-page="liquid-docs"] .ld-main .ld-cards li { grid-template-columns: 1fr; }
+  [data-page="liquid-docs"] .ld-main .ld-lead { font-size: 19px; }
+  [data-page="liquid-docs"] h2 { font-size: 25px; }
+  [data-page="liquid-docs"] .ex-stage { padding: 32px 16px; }
+  [data-page="liquid-docs"] .demo-big { padding: 20px 32px; font-size: 18px; }
+  [data-page="liquid-docs"] .ld-main p code, [data-page="liquid-docs"] .ld-main li code, [data-page="liquid-docs"] .ld-note code, [data-page="liquid-docs"] .ld-warn code { white-space: normal; overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-page="liquid-docs"] .ld-side { transition: none; }
+}
 /* ═══════════════════════════════════════════════════════════════════
    PAGE: MANAGE  —  scoped to [data-page="manage"]
    ═══════════════════════════════════════════════════════════════════ */

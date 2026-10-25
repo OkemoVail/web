@@ -27,9 +27,9 @@
       var tools = config && config.variant === 'tools';
       add('menu', menu, { key: menu && menu.getAttribute('data-glass-key') || 'menu', component: tools ? 'tools' : 'options', label: tools ? 'More' : 'Open menu', items: tools ? [
         Object.assign({ glyph: '<svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="3"/><path d="M9 7V5h6v2M4 12h16"/></svg>' }, config.toolsWork || { label: 'Selected work', href: '#work' }),
-        Object.assign({ glyph: '<svg viewBox="0 0 24 24"><path d="M12 3s-7 7-7 12a7 7 0 0 0 14 0c0-5-7-12-7-12Z"/></svg>' }, config.toolsSecondary || { label: 'Liquid Design', href: '/design.html' }),
+        Object.assign({ glyph: '<svg viewBox="0 0 24 24"><path d="M12 3s-7 7-7 12a7 7 0 0 0 14 0c0-5-7-12-7-12Z"/></svg>' }, config.toolsSecondary || { label: 'Liquid Design', href: '/liquid-design/index.html' }),
         { label: 'Toggle theme', action: 'theme', glyph: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' }
-      ] : config && config.links || [{ label: 'Home', href: '/index.html' }, { label: 'Design', href: '/design.html' }], glyph: tools ? '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>' });
+      ] : config && config.links || [{ label: 'Home', href: '/index.html' }, { label: 'Liquid Design', href: '/liquid-design/index.html' }], glyph: tools ? '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>' });
       var theme = nav.querySelector('.ov-nav__theme');
       if (!tools) {
         var themeIcon = theme && theme.querySelector(doc.documentElement.classList.contains('dark') ? '.ov-nav__sun' : '.ov-nav__moon');

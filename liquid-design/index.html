@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liquid Design Docs</title>
+  <meta name="description" content="Documentation and live examples for Liquid Design, the glass that stretches. Add one attribute to an existing button and it becomes liquid glass.">
+  <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
+  <script>
+    // Anti-FOUC: the site's theme convention (.dark on <html>, vail_theme), mirrored
+    // into data-liquid-design-theme so the glass follows the page, not the OS.
+    (function () {
+      var saved = null; try { saved = localStorage.getItem('vail_theme'); } catch (_) {}
+      var dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', dark);
+      document.documentElement.setAttribute('data-liquid-design-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+  <link rel="stylesheet" href="../src/site.css?v=20261025-liquid-docs2">
+  <link rel="stylesheet" href="liquid-design.css?v=20261024-clear-visible">
+  <script src="../src/glass-navigation.js"></script>
+  <link rel="expect" href="#site-navigation-ready" blocking="render">
+  <script defer src="liquid-design.js?v=20261024-adapt-fast"></script>
+  <script defer src="../src/liquid-design-site.js?v=20261007-api-audit"></script>
+</head>
+<body data-page="liquid-docs">
+<a class="ld-skip" href="#ld-content">Skip to content</a>
+
+<!-- The site nav (src/nav.js) floats in the reserved slots at either end of this bar. -->
+<header class="ld-top" data-lg-plain>
+  <a class="ld-brand" href="#overview" translate="no">Liquid Design<span aria-hidden="true">.</span></a>
+  <button class="ld-menu-btn" type="button" aria-expanded="false" aria-controls="ld-side">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>
+    <span>Contents</span>
+  </button>
+</header>
+
+<div class="ld-scrim" hidden></div>
+
+<div class="ld-shell" data-lg-plain>
+  <aside class="ld-side" id="ld-side" aria-label="Documentation">
+    <label class="ld-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <span class="ld-sr">Filter documentation</span>
+      <input id="ld-filter" type="search" placeholder="Filter" autocomplete="off" spellcheck="false">
+      <kbd aria-hidden="true">/</kbd>
+    </label>
+    <nav>
+      <p class="ld-side-head">Get started</p>
+      <a href="#overview">Overview</a>
+      <a href="#install">Installation</a>
+      <a href="#quick-start">Quick start</a>
+      <p class="ld-side-head">Controls</p>
+      <a href="#buttons">Buttons and links</a>
+      <a href="#surfaces">Surfaces and forms</a>
+      <a href="#groups">Shared glass groups</a>
+      <a href="#disabled">Disabled controls</a>
+      <p class="ld-side-head">Components</p>
+      <a href="#options">Options menu</a>
+      <a href="#tools">Tools</a>
+      <a href="#navigation">Coordinated navigation</a>
+      <p class="ld-side-head">Styling</p>
+      <a href="#theme">Theme</a>
+      <a href="#tint">Tint and ink</a>
+      <a href="#color-source">Nearby colour</a>
+      <a href="#playground">Playground</a>
+      <a href="#variables">Variable reference</a>
+      <p class="ld-side-head">Optics</p>
+      <a href="#refraction">Refraction</a>
+      <a href="#adaptation">Backdrop adaptation</a>
+      <p class="ld-side-head">Reference</p>
+      <a href="#api">JavaScript API</a>
+      <a href="#attributes">Attribute reference</a>
+      <a href="#accessibility">Accessibility</a>
+      <a href="#support">Browser support</a>
+      <p class="ld-side-empty" hidden>No matching pages.</p>
+    </nav>
+  </aside>
+
+  <main class="ld-main" id="ld-content" tabindex="-1">
+    <!-- ───────────────────────── Overview ───────────────────────── -->
+    <section id="overview">
+      <h1>Liquid Design</h1>
+      <p class="ld-lead">Glass that stretches. Add one attribute to a button you already have, and it becomes a piece of liquid glass that blurs what is behind it, bends under your finger and springs back.</p>
+
+      <div class="ex" data-bg="astra">
+        <div class="ex-stage ex-stage--hero">
+          <button class="demo-btn" type="button" data-liquid-design>Hold and pull me</button>
+        </div>
+        <p class="ex-cap">Press, hold and drag past the edge. The glass stretches along one axis and rebounds when you let go.</p>
+      </div>
+
+      <p>Liquid Design is a small runtime: one stylesheet and one script, no dependencies and no build step. It never replaces your markup. Your button keeps its element, its click handler, its focus ring and its layout box. The engine paints the material behind the content and owns only the decoration it adds.</p>
+      <ul class="ld-cards">
+        <li><strong>Opt in, per control</strong><span>Nothing changes until you add <code>data-liquid-design</code>.</span></li>
+        <li><strong>Native behaviour</strong><span>Links navigate, forms submit, inputs type. Hitboxes never move.</span></li>
+        <li><strong>Accessible by default</strong><span>Respects reduced motion, reduced transparency, more contrast and forced colours.</span></li>
+      </ul>
+      <aside class="ld-note"><strong>Note</strong> Liquid Design is a browser approximation inspired by Apple's Liquid Glass, not Apple's renderer.</aside>
+    </section>
+
+    <!-- ───────────────────────── Install ───────────────────────── -->
+    <section id="install">
+      <h2>Installation</h2>
+      <p>Copy the <code>liquid-design/</code> folder into your site. At runtime you only need two files: <code>liquid-design.css</code> and <code>liquid-design.js</code>. Load the stylesheet first, then the script with <code>defer</code>.</p>
+      <div class="ld-code" data-lang="html" data-file="index.html"><pre>&lt;link rel="stylesheet" href="liquid-design/liquid-design.css"&gt;
+&lt;script defer src="liquid-design/liquid-design.js"&gt;&lt;/script&gt;</pre></div>
+      <p>The script initialises itself on <code>DOMContentLoaded</code> and exposes a global <code>LiquidDesign</code> object. There is nothing to configure.</p>
+      <aside class="ld-note"><strong>Build from source</strong> The modules live in <code>liquid-design/source/</code>. Run <code>node liquid-design/build.mjs</code> to rebuild the bundle.</aside>
+    </section>
+
+    <!-- ───────────────────────── Quick start ───────────────────────── -->
+    <section id="quick-start">
+      <h2>Quick start</h2>
+      <p>Style your button the way you normally would. The glass takes its shape from your button's size and <code>border-radius</code>, so a pill stays a pill and a circle stays a circle.</p>
+      <div class="ex" data-bg="aion">
+        <div class="ex-stage">
+<button class="demo-btn" type="button" data-liquid-design>Click me</button>
+        </div>
+      </div>
+      <p>The engine removes your button's own background and border colour while it is enhanced, and puts them back if you call <code>LiquidDesign.destroy()</code>.</p>
+    </section>
+
+    <!-- ───────────────────────── Buttons ───────────────────────── -->
+    <section id="buttons">
+      <h2>Buttons and links</h2>
+      <p>Any <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> can be glass. Icon buttons work the same way: give them a fixed size and a 50% radius.</p>
+      <div class="ex" data-bg="word">
+        <div class="ex-stage">
+<button class="demo-btn" type="button" data-liquid-design data-liquid-design-independent>Save</button>
+<a class="demo-btn" href="#surfaces" data-liquid-design data-liquid-design-independent>Go to surfaces</a>
+<button class="demo-btn demo-icon" type="button" aria-label="Favourite" data-liquid-design data-liquid-design-independent>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3L3.2 9.7l6.4-.9Z"/></svg>
+</button>
+        </div>
+      </div>
+      <aside class="ld-warn"><strong>Siblings share glass automatically</strong> When two or more enhanced controls sit in the same parent, the engine treats them as one <a href="#groups">group</a> with one shared material. Add <code>data-liquid-design-independent</code> to keep each one separate, as above.</aside>
+      <p>A drag that moves more than a couple of pixels is treated as a stretch, not a click, so pulling on a button never fires it by accident. Keyboard activation with <kbd>Enter</kbd> and <kbd>Space</kbd> is unchanged.</p>
+    </section>
+
+    <!-- ───────────────────────── Surfaces ───────────────────────── -->
+    <section id="surfaces">
+      <h2>Surfaces and forms</h2>
+      <p>Use <code>data-liquid-design="surface"</code> for larger glass that holds editable content: search bars, composers, panels. Inputs and textareas keep native typing, selection and caret. Surfaces keep a light veil so text on them stays readable, and they stretch with more resistance than small buttons.</p>
+      <div class="ex" data-bg="labs21">
+        <div class="ex-stage ex-stage--col">
+<form class="demo-composer" data-liquid-design="surface">
+  <textarea rows="2" aria-label="Message" placeholder="Write a message…"></textarea>
+  <div class="demo-composer-row">
+    <button class="demo-btn demo-icon demo-send" type="submit" aria-label="Send" data-liquid-design>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
+    </button>
+  </div>
+</form>
+        </div>
+      </div>
+      <p>Buttons nested inside a surface get their own glass and stretch on their own. If you want a press on any nested row to stretch the whole panel instead, add <code>data-liquid-design-static-actions</code> to the surface. A still release still clicks the row; a pull does not.</p>
+    </section>
+
+    <!-- ───────────────────────── Groups ───────────────────────── -->
+    <section id="groups">
+      <h2>Shared glass groups</h2>
+      <p>A toolbar reads best as one piece of glass. Put <code>data-liquid-design-group</code> on the container and every enhanced control inside joins it. Each button still stretches on its own; their shapes melt together where they touch.</p>
+      <div class="ex" data-bg="aion">
+        <div class="ex-stage">
+<div class="demo-toolbar" data-liquid-design-group>
+  <button class="demo-btn" type="button" data-liquid-design>Copy</button>
+  <button class="demo-btn" type="button" data-liquid-design>Share</button>
+  <button class="demo-btn" type="button" data-liquid-design>Download</button>
+</div>
+        </div>
+      </div>
+      <p><code>data-liquid-design-independent</code> on a single control overrides both the explicit group and the automatic sibling grouping.</p>
+    </section>
+
+    <!-- ───────────────────────── Disabled ───────────────────────── -->
+    <section id="disabled">
+      <h2>Disabled controls</h2>
+      <p>There are two kinds of disabled. Use <code>aria-disabled="true"</code> when the control should stay focusable and still feel alive: it stretches, dims its content to 50% and swallows clicks and <kbd>Enter</kbd>/<kbd>Space</kbd>. The native <code>disabled</code> attribute removes it from interaction entirely, including the glass motion.</p>
+      <div class="ex" data-bg="now">
+        <div class="ex-stage">
+<button class="demo-btn" type="button" aria-disabled="true" data-liquid-design data-liquid-design-independent>Unavailable, still stretchy</button>
+<button class="demo-btn" type="button" disabled data-liquid-design data-liquid-design-independent>Disabled</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Options ───────────────────────── -->
+    <section id="options">
+      <h2>Options menu</h2>
+      <p>The trigger morphs into the menu: one piece of glass grows out of the button, the rows fade in sharp, and closing reverses the same path back into the button. Click it, or hold for 260&nbsp;ms and drag onto a row, then release to choose.</p>
+      <div class="ex" data-bg="astra">
+        <div class="ex-stage ex-stage--tall ex-stage--top">
+<div class="demo-options" data-liquid-design-component="options">
+  <button class="demo-btn" type="button" data-liquid-design data-liquid-design-toggle="docs-options">Options</button>
+  <div id="docs-options" hidden inert>
+    <button type="button" data-liquid-design>Duplicate</button>
+    <button type="button" data-liquid-design>Archive</button>
+    <button type="button" data-liquid-design>Share</button>
+  </div>
+</div>
+        </div>
+      </div>
+      <h3>Structure</h3>
+      <ul>
+        <li>A wrapper with <code>data-liquid-design-component="options"</code>.</li>
+        <li>A trigger with <code>data-liquid-design-toggle</code> set to the panel's <code>id</code>.</li>
+        <li>The panel inside the wrapper, starting <code>hidden inert</code>, with one enhanced button per row.</li>
+      </ul>
+      <p>Arrow keys, <kbd>Home</kbd> and <kbd>End</kbd> move between rows, <kbd>Escape</kbd> closes and returns focus to the trigger, and a click outside dismisses. The menu opens downward and flips up near the bottom of the viewport. Force a direction with <code>data-liquid-design-menu-direction="up"</code> or <code>"down"</code> on the wrapper.</p>
+    </section>
+
+    <!-- ───────────────────────── Tools ───────────────────────── -->
+    <section id="tools">
+      <h2>Tools</h2>
+      <p>Tools splits a row of actions out of its trigger like droplets, and absorbs them back on the second click. Actions open towards the side with more room. The markup matches Options, with <code>"tools"</code> instead.</p>
+      <div class="ex" data-bg="word">
+        <div class="ex-stage ex-stage--tools">
+<div class="demo-tools" data-liquid-design-component="tools">
+  <button class="demo-btn demo-icon" type="button" aria-label="More tools" data-liquid-design data-liquid-design-toggle="docs-tools">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+  </button>
+  <div id="docs-tools" hidden inert>
+    <button type="button" aria-label="Copy" data-liquid-design><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg></button>
+    <button type="button" aria-label="Favourite" data-liquid-design><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3L3.2 9.7l6.4-.9Z"/></svg></button>
+    <button type="button" aria-label="Download" data-liquid-design><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg></button>
+  </div>
+</div>
+        </div>
+      </div>
+      <p>Actions are 52&nbsp;px circles by default. Size them with your own CSS on the action buttons, and set the spacing with <code>--liquid-design-tools-gap</code> (a unitless pixel value, default <code>9</code>).</p>
+    </section>
+
+    <!-- ───────────────────────── Navigation ───────────────────────── -->
+    <section id="navigation">
+      <h2>Coordinated navigation</h2>
+      <p>When an Options menu and a Tools row share a bar, wrap both in <code>data-liquid-design-navigation</code> and put <code>data-liquid-design-move</code> on the positioned wrapper around Options. The engine then keeps them out of each other's way:</p>
+      <ul>
+        <li>Opening Options closes Tools.</li>
+        <li>If the menu would cover the Tools trigger, it opens below it with a 12&nbsp;px gap (<code>--liquid-design-navigation-gap</code>).</li>
+        <li>If expanded Tools would cover Options, the Options wrapper slides off the left edge, and returns when Tools closes.</li>
+      </ul>
+      <div class="ex" data-bg="labs21">
+        <div class="ex-stage ex-stage--nav">
+<div class="demo-nav" data-liquid-design-navigation>
+  <div class="demo-nav-left" data-liquid-design-move>
+    <div data-liquid-design-component="options">
+      <button class="demo-btn demo-icon" type="button" aria-label="Socials" data-liquid-design data-liquid-design-toggle="docs-socials">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg>
+      </button>
+      <div id="docs-socials" hidden inert>
+        <button type="button" data-liquid-design>GitHub</button>
+        <button type="button" data-liquid-design>YouTube</button>
+      </div>
+    </div>
+  </div>
+  <div class="demo-nav-right" data-liquid-design-component="tools">
+    <button class="demo-btn demo-icon" type="button" aria-label="More" data-liquid-design data-liquid-design-toggle="docs-nav-tools">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+    </button>
+    <div id="docs-nav-tools" hidden inert>
+      <button type="button" aria-label="Work" data-liquid-design>W</button>
+      <button type="button" aria-label="Design" data-liquid-design>D</button>
+      <button type="button" aria-label="Theme" data-liquid-design>T</button>
+      <button type="button" aria-label="Search" data-liquid-design>S</button>
+    </div>
+  </div>
+</div>
+        </div>
+      </div>
+      <p>Your CSS still owns where both wrappers sit. Controls never shrink to make room.</p>
+    </section>
+
+    <!-- ───────────────────────── Theme ───────────────────────── -->
+    <section id="theme">
+      <h2>Theme</h2>
+      <p>Glass follows the operating system's light or dark preference. To follow your site's own theme switch instead, set <code>data-liquid-design-theme</code> on <code>&lt;html&gt;</code> or on any ancestor. Changes apply immediately.</p>
+      <div class="ld-code" data-lang="js" data-file="theme.js"><pre>// Your theme toggle
+document.documentElement.dataset.liquidDesignTheme = isDark ? 'dark' : 'light';</pre></div>
+      <p>The engine also treats an ancestor with the class <code>dark</code> as dark. This page uses the attribute: try the theme button at the top.</p>
+      <div class="ex" data-bg="aion">
+        <div class="ex-stage">
+<div data-liquid-design-theme="light">
+  <button class="demo-btn" type="button" data-liquid-design>Always light</button>
+</div>
+<div data-liquid-design-theme="dark">
+  <button class="demo-btn" type="button" data-liquid-design>Always dark</button>
+</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Tint ───────────────────────── -->
+    <section id="tint">
+      <h2>Tint and ink</h2>
+      <p>Buttons are clear by default: no veil, only blur, refraction and an edge of light. Give a button colour for a primary action with <code>--liquid-design-tint</code>, and set its text and icon colour with <code>--liquid-design-color</code>. Use a translucent tint so the glass still shows through.</p>
+      <div class="ex" data-bg="stripes">
+        <div class="ex-stage">
+<button class="demo-btn" type="button" data-liquid-design data-liquid-design-independent
+  style="--liquid-design-tint: rgb(201 100 120 / 70%); --liquid-design-color: #fff">Continue</button>
+<button class="demo-btn" type="button" data-liquid-design data-liquid-design-independent
+  style="--liquid-design-tint: rgb(35 64 255 / 55%); --liquid-design-color: #fff">Search</button>
+<button class="demo-btn" type="button" data-liquid-design data-liquid-design-independent
+  style="--liquid-design-tint: rgb(200 40 40 / 60%); --liquid-design-color: #fff">Delete</button>
+        </div>
+      </div>
+      <aside class="ld-note"><strong>Fill is for surfaces</strong> <code>--liquid-design-fill</code> changes the veil on surfaces and open menus. Clear buttons ignore it; use a tint.</aside>
+    </section>
+
+    <!-- ───────────────────────── Color source ───────────────────────── -->
+    <section id="color-source">
+      <h2>Nearby colour</h2>
+      <p>Real glass picks up colour from bright objects next to it. Mark an element with <code>data-liquid-color-source</code> and glass within 80&nbsp;px catches its colour on the facing rim, with a faint wash inside. Leave the value empty to use the element's background colour, or give a colour.</p>
+      <div class="ex" data-bg="plain">
+        <div class="ex-stage">
+<span class="demo-orb" data-liquid-color-source="#ff5fa2"></span>
+<button class="demo-btn" type="button" data-liquid-design>Pink on my left</button>
+        </div>
+      </div>
+      <p>Widen the reach for one piece of glass with <code>--liquid-design-color-range</code> (pixels, default <code>80</code>).</p>
+    </section>
+
+    <!-- ───────────────────────── Playground ───────────────────────── -->
+    <section id="playground">
+      <h2>Playground</h2>
+      <p>Adjust the variables and copy the CSS. Every value is a plain custom property, so you can set it on one control, a section or <code>:root</code>.</p>
+      <div class="ld-play">
+        <div class="ex-stage ld-play-stage" data-bg="astra" id="ld-play-stage">
+          <button class="demo-btn ld-play-btn" type="button" id="ld-play-btn" data-liquid-design>Liquid glass</button>
+        </div>
+        <form class="ld-play-controls" id="ld-play-form">
+          <label>Backdrop
+            <select name="bg">
+              <option value="astra">Cobalt</option><option value="aion">Red</option><option value="word">Saffron</option>
+              <option value="labs21">Green</option><option value="now">Pink</option><option value="stripes">Stripes</option><option value="plain">Plain</option>
+            </select>
+          </label>
+          <label>Blur <output name="blurOut">12px</output>
+            <input type="range" name="blur" min="0" max="40" value="12">
+          </label>
+          <label>Tint
+            <span class="ld-play-pair"><input type="color" name="tint" value="#c96478" aria-label="Tint colour"><input type="range" name="tintAlpha" min="0" max="100" value="0" aria-label="Tint strength"></span>
+          </label>
+          <label>Edge width <output name="edgeOut">1.25px</output>
+            <input type="range" name="edge" min="0" max="4" step=".25" value="1.25">
+          </label>
+          <label>Optics <output name="opticsOut">1</output>
+            <input type="range" name="optics" min="0" max="1" step=".05" value="1">
+          </label>
+          <label>Corner radius <output name="radiusOut">999px</output>
+            <input type="range" name="radius" min="0" max="40" value="40">
+          </label>
+        </form>
+      </div>
+      <div class="ld-code" data-lang="css" data-file="glass.css" id="ld-play-out"><pre></pre></div>
+    </section>
+
+    <!-- ───────────────────────── Variables ───────────────────────── -->
+    <section id="variables">
+      <h2>Variable reference</h2>
+      <p>Set these on a control or any ancestor. Unset values fall back to the built-in light or dark material.</p>
+      <div class="ld-table-wrap"><table class="ld-table">
+        <thead><tr><th scope="col">Property</th><th scope="col">Default</th><th scope="col">What it does</th></tr></thead>
+        <tbody>
+          <tr><th colspan="3" scope="rowgroup">Material</th></tr>
+          <tr><td><code>--liquid-design-tint</code></td><td><code>transparent</code></td><td>Colour painted over the glass. Use alpha.</td></tr>
+          <tr><td><code>--liquid-design-color</code></td><td>inherit</td><td>Text and icon colour on the glass.</td></tr>
+          <tr><td><code>--liquid-design-fill</code></td><td>64% white / 18% charcoal</td><td>Veil on surfaces and open menus.</td></tr>
+          <tr><td><code>--liquid-design-blur</code></td><td><code>12px</code></td><td>Backdrop blur where refraction is off.</td></tr>
+          <tr><td><code>--liquid-design-saturate</code></td><td><code>1.7</code> / <code>1.5</code></td><td>Backdrop vibrancy on surfaces.</td></tr>
+          <tr><th colspan="3" scope="rowgroup">Edge and light</th></tr>
+          <tr><td><code>--liquid-design-edge-width</code></td><td><code>1.25px</code> / <code>1px</code></td><td>Width of the ring of light around the edge.</td></tr>
+          <tr><td><code>--liquid-design-edge-light</code></td><td>top and bottom gradient</td><td>The ring's paint. Any background value.</td></tr>
+          <tr><td><code>--liquid-design-edge-contrast</code></td><td>faint grey / none</td><td>Thin dark contour that keeps light glass visible on white.</td></tr>
+          <tr><td><code>--liquid-design-rim</code></td><td><code>1</code></td><td>Opacity of the reflected rim on blended shapes.</td></tr>
+          <tr><td><code>--liquid-design-rim-width</code></td><td><code>1.25px</code> / <code>.75px</code></td><td>Width of that rim.</td></tr>
+          <tr><td><code>--liquid-design-touch-light</code></td><td>white radial</td><td>Highlight that follows the finger.</td></tr>
+          <tr><td><code>--liquid-design-prism-opacity</code></td><td><code>.28</code> / <code>.18</code></td><td>Violet and blue edge colour under pressure.</td></tr>
+          <tr><td><code>--liquid-design-optics</code></td><td><code>1</code></td><td>Scales the static lens layer. <code>0</code> turns it off.</td></tr>
+          <tr><th colspan="3" scope="rowgroup">Refraction</th></tr>
+          <tr><td><code>--liquid-design-refraction</code></td><td><code>1</code></td><td>Strength multiplier for the lens bend.</td></tr>
+          <tr><td><code>--liquid-design-refraction-blur</code></td><td><code>2px</code></td><td>Blur used while refracting.</td></tr>
+          <tr><td><code>--liquid-design-refraction-veil</code></td><td><code>14%</code></td><td>How much of the fill stays while refracting.</td></tr>
+          <tr><th colspan="3" scope="rowgroup">Layout</th></tr>
+          <tr><td><code>--liquid-design-tools-gap</code></td><td><code>9</code></td><td>Pixels between split Tools actions.</td></tr>
+          <tr><td><code>--liquid-design-menu-radius</code></td><td>from row height</td><td>Corner radius of an Options menu.</td></tr>
+          <tr><td><code>--liquid-design-menu-gap</code></td><td>—</td><td>Gap between trigger and menu.</td></tr>
+          <tr><td><code>--liquid-design-menu-offset-y</code></td><td><code>0</code></td><td>Extra vertical offset for a menu you position yourself.</td></tr>
+          <tr><td><code>--liquid-design-menu-top-bound</code>, <code>-bottom-bound</code></td><td>viewport</td><td>Limits a menu must stay within.</td></tr>
+          <tr><td><code>--liquid-design-navigation-gap</code></td><td><code>12</code></td><td>Clearance in coordinated navigation.</td></tr>
+          <tr><td><code>--liquid-design-color-range</code></td><td><code>80</code></td><td>Reach of nearby colour sources.</td></tr>
+          <tr><td><code>--liquid-design-front-z</code></td><td><code>var(--z-chrome, 100)</code></td><td>z-index a control is raised to while pressed.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="ld-small">Two values mean light / dark.</p>
+    </section>
+
+    <!-- ───────────────────────── Refraction ───────────────────────── -->
+    <section id="refraction">
+      <h2>Refraction</h2>
+      <p>In Chromium browsers the glass bends what is behind it. The middle stays flat; the edge rolls off like a thick slab of glass, so stripes and text curve as they reach the rim. The bend comes from a displacement map generated per shape and cached, so it costs nothing while you are not changing size.</p>
+      <div class="ex" data-bg="stripes">
+        <div class="ex-stage ex-stage--hero">
+<button class="demo-btn demo-big" type="button" data-liquid-design>Look at the edges</button>
+        </div>
+      </div>
+      <ul>
+        <li>Turn it off for one subtree with <code>data-liquid-design-refraction="off"</code>, or for the page by setting it on <code>&lt;html&gt;</code>.</li>
+        <li>Scale it with <code>--liquid-design-refraction</code>.</li>
+        <li>Debug it with <code>&lt;html data-liquid-design-refraction-debug&gt;</code>: each lens shows its map (red is sideways pull, green is vertical, grey is no bend).</li>
+      </ul>
+      <p><button class="ld-inline-btn" type="button" id="ld-debug">Show displacement maps</button></p>
+      <aside class="ld-note"><strong>Safari and iOS</strong> WebKit cannot feed an SVG filter into <code>backdrop-filter</code>, so there the glass keeps blur and its edge light without the bend. Nothing breaks.</aside>
+    </section>
+
+    <!-- ───────────────────────── Adaptation ───────────────────────── -->
+    <section id="adaptation">
+      <h2>Backdrop adaptation</h2>
+      <p>Clear glass is only as readable as what is behind it. The engine samples a small grid under each control (page colours, same-origin images and CSS backgrounds) and sets <code>data-lgp-backdrop="dark|light"</code> on it. Over dark content the veil lifts and the ink turns light when your theme's ink would clash; over light content a clear button gains a thin veil and a firmer contour. Changes fade over 220&nbsp;ms.</p>
+      <div class="ex" data-bg="split">
+        <div class="ex-stage">
+<button class="demo-btn" type="button" data-liquid-design data-liquid-design-independent>On dark</button>
+<button class="demo-btn" type="button" data-liquid-design data-liquid-design-independent>On light</button>
+        </div>
+      </div>
+      <ul>
+        <li>Opt out with <code>data-liquid-design-adapt="off"</code> on a control, a subtree or <code>&lt;html&gt;</code>.</li>
+        <li>Controls pinned on one line within 48&nbsp;px pick one ink together. Force a cluster with a shared <code>data-liquid-design-adapt-group="name"</code>.</li>
+        <li>Fixed overlays that do not take pointer events are composited into the reading. Mark other overlays with <code>data-liquid-design-scrim</code>, or exclude one with <code>="off"</code>.</li>
+      </ul>
+      <p>Cross-origin images cannot be read, so they are skipped. If glass sits over one, set an explicit ink with <code>--liquid-design-color</code>.</p>
+    </section>
+
+    <!-- ───────────────────────── API ───────────────────────── -->
+    <section id="api">
+      <h2>JavaScript API</h2>
+      <p>The engine enhances what is in the page at load. For content you add later, call <code>refresh</code>. All three methods take an optional scope element and default to the whole document.</p>
+      <div class="ld-table-wrap"><table class="ld-table">
+        <thead><tr><th scope="col">Method</th><th scope="col">What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>LiquidDesign.refresh(scope?)</code></td><td>Enhances new controls in <code>scope</code> and re-measures existing ones.</td></tr>
+          <tr><td><code>LiquidDesign.destroy(scope?)</code></td><td>Removes the glass, listeners and springs, and restores the original styles and attributes.</td></tr>
+          <tr><td><code>LiquidDesign.repaint(scope?)</code></td><td>Repaints shapes without re-enhancing. Use during your own CSS transitions.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="ld-code" data-lang="js" data-file="app.js"><pre>const card = document.createElement('div');
+card.innerHTML = '&lt;button data-liquid-design&gt;New action&lt;/button&gt;';
+list.append(card);
+LiquidDesign.refresh(card);
+
+// Later, before removing a whole view
+LiquidDesign.destroy(view);</pre></div>
+      <div class="ex" data-bg="now">
+        <div class="ex-stage ex-stage--wrap" id="ld-api-stage">
+<button class="demo-btn" type="button" data-liquid-design data-liquid-design-independent>I was here at load</button>
+        </div>
+        <div class="ex-bar">
+          <button class="ld-inline-btn" type="button" id="ld-api-add">Add a button</button>
+          <button class="ld-inline-btn" type="button" id="ld-api-toggle">Destroy</button>
+        </div>
+      </div>
+      <p>Removed controls are cleaned up on their own, so you only need <code>destroy</code> to turn the glass off while keeping the elements.</p>
+    </section>
+
+    <!-- ───────────────────────── Attributes ───────────────────────── -->
+    <section id="attributes">
+      <h2>Attribute reference</h2>
+      <div class="ld-table-wrap"><table class="ld-table">
+        <thead><tr><th scope="col">Attribute</th><th scope="col">On</th><th scope="col">What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>data-liquid-design</code></td><td>button, link</td><td>Makes the control glass.</td></tr>
+          <tr><td><code>data-liquid-design="surface"</code></td><td>form, div</td><td>Editable glass panel with native inputs.</td></tr>
+          <tr><td><code>data-liquid-design-independent</code></td><td>control</td><td>Own material, never grouped.</td></tr>
+          <tr><td><code>data-liquid-design-group</code></td><td>container</td><td>Children share one material.</td></tr>
+          <tr><td><code>data-liquid-design-static-actions</code></td><td>surface</td><td>Presses on nested rows stretch the whole surface.</td></tr>
+          <tr><td><code>data-liquid-design-component</code></td><td>wrapper</td><td><code>"options"</code> or <code>"tools"</code>.</td></tr>
+          <tr><td><code>data-liquid-design-toggle</code></td><td>trigger</td><td>The <code>id</code> of the component's panel.</td></tr>
+          <tr><td><code>data-liquid-design-menu-direction</code></td><td>options wrapper</td><td><code>"up"</code> or <code>"down"</code>.</td></tr>
+          <tr><td><code>data-liquid-design-navigation</code></td><td>bar</td><td>Coordinates an Options and a Tools inside it.</td></tr>
+          <tr><td><code>data-liquid-design-move</code></td><td>options position</td><td>The wrapper that slides away from Tools.</td></tr>
+          <tr><td><code>data-liquid-design-theme</code></td><td>any ancestor</td><td><code>"light"</code> or <code>"dark"</code>.</td></tr>
+          <tr><td><code>data-liquid-color-source</code></td><td>any element</td><td>Colour that nearby glass reflects.</td></tr>
+          <tr><td><code>data-liquid-design-refraction</code></td><td>html, subtree</td><td><code>"off"</code>; on <code>&lt;html&gt;</code>, <code>"on"</code> forces it in automation.</td></tr>
+          <tr><td><code>data-liquid-design-refraction-debug</code></td><td>html</td><td>Shows displacement maps.</td></tr>
+          <tr><td><code>data-liquid-design-adapt</code></td><td>html, subtree</td><td><code>"off"</code> stops backdrop sampling.</td></tr>
+          <tr><td><code>data-liquid-design-adapt-group</code></td><td>control</td><td>Controls with the same name share one ink.</td></tr>
+          <tr><td><code>data-liquid-design-scrim</code></td><td>overlay</td><td>Counts as part of the backdrop; <code>"off"</code> ignores it.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ───────────────────────── Accessibility ───────────────────────── -->
+    <section id="accessibility">
+      <h2>Accessibility</h2>
+      <ul>
+        <li><strong>Semantics stay yours.</strong> Roles, names, focus order and keyboard activation are your element's. Decoration is <code>aria-hidden</code> and ignores pointer events.</li>
+        <li><strong>Reduced motion</strong> turns off stretching, springs and menu morphs; menus open and close instantly. The setting is watched live.</li>
+        <li><strong>Reduced transparency and more contrast</strong> give the glass an opaque fill with no blur, refraction or lens layer.</li>
+        <li><strong>Forced colours</strong> use system colours.</li>
+        <li><strong>Hitboxes never move.</strong> The material stretches; your layout box does not.</li>
+        <li><strong>Text selection</strong> is off on glass labels so a drag never selects them, and stays on inside inputs and editable content.</li>
+      </ul>
+      <p>Keep your own visible <code>:focus-visible</code> style on buttons. Surfaces drop the extra focus box because the field inside shows focus.</p>
+      <aside class="ld-note"><strong>Testing</strong> Under WebDriver the engine keeps controls still and skips refraction and sampling, so snapshots are deterministic. Opt back in with <code>data-liquid-design-refraction="on"</code> and <code>data-liquid-design-adapt="on"</code> on <code>&lt;html&gt;</code>.</aside>
+    </section>
+
+    <!-- ───────────────────────── Support ───────────────────────── -->
+    <section id="support">
+      <h2>Browser support</h2>
+      <div class="ld-table-wrap"><table class="ld-table">
+        <thead><tr><th scope="col">Feature</th><th scope="col">Chromium</th><th scope="col">Safari / iOS</th><th scope="col">Firefox</th></tr></thead>
+        <tbody>
+          <tr><td>Glass, blur, stretch, components</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td>Refraction</td><td>Yes</td><td>Falls back to blur</td><td>Falls back to blur</td></tr>
+          <tr><td>Backdrop adaptation</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        </tbody>
+      </table></div>
+      <div class="ld-next">
+        <a href="example.html"><span>Next</span><strong>Open the standalone demo</strong></a>
+      </div>
+    </section>
+
+    <footer class="ld-foot">
+      <span>© 2026 <span translate="no">OkemoVail</span></span>
+      <a href="/index.html">Home</a>
+      <a href="example.html">Standalone demo</a>
+      <a href="README.md">README</a>
+      <a href="https://github.com/okemovail" target="_blank" rel="noopener">GitHub</a>
+    </footer>
+  </main>
+
+  <nav class="ld-toc" aria-label="On this page">
+    <p>On this page</p>
+    <ol id="ld-toc-list"></ol>
+  </nav>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var html = document.documentElement;
+
+  // ── Code blocks for examples: captured before the deferred engine runs, so
+  // the snippet is exactly the markup the reader would write.
+  function dedent(text) {
+    var lines = text.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+    var pad = Math.min.apply(null, lines.filter(function (l) { return l.trim(); }).map(function (l) { return l.match(/^ */)[0].length; }));
+    return lines.map(function (l) { return l.slice(pad); }).join('\n');
+  }
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function highlightHtml(src) {
+    var out = '', last = 0, re = /<!--[\s\S]*?-->|<\/?[\w-]+(?:\s+[^\s=>]+(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?)*\s*\/?>/g, m;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      var tag = m[0];
+      if (tag.indexOf('<!--') === 0) out += '<span class="tk-c">' + esc(tag) + '</span>';
+      else out += tag.replace(/^(<\/?)([\w-]+)([\s\S]*?)(\/?>)$/, function (_, open, name, attrs, close) {
+        attrs = attrs.replace(/([^\s=]+)(?:(=)("[^"]*"|'[^']*'|[^\s>]+))?/g, function (a, n, eq, v) {
+          return '<span class="tk-a">' + esc(n) + '</span>' + (eq ? '=<span class="tk-s">' + esc(v) + '</span>' : '');
+        });
+        return '<span class="tk-p">' + esc(open) + '</span><span class="tk-t">' + name + '</span>' + attrs + '<span class="tk-p">' + esc(close) + '</span>';
+      });
+      last = re.lastIndex;
+    }
+    return out + esc(src.slice(last));
+  }
+  function highlightScript(src) {
+    var out = '', last = 0, re = /\/\*[\s\S]*?\*\/|\/\/[^\n]*|'[^'\n]*'|"[^"\n]*"|\b(?:const|let|var|function|return|new|document)\b/g, m;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      var t = m[0], cls = t[0] === '/' ? 'tk-c' : (t[0] === '"' || t[0] === "'") ? 'tk-s' : 'tk-k';
+      out += '<span class="' + cls + '">' + esc(t) + '</span>';
+      last = re.lastIndex;
+    }
+    return out + esc(src.slice(last));
+  }
+  function codeBlock(source, lang, file) {
+    var wrap = document.createElement('div');
+    wrap.className = 'ld-code'; wrap.dataset.lang = lang; if (file) wrap.dataset.file = file;
+    wrap.innerHTML = '<pre></pre>';
+    wrap.querySelector('pre').textContent = source;
+    return wrap;
+  }
+  function decorate(block) {
+    var pre = block.querySelector('pre'), source = pre.textContent, lang = block.dataset.lang || 'html';
+    block._source = source;
+    pre.innerHTML = lang === 'html' ? highlightHtml(source) : highlightScript(source);
+    if (block.querySelector('.ld-code-bar')) return;
+    var bar = document.createElement('div'); bar.className = 'ld-code-bar';
+    bar.innerHTML = '<span>' + esc(block.dataset.file || lang.toUpperCase()) + '</span><button type="button" class="ld-copy">Copy</button>';
+    block.prepend(bar);
+  }
+  document.querySelectorAll('.ex').forEach(function (ex) {
+    var stage = ex.querySelector('.ex-stage');
+    if (ex.dataset.bg) stage.dataset.bg = ex.dataset.bg;
+    if (ex.closest('#overview')) return;
+    // innerHTML serializes boolean attributes as attr="", which nobody writes.
+    var source = dedent(stage.innerHTML).replace(/ ([\w-]+)=""/g, ' $1');
+    var block = codeBlock(source, 'html', 'HTML');
+    var cap = ex.querySelector('.ex-cap, .ex-bar');
+    ex.insertBefore(block, cap ? cap.nextSibling : null);
+  });
+  document.querySelectorAll('.ld-code').forEach(decorate);
+  document.addEventListener('click', function (event) {
+    var btn = event.target.closest('.ld-copy'); if (!btn) return;
+    var text = btn.closest('.ld-code')._source || '';
+    function done(ok) { btn.textContent = ok ? 'Copied' : 'Press Ctrl+C'; setTimeout(function () { btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+    else done(false);
+  });
+
+  // ── On this page + scroll spy (theme is owned by the site nav)
+  var sections = Array.from(document.querySelectorAll('.ld-main > section[id]'));
+  var tocList = document.getElementById('ld-toc-list');
+  var sideLinks = Array.from(document.querySelectorAll('.ld-side a'));
+  sections.forEach(function (s) {
+    var h = s.querySelector('h1, h2'); if (!h) return;
+    var li = document.createElement('li'), a = document.createElement('a');
+    a.href = '#' + s.id; a.textContent = h.textContent; li.append(a); tocList.append(li);
+    if (h.tagName === 'H2') {
+      var anchor = document.createElement('a'); anchor.className = 'ld-anchor'; anchor.href = '#' + s.id;
+      anchor.setAttribute('aria-label', 'Link to ' + h.textContent); anchor.textContent = '#';
+      h.append(anchor);
+    }
+  });
+  var tocLinks = Array.from(tocList.querySelectorAll('a'));
+  function setActive(id) {
+    tocLinks.concat(sideLinks).forEach(function (a) {
+      var on = a.getAttribute('href') === '#' + id;
+      a.classList.toggle('is-active', on);
+      if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+    });
+  }
+  var visible = new Map();
+  var spy = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { visible.set(e.target.id, e.isIntersecting); });
+    var first = sections.find(function (s) { return visible.get(s.id); });
+    if (first) setActive(first.id);
+  }, { rootMargin: '-72px 0px -60% 0px' });
+  sections.forEach(function (s) { spy.observe(s); });
+
+  // ── Sidebar filter
+  var filter = document.getElementById('ld-filter'), empty = document.querySelector('.ld-side-empty');
+  filter.addEventListener('input', function () {
+    var q = filter.value.trim().toLowerCase(), any = false;
+    sideLinks.forEach(function (a) {
+      var section = document.querySelector(a.getAttribute('href'));
+      var hay = (a.textContent + ' ' + (section ? section.textContent : '')).toLowerCase();
+      var hit = !q || hay.indexOf(q) !== -1; a.hidden = !hit; any = any || hit;
+    });
+    document.querySelectorAll('.ld-side-head').forEach(function (head) {
+      var n = head.nextElementSibling, show = false;
+      while (n && n.tagName === 'A') { if (!n.hidden) show = true; n = n.nextElementSibling; }
+      head.hidden = !show;
+    });
+    empty.hidden = any;
+    if (q) openSide(true);
+  });
+  filter.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      var first = sideLinks.find(function (a) { return !a.hidden; });
+      if (first) { event.preventDefault(); location.hash = first.getAttribute('href'); closeSide(); first.focus(); }
+    } else if (event.key === 'Escape') { filter.value = ''; filter.dispatchEvent(new Event('input')); filter.blur(); }
+  });
+  document.addEventListener('keydown', function (event) {
+    var t = event.target, typing = t.closest && t.closest('input, textarea, select, [contenteditable]');
+    if (!typing && (event.key === '/' || (event.key.toLowerCase() === 'k' && (event.ctrlKey || event.metaKey)))) {
+      event.preventDefault(); filter.focus();
+    }
+  });
+
+  // ── Mobile drawer
+  var side = document.getElementById('ld-side'), menuBtn = document.querySelector('.ld-menu-btn'), scrim = document.querySelector('.ld-scrim');
+  var narrow = matchMedia('(max-width: 899px)');
+  function syncInert() { side.inert = narrow.matches && !side.classList.contains('is-open'); }
+  function openSide(fromFilter) {
+    if (!narrow.matches) return;
+    side.classList.add('is-open'); scrim.hidden = false; menuBtn.setAttribute('aria-expanded', 'true'); syncInert();
+    if (!fromFilter) { var link = side.querySelector('a:not([hidden])'); if (link) link.focus(); }
+  }
+  function closeSide() {
+    if (!side.classList.contains('is-open')) return;
+    side.classList.remove('is-open'); scrim.hidden = true; menuBtn.setAttribute('aria-expanded', 'false'); syncInert();
+  }
+  menuBtn.addEventListener('click', function () { side.classList.contains('is-open') ? closeSide() : openSide(); });
+  scrim.addEventListener('click', closeSide);
+  side.addEventListener('click', function (event) { if (event.target.closest('a')) closeSide(); });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && side.classList.contains('is-open')) { closeSide(); menuBtn.focus(); }
+  });
+  narrow.addEventListener('change', function () { if (!narrow.matches) closeSide(); syncInert(); });
+  syncInert();
+
+  // ── Playground
+  var form = document.getElementById('ld-play-form'), btn = document.getElementById('ld-play-btn');
+  var playStage = document.getElementById('ld-play-stage'), out = document.getElementById('ld-play-out');
+  function hexAlpha(hex, a) {
+    var n = parseInt(hex.slice(1), 16);
+    return 'rgb(' + (n >> 16 & 255) + ' ' + (n >> 8 & 255) + ' ' + (n & 255) + ' / ' + a + '%)';
+  }
+  function play() {
+    var f = form.elements, alpha = +f.tintAlpha.value, radius = +f.radius.value;
+    playStage.dataset.bg = f.bg.value;
+    var vars = [
+      ['--liquid-design-blur', f.blur.value + 'px'],
+      ['--liquid-design-refraction-blur', Math.min(+f.blur.value, 2) + 'px'],
+      ['--liquid-design-edge-width', f.edge.value + 'px'],
+      ['--liquid-design-optics', f.optics.value]
+    ];
+    if (alpha) vars.push(['--liquid-design-tint', hexAlpha(f.tint.value, alpha)], ['--liquid-design-color', '#fff']);
+    // Clear only the properties the playground owns; the engine keeps its own
+    // inline styles on the control, and wiping them detaches the material.
+    ['--liquid-design-blur', '--liquid-design-refraction-blur', '--liquid-design-edge-width', '--liquid-design-optics',
+     '--liquid-design-tint', '--liquid-design-color'].forEach(function (p) { btn.style.removeProperty(p); });
+    vars.forEach(function (v) { btn.style.setProperty(v[0], v[1]); });
+    btn.style.setProperty('border-radius', radius >= 40 ? '999px' : radius + 'px');
+    f.blurOut.value = f.blur.value + 'px'; f.edgeOut.value = f.edge.value + 'px';
+    f.opticsOut.value = f.optics.value; f.radiusOut.value = radius >= 40 ? '999px' : radius + 'px';
+    var css = '.my-glass {\n  border-radius: ' + (radius >= 40 ? '999px' : radius + 'px') + ';\n' +
+      vars.map(function (v) { return '  ' + v[0] + ': ' + v[1] + ';'; }).join('\n') + '\n}';
+    out.querySelector('pre').textContent = css; decorate(out);
+    if (window.LiquidDesign) LiquidDesign.repaint(btn);
+  }
+  form.addEventListener('input', play);
+  form.addEventListener('submit', function (event) { event.preventDefault(); });
+  addEventListener('DOMContentLoaded', play);
+
+  // ── Refraction debug
+  var debugBtn = document.getElementById('ld-debug');
+  debugBtn.addEventListener('click', function () {
+    var on = html.toggleAttribute('data-liquid-design-refraction-debug');
+    debugBtn.textContent = on ? 'Hide displacement maps' : 'Show displacement maps';
+  });
+
+  // ── API demo
+  var apiStage = document.getElementById('ld-api-stage'), added = 0, live = true;
+  document.getElementById('ld-api-add').addEventListener('click', function () {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'demo-btn';
+    b.setAttribute('data-liquid-design', ''); b.setAttribute('data-liquid-design-independent', '');
+    b.textContent = 'Added ' + (++added);
+    apiStage.append(b);
+    if (live && window.LiquidDesign) LiquidDesign.refresh(b);
+  });
+  document.getElementById('ld-api-toggle').addEventListener('click', function (event) {
+    if (!window.LiquidDesign) return;
+    live = !live;
+    if (live) LiquidDesign.refresh(apiStage); else LiquidDesign.destroy(apiStage);
+    event.currentTarget.textContent = live ? 'Destroy' : 'Refresh';
+  });
+
+  // ── Example buttons give feedback without navigating away
+  document.addEventListener('click', function (event) {
+    var b = event.target.closest('.ex-stage button[type="submit"]');
+    if (b) event.preventDefault();
+  });
+  document.querySelectorAll('.ex-stage form').forEach(function (f) {
+    f.addEventListener('submit', function (event) { event.preventDefault(); var t = f.querySelector('textarea'); if (t) t.value = ''; });
+  });
+})();
+</script>
+<script>
+  // Site navigation: Back on the left; page menu and theme on the right, inside
+  // the slots the docs top bar reserves for them.
+  window.NAV_CONFIG = {
+    variant: 'pages',
+    back: { label: 'Back', href: '/index.html' },
+    links: [
+      { label: 'Home', href: '/index.html' },
+      { label: 'Labs21', href: '/AI/index.html' },
+      { label: 'Standalone demo', href: '/liquid-design/example.html' },
+      { label: 'GitHub', href: 'https://github.com/okemovail' }
+    ],
+    primary: null
+  };
+</script>
+<script src="../src/nav.js?v=20261025-liquid-docs"></script>
+</body>
+</html>

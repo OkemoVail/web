@@ -405,6 +405,20 @@
       // can disappear across WebKit compositor layers during split/rejoin.
       material.style.clipPath = 'path("' + d + '")';
       highlights.style.clipPath = 'path("' + d + '")';
+      // Chromium does not fully contain a backdrop-filter inside a compound
+      // clip-path: the filtered backdrop of a multi-lobe contour leaks past the
+      // necks and the far end while Tools expands, reading as a ghost outline
+      // ahead of the glass. A matching alpha mask contains it exactly. Lone
+      // lobes use border-radius and need no mask.
+      var maskKey = lone ? '' : width + 'x' + height + ':' + d;
+      if (maskKey !== material._lgcMaskKey) {
+        material._lgcMaskKey = maskKey;
+        var maskImage = lone ? '' : 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height +
+          '" viewBox="0 0 ' + width + ' ' + height + '"><path d="' + d + '"/></svg>') + '")';
+        ['maskImage', 'webkitMaskImage'].forEach(function (name) { material.style[name] = maskImage; });
+        ['maskSize', 'webkitMaskSize'].forEach(function (name) { material.style[name] = lone ? '' : '100% 100%'; });
+        ['maskRepeat', 'webkitMaskRepeat'].forEach(function (name) { material.style[name] = lone ? '' : 'no-repeat'; });
+      }
        rim.setAttribute('d', d);
         // Each expanded lobe references its own contour bounds so the actions
         // and trigger carry the same local top reflection while deforming.
@@ -644,8 +658,15 @@
       panel.prepend(selectionPill);
       var menuMotion = root.LiquidDesignLiveDemo.create(group, {
         button: panel, slab: panel, track: group,
-        editableSurface: true,
-        deformationScale: .28, centerCoupling: .045, centerLimit: 10,
+        // Rows are nested buttons. As a static-action surface the press on a
+        // row lights the glass and a pull past the edge stretches the sheet,
+        // while the row still activates on a stationary release. Without it
+        // every row press returned early and the open menu never stretched.
+        editableSurface: true, staticActionSurface: true,
+        // A 220x144 sheet has ~3.4x a button's area resistance, applied to
+        // both stretch gain and its limit, so a 140px pull moved the edge
+        // ~3px. Cap it so the open sheet pulls like the site's surfaces.
+        deformationScale: 1, centerCoupling: .045, centerLimit: 10, areaScaleLimit: 1.2, pullFromPress: true,
         measureRect: function () {
           // Never feed our stretched render transform back into the solver.
           var transform = panel.style.transform;

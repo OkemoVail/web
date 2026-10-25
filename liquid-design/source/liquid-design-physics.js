@@ -199,14 +199,17 @@
     var height = geometry.slabHalfHeight * 2;
     // Small controls keep their familiar feel; broad surfaces resist the same
     // pointer pressure progressively. Use resting area, never deformed bounds.
-    var areaResistance = 1.35 * Math.max(1, Math.sqrt(width * height / (52 * 52)));
+    // areaScaleLimit (optional) caps that resistance for sheets that must
+    // still visibly pull, such as an open Options menu.
+    var areaCap = Number(config.areaScaleLimit) > 0 ? Number(config.areaScaleLimit) : Infinity;
+    var areaResistance = 1.35 * Math.min(areaCap, Math.max(1, Math.sqrt(width * height / (52 * 52))));
     var centerCoupling = clamp(config.centerCoupling, 0.05, 0.08);
     var stretchGain = clamp(Number(config.fluidStretchGain) || 1, 1, 3);
     var stretchRatio = clamp(Number(config.fluidStretchRatio) || 0.55, 0.1, 0.7);
     var facingShare = 0.88;
     var oppositeShare = 1 - facingShare;
     // stretchLimit is the maximum facing-edge extension in CSS pixels.
-    var areaScale = Math.max(1, Math.sqrt(width * height / (52 * 52)));
+    var areaScale = Math.min(areaCap, Math.max(1, Math.sqrt(width * height / (52 * 52))));
     var horizontalFacingLimit = Math.min(config.stretchLimit, width * stretchRatio) / areaScale;
     var verticalFacingLimit = Math.min(config.stretchLimit, height * stretchRatio) / areaScale;
     var horizontalPressure = Math.abs(rubberBand(
