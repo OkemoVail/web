@@ -1324,6 +1324,9 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="ai-home"] :is(.lumen-fallback, .lumen-stage) { z-index: 1; opacity: 0; transition: opacity var(--dur-3) var(--ease-smooth); }
         [data-page="ai-home"] .lumen-hero[data-mode="video"] .lumen-fallback,
         [data-page="ai-home"] .lumen-hero[data-mode="webgl"] .lumen-stage { opacity: 1; }
+        /* Held video: show the poster (the film's last frame) instead of
+           relying on a seek, which can land on 0s and go black. */
+        [data-page="ai-home"] .lumen-hero[data-mode="video"][data-state="held"] .lumen-fallback { opacity: 0; transition: none; }
         /* Ground darkens toward the bottom edge so the copy stays legible. */
         [data-page="ai-home"] .lumen-hero::after {
             content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
@@ -1341,7 +1344,11 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
             position: relative; z-index: 3; display: grid; gap: 16px;
             width: 100%; max-width: calc(var(--lv-max) + 2 * var(--lv-pad));
             margin: 0 auto; padding: 0 var(--lv-pad) clamp(40px, 7vw, 88px);
+            /* The copy box spans the hero; let clicks through its empty area
+               to the Replay button and the film (cursor ripples). */
+            pointer-events: none;
         }
+        [data-page="ai-home"] .lv-hero-copy > * { pointer-events: auto; }
         [data-page="ai-home"] .lv-kicker { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
         [data-page="ai-home"] .lv-title { font-size: clamp(48px, 7.2vw, 104px); font-weight: 600; line-height: .95; letter-spacing: -.035em; }
         [data-page="ai-home"] .lv-lead { max-width: 34ch; color: var(--text-secondary); font-size: clamp(17px, 1.4vw, 20px); line-height: 1.5; text-wrap: pretty; }

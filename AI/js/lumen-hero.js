@@ -132,16 +132,9 @@
     elapsedMs = policy.DURATION;
     updateLayers(policy.timelineAt(elapsedMs));
     setPresentation(mode, 'held');
-    if (mode === 'video') {
-      // Hold on the last decoded frame. Seeking to exactly `duration` can land
-      // past the final frame and show black, so stay one frame short.
-      try {
-        if (video.readyState >= 1) {
-          var end = Math.max(0, (Number.isFinite(video.duration) ? video.duration : 8) - 1 / 30);
-          if (Math.abs(video.currentTime - end) > 0.02) video.currentTime = end;
-        }
-      } catch (_) {}
-    }
+    // A held video is never seeked: servers without Range support make the
+    // seek fall back to 0s (a black frame). CSS hides the held video instead,
+    // and the poster underneath is rendered from the film's final frame.
     if (renderFinal) renderHeldSafely();
     announceReady();
   }
@@ -252,7 +245,7 @@
     var attempt = ++generation;
     sceneAbort = new AbortController();
     try {
-      var module = await import('./lumen-scene.js?v=aion2');
+      var module = await import('./lumen-scene.js?v=aion2-fun');
       if (!current(attempt)) return;
       var candidate = await (window.createLumenScene || module.createLumenScene)({
         mount: stage,

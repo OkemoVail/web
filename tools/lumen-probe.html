@@ -6,9 +6,9 @@ const tier = p.get('tier') || 'desktop';
 const m = document.getElementById('m');
 try {
   const mod = await import('../AI/js/lumen-scene.js?' + Date.now());
-  const s = await mod.createLumenSceneWithDependencies({ mount: m, quality: { textureTier: tier, pixelRatio: 1, antialias: true }, preserveDrawingBuffer: true });
+  const s = await mod.createLumenSceneWithDependencies({ mount: m, quality: { textureTier: tier, pixelRatio: 1, antialias: true }, preserveDrawingBuffer: true, interactive: false });
   s.resize(innerWidth, innerHeight);
-  window.renderAt = ms => { s.render({ elapsedMs: ms }, 16); return true; };
+  window.renderAt = ms => new Promise(r => { s.render({ elapsedMs: ms }, 16); requestAnimationFrame(() => requestAnimationFrame(() => r(true))); });
   window.ready = true;
 } catch (e) { window.failed = String(e && e.stack || e); }
 </script>

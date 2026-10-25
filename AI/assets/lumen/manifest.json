@@ -101,29 +101,29 @@
       "source": "https://science.nasa.gov/resource/moon-mosaic/"
     },
     "poster-mobile.webp": {
-      "bytes": 111838,
-      "sha256": "0bb6cf38be7d5bf0bbdf5878e3f802f11ffce464bb74ea2973bf687356251b5a",
+      "bytes": 75910,
+      "sha256": "54c25a5ab5f40b0039d7632381c0c3b85ad4826cb4708d56a73aece427bab0fc",
       "sources": [],
       "source": "procedural: AI/js/lumen-scene.js via tools/lumen-render.mjs",
       "immutable": true
     },
     "poster-desktop.webp": {
-      "bytes": 150006,
-      "sha256": "e14131b16f4a2631c34ac180c2a3f353d7a2843572eeb6b0eb30a72b2b9fc106",
+      "bytes": 101744,
+      "sha256": "4b94879ef33f3c7484e2b67517b2526e3a9ee17216644da2f34063de2c1131e4",
       "sources": [],
       "source": "procedural: AI/js/lumen-scene.js via tools/lumen-render.mjs",
       "immutable": true
     },
     "journey-mobile.mp4": {
-      "bytes": 1748356,
-      "sha256": "e7f0bbe87138883c3d4c790e839d0ad825c569c4e4eabf4e446b2700765708fb",
+      "bytes": 477225,
+      "sha256": "10360fedae44aaac9e72139e9151c911aa4fa823a56e6ad99d88f6679edb0165",
       "sources": [],
       "source": "procedural: AI/js/lumen-scene.js via tools/lumen-render.mjs",
       "immutable": true
     },
     "journey-desktop.mp4": {
-      "bytes": 2392273,
-      "sha256": "b72f91191733a68bfd165dce8b86ffe63251b155d9d5805f4e379c5f4724deba",
+      "bytes": 632514,
+      "sha256": "a890a6e879a220aba1617c4c802f066f1fd68b230b374e7d456645444fc4dccd",
       "sources": [],
       "source": "procedural: AI/js/lumen-scene.js via tools/lumen-render.mjs",
       "immutable": true

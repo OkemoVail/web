@@ -7,12 +7,14 @@
     { "name": "reveal", "startMs": 6500, "endMs": 8000 }
   ],
   "voices": [
-    { "x": -0.3, "z": -0.22, "startMs": 200 },
-    { "x": 0.26, "z": 0.18, "startMs": 1700 }
+    { "x": -0.3, "z": -0.22, "startMs": 450 },
+    { "x": 0.26, "z": 0.18, "startMs": 1900 }
   ],
-  "wave": { "speed": 0.028, "wavelength": 15, "periodMs": 1150, "amplitude": 1.5, "residual": 0.12 },
-  "formStartMs": 4300,
-  "formMs": 1500,
+  "typing": { "gapMs": 170, "spacing": 3 },
+  "pulse": { "speed": 0.03, "width": 2.4, "decayMs": 1300, "amplitude": 1.3 },
+  "drop": { "startMs": 4100, "spreadMs": 1000, "fallMs": 340, "height": 28, "restitution": 0.32 },
+  "shock": { "speed": 0.045, "width": 3.2, "decayMs": 1000, "amplitude": 2.2 },
+  "touch": { "speed": 0.03, "width": 1.8, "decayMs": 700, "amplitude": 0.7 },
   "desktop": {
     "cols": 128, "rows": 72,
     "glyph": { "cx": 0.15, "cz": -0.04, "size": 0.5, "height": 6 },

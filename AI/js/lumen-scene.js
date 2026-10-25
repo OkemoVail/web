@@ -2,12 +2,14 @@ import { WebGLRenderer } from '../vendor/three.module.min.js';
 import * as THREE from '../vendor/three.core.min.js';
 
 // Aion 2 hero (2026-10-25). A field of graphite blocks works as a sound
-// surface: one voice ripples out, a second one answers ("talks back"), then
-// the waves settle and the blocks under a "2" rise and light in AION red.
-// The camera moves from a low pass across the field to a raised three-quarter
-// view and the final frame holds with a faint residual ripple.
-// One InstancedMesh; heights are computed in the vertex shader from a few
-// uniforms plus per-block attributes (glyph mask, red spill, delay, jitter).
+// surface. Two "voices" tap out the three-dot typing rhythm of a chat, each
+// tap sending a ring across the field. Then the red "2" is written top to
+// bottom by blocks that drop from above, bounce and squash as they land on the
+// field; the last landing sends a shockwave out. The camera moves from a low
+// pass to a raised three-quarter view and the final frame holds. In the live
+// WebGL version the pointer drags ripples through the field.
+// Two instanced meshes share one shader: the field (every cell) and the caps
+// (glyph cells only). All motion is computed in the vertex shader.
 
 function easeInOut(value) {
   const t = Math.max(0, Math.min(1, value));
@@ -25,7 +27,7 @@ function seededRandom(seed) {
 const defaultDependencies = {
   createRenderer: (options) => new WebGLRenderer(options),
   loadTimeline: async (signal) => {
-    const response = await fetch(new URL('./lumen-timeline.json?v=aion2', import.meta.url), { signal });
+    const response = await fetch(new URL('./lumen-timeline.json?v=aion2-fun', import.meta.url), { signal });
     if (!response.ok) throw new Error('Unable to load the Aion 2 timeline');
     return response.json();
   },
@@ -68,8 +70,7 @@ function glyphMask(cols, rows, glyph) {
         }
       }
       // Hard-ish threshold so the letterform reads as whole blocks.
-      const coverage = sum / (scale * scale * 255);
-      mask[row * cols + col] = coverage > 0.42 ? 1 : 0;
+      mask[row * cols + col] = sum / (scale * scale * 255) > 0.42 ? 1 : 0;
     }
   }
   const spill = new Float32Array(cols * rows);
@@ -94,6 +95,9 @@ function glyphMask(cols, rows, glyph) {
   return { mask, spill };
 }
 
+const PULSES = 12;
+const TOUCHES = 8;
+
 const vertexShader = /* glsl */ `
 attribute vec2 aCell;
 attribute float aGlyph;
@@ -101,12 +105,16 @@ attribute float aSpill;
 attribute float aRand;
 attribute float aDelay;
 uniform float uTime;
-uniform float uCell;
-uniform vec4 uVoiceA;
-uniform vec4 uVoiceB;
-uniform vec4 uWave;
-uniform float uResidual;
-uniform vec2 uForm;
+uniform float uNow;
+uniform float uCap;
+uniform vec4 uPulses[${PULSES}];
+uniform vec4 uPulse;
+uniform vec4 uShockAt;
+uniform vec4 uShock;
+uniform vec4 uTouches[${TOUCHES}];
+uniform vec4 uTouch;
+uniform vec4 uDrop;
+uniform vec2 uSpillWindow;
 uniform float uGlyphHeight;
 varying vec3 vNormal;
 varying vec3 vLocal;
@@ -117,30 +125,72 @@ varying float vWave;
 varying float vForm;
 varying float vHeight;
 
-float voice(vec4 v, vec2 p, float t) {
-  float dt = t - v.z;
-  if (dt <= 0.0) return 0.0;
-  float d = distance(p, v.xy);
-  float front = uWave.x * dt;
-  float envelope = smoothstep(front, front - 10.0, d);
-  float k = 6.2831853 / uWave.y;
-  float w = 6.2831853 / uWave.z;
-  float falloff = 1.0 / (1.0 + d * 0.035);
-  return sin(d * k - dt * w) * envelope * falloff * v.w;
+// One travelling ring: a crest with a shallow trough behind it, fading with
+// time and distance. src = (x, z, startMs, amp), cfg = (speed, width, decay, amp).
+float ring(vec2 p, vec4 src, vec4 cfg, float t) {
+  float dt = t - src.z;
+  if (dt <= 0.0 || src.w == 0.0) return 0.0;
+  float d = distance(p, src.xy);
+  float x = (d - cfg.x * dt) / cfg.y;
+  float shape = exp(-x * x) - 0.45 * exp(-(x + 1.6) * (x + 1.6));
+  float nearSource = mix(0.45, 1.0, smoothstep(0.0, 4.0, d));
+  return shape * exp(-dt / cfg.z) * src.w * cfg.w * nearSource / (1.0 + d * 0.02);
+}
+
+float field(vec2 c) {
+  float w = 0.0;
+  for (int i = 0; i < ${PULSES}; i++) w += ring(c, uPulses[i], uPulse, uTime);
+  w += ring(c, uShockAt, uShock, uTime);
+  for (int i = 0; i < ${TOUCHES}; i++) w += ring(c, uTouches[i], uTouch, uNow);
+  // Barely-there breathing so the held frame never looks frozen.
+  w += 0.05 * sin(c.x * 0.21 + uTime * 0.0011) * sin(c.y * 0.17 - uTime * 0.0009);
+  return w;
+}
+
+// Height above the field of a dropped cap s ms after it was released, plus a
+// visibility flag. Falls under constant gravity, then two damped bounces.
+vec2 drop(float s) {
+  float fall = uDrop.y;
+  float H = uDrop.z;
+  float r = uDrop.w;
+  if (s < 0.0) return vec2(0.0, 0.0);
+  if (s < fall) { float u = s / fall; return vec2(H * (1.0 - u * u), 1.0); }
+  float g = 2.0 * H / (fall * fall);
+  float v = 2.0 * H / fall * r;
+  float u = s - fall;
+  for (int i = 0; i < 2; i++) {
+    float T = 2.0 * v / g;
+    if (u < T) return vec2(v * u - 0.5 * g * u * u, 1.0);
+    u -= T;
+    v *= r;
+  }
+  return vec2(0.0, 1.0);
 }
 
 void main() {
-  float t = uTime;
-  float settle = smoothstep(uForm.x, uForm.x + uForm.y * 1.4, t);
-  float wave = (voice(uVoiceA, aCell, t) + voice(uVoiceB, aCell, t)) * uWave.w;
-  wave *= mix(1.0, uResidual, settle);
-  float form = clamp((t - uForm.x - aDelay) / uForm.y, 0.0, 1.0);
-  form = 1.0 - pow(1.0 - form, 3.0);
-  float h = max(0.06, 0.32 + aRand * 0.14 + wave);
-  h += aGlyph * uGlyphHeight * form;
+  float wave = field(aCell);
+  float base = max(0.06, 0.32 + aRand * 0.14 + wave);
+  float h = base;
+  float yOff = 0.0;
+  float vis = 1.0;
+  float form;
+  if (uCap > 0.5) {
+    float s = uTime - uDrop.x - aDelay;
+    vec2 dr = drop(s);
+    float since = s - uDrop.y;
+    // Squash on the first impact, recovering over ~0.3s.
+    float squash = since >= 0.0 ? 0.22 * exp(-since / 90.0) : 0.0;
+    vis = dr.y;
+    h = uGlyphHeight * (1.0 - squash);
+    yOff = base + 0.01 + dr.x;
+    form = dr.y;
+    wave = 0.0;
+  } else {
+    form = smoothstep(uSpillWindow.x, uSpillWindow.y, uTime);
+  }
 
   vec3 p = position + vec3(0.0, 0.5, 0.0);
-  vec3 world = vec3(aCell.x + position.x * uCell, p.y * h, aCell.y + position.z * uCell);
+  vec3 world = vec3(aCell.x + position.x * vis, yOff + p.y * h * vis, aCell.y + position.z * vis);
   vLocal = vec3(p.x, p.y * h, p.z);
   vNormal = normal;
   vWorld = world;
@@ -200,22 +250,19 @@ void main() {
   }
 
   if (vGlyph > 0.5) {
-    float lit = vForm;
     if (top) {
       vec2 uv = vLocal.xz;
       float edge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
-      vec3 face = uRed * (0.62 + 0.28 * (1.0 - smoothstep(0.0, 0.06, edge))) * (0.75 + 0.35 * diffuse);
-      color = mix(color, face, lit);
+      color = uRed * (0.62 + 0.28 * (1.0 - smoothstep(0.0, 0.06, edge))) * (0.75 + 0.35 * diffuse);
     } else {
       float rise = clamp(vLocal.y / max(vHeight, 0.001), 0.0, 1.0);
-      vec3 side = uRed * mix(0.03, 0.34, rise * rise) * (0.45 + 0.6 * diffuse);
-      color = mix(color, side, lit);
+      color = uRed * mix(0.03, 0.34, rise * rise) * (0.45 + 0.6 * diffuse);
     }
   }
 
   float dist = distance(vWorld, uCameraPos);
   color = mix(color, uBg, smoothstep(uFog.x, uFog.y, dist));
-  // Field dissolves into black around the focus, so it has no visible edge.
+  // Field dissolves into black toward its bounds, so it has no visible edge.
   vec2 q = vWorld.xz / uHalf;
   float r = pow(pow(abs(q.x), 4.0) + pow(abs(q.y), 4.0), 0.25);
   color = mix(color, uBg, smoothstep(uEdge.x, uEdge.y, r));
@@ -227,7 +274,7 @@ void main() {
 `;
 
 async function createLumenSceneWithDependencies(
-  { mount, quality, onContextLost = function () {}, signal, preserveDrawingBuffer = false },
+  { mount, quality, onContextLost = function () {}, signal, preserveDrawingBuffer = false, interactive = true },
   dependencies = defaultDependencies,
 ) {
   if (!mount || !quality) throw new TypeError('Aion 2 scene requires mount and quality');
@@ -247,11 +294,17 @@ async function createLumenSceneWithDependencies(
   const initializationInterrupted = new Promise((resolve, reject) => { rejectInitialization = reject; });
   const geometries = [];
   const materials = [];
+  let pointerTarget = null;
+  let liveRaf = 0;
 
   function disposeResources() {
     if (disposed) return;
     disposed = true;
     active = false;
+    if (liveRaf) cancelAnimationFrame(liveRaf);
+    liveRaf = 0;
+    pointerTarget?.removeEventListener('pointermove', handlePointer);
+    pointerTarget?.removeEventListener('pointerdown', handlePointer);
     renderer.domElement.removeEventListener('webglcontextlost', handleContextLost, false);
     signal?.removeEventListener('abort', handleAbort);
     geometries.forEach((geometry) => geometry.dispose());
@@ -295,55 +348,103 @@ async function createLumenSceneWithDependencies(
 
   const layout = timeline[tier];
   const { cols, rows } = layout;
-  const cell = 1;
   const count = cols * rows;
   const { mask, spill } = glyphMask(cols, rows, { ...layout.glyph, text: timeline.glyphText || '2' });
   const random = seededRandom(2026);
 
-  const glyphCenter = new THREE.Vector2(layout.glyph.cx * cols, layout.glyph.cz * rows);
+  // Field: every cell. Caps: glyph cells only, written top to bottom.
   const cells = new Float32Array(count * 2);
-  const glyphs = new Float32Array(count);
   const spills = new Float32Array(count);
   const rands = new Float32Array(count);
-  const delays = new Float32Array(count);
+  const capIndex = [];
+  let zMin = Infinity;
+  let zMax = -Infinity;
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const i = row * cols + col;
-      const x = (col - (cols - 1) / 2) * cell;
-      const z = (row - (rows - 1) / 2) * cell;
+      const x = col - (cols - 1) / 2;
+      const z = row - (rows - 1) / 2;
       cells[i * 2] = x;
       cells[i * 2 + 1] = z;
-      glyphs[i] = mask[i];
       spills[i] = spill[i];
       rands[i] = random();
-      // The glyph builds from its centre outward with a little jitter.
-      delays[i] = Math.hypot(x - glyphCenter.x, z - glyphCenter.y) * 14 + random() * 260;
+      if (mask[i]) {
+        capIndex.push(i);
+        zMin = Math.min(zMin, z);
+        zMax = Math.max(zMax, z);
+      }
     }
   }
+  const capCount = capIndex.length;
+  const capCells = new Float32Array(capCount * 2);
+  const capSpills = new Float32Array(capCount);
+  const capRands = new Float32Array(capCount);
+  const capDelays = new Float32Array(capCount);
+  const spread = timeline.drop.spreadMs;
+  capIndex.forEach((i, k) => {
+    capCells[k * 2] = cells[i * 2];
+    capCells[k * 2 + 1] = cells[i * 2 + 1];
+    capSpills[k] = 1;
+    capRands[k] = rands[i];
+    const along = (cells[i * 2 + 1] - zMin) / Math.max(1, zMax - zMin);
+    capDelays[k] = along * spread + random() * 140;
+  });
 
   const box = new THREE.BoxGeometry(0.86, 1, 0.86);
-  const geometry = new THREE.InstancedBufferGeometry();
-  geometry.index = box.index;
-  geometry.setAttribute('position', box.getAttribute('position'));
-  geometry.setAttribute('normal', box.getAttribute('normal'));
-  geometry.setAttribute('aCell', new THREE.InstancedBufferAttribute(cells, 2));
-  geometry.setAttribute('aGlyph', new THREE.InstancedBufferAttribute(glyphs, 1));
-  geometry.setAttribute('aSpill', new THREE.InstancedBufferAttribute(spills, 1));
-  geometry.setAttribute('aRand', new THREE.InstancedBufferAttribute(rands, 1));
-  geometry.setAttribute('aDelay', new THREE.InstancedBufferAttribute(delays, 1));
-  geometry.instanceCount = count;
-  geometries.push(box, geometry);
+  geometries.push(box);
+  function instanced(cellData, glyphData, spillData, randData, delayData, instances) {
+    const geometry = new THREE.InstancedBufferGeometry();
+    geometry.index = box.index;
+    geometry.setAttribute('position', box.getAttribute('position'));
+    geometry.setAttribute('normal', box.getAttribute('normal'));
+    geometry.setAttribute('aCell', new THREE.InstancedBufferAttribute(cellData, 2));
+    geometry.setAttribute('aGlyph', new THREE.InstancedBufferAttribute(glyphData, 1));
+    geometry.setAttribute('aSpill', new THREE.InstancedBufferAttribute(spillData, 1));
+    geometry.setAttribute('aRand', new THREE.InstancedBufferAttribute(randData, 1));
+    geometry.setAttribute('aDelay', new THREE.InstancedBufferAttribute(delayData, 1));
+    geometry.instanceCount = instances;
+    geometries.push(geometry);
+    return geometry;
+  }
+  const fieldGeometry = instanced(cells, new Float32Array(count), spills, rands, new Float32Array(count), count);
+  const capGeometry = instanced(capCells, new Float32Array(capCount).fill(1), capSpills, capRands, capDelays, capCount);
 
-  const voice = (v) => new THREE.Vector4(v.x * cols, v.z * rows, v.startMs, 1);
-  const wave = timeline.wave;
+  // Typing rhythm: each voice taps three dots in a row, twice.
+  const pulses = [];
+  const { gapMs, spacing } = timeline.typing;
+  timeline.voices.forEach((voice) => {
+    for (let round = 0; round < 2; round++) {
+      for (let dot = 0; dot < 3; dot++) {
+        pulses.push(new THREE.Vector4(
+          voice.x * cols + (dot - 1) * spacing,
+          voice.z * rows,
+          voice.startMs + round * 700 + dot * gapMs,
+          dot === 1 ? 1.1 : 1,
+        ));
+      }
+    }
+  });
+  while (pulses.length < PULSES) pulses.push(new THREE.Vector4(0, 0, 0, 0));
+  pulses.length = PULSES;
+
+  const drop = timeline.drop;
+  const lastLanding = drop.startMs + spread + 140 + drop.fallMs;
+  const glyphCenter = new THREE.Vector2(layout.glyph.cx * cols, layout.glyph.cz * rows);
+  const cfg = (c) => new THREE.Vector4(c.speed, c.width, c.decayMs, c.amplitude);
+  // Vector4() defaults w to 1, which would make every empty slot a live ripple.
+  const touches = Array.from({ length: TOUCHES }, () => new THREE.Vector4(0, 0, 0, 0));
   const uniforms = {
     uTime: { value: 0 },
-    uCell: { value: 1 },
-    uVoiceA: { value: voice(timeline.voices[0]) },
-    uVoiceB: { value: voice(timeline.voices[1]) },
-    uWave: { value: new THREE.Vector4(wave.speed, wave.wavelength, wave.periodMs, wave.amplitude) },
-    uResidual: { value: wave.residual },
-    uForm: { value: new THREE.Vector2(timeline.formStartMs, timeline.formMs) },
+    uNow: { value: 0 },
+    uCap: { value: 0 },
+    uPulses: { value: pulses },
+    uPulse: { value: cfg(timeline.pulse) },
+    uShockAt: { value: new THREE.Vector4(glyphCenter.x, glyphCenter.y, lastLanding + 40, 1) },
+    uShock: { value: cfg(timeline.shock) },
+    uTouches: { value: touches },
+    uTouch: { value: cfg(timeline.touch) },
+    uDrop: { value: new THREE.Vector4(drop.startMs, drop.fallMs, drop.height, drop.restitution) },
+    uSpillWindow: { value: new THREE.Vector2(drop.startMs, lastLanding + 300) },
     uGlyphHeight: { value: layout.glyph.height },
     uCameraPos: { value: new THREE.Vector3() },
     uLight: { value: new THREE.Vector3(-0.45, 0.78, 0.42).normalize() },
@@ -354,20 +455,26 @@ async function createLumenSceneWithDependencies(
     uHalf: { value: new THREE.Vector2(cols / 2, rows / 2) },
     uEdge: { value: new THREE.Vector2(0.55, 0.96) },
   };
-  const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
-  materials.push(material);
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.frustumCulled = false;
+  const fieldMaterial = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
+  // Caps share every uniform object except the mesh switch.
+  const capMaterial = new THREE.ShaderMaterial({ uniforms: { ...uniforms, uCap: { value: 1 } }, vertexShader, fragmentShader });
+  materials.push(fieldMaterial, capMaterial);
   const scene = new THREE.Scene();
-  scene.add(mesh);
+  for (const [geometry, material] of [[fieldGeometry, fieldMaterial], [capGeometry, capMaterial]]) {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.frustumCulled = false;
+    scene.add(mesh);
+  }
   const camera = new THREE.PerspectiveCamera(layout.camera.fovDeg, 1, 1, 600);
 
   const deg = Math.PI / 180;
   const cam = timeline.camera;
   const target = new THREE.Vector3(glyphCenter.x * 0.55, 1.5, glyphCenter.y * 0.4);
+  const clockStart = performance.now();
 
   let latestState = { elapsedMs: 0 };
   let aspect = 1;
+  let lastExternal = 0;
 
   function draw(state) {
     const elapsed = Math.max(0, state.elapsedMs || 0);
@@ -388,16 +495,69 @@ async function createLumenSceneWithDependencies(
     camera.projectionMatrix.elements[8] = -layout.camera.shiftX;
     camera.projectionMatrix.elements[9] = -layout.camera.shiftY;
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+    camera.updateMatrixWorld();
     uniforms.uCameraPos.value.copy(camera.position);
     uniforms.uTime.value = elapsed;
+    uniforms.uNow.value = performance.now() - clockStart;
     const fade = Math.min(1, elapsed / cam.fadeInMs);
     uniforms.uExposure.value = fade * fade * (3 - 2 * fade);
     renderer.render(scene, camera);
   }
 
+  // ── Pointer ripples (live version only) ──
+  // The controller only redraws a held hero every 250ms, so while a touch
+  // ripple is alive the scene runs its own frames.
+  const touchLife = 2400;
+  let touchSlot = 0;
+  let lastTouch = { x: Infinity, z: Infinity, at: -Infinity };
+  const ndc = new THREE.Vector3();
+  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.4);
+  const ray = new THREE.Ray();
+  const hit = new THREE.Vector3();
+
+  function touchesAlive(now) {
+    return touches.some((touch) => touch.w > 0 && now - touch.z < touchLife);
+  }
+
+  function liveTick() {
+    liveRaf = 0;
+    if (!active || disposed) return;
+    const now = performance.now();
+    if (now - lastExternal > 40) draw(latestState);
+    if (touchesAlive(now - clockStart)) liveRaf = requestAnimationFrame(liveTick);
+  }
+
+  function handlePointer(event) {
+    if (!active || disposed) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    ndc.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1, 0.5);
+    ndc.unproject(camera);
+    ray.origin.copy(camera.position);
+    ray.direction.copy(ndc).sub(camera.position).normalize();
+    if (!ray.intersectPlane(plane, hit)) return;
+    if (Math.abs(hit.x) > cols / 2 || Math.abs(hit.z) > rows / 2) return;
+    const now = performance.now() - clockStart;
+    const press = event.type === 'pointerdown';
+    const moved = Math.hypot(hit.x - lastTouch.x, hit.z - lastTouch.z);
+    if (!press && moved < 2.5 && now - lastTouch.at < 160) return;
+    if (!press && now - lastTouch.at < 45) return;
+    touches[touchSlot].set(hit.x, hit.z, now, press ? 2 : 1);
+    touchSlot = (touchSlot + 1) % TOUCHES;
+    lastTouch = { x: hit.x, z: hit.z, at: now };
+    if (!liveRaf) liveRaf = requestAnimationFrame(liveTick);
+  }
+
+  if (interactive) {
+    pointerTarget = mount.closest('section') || mount.parentElement;
+    pointerTarget?.addEventListener('pointermove', handlePointer, { passive: true });
+    pointerTarget?.addEventListener('pointerdown', handlePointer, { passive: true });
+  }
+
   function render(state, deltaMs) {
     latestState = { ...state, elapsedMs: Number.isFinite(state.elapsedMs) ? state.elapsedMs : 0, deltaMs };
     if (!active || disposed) return;
+    lastExternal = performance.now();
     draw(latestState);
   }
 
@@ -412,7 +572,11 @@ async function createLumenSceneWithDependencies(
   return {
     render,
     resize,
-    pause() { active = false; },
+    pause() {
+      active = false;
+      if (liveRaf) cancelAnimationFrame(liveRaf);
+      liveRaf = 0;
+    },
     resume() { if (!disposed && !contextLost) active = true; },
     dispose() { disposeResources(); },
   };

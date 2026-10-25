@@ -28,11 +28,11 @@ for (const { tier, width, height } of targets) {
   }
   await new Promise((done, fail) => {
     const p = spawn(ffmpeg, ['-y', '-v', 'error', '-framerate', '30', '-i', join(dir, 'f%04d.png'), '-frames:v', '240',
-      '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '24', '-preset', 'slow', '-movflags', '+faststart',
+      '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '30', '-preset', 'veryslow', '-tune', 'animation', '-movflags', '+faststart',
       join(out, `journey-${tier}.mp4`)], { stdio: 'inherit' });
     p.on('exit', (code) => (code === 0 ? done() : fail(new Error(`ffmpeg ${code}`))));
   });
-  await sharp(join(dir, 'f0240.png')).webp({ quality: 82 }).toFile(join(out, `poster-${tier}.webp`));
+  await sharp(join(dir, 'f0240.png')).webp({ quality: 72 }).toFile(join(out, `poster-${tier}.webp`));
   rmSync(dir, { recursive: true, force: true });
   await page.close();
   console.log('rendered', tier);

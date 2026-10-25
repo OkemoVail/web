@@ -1815,3 +1815,17 @@ to exactly `duration` showed black). Fallback video + posters: run
 `node tools/lumen-render.mjs` with a static server on 127.0.0.1:8080 (PORT
 env overrides) serving the repo root; it renders `tools/lumen-probe.html`.
 Cache tag `?v=aion2`, `site.css?v=20261025-aion2`. Ids stay `lumen-*`.
+
+Aion 2 "more fun" pass (2026-10-25, user picked typing-dots rhythm, bouncier
+build, cursor ripples): the two voices tap the three-dot typing rhythm (12
+travelling rings); the "2" is a second instanced mesh of caps that drop from
+above top-to-bottom, bounce twice and squash on landing, and the last landing
+sends a shockwave. Live WebGL only: pointer moves/presses on the hero section
+add ripples (8 slots, scene runs its own rAF while one is alive). Gotcha:
+`new THREE.Vector4()` defaults w=1, so empty ripple slots must be
+`Vector4(0,0,0,0)` or they render as live rings. Held video is no longer
+seeked (python http.server has no Range support, so seeks fell back to 0s =
+black); CSS hides `[data-state="held"]` video and the poster (final frame)
+shows. `.lv-hero-copy` is pointer-events:none (children auto) so Replay and
+the film get clicks. Media encode: crf 30 veryslow, posters webp q72.
+Cache tag `?v=aion2-fun`.
