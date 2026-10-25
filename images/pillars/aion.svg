@@ -1,33 +1,122 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid slice">
-  <!-- AION, monochrome red: two chat bubbles talking, flat tones only. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- AION, monochrome red screenprint: a grinning chat bubble, a typing reply, Saga's open book. -->
+  <defs>
+    <pattern id="a-dots" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="3.5" cy="3.5" r="3" fill="#a3201a"/><circle cx="10.5" cy="10.5" r="3" fill="#a3201a"/>
+    </pattern>
+    <pattern id="a-dots-lite" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="2.2" fill="#ff7a6b"/><circle cx="9" cy="9" r="2.2" fill="#ff7a6b"/>
+    </pattern>
+    <pattern id="a-hatch" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="16" fill="#2a0604"/>
+    </pattern>
+    <path id="a-spark" d="M0-16C2-5 5-2 16 0 5 2 2 5 0 16-2 5-5 2-16 0-5-2-2-5 0-16Z"/>
+    <path id="a-ray" d="M200 430L120-520H280Z"/>
+    <path id="a-bubble" d="M92 288H308A62 62 0 0 1 370 350V478A62 62 0 0 1 308 540H150L62 618L96 540H92A62 62 0 0 1 30 478V350A62 62 0 0 1 92 288Z"/>
+    <path id="a-reply" d="M122 600H326A42 42 0 0 1 368 642V684A42 42 0 0 1 326 726H316L348 772L270 726H122A42 42 0 0 1 80 684V642A42 42 0 0 1 122 600Z"/>
+    <clipPath id="a-sun"><circle cx="320" cy="120" r="120"/></clipPath>
+  </defs>
+
   <rect width="400" height="1000" fill="#e8352b"/>
 
-  <!-- top: a huge dark quarter circle and a light half sun -->
-  <path d="M400 0V330A330 330 0 0 1 70 0Z" fill="#a3201a"/>
-  <path d="M400 0V170A170 170 0 0 1 230 0Z" fill="#5c0f0b"/>
-  <circle cx="60" cy="150" r="70" fill="#ff7a6b"/>
-  <path d="M-10 150a70 70 0 0 0 140 0Z" fill="#a3201a"/>
-
-  <!-- the reply bubble (light, left) -->
-  <path d="M40 300h250a40 40 0 0 1 40 40v110a40 40 0 0 1-40 40H120l-60 50 10-50h-30a40 40 0 0 1-40-40V340a40 40 0 0 1 40-40Z" fill="#ffc4bb"/>
-  <rect x="80" y="350" width="190" height="22" fill="#e8352b"/>
-  <rect x="80" y="392" width="140" height="22" fill="#e8352b"/>
-  <rect x="80" y="434" width="170" height="22" fill="#ff7a6b"/>
-
-  <!-- the question bubble (dark, right) -->
-  <path d="M120 560h240a40 40 0 0 1 40 40v70a40 40 0 0 1-40 40h-10l10 50-60-50H120a40 40 0 0 1-40-40v-70a40 40 0 0 1 40-40Z" fill="#5c0f0b"/>
-  <circle cx="180" cy="635" r="18" fill="#ff7a6b"/>
-  <circle cx="240" cy="635" r="18" fill="#e8352b"/>
-  <circle cx="300" cy="635" r="18" fill="#a3201a"/>
-
-  <!-- bottom: stacked half circles and a dot grid, calm under the labels -->
-  <path d="M0 1000a200 200 0 0 1 400 0Z" fill="#a3201a"/>
-  <path d="M80 1000a120 120 0 0 1 240 0Z" fill="#5c0f0b"/>
-  <g fill="#ff7a6b">
-    <circle cx="30" cy="800" r="6"/><circle cx="60" cy="800" r="6"/><circle cx="90" cy="800" r="6"/>
-    <circle cx="30" cy="830" r="6"/><circle cx="60" cy="830" r="6"/><circle cx="90" cy="830" r="6"/>
-    <circle cx="30" cy="860" r="6"/><circle cx="60" cy="860" r="6"/><circle cx="90" cy="860" r="6"/>
+  <!-- sunburst radiating from behind the talking bubble -->
+  <g fill="#c42a22">
+    <use xlink:href="#a-ray"/>
+    <use xlink:href="#a-ray" transform="rotate(30 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(60 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(90 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(120 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(150 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(180 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(210 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(240 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(270 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(300 200 430)"/>
+    <use xlink:href="#a-ray" transform="rotate(330 200 430)"/>
   </g>
-  <rect x="300" y="780" width="100" height="24" fill="#ffc4bb"/>
-  <rect x="340" y="820" width="60" height="24" fill="#ff7a6b"/>
+
+  <!-- top: halftone moon bleeding off the corner, a dark arc, little speech marks -->
+  <circle cx="320" cy="120" r="120" fill="#ff7a6b"/>
+  <rect x="190" y="0" width="260" height="260" fill="url(#a-dots)" clip-path="url(#a-sun)"/>
+  <path d="M-40 0H150A190 190 0 0 1-40 190Z" fill="#5c0f0b"/>
+  <path d="M-40 0H90A130 130 0 0 1-40 130Z" fill="#a3201a"/>
+  <g fill="#fff0ec">
+    <rect x="130" y="70" width="70" height="40" rx="20"/>
+    <path d="M140 104l-12 22 30-16Z"/>
+  </g>
+  <g fill="#e8352b"><circle cx="150" cy="90" r="5"/><circle cx="165" cy="90" r="5"/><circle cx="180" cy="90" r="5"/></g>
+  <rect x="34" y="210" width="62" height="34" rx="17" fill="#ffc4bb"/>
+  <path d="M84 238l18 20-4-24Z" fill="#ffc4bb"/>
+
+  <!-- the talking bubble: riso offset shadow, a face, rosy cheeks -->
+  <g transform="rotate(-6 200 415)">
+    <use xlink:href="#a-bubble" fill="#5c0f0b" transform="translate(16 16)"/>
+    <use xlink:href="#a-bubble" fill="#ffc4bb"/>
+    <path d="M30 470V478A62 62 0 0 0 92 540H96L84 568C150 560 190 520 210 470Z" fill="#ff9d90"/>
+    <circle cx="112" cy="440" r="20" fill="#ff7a6b"/>
+    <circle cx="288" cy="440" r="20" fill="#ff7a6b"/>
+    <ellipse cx="150" cy="395" rx="17" ry="26" fill="#2a0604"/>
+    <ellipse cx="250" cy="395" rx="17" ry="26" fill="#2a0604"/>
+    <circle cx="156" cy="384" r="6" fill="#fff0ec"/>
+    <circle cx="256" cy="384" r="6" fill="#fff0ec"/>
+    <path d="M150 448Q200 470 250 448Q246 508 200 510Q154 508 150 448Z" fill="#5c0f0b"/>
+    <path d="M172 492Q200 478 228 492Q216 508 200 509Q184 508 172 492Z" fill="#e8352b"/>
+    <rect x="128" y="334" width="44" height="10" rx="5" fill="#5c0f0b" transform="rotate(-10 150 339)"/>
+    <rect x="228" y="334" width="44" height="10" rx="5" fill="#5c0f0b" transform="rotate(10 250 339)"/>
+  </g>
+
+  <!-- the reply, still typing: three bouncing dots -->
+  <g transform="rotate(5 224 680)">
+    <use xlink:href="#a-reply" fill="#2a0604" transform="translate(-12 12)"/>
+    <use xlink:href="#a-reply" fill="#5c0f0b"/>
+    <rect x="96" y="616" width="252" height="94" rx="30" fill="url(#a-hatch)"/>
+    <circle cx="160" cy="668" r="22" fill="#ff7a6b"/>
+    <circle cx="224" cy="650" r="22" fill="#ffc4bb"/>
+    <circle cx="288" cy="668" r="22" fill="#fff0ec"/>
+    <rect x="208" y="680" width="32" height="8" rx="4" fill="#a3201a"/>
+  </g>
+
+  <!-- Saga's open book, pages lifting, sparks flying out -->
+  <path d="M200 788C150 764 80 762 22 782V900C80 882 150 884 200 906C250 884 320 882 378 900V782C320 762 250 764 200 788Z" fill="#2a0604"/>
+  <path d="M200 774C160 750 96 748 44 766V876C96 860 160 862 200 886Z" fill="#fff0ec"/>
+  <path d="M200 774C240 750 304 748 356 766V876C304 860 240 862 200 886Z" fill="#ffc4bb"/>
+  <path d="M200 774C228 728 280 716 330 730C292 744 236 760 200 774Z" fill="#fff0ec"/>
+  <path d="M200 774C234 742 288 734 340 746C298 756 238 768 200 774Z" fill="#ff7a6b"/>
+  <g fill="#e8352b">
+    <rect x="66" y="790" width="104" height="9" rx="4.5"/>
+    <rect x="66" y="812" width="90" height="9" rx="4.5"/>
+    <rect x="66" y="834" width="110" height="9" rx="4.5"/>
+    <rect x="66" y="856" width="70" height="9" rx="4.5"/>
+  </g>
+  <g fill="#a3201a">
+    <rect x="226" y="796" width="104" height="9" rx="4.5"/>
+    <rect x="226" y="818" width="80" height="9" rx="4.5"/>
+    <rect x="226" y="840" width="100" height="9" rx="4.5"/>
+  </g>
+  <rect x="196" y="776" width="8" height="112" fill="#5c0f0b"/>
+
+  <!-- confetti -->
+  <g fill="#fff0ec">
+    <use xlink:href="#a-spark" transform="translate(200 742) scale(1.3)"/>
+    <use xlink:href="#a-spark" transform="translate(68 590) scale(.8)"/>
+    <use xlink:href="#a-spark" transform="translate(360 560) scale(.7)"/>
+    <use xlink:href="#a-spark" transform="translate(110 262) scale(.6)"/>
+  </g>
+  <g fill="#ffc4bb">
+    <use xlink:href="#a-spark" transform="translate(140 728) scale(.6)"/>
+    <use xlink:href="#a-spark" transform="translate(262 722) scale(.5)"/>
+    <circle cx="372" cy="292" r="6"/><circle cx="24" cy="270" r="5"/><circle cx="380" cy="740" r="7"/>
+    <circle cx="40" cy="700" r="6"/><circle cx="250" cy="250" r="5"/>
+  </g>
+  <g fill="#5c0f0b"><circle cx="30" cy="560" r="8"/><circle cx="340" cy="250" r="7"/><circle cx="60" cy="760" r="5"/></g>
+
+  <!-- bottom: scalloped band, halftone, hatch -->
+  <rect x="0" y="915" width="400" height="85" fill="#5c0f0b"/>
+  <g fill="#5c0f0b">
+    <circle cx="0" cy="918" r="20"/><circle cx="40" cy="918" r="20"/><circle cx="80" cy="918" r="20"/><circle cx="120" cy="918" r="20"/>
+    <circle cx="160" cy="918" r="20"/><circle cx="200" cy="918" r="20"/><circle cx="240" cy="918" r="20"/><circle cx="280" cy="918" r="20"/>
+    <circle cx="320" cy="918" r="20"/><circle cx="360" cy="918" r="20"/><circle cx="400" cy="918" r="20"/>
+  </g>
+  <rect x="0" y="938" width="400" height="30" fill="url(#a-dots-lite)"/>
+  <rect x="0" y="968" width="400" height="32" fill="url(#a-hatch)"/>
 </svg>

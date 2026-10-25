@@ -344,6 +344,15 @@ window.initChatUI = () => {
     try {
         window.initChatUI();
         if (typeof window.AccountModal !== 'undefined') window.AccountModal.init();
+        // Landing composer hands off as ?q=; send it once, then drop it so a refresh can't resend.
+        const params = new URLSearchParams(window.location.search);
+        const handoff = (params.get('q') || '').trim().slice(0, 4000);
+        if (handoff) {
+            params.delete('q');
+            const rest = params.toString();
+            history.replaceState(null, '', window.location.pathname + (rest ? '?' + rest : '') + window.location.hash);
+            window.sendMessage(handoff);
+        }
     } catch (e) {
         console.error('Initialization error:', e);
     } finally {

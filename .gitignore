@@ -47,7 +47,8 @@ backend/feedback.jsonl
 tools/snapshots/after/
 tools/snapshots/diff-*.png
 
-# Local dev test harnesses (CI only needs the Lamina suite)
+# Local dev test harnesses live in tests/ (CI only needs the Lamina suite)
+tests/
 test-*.mjs
 !test-lamina-repositories.mjs
 test.mjs

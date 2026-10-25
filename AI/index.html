@@ -83,451 +83,176 @@
             }
         } };
     </script>
-    <link rel="stylesheet" href="../src/site.css?v=20261022-no-scroll-tint">
-    <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261022-diffract">
+    <link rel="stylesheet" href="../src/site.css?v=20261024-assistant">
+    <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261024-clear-visible">
     <script src="../src/glass-navigation.js"></script>
     <link rel="expect" href="#site-navigation-ready" blocking="render">
-    <script defer src="../liquid-design/liquid-design.js?v=20261022-plus-menu"></script>
+    <script defer src="../liquid-design/liquid-design.js?v=20261024-adapt-fast"></script>
     <script defer src="../src/liquid-design-site.js?v=20261007-api-audit"></script>
-    
-
-    
 </head>
 
-<body data-page="ai-home"
-    class="home-base font-sans antialiased">
+<body data-page="ai-home" class="home-base font-sans antialiased">
 
     <a href="#main-content" class="home-skip">Skip to content</a>
     <main id="main-content" class="home-main">
 
-    <!-- HERO -->
-    <section class="hero-section" aria-label="Labs21 films and models">
-        <div class="ai-intro" data-reveal>
-            <p class="ai-eyebrow">Labs21</p>
-            <h2 class="home-title">Stay curious<span class="home-title-dot">.</span></h2>
-            <p class="ai-intro-note">Small models. Questions worth following.</p>
-        </div>
-        <div class="hero-scroll-wrap">
-            <button class="hero-arrow hero-arrow--prev" id="hero-prev" aria-label="Previous">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" fill="currentColor" aria-hidden="true"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>
-            </button>
+    <!-- Hero: a greeting and a real prompt box (ChatGPT-style start screen) -->
+    <section class="ah-hero" aria-labelledby="ah-title">
+        <h1 id="ah-title" class="ah-title">Stay curious.</h1>
+        <p class="ah-sub">Small models from Labs21. Ask Saga anything.</p>
 
-            <div class="hero-scroll" id="hero-scroll">
-                <div class="hero-card lumen-hero" id="lumen-hero" data-card="0" data-mode="poster" data-state="loading">
-                    <picture id="lumen-poster" class="lumen-media lumen-poster" aria-hidden="true">
-                        <source media="(max-width: 640px)" srcset="assets/lumen/poster-mobile.webp">
-                        <img src="assets/lumen/poster-desktop.webp" alt="" width="1600" height="900">
-                    </picture>
-                    <video id="lumen-fallback" class="lumen-media lumen-fallback" muted playsinline preload="none" aria-hidden="true">
-                        <source media="(max-width: 640px)" data-src="assets/lumen/journey-mobile.mp4" type="video/mp4">
-                        <source data-src="assets/lumen/journey-desktop.mp4" type="video/mp4">
-                    </video>
-                    <div id="lumen-stage" class="lumen-stage" aria-hidden="true"></div>
-                    <p class="sr-only">A cinematic journey past the solar limb, Earth, and Moon, ending with Earth above Lumen 1.9.</p>
-                    <p id="lumen-location" class="lumen-location" aria-hidden="true">SOLAR</p>
-                    <div id="lumen-copy" class="lumen-copy">
-                        <p class="lumen-eyebrow">Labs21 model</p>
-                        <h1>Lumen 1.9</h1>
-                        <p class="lumen-deck">A small model built to keep going when the question gets difficult.</p>
-                        <a href="chat.html" class="skuo skuo-accent skuo-pill lumen-start">Start here</a>
-                    </div>
-                    <button id="lumen-playback" class="skuo skuo-neutral skuo-pill" type="button" hidden>Skip intro</button>
-                    <p id="lumen-status" class="sr-only" aria-live="polite"></p>
-                </div>
+        <form class="ah-composer" action="chat.html" method="get" role="search" aria-label="Ask Saga" data-lg-plain>
+            <label for="ah-q" class="sr-only">Ask Saga</label>
+            <textarea id="ah-q" name="q" rows="1" placeholder="What do you want to know?" autocomplete="off" required></textarea>
+            <div class="ah-composer-row">
+                <span class="ah-model"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v13M12 7c-2-1.6-5-2-8-1.5v13c3-.5 6-.1 8 1.5 2-1.6 5-2 8-1.5v-13c-3-.5-6-.1-8 1.5"/></svg>Saga</span>
+                <button type="submit" class="ah-send" aria-label="Send to Saga" disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
+                </button>
+            </div>
+        </form>
 
-                <div class="hero-card" data-card="1">
-                    <video class="hero-video"
-                           src="video/labs21-hero.mp4"
-                           poster="video/labs21-hero-poster.jpg"
-                           muted playsinline preload="auto">
-                    </video>
-                    <div class="hero-card-overlay"></div>
+        <ul class="ah-chips" aria-label="Example questions" data-lg-plain>
+            <li><button type="button" data-q="Explain how a transformer pays attention, like I'm new to it.">Explain attention</button></li>
+            <li><button type="button" data-q="Help me plan a week of study for a maths exam.">Plan a study week</button></li>
+            <li><button type="button" data-q="Write a short poem about Earth rising over the Moon.">Write a poem</button></li>
+            <li><button type="button" data-q="Review this idea and tell me what could go wrong: ">Pressure-test an idea</button></li>
+        </ul>
+    </section>
 
-                <div class="hero-card-content">
-                    <h1 class="hero-headline">
-                            <span>Stay</span>
-                            <span class="apple-color-cycle">Curious.</span>
-                        </h1>
-                        <button id="hero-start" onclick="window.location.href='chat.html'" class="skuo skuo-accent skuo-pill !px-7 !py-3 mt-5 group flex items-center gap-2">
-                            <span class="text-base font-bold">Start here</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"
-                                class="transition-transform group-hover:translate-x-1">
-                                <path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L200.69,136H40a8,8,0,0,1,0-16H200.69l-62.35-62.34a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"></path>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <button class="hero-replay" aria-label="Play again">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M488 192l-144 0c-9.7 0-18.5-5.8-22.2-14.8s-1.7-19.3 5.2-26.2l46.7-46.7c-75.3-58.6-184.3-53.3-253.5 15.9-75 75-75 196.5 0 271.5s196.5 75 271.5 0c8.2-8.2 15.5-16.9 21.9-26.1 10.1-14.5 30.1-18 44.6-7.9s18 30.1 7.9 44.6c-8.5 12.2-18.2 23.8-29.1 34.7-100 100-262.1 100-362 0S-25 175 75 75c94.3-94.3 243.7-99.6 344.3-16.2L471 7c6.9-6.9 17.2-8.9 26.2-5.2S512 14.3 512 24l0 144c0 13.3-10.7 24-24 24z"/></svg>
-                    </button>
-                </div>
-
-                <div class="hero-card hero-card--player" data-card="2">
-                    <video class="hero-video"
-                           data-src-desktop="video/comp1.mp4"
-                           data-src-mobile="video/comp1-mobile.mp4"
-                           muted playsinline preload="auto">
-                    </video>
-                    <div class="hero-card-overlay"></div>
-
-                    <div class="hero-player" id="hero-player">
-                        <button class="hp-btn hp-play" id="hp-play" aria-label="Play">
-                            <svg class="ic-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M91.2 36.9c-12.4-6.8-27.4-6.5-39.6 .7S32 57.9 32 72l0 368c0 14.1 7.5 27.2 19.6 34.4s27.2 7.5 39.6 .7l336-184c12.8-7 20.8-20.5 20.8-35.1s-8-28.1-20.8-35.1l-336-184z"/></svg>
-                            <svg class="ic-pause hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M48 32C21.5 32 0 53.5 0 80L0 432c0 26.5 21.5 48 48 48l64 0c26.5 0 48-21.5 48-48l0-352c0-26.5-21.5-48-48-48L48 32zm224 0c-26.5 0-48 21.5-48 48l0 352c0 26.5 21.5 48 48 48l64 0c26.5 0 48-21.5 48-48l0-352c0-26.5-21.5-48-48-48l-64 0z"/></svg>
-                        </button>
-                        <div class="hp-seek" id="hp-seek" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00 of 0:00" tabindex="0">
-                            <div class="hp-seek-fill" id="hp-seek-fill"></div>
-                        </div>
-                        <span class="hp-time" id="hp-time">0:00 / 0:00</span>
-                        <button class="hp-btn hp-mute" id="hp-mute" aria-label="Unmute">
-                            <svg class="ic-mute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor" aria-hidden="true"><path d="M48 352l48 0 134.1 119.2c6.4 5.7 14.6 8.8 23.1 8.8 19.2 0 34.8-15.6 34.8-34.8l0-378.4c0-19.2-15.6-34.8-34.8-34.8-8.5 0-16.7 3.1-23.1 8.8L96 160 48 160c-26.5 0-48 21.5-48 48l0 96c0 26.5 21.5 48 48 48zM367 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/></svg>
-                            <svg class="ic-on hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M48 352l48 0 134.1 119.2c6.4 5.7 14.6 8.8 23.1 8.8 19.2 0 34.8-15.6 34.8-34.8l0-378.4c0-19.2-15.6-34.8-34.8-34.8-8.5 0-16.7 3.1-23.1 8.8L96 160 48 160c-26.5 0-48 21.5-48 48l0 96c0 26.5 21.5 48 48 48zM441.1 107c-10.3-8.4-25.4-6.8-33.8 3.5s-6.8 25.4 3.5 33.8C443.3 170.7 464 210.9 464 256s-20.7 85.3-53.2 111.8c-10.3 8.4-11.8 23.5-3.5 33.8s23.5 11.8 33.8 3.5c43.2-35.2 70.9-88.9 70.9-149s-27.7-113.8-70.9-149zm-60.5 74.5c-10.3-8.4-25.4-6.8-33.8 3.5s-6.8 25.4 3.5 33.8C361.1 227.6 368 241 368 256s-6.9 28.4-17.7 37.3c-10.3 8.4-11.8 23.5-3.5 33.8s23.5 11.8 33.8 3.5C402.1 312.9 416 286.1 416 256s-13.9-56.9-35.5-74.5z"/></svg>
-                        </button>
-                        <button class="hp-btn hp-replay" id="hp-replay" aria-label="Replay">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M488 192l-144 0c-9.7 0-18.5-5.8-22.2-14.8s-1.7-19.3 5.2-26.2l46.7-46.7c-75.3-58.6-184.3-53.3-253.5 15.9-75 75-75 196.5 0 271.5s196.5 75 271.5 0c8.2-8.2 15.5-16.9 21.9-26.1 10.1-14.5 30.1-18 44.6-7.9s18 30.1 7.9 44.6c-8.5 12.2-18.2 23.8-29.1 34.7-100 100-262.1 100-362 0S-25 175 75 75c94.3-94.3 243.7-99.6 344.3-16.2L471 7c6.9-6.9 17.2-8.9 26.2-5.2S512 14.3 512 24l0 144c0 13.3-10.7 24-24 24z"/></svg>
-                        </button>
-                    </div>
+    <!-- Announcement: Lumen 1.9 film -->
+    <section class="ah-section" aria-labelledby="lumen-title">
+        <div class="ah-feature">
+            <div class="lumen-hero" id="lumen-hero" data-mode="poster" data-state="loading">
+                <picture id="lumen-poster" class="lumen-media lumen-poster" aria-hidden="true">
+                    <source media="(max-width: 640px)" srcset="assets/lumen/poster-mobile.webp">
+                    <img src="assets/lumen/poster-desktop.webp" alt="" width="1600" height="900">
+                </picture>
+                <video id="lumen-fallback" class="lumen-media lumen-fallback" poster="assets/lumen/poster-desktop.webp" muted playsinline preload="none" aria-hidden="true">
+                    <source media="(max-width: 640px)" data-src="assets/lumen/journey-mobile.mp4" type="video/mp4">
+                    <source data-src="assets/lumen/journey-desktop.mp4" type="video/mp4">
+                </video>
+                <div id="lumen-stage" class="lumen-stage" aria-hidden="true"></div>
+                <p class="sr-only">A cinematic journey past the solar limb, Earth, and Moon, ending with Earth above Lumen 1.9.</p>
+                <p id="lumen-location" class="lumen-location" aria-hidden="true">SOLAR</p>
+                <div id="lumen-copy" class="lumen-copy" aria-hidden="true"></div>
+                <button id="lumen-playback" class="lumen-playback" type="button" hidden data-lg-plain>Skip intro</button>
+                <p id="lumen-status" class="sr-only" aria-live="polite"></p>
+            </div>
+            <div class="ah-feature-copy">
+                <p class="ah-meta">Model release</p>
+                <h2 id="lumen-title">Introducing Lumen 1.9</h2>
+                <p>A small model built to keep going when the question gets difficult. It's tuned to keep reasoning through long, awkward problems instead of stopping at the first plausible answer.</p>
+                <div class="ah-actions">
+                    <a href="chat.html" class="ah-btn ah-btn--solid" data-lg-plain>Try Lumen</a>
+                    <a href="research.html" class="ah-btn ah-btn--ghost" data-lg-plain>Read the notes</a>
                 </div>
             </div>
-
-            <button class="hero-arrow hero-arrow--next" id="hero-next" aria-label="Next">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" fill="currentColor" aria-hidden="true"><path d="M311.1 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L243.2 256 73.9 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>
-            </button>
-        </div>
-
-        <div class="hero-dots">
-            <button class="hero-dot active" data-index="0" aria-label="Lumen 1.9"></button>
-            <button class="hero-dot" data-index="1" aria-label="Labs21 video"></button>
-            <button class="hero-dot" data-index="2" aria-label="Product video"></button>
         </div>
     </section>
 
-    <script>
-        (function () {
-            const scroller = document.getElementById('hero-scroll');
-            const cards = document.querySelectorAll('.hero-card');
-            const dots = document.querySelectorAll('.hero-dot');
-            const prevBtn = document.getElementById('hero-prev');
-            const nextBtn = document.getElementById('hero-next');
-            if (!scroller || !cards.length) return;
-
-            var lumenCard = cards[0];
-            var labsVideoCard = cards[1];
-            var productVideoCard = cards[2];
-            if (!lumenCard) return;
-
-            let active = 0;
-            let target = 0;
-            var MOBILE = 768;
-
-            function isMobile() { return window.innerWidth <= MOBILE; }
-
-            function applySrc(v) {
-                var desk = v.getAttribute('data-src-desktop');
-                var mob = v.getAttribute('data-src-mobile');
-                if (!desk && !mob) return;
-                var want = isMobile() && mob ? mob : (desk || mob);
-                if (v.getAttribute('src') !== want) {
-                    v.setAttribute('src', want);
-                    v.load();
-                }
-            }
-
-            function fmt(s) {
-                if (!s || !isFinite(s)) s = 0;
-                var m = Math.floor(s / 60);
-                var sec = Math.floor(s % 60);
-                return m + ':' + (sec < 10 ? '0' : '') + sec;
-            }
-
-            /* ── Labs21 video ── */
-            (function () {
-                if (!labsVideoCard) return;
-                var vid = labsVideoCard.querySelector('.hero-video');
-                var replay = labsVideoCard.querySelector('.hero-replay');
-                if (!vid) return;
-                applySrc(vid);
-                vid.addEventListener('canplay', function () {
-                    if (active === 1) { vid.classList.add('loaded'); vid.play().catch(function () {}); }
-                });
-                vid.addEventListener('ended', function () { if (replay) replay.classList.add('show'); });
-                if (replay) replay.addEventListener('click', function () {
-                    if (active !== 1) return;
-                    replay.classList.remove('show');
-                    vid.currentTime = 0;
-                    vid.play().catch(function () {});
-                });
-            })();
-
-            /* ── Product video player ── */
-            var pVideo, pPlay, pPauseIc, pPlayIc, pSeek, pSeekFill, pTime, pMute, pMuteIc, pOnIc, pReplay, pPlayer;
-            (function () {
-                if (!productVideoCard) return;
-                pVideo = productVideoCard.querySelector('.hero-video');
-                pPlay = document.getElementById('hp-play');
-                pPauseIc = pPlay ? pPlay.querySelector('.ic-pause') : null;
-                pPlayIc = pPlay ? pPlay.querySelector('.ic-play') : null;
-                pSeek = document.getElementById('hp-seek');
-                pSeekFill = document.getElementById('hp-seek-fill');
-                pTime = document.getElementById('hp-time');
-                pMute = document.getElementById('hp-mute');
-                pMuteIc = pMute ? pMute.querySelector('.ic-mute') : null;
-                pOnIc = pMute ? pMute.querySelector('.ic-on') : null;
-                pReplay = document.getElementById('hp-replay');
-                pPlayer = document.getElementById('hero-player');
-                if (!pVideo) return;
-
-                applySrc(pVideo);
-
-                function setPlayIcon(playing) {
-                    if (pPauseIc) pPauseIc.classList.toggle('hide', !playing);
-                    if (pPlayIc) pPlayIc.classList.toggle('hide', playing);
-                }
-
-                function updateSeekState() {
-                    if (!pSeek) return;
-                    var duration = isFinite(pVideo.duration) ? Math.max(0, pVideo.duration) : 0;
-                    var currentTime = Math.max(0, Math.min(duration, pVideo.currentTime || 0));
-                    pSeek.setAttribute('aria-valuemin', '0');
-                    pSeek.setAttribute('aria-valuemax', String(Math.round(duration)));
-                    pSeek.setAttribute('aria-valuenow', String(Math.round(currentTime)));
-                    pSeek.setAttribute('aria-valuetext', fmt(currentTime) + ' of ' + fmt(duration));
-                }
-
-                /* ── Auto-hide player after 500ms ── */
-                var hideTimer;
-                function showPlayer() {
-                    if (pPlayer) pPlayer.classList.add('show');
-                    clearTimeout(hideTimer);
-                    hideTimer = setTimeout(function () {
-                        if (pPlayer && !pVideo.paused) pPlayer.classList.remove('show');
-                    }, 500);
-                }
-                if (productVideoCard) {
-                    productVideoCard.addEventListener('mousemove', showPlayer);
-                    productVideoCard.addEventListener('touchstart', showPlayer, { passive: true });
-                }
-                if (pPlayer) {
-                    pPlayer.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
-                    pPlayer.addEventListener('mouseleave', showPlayer);
-                }
-                showPlayer();
-
-                pVideo.addEventListener('canplay', function () {
-                    if (active === 2) { pVideo.classList.add('loaded'); pVideo.play().catch(function () {}); }
-                });
-                pVideo.addEventListener('play', function () { setPlayIcon(true); productVideoCard.classList.remove('is-paused'); });
-                pVideo.addEventListener('pause', function () { setPlayIcon(false); productVideoCard.classList.add('is-paused'); });
-                pVideo.addEventListener('ended', function () {
-                    setPlayIcon(false);
-                    productVideoCard.classList.add('is-paused');
-                });
-
-                pVideo.addEventListener('timeupdate', function () {
-                    var pct = pVideo.duration ? (pVideo.currentTime / pVideo.duration) * 100 : 0;
-                    if (pSeekFill) pSeekFill.style.width = pct + '%';
-                    if (pTime) pTime.textContent = fmt(pVideo.currentTime) + ' / ' + fmt(pVideo.duration);
-                    updateSeekState();
-                });
-                pVideo.addEventListener('loadedmetadata', function () {
-                    if (pTime) pTime.textContent = '0:00 / ' + fmt(pVideo.duration);
-                    updateSeekState();
-                });
-
-                if (pPlay) pPlay.addEventListener('click', function () {
-                    if (active !== 2) return;
-                    if (pVideo.paused) pVideo.play().catch(function () {});
-                    else pVideo.pause();
-                });
-
-                if (pSeek) {
-                    function seekFromX(clientX) {
-                        if (active !== 2) return;
-                        var rect = pSeek.getBoundingClientRect();
-                        var ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                        if (pVideo.duration) pVideo.currentTime = ratio * pVideo.duration;
-                    }
-                    pSeek.addEventListener('click', function (e) { seekFromX(e.clientX); });
-                    pSeek.addEventListener('keydown', function (event) {
-                        if (active !== 2 || !pVideo.duration) return;
-                        var next = pVideo.currentTime;
-                        if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next -= 5;
-                        else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') next += 5;
-                        else if (event.key === 'Home') next = 0;
-                        else if (event.key === 'End') next = pVideo.duration;
-                        else return;
-                        event.preventDefault();
-                        pVideo.currentTime = Math.max(0, Math.min(pVideo.duration, next));
-                        updateSeekState();
-                    });
-                    var dragging = false;
-                    pSeek.addEventListener('pointerdown', function (e) {
-                        if (active !== 2) return;
-                        dragging = true;
-                        seekFromX(e.clientX);
-                    });
-                    window.addEventListener('pointermove', function (e) {
-                        if (active !== 2) { dragging = false; return; }
-                        if (dragging) seekFromX(e.clientX);
-                    });
-                    window.addEventListener('pointerup', function () { dragging = false; });
-                }
-
-                if (pMute) pMute.addEventListener('click', function () {
-                    if (active !== 2) return;
-                    pVideo.muted = !pVideo.muted;
-                    if (pMuteIc) pMuteIc.classList.toggle('hide', !pVideo.muted);
-                    if (pOnIc) pOnIc.classList.toggle('hide', pVideo.muted);
-                    pMute.setAttribute('aria-label', pVideo.muted ? 'Unmute' : 'Mute');
-                });
-
-                if (pReplay) pReplay.addEventListener('click', function () {
-                    if (active !== 2) return;
-                    pVideo.currentTime = 0;
-                    pVideo.play().catch(function () {});
-                });
-            })();
-
-            /* ── Carousel ── */
-            function notifyLumen() {
-                lumenCard.setAttribute('data-carousel-active', active === 0 ? 'true' : 'false');
-                var controller = window.LumenHero;
-                if (!controller) return;
-                controller.setActive(active === 0);
-            }
-            function setActive(i) {
-                active = i;
-                if (active !== 2) dragging = false;
-                notifyLumen();
-                dots.forEach(function (d, j) {
-                    d.classList.toggle('active', j === i);
-                    if (j === i) d.setAttribute('aria-current', 'true');
-                    else d.removeAttribute('aria-current');
-                });
-                cards.forEach(function (card, j) {
-                    var vid = card.querySelector('.hero-video');
-                    if (!vid) return;
-                    if (j !== i) { vid.pause(); return; }
-                    applySrc(vid);
-                    vid.classList.add('loaded');
-                    vid.play().catch(function () {});
-                });
-                updateArrows();
-            }
-            function updateArrows() {
-                if (prevBtn) prevBtn.classList.toggle('hide', active === 0);
-                if (nextBtn) nextBtn.classList.toggle('hide', active === cards.length - 1);
-            }
-            function scrollToCard(i) {
-                target = Math.max(0, Math.min(cards.length - 1, i));
-                var immediate = navigator.webdriver || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                scroller.scrollTo({ left: cards[target].offsetLeft - scroller.offsetLeft, behavior: immediate ? 'instant' : 'smooth' });
-            }
-
-            var scrollSettleTimer;
-            scroller.addEventListener('scroll', function () {
-                var i = Array.from(cards).reduce(function (closest, card, index) {
-                    var distance = Math.abs(scroller.scrollLeft - (card.offsetLeft - scroller.offsetLeft));
-                    return distance < closest.distance ? { index: index, distance: distance } : closest;
-                }, { index: 0, distance: Infinity }).index;
-                if (i !== active) setActive(i);
-                clearTimeout(scrollSettleTimer);
-                scrollSettleTimer = setTimeout(function () { target = i; }, 120);
-            }, { passive: true });
-
-            dots.forEach(function (dot) {
-                dot.addEventListener('click', function () {
-                    scrollToCard(parseInt(dot.getAttribute('data-index')));
-                });
-            });
-            if (prevBtn) prevBtn.addEventListener('click', function () { scrollToCard(target - 1); });
-            if (nextBtn) nextBtn.addEventListener('click', function () { scrollToCard(target + 1); });
-            var swipeStartX = null;
-            var swipeStartY = null;
-            scroller.addEventListener('touchstart', function (event) {
-                if (event.touches.length !== 1) return;
-                swipeStartX = event.touches[0].clientX;
-                swipeStartY = event.touches[0].clientY;
-            }, { passive: true });
-            scroller.addEventListener('touchend', function (event) {
-                if (swipeStartX == null || !event.changedTouches.length) return;
-                var deltaX = event.changedTouches[0].clientX - swipeStartX;
-                var deltaY = event.changedTouches[0].clientY - swipeStartY;
-                swipeStartX = null;
-                swipeStartY = null;
-                if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
-                scrollToCard(target + (deltaX < 0 ? 1 : -1));
-            }, { passive: true });
-            setActive(0);
-            window.addEventListener('load', notifyLumen, { once: true });
-
-            var rt;
-            window.addEventListener('resize', function () {
-                clearTimeout(rt);
-                rt = setTimeout(function () {
-                    cards.forEach(function (c) {
-                        var v = c.querySelector('.hero-video');
-                        if (v) applySrc(v);
-                    });
-                }, 200);
-            });
-        })();
-    </script>
-
-    <section id="work" class="home-work" aria-labelledby="explore-title" data-reveal>
-        <div class="home-section-heading">
-            <h2 id="explore-title">Explore Labs21</h2>
-            <span>04 places to start</span>
+    <!-- Latest: research posts (filled from data/blogs.json) -->
+    <section class="ah-section" aria-labelledby="latest-title" data-reveal>
+        <div class="ah-head">
+            <h2 id="latest-title">Latest from the lab</h2>
+            <a href="research.html" class="ah-more">All research<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
         </div>
-        <ul class="work-list" aria-label="Explore Labs21">
-            <li><a href="/AI/chat.html" class="work-row">
-                <span class="work-title">Chat with Saga</span><span class="work-detail">Try the model</span>
-                <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <ul class="ah-cards" id="ah-posts">
+            <li><a class="ah-card" href="research.html">
+                <img src="assets/space/earthrise.webp" width="1400" height="1400" alt="" loading="lazy" decoding="async">
+                <span class="ah-meta">Mar 2026 · Architecture</span>
+                <span class="ah-card-title">Scaling to 1B Parameters</span>
+                <span class="ah-card-text">Polaris has scaled to 1 billion parameters, up from 500M, for broader knowledge and stronger reasoning.</span>
             </a></li>
-            <li><a href="/AI/goals.html" class="work-row">
-                <span class="work-title">Goals</span><span class="work-detail">What's next</span>
-                <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            <li><a class="ah-card" href="research.html">
+                <img src="assets/space/tycho.webp" width="1600" height="735" alt="" loading="lazy" decoding="async">
+                <span class="ah-meta">Feb 2026 · Architecture</span>
+                <span class="ah-card-title">Scaling Through Training</span>
+                <span class="ah-card-text">The model can grow as its knowledge grows: from 256M to 500M parameters during OLM's training.</span>
             </a></li>
-            <li><a href="/AI/research.html" class="work-row">
-                <span class="work-title">Research</span><span class="work-detail">Work in progress</span>
-                <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-            </a></li>
-            <li><a href="#architecture" class="work-row">
-                <span class="work-title">Behind the model</span><span class="work-detail">BDH architecture</span>
-                <svg class="work-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            <li><a class="ah-card" href="#architecture">
+                <img src="assets/space/moon-quarter.webp" width="1200" height="1200" alt="" loading="lazy" decoding="async">
+                <span class="ah-meta">In progress · Saga</span>
+                <span class="ah-card-title">Bounded Dynamic Highway</span>
+                <span class="ah-card-text">A looped network that replaces attention, RoPE and large KV caches with bounded hidden dynamics.</span>
             </a></li>
         </ul>
     </section>
 
-    <section id="architecture" class="home-words ai-about" aria-labelledby="about-title" data-reveal>
-        <h2 id="about-title" class="home-section-title">Built here. Still learning.</h2>
-        <div class="ai-about-grid">
-            <div class="ai-about-copy">
-                <p>I'm building and updating these models on an RTX 5080. The aim is simple: keep making them more useful, and make them affordable to run.</p>
-                <h3>Bounded Dynamic Highway</h3>
-                <p>Saga is moving to a looped network that replaces attention, RoPE, and large KV caches with bounded hidden dynamics. Each block keeps four recent hidden states, mixes them across grouped temporal branches, then repeats the same physical depth.</p>
-            </div>
-            <dl class="ai-model-specs" aria-label="BDH model specifications">
-                <div><dt>State</dt><dd>4 cached</dd></div>
-                <div><dt>Branches</dt><dd>12 temporal</dd></div>
-                <div><dt>Depth</dt><dd>28 × 2 passes</dd></div>
-                <div><dt>Target</dt><dd>RTX 5080</dd></div>
-            </dl>
+    <!-- Models -->
+    <section class="ah-section" aria-labelledby="models-title" data-reveal>
+        <div class="ah-head">
+            <h2 id="models-title">Models</h2>
+        </div>
+        <div class="ah-models">
+            <article class="ah-model-card">
+                <h3>Saga</h3>
+                <p>The everyday model. Fast, conversational, and the one you're talking to in chat.</p>
+                <dl>
+                    <div><dt>Best for</dt><dd>Chat, writing, quick answers</dd></div>
+                    <div><dt>Status</dt><dd>Available</dd></div>
+                </dl>
+                <a href="chat.html" class="ah-btn ah-btn--solid" data-lg-plain>Chat with Saga</a>
+            </article>
+            <article class="ah-model-card">
+                <h3>Lumen 1.9</h3>
+                <p>The persistent one. Slower, and built to stay with hard, multi-step problems.</p>
+                <dl>
+                    <div><dt>Best for</dt><dd>Reasoning, long problems</dd></div>
+                    <div><dt>Status</dt><dd>New</dd></div>
+                </dl>
+                <a href="chat.html" class="ah-btn ah-btn--ghost" data-lg-plain>Try Lumen</a>
+            </article>
         </div>
     </section>
 
-    <footer class="home-footer">
-        <p>© 2026 Labs21 by OkemoVail — made of stardust ✦</p>
-        <nav aria-label="Footer">
-            <a href="/index.html">OkemoVail</a>
-            <a href="/AI/privacy.html">Privacy</a>
-            <a href="/AI/tos.html">Terms</a>
-            <a href="https://github.com/ar12c" target="_blank" rel="noopener">GitHub</a>
-        </nav>
+    <!-- Behind the model -->
+    <section id="architecture" class="ah-section ah-bdh" aria-labelledby="bdh-title" data-reveal>
+        <div class="ah-bdh-copy">
+            <p class="ah-meta">Behind the model</p>
+            <h2 id="bdh-title">Bounded Dynamic Highway</h2>
+            <p>Saga is moving to a looped network that replaces attention, RoPE, and large KV caches with bounded hidden dynamics. Each block keeps four recent hidden states, mixes them across grouped temporal branches, then repeats the same physical depth.</p>
+            <p>It's all built and trained on one RTX&nbsp;5080. The aim is simple: keep making these models more useful, and make them affordable to run.</p>
+        </div>
+        <dl class="ah-specs" aria-label="BDH model specifications">
+            <div><dt>Cached states</dt><dd>4</dd></div>
+            <div><dt>Temporal branches</dt><dd>12</dd></div>
+            <div><dt>Blocks × passes</dt><dd>28×2</dd></div>
+            <div><dt>Target GPU</dt><dd>RTX 5080</dd></div>
+        </dl>
+    </section>
+
+    <!-- Closing prompt -->
+    <section class="ah-section ah-close" aria-labelledby="close-title" data-reveal>
+        <h2 id="close-title">Bring Saga a hard question.</h2>
+        <a href="chat.html" class="ah-btn ah-btn--solid" data-lg-plain>Start a chat</a>
+    </section>
+
+    <footer class="ah-foot">
+        <div class="ah-foot-grid">
+            <p class="ah-foot-brand" translate="no">Labs21</p>
+            <nav aria-label="Product">
+                <h2>Product</h2>
+                <a href="/AI/chat.html">Chat</a>
+                <a href="/AI/goals.html">Goals</a>
+            </nav>
+            <nav aria-label="Research">
+                <h2>Research</h2>
+                <a href="/AI/research.html">Notes</a>
+                <a href="#architecture">Architecture</a>
+            </nav>
+            <nav aria-label="Company">
+                <h2>OkemoVail</h2>
+                <a href="/index.html">Home</a>
+                <a href="https://github.com/ar12c" target="_blank" rel="noopener">GitHub</a>
+                <a href="/AI/privacy.html">Privacy</a>
+                <a href="/AI/tos.html">Terms</a>
+            </nav>
+        </div>
+        <p class="ah-credits">© 2026 Labs21 by OkemoVail. Photos: <a href="https://commons.wikimedia.org/w/index.php?curid=97231018">Earthrise</a> from Apollo 8 by Justin Cowart, CC BY 2.0; <a href="https://commons.wikimedia.org/w/index.php?curid=15545487">first-quarter Moon</a> by NASA Goddard, CC BY 2.0; <a href="https://commons.wikimedia.org/wiki/File:LRO_Tycho_Central_Peak.jpg">Tycho central peak</a> by NASA/GSFC/ASU, public domain.</p>
     </footer>
     </main>
 
-    
   <script>
     window.NAV_CONFIG = {
       variant: 'pages',
@@ -541,10 +266,60 @@
       primary: { label: 'Chat', href: '/AI/chat.html', icon: 'labs21' }
     };
   </script>
-   <script src="js/lumen-hero-policy.js"></script>
-   <script src="js/lumen-hero.js"></script>
-   <script src="../src/motion.js"></script>
-    <script src="../src/nav.js"></script>
+  <script>
+    /* Composer: auto-grow, Enter sends, Shift+Enter adds a line; chips fill it. */
+    (function () {
+      var form = document.querySelector('.ah-composer');
+      var ta = document.getElementById('ah-q');
+      var send = form.querySelector('.ah-send');
+      function sync() {
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(ta.scrollHeight, 220) + 'px';
+        send.disabled = !ta.value.trim();
+      }
+      ta.addEventListener('input', sync);
+      ta.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+          e.preventDefault();
+          if (ta.value.trim()) form.requestSubmit();
+        }
+      });
+      document.querySelectorAll('.ah-chips button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          ta.value = b.dataset.q;
+          sync();
+          ta.focus();
+          ta.setSelectionRange(ta.value.length, ta.value.length);
+        });
+      });
+      sync();
+    })();
+
+    /* Latest posts: newest three from data/blogs.json; the static cards stay if it fails. */
+    (function () {
+      var list = document.getElementById('ah-posts');
+      var pics = ['assets/space/earthrise.webp', 'assets/space/tycho.webp', 'assets/space/moon-quarter.webp'];
+      fetch('data/blogs.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (posts) {
+        if (!Array.isArray(posts) || posts.length < 2) return;
+        var latest = posts.slice().reverse().slice(0, 2);
+        var cards = list.querySelectorAll('.ah-card');
+        latest.forEach(function (p, i) {
+          var card = cards[i]; if (!card) return;
+          var tmp = new DOMParser().parseFromString(String(p.content || ''), 'text/html').body;
+          var date = (p.date || '').toLowerCase().replace(/^\w/, function (c) { return c.toUpperCase(); });
+          var tag = p.tags && p.tags[0] ? ' · ' + p.tags[0].name : '';
+          card.querySelector('.ah-meta').textContent = date + tag;
+          card.querySelector('.ah-card-title').textContent = String(p.title || '').replace(/\.$/, '');
+          card.querySelector('.ah-card-text').textContent = tmp.textContent.trim();
+          card.querySelector('img').src = pics[i];
+        });
+      }).catch(function () {});
+    })();
+  </script>
+  <script src="js/lumen-hero-policy.js"></script>
+  <script src="js/lumen-hero.js"></script>
+  <script src="../src/motion.js"></script>
+  <script src="../src/nav.js"></script>
 </body>
 
 </html>

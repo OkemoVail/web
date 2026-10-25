@@ -254,7 +254,9 @@
    numbers so the gradient and shadow built from them interpolate too. */
 @property --lgp-rim-lift { syntax: '<number>'; inherits: true; initial-value: 0; }
 @property --lgp-contour { syntax: '<number>'; inherits: true; initial-value: 0; }
-:root { --lgp-adapt-duration: 480ms; --lgp-adapt-ease: cubic-bezier(.33, 0, .2, 1); }
+/* Fast-start ease-out: the change is visible on the very next frame and
+   settles quickly, rather than easing in from a standstill. */
+:root { --lgp-adapt-duration: 220ms; --lgp-adapt-ease: cubic-bezier(.2, 0, 0, 1); }
 [data-lgp-backdrop] :is(.lgp-content, [data-liquid-button], .lgc-exit),
 [data-lgp-backdrop] :is(.lgp-content, [data-liquid-button], .lgc-exit) svg {
   transition: color var(--lgp-adapt-duration) var(--lgp-adapt-ease), fill var(--lgp-adapt-duration) var(--lgp-adapt-ease), stroke var(--lgp-adapt-duration) var(--lgp-adapt-ease);
@@ -311,10 +313,20 @@
 [data-lgp-group]:not([data-lgp-control="surface"]) > .lgp-material,
 [data-lgp-component="tools"] .lgc-material,
 [data-lgp-component="options"]:not(:has([aria-expanded="true"])) .lgc-material {
-  background: transparent !important;
+  background: var(--lgp-clear-fill, transparent) !important;
   /* The vibrancy boost (saturate 1.7) turns a warm canvas yellow behind a
      clear button; with no veil to balance it, it reads as a tint. */
   --liquid-design-saturate: 1; --lgp-brightness: 1;
+}
+/* Over light backdrops a fully clear button disappears into the page (only a
+   faint ring is left). Give it a thin white veil and a firmer contour so it
+   still reads as a button; over dark backdrops it stays fully clear. */
+[data-lgp-backdrop="light"] { --lgp-clear-fill: rgb(255 255 255 / .24); }
+:is([data-lgp-control="button"], [data-lgp-group]:not([data-lgp-control="surface"]))[data-lgp-backdrop="light"] > .lgp-material[data-lgp-lens] {
+  box-shadow: inset 0 0 0 .75px rgb(40 36 34 / calc(.3 * var(--lgp-contour)));
+}
+:is([data-lgp-component="tools"], [data-lgp-component="options"])[data-lgp-backdrop="light"] > .lgc-outline > .lgc-contrast-rim {
+  stroke: rgb(40 36 34 / calc(.3 * var(--lgp-contour))) !important;
 }
 /* A closed Options trigger is a button too; its menu fades the fill back in. */
 [data-lgp-component="options"] .lgc-material { transition: background-color 200ms var(--lgp-adapt-ease, ease); }

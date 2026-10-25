@@ -306,11 +306,34 @@
     if (delay <= 0) frame = root.requestAnimationFrame(run);
     else wait = setTimeout(function () { wait = 0; frame = root.requestAnimationFrame(run); }, delay);
   }
-  function rescan() { scrimsAt = -Infinity; schedule(); }
+  // A discrete change (theme toggle, page class swap) skips the throttle and
+  // samples on the next frame, so the glass reacts at once.
+  function now() {
+    if (frame) return;
+    if (wait) { clearTimeout(wait); wait = 0; }
+    frame = root.requestAnimationFrame(run);
+  }
+  function rescan() { scrimsAt = -Infinity; now(); }
+  // Transitions of page colours: sample as they start and when they end,
+  // ignoring the glass's own transitions.
+  function onTransition(e) {
+    var t = e.target;
+    if (t && t.closest && t.closest('[data-lgp-control], [data-lgp-group], [data-lgp-component]')) return;
+    now();
+  }
+  var observer = null;
   function start() {
     root.addEventListener('scroll', schedule, { capture: true, passive: true });
     root.addEventListener('resize', rescan);
-    root.addEventListener('transitionend', schedule, true);
+    root.addEventListener('transitionrun', onTransition, true);
+    root.addEventListener('transitionend', onTransition, true);
+    if (typeof MutationObserver !== 'undefined') {
+      observer = new MutationObserver(rescan);
+      // No 'style': pages animate inline styles on <html> per frame.
+      var opts = { attributes: true, attributeFilter: ['class', 'data-theme', 'data-liquid-design-theme'] };
+      observer.observe(document.documentElement, opts);
+      if (document.body) observer.observe(document.body, opts);
+    }
     // Content can change beneath fixed glass without any event here (an
     // iframe scrolling, a carousel); a slow poll keeps the reading honest.
     timer = setInterval(function () { if (!document.hidden) schedule(); }, 1500);
@@ -318,7 +341,9 @@
   function stop() {
     root.removeEventListener('scroll', schedule, { capture: true });
     root.removeEventListener('resize', rescan);
-    root.removeEventListener('transitionend', schedule, true);
+    root.removeEventListener('transitionrun', onTransition, true);
+    root.removeEventListener('transitionend', onTransition, true);
+    if (observer) { observer.disconnect(); observer = null; }
     clearInterval(timer); timer = 0; clearTimeout(wait); wait = 0;
   }
   function watch(el) {

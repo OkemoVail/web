@@ -1,45 +1,110 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid slice">
-  <!-- ASTRA, monochrome cobalt: a telescope on a tripod sighting a ringed planet. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- ASTRA, monochrome cobalt screenprint: a telescope on a tripod whose beam cuts a shaft to a ringed planet. -->
+  <defs>
+    <pattern id="s-dots" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="2.4" fill="#6b85ff"/><circle cx="9" cy="9" r="2.4" fill="#6b85ff"/>
+    </pattern>
+    <pattern id="s-dots-dark" width="10" height="10" patternUnits="userSpaceOnUse">
+      <circle cx="2.5" cy="2.5" r="2" fill="#0a1466"/><circle cx="7.5" cy="7.5" r="2" fill="#0a1466"/>
+    </pattern>
+    <pattern id="s-hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+      <rect width="6" height="14" fill="#1527b8"/>
+    </pattern>
+    <path id="s-star" d="M0-14C2-4 4-2 14 0 4 2 2 4 0 14-2 4-4 2-14 0-4-2-2-4 0-14Z"/>
+    <clipPath id="s-planet"><circle cx="232" cy="236" r="96"/></clipPath>
+    <clipPath id="s-beam"><path d="M262 500L140 214L326 196Z"/></clipPath>
+  </defs>
+
   <rect width="400" height="1000" fill="#2340ff"/>
 
-  <!-- sky: deep field top, stars in pale tones -->
-  <rect width="400" height="260" fill="#1527b8"/>
-  <path d="M0 0H400V120A400 120 0 0 1 0 120Z" fill="#0a1466"/>
+  <!-- night sky: deep bands curving down -->
+  <rect width="400" height="520" fill="#1527b8"/>
+  <path d="M-20 0H420V300C300 250 100 250-20 300Z" fill="#0a1466"/>
+  <path d="M-20 0H420V130C300 100 100 100-20 130Z" fill="#050a3d"/>
+
+  <!-- constellation: lines and joints -->
+  <g stroke="#6b85ff" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M40 60L96 112L70 190L130 250M96 112L160 80L210 30"/>
+    <path d="M330 420L370 470L344 520L388 590"/>
+  </g>
   <g fill="#c2ceff">
-    <circle cx="48" cy="60" r="5"/><circle cx="140" cy="36" r="3"/><circle cx="350" cy="80" r="6"/>
-    <circle cx="90" cy="190" r="4"/><circle cx="60" cy="330" r="3"/><circle cx="130" cy="400" r="4"/>
-  </g>
-  <path d="M200 40l8 22 22 8-22 8-8 22-8-22-22-8 22-8Z" fill="#6b85ff"/>
-
-  <!-- the planet: ring passes behind, then in front -->
-  <g transform="rotate(-18 225 300)">
-    <path d="M149 300A76 18 0 0 1 301 300" fill="none" stroke="#0a1466" stroke-width="12"/>
-    <circle cx="225" cy="300" r="50" fill="#c2ceff"/>
-    <path d="M173 300a52 52 0 0 0 104 0Z" fill="#6b85ff"/>
-    <path d="M149 300A76 18 0 0 0 301 300" fill="none" stroke="#0a1466" stroke-width="12"/>
+    <circle cx="40" cy="60" r="7"/><circle cx="96" cy="112" r="9"/><circle cx="70" cy="190" r="6"/>
+    <circle cx="130" cy="250" r="7"/><circle cx="160" cy="80" r="5"/><circle cx="210" cy="30" r="8"/>
+    <circle cx="330" cy="420" r="6"/><circle cx="370" cy="470" r="8"/><circle cx="344" cy="520" r="5"/><circle cx="388" cy="590" r="7"/>
   </g>
 
-  <!-- tripod -->
-  <g fill="none" stroke-linecap="round">
-    <path d="M200 580L125 890M200 580L275 890" stroke="#0a1466" stroke-width="18"/>
-    <path d="M200 580V905" stroke="#1527b8" stroke-width="14"/>
-    <path d="M150 750H250" stroke="#6b85ff" stroke-width="10"/>
+  <!-- the beam: a shaft of halftone from the lens to the planet -->
+  <path d="M262 500L140 214L326 196Z" fill="#2340ff"/>
+  <rect x="130" y="180" width="210" height="330" fill="url(#s-dots)" clip-path="url(#s-beam)"/>
+
+  <!-- ringed planet, sliced by bands, ring behind then in front -->
+  <g transform="rotate(-22 232 236)">
+    <path d="M90 236A142 34 0 0 1 374 236" fill="none" stroke="#c2ceff" stroke-width="16"/>
+    <path d="M110 236A122 22 0 0 1 354 236" fill="none" stroke="#0a1466" stroke-width="6"/>
+  </g>
+  <circle cx="232" cy="236" r="96" fill="#6b85ff"/>
+  <g clip-path="url(#s-planet)">
+    <path d="M120 170C180 150 260 190 350 160V200C260 230 180 190 120 210Z" fill="#c2ceff"/>
+    <path d="M120 250C180 230 260 270 350 240V262C260 292 180 252 120 272Z" fill="#1527b8"/>
+    <path d="M120 300C200 280 260 320 350 290V340H120Z" fill="#0a1466"/>
+    <circle cx="200" cy="200" r="16" fill="#2340ff"/>
+    <circle cx="270" cy="300" r="10" fill="#c2ceff"/>
+    <path d="M232 140A96 96 0 0 1 328 236A96 96 0 0 1 300 304A120 120 0 0 0 232 140Z" fill="url(#s-dots-dark)"/>
+  </g>
+  <g transform="rotate(-22 232 236)">
+    <path d="M90 236A142 34 0 0 0 374 236" fill="none" stroke="#e8edff" stroke-width="16"/>
+    <path d="M110 236A122 22 0 0 0 354 236" fill="none" stroke="#0a1466" stroke-width="6"/>
   </g>
 
-  <!-- the telescope, sighting the planet: eyepiece, tube, bands, finder, dew shield -->
-  <g transform="rotate(-62 200 560)">
-    <rect x="62" y="546" width="36" height="28" fill="#c2ceff"/>
-    <rect x="88" y="528" width="200" height="64" rx="8" fill="#0a1466"/>
-    <rect x="276" y="514" width="44" height="92" rx="6" fill="#6b85ff"/>
-    <rect x="310" y="526" width="10" height="68" fill="#c2ceff"/>
-    <rect x="146" y="528" width="14" height="64" fill="#6b85ff"/>
-    <rect x="240" y="528" width="14" height="64" fill="#1527b8"/>
-    <rect x="146" y="504" width="100" height="18" rx="9" fill="#1527b8"/>
+  <!-- moon and confetti stars -->
+  <circle cx="58" cy="350" r="34" fill="#e8edff"/>
+  <circle cx="74" cy="340" r="30" fill="#1527b8"/>
+  <g fill="#e8edff">
+    <use xlink:href="#s-star" transform="translate(330 60) scale(1.4)"/>
+    <use xlink:href="#s-star" transform="translate(120 420) scale(.8)"/>
+    <use xlink:href="#s-star" transform="translate(300 380) scale(.6)"/>
+    <use xlink:href="#s-star" transform="translate(30 470) scale(.6)"/>
+    <circle cx="270" cy="60" r="3"/><circle cx="380" cy="140" r="4"/><circle cx="20" cy="250" r="3"/>
+    <circle cx="190" cy="390" r="3"/><circle cx="250" cy="450" r="4"/><circle cx="110" cy="320" r="3"/>
   </g>
-  <circle cx="200" cy="572" r="22" fill="#c2ceff"/>
-  <circle cx="200" cy="572" r="8" fill="#0a1466"/>
 
-  <!-- ground: a dark hill the tripod stands on -->
-  <rect x="-40" y="880" width="480" height="160" rx="80" fill="#1527b8"/>
-  <circle cx="330" cy="950" r="30" fill="#0a1466"/>
+  <!-- tripod with spread legs and a hatch shadow -->
+  <path d="M60 940L340 940L300 900H100Z" fill="url(#s-hatch)"/>
+  <g stroke-linecap="round" fill="none">
+    <path d="M196 640L92 920" stroke="#050a3d" stroke-width="20"/>
+    <path d="M196 640L310 920" stroke="#050a3d" stroke-width="20"/>
+    <path d="M196 640V930" stroke="#0a1466" stroke-width="16"/>
+    <path d="M136 800H262" stroke="#6b85ff" stroke-width="10"/>
+  </g>
+  <circle cx="92" cy="922" r="14" fill="#c2ceff"/><circle cx="310" cy="922" r="14" fill="#c2ceff"/><circle cx="196" cy="932" r="12" fill="#6b85ff"/>
+
+  <!-- the telescope: tube is a search bar, lens throws the beam up -->
+  <g transform="rotate(-64 196 640)">
+    <rect x="30" y="618" width="46" height="44" rx="8" fill="#c2ceff"/>
+    <rect x="16" y="628" width="20" height="24" rx="4" fill="#0a1466"/>
+    <rect x="66" y="596" width="280" height="88" rx="44" fill="#e8edff"/>
+    <rect x="66" y="596" width="280" height="88" rx="44" fill="#0a1466" transform="translate(10 10)"/>
+    <rect x="66" y="596" width="280" height="88" rx="44" fill="#e8edff"/>
+    <rect x="104" y="626" width="120" height="12" rx="6" fill="#6b85ff"/>
+    <rect x="104" y="648" width="76" height="12" rx="6" fill="#c2ceff"/>
+    <rect x="240" y="626" width="4" height="34" fill="#2340ff"/>
+    <circle cx="300" cy="640" r="30" fill="#2340ff"/>
+    <circle cx="296" cy="636" r="13" fill="none" stroke="#e8edff" stroke-width="6"/>
+    <path d="M305 645L316 656" stroke="#e8edff" stroke-width="7" stroke-linecap="round"/>
+    <rect x="340" y="580" width="40" height="120" rx="10" fill="#6b85ff"/>
+    <rect x="368" y="590" width="12" height="100" fill="#c2ceff"/>
+    <rect x="136" y="566" width="110" height="22" rx="11" fill="#1527b8"/>
+    <rect x="236" y="560" width="22" height="34" rx="4" fill="#6b85ff"/>
+  </g>
+  <circle cx="196" cy="640" r="26" fill="#050a3d"/>
+  <circle cx="196" cy="640" r="11" fill="#c2ceff"/>
+
+  <!-- ground: wavy hills with a dot field -->
+  <path d="M0 920C60 890 120 900 200 930C280 960 340 930 400 910V1000H0Z" fill="#0a1466"/>
+  <path d="M0 960C80 930 160 950 240 970C300 985 350 970 400 955V1000H0Z" fill="#050a3d"/>
+  <rect x="0" y="960" width="400" height="40" fill="url(#s-dots)"/>
+  <!-- small sky details lower -->
+  <g fill="#6b85ff"><circle cx="40" cy="580" r="5"/><circle cx="360" cy="680" r="6"/><circle cx="30" cy="760" r="4"/><circle cx="372" cy="820" r="5"/></g>
+  <use xlink:href="#s-star" fill="#c2ceff" transform="translate(56 690) scale(.9)"/>
+  <use xlink:href="#s-star" fill="#c2ceff" transform="translate(340 760) scale(.7)"/>
 </svg>

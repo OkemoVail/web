@@ -37,6 +37,8 @@
   }
   function enhance(el) {
     if (el.closest('[data-liquid-design-component]')) return;
+    // Opt-out for plain, flat controls (e.g. the Labs21 landing composer).
+    if (el.closest('[data-lg-plain]')) return;
     // Chat glass is a functional layer, not a skin on every list/message action.
     // Shared toolbar surfaces own their background; their icons stay plain.
     if (el.closest('[data-page="chat"]') && !el.matches('#send-btn,#menu-toggle-btn,.chat-sidebar-actions,#profile-identity-glass,.sb-profile-btn,#profile-row-actions button[data-liquid-design],.folder-create-btn,.custom-modal-card,.custom-modal-input-shell,.custom-modal-card .modal-btn') ) return;

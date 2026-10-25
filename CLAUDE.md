@@ -1624,6 +1624,14 @@ untracked/ignored: `.superpowers/` agent reports, `tools/snapshots/`,
 The `zz-nc-*` screenshots, four root review reports and `voidai/claude.svg`
 were deleted (recoverable from git history).
 
+Tests folder (2026-10-24): all local harnesses (`test-*.mjs`, `test.mjs`,
+`test_localhost.mjs`) now live in `tests/`, which is gitignored as a whole.
+Run them as `node tests/<name>.mjs` (older notes in this file say
+`node test-x.mjs`; prefix `tests/`). Each file's first line `process.chdir`s
+to the repo root, and server roots / `new URL('../…', import.meta.url)` point
+one level up, so they work from any cwd. `test-lamina-repositories.mjs` stays
+at the root and tracked because `npm run test:lamina-repositories` and CI use it.
+
 Homepage pillars, monochrome (2026-10-21, user: "still looks AI generated"):
 every panel is now ONE hue built from 3-5 flat tones of it, no gradients:
 AION red `#e8352b`, ASTRA cobalt `#2340ff`, WORD saffron `#ffb800`, LABS21
@@ -1746,3 +1754,39 @@ menu has no enabled rows; bundle rebuilt. (2) The "+" shifted 5px left in any
 thinking mode: `ui.js` showed the empty `#plus-active-icon` span when thinking
 was on, adding a flex gap. Thinking no longer toggles it (only search,
 research, canvas do). Cache version `20261022-plus-menu` (engine + `ui.js`).
+
+Glass adaptation latency (2026-10-24, user: "reaction to the material changing
+colour is really slow"): `liquid-design-backdrop.js` now samples on the next
+frame (bypassing the 120ms throttle) for discrete changes: a MutationObserver
+on `<html>`/`<body>` `class`/`data-theme`/`data-liquid-design-theme`, plus
+`transitionrun` and `transitionend` of page elements (glass's own transitions
+are ignored). Scroll keeps the throttle. The crossfade is now 220ms with a
+fast-start ease-out `cubic-bezier(.2, 0, 0, 1)` (was 480ms ease-in-out), so it
+visibly starts at once. Measured ~60ms from theme toggle to new reading.
+Cache version `20261024-adapt-fast`.
+
+Chat sidebar glass restored (2026-10-24, user): `.chat-sidebar-actions`
+(search + collapse pill), `#chat-search-panel` and `.sb-profile-btn` carry
+`data-liquid-design="surface" data-liquid-design-independent` again (removed
+in edac209); the pill and profile stay clear (no veil). Dark-mode
+`#sidebar::after` corner hotspot is transparent and the top specular is .05
+(was .14 / .09), which read as a glow top-left. Cache version
+`site.css?v=20261024-profile-ink`. As clear glass, `.sb-profile-btn[data-lg-site][data-lgp-control]` uses `color: var(--text-primary)` (it inherited `--accent-contrast`, white, from the old accent-filled pill, so light-mode text was invisible). The header pill (`.sb-tools-dock > .chat-sidebar-actions`) is `overflow: visible` (was hidden), so its glass is not cut off when it stretches past the pill on press/drag.
+
+Clear buttons over light backdrops (2026-10-24, user: "cannot really see the
+glass as a button"): fully clear buttons vanished over light art (pink
+pillars), leaving only a faint ring. When the sampler reports
+`data-lgp-backdrop="light"`, clear buttons/groups/Tools/closed Options now get
+`--lgp-clear-fill` (white 24%) and a .75px contour at 30% instead of 16%. Over
+dark backdrops they stay fully clear. Cache version `20261024-clear-visible`.
+
+AI landing, assistant style (2026-10-24, user: "like anthropic or chatgpt"):
+`AI/index.html` supersedes the poster/carousel layouts. It opens on a centred
+"Stay curious." greeting with a real composer (`form.ah-composer` GET to
+`chat.html?q=`; Enter sends, Shift+Enter newline, chips fill the box). Then:
+Lumen 1.9 film beside its copy (the `#lumen-copy` end card is hidden here),
+"Latest from the lab" cards filled from `data/blogs.json` (static fallback),
+Saga/Lumen model cards, BDH specs, closing prompt, column footer. `main.js`
+sends `?q=` once after `initChatUI()` and strips it with `replaceState`.
+Controls carry `data-lg-plain`, which `src/liquid-design-site.js` skips (no
+glass). CSS: `.ah-*` in the AI-HOME section of `src/site.css`.
