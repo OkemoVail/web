@@ -1,243 +1,241 @@
-import * as THREE from '../vendor/three.module.min.js';
+import { WebGLRenderer } from '../vendor/three.module.min.js';
+import * as THREE from '../vendor/three.core.min.js';
 
-// Lumen 1.9 Earthrise (2026-10-25). One slow telephoto shot from just above
-// the lunar surface: the camera rises, the horizon sinks and a half-lit Earth
-// clears it. Everything is ray-traced in one full-screen shader (an analytic
-// Moon sphere with procedural crater relief and cast shadows, an Earth sphere
-// with Blue Marble day + cloud textures and a thin atmosphere), so there is no
-// mesh tessellation to show at a 9 degree lens. No stars: at this exposure a
-// real camera would not record them.
+// Aion 2 hero (2026-10-25). A field of graphite blocks works as a sound
+// surface: one voice ripples out, a second one answers ("talks back"), then
+// the waves settle and the blocks under a "2" rise and light in AION red.
+// The camera moves from a low pass across the field to a raised three-quarter
+// view and the final frame holds with a faint residual ripple.
+// One InstancedMesh; heights are computed in the vertex shader from a few
+// uniforms plus per-block attributes (glyph mask, red spill, delay, jitter).
 
 function easeInOut(value) {
   const t = Math.max(0, Math.min(1, value));
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-function assetPath(assets, name, tier) {
-  const value = assets[name];
-  if (!value) throw new Error(`Missing Lumen asset: ${name}`);
-  return typeof value === 'string' ? value : value[tier];
+function seededRandom(seed) {
+  let value = seed >>> 0;
+  return function random() {
+    value = (value * 1664525 + 1013904223) >>> 0;
+    return value / 4294967296;
+  };
 }
 
 const defaultDependencies = {
-  createRenderer: (options) => new THREE.WebGLRenderer(options),
+  createRenderer: (options) => new WebGLRenderer(options),
   loadTimeline: async (signal) => {
-    const response = await fetch(new URL('./lumen-timeline.json?v=earthrise', import.meta.url), { signal });
-    if (!response.ok) throw new Error('Unable to load the Lumen timeline');
+    const response = await fetch(new URL('./lumen-timeline.json?v=aion2', import.meta.url), { signal });
+    if (!response.ok) throw new Error('Unable to load the Aion 2 timeline');
     return response.json();
   },
-  loadTexture: (loader, path) => loader.loadAsync(path),
+  loadFont: async () => {
+    try { await document.fonts.load('900 200px Satoshi'); } catch (_) {}
+  },
 };
 
-function abortError(message = 'Lumen scene initialization aborted') {
+function abortError(message = 'Aion 2 scene initialization aborted') {
   return new DOMException(message, 'AbortError');
 }
 
-const vertexShader = 'varying vec2 vUv; void main(){ vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position.xy, 0.0, 1.0); }';
-
-const fragmentShader = /* glsl */ `
-precision highp float;
-varying vec2 vUv;
-uniform vec2 resolution;
-uniform vec3 camPos;
-uniform vec3 camRight;
-uniform vec3 camUp;
-uniform vec3 camForward;
-uniform vec2 tanHalf;
-uniform vec3 sunDir;
-uniform float moonR;
-uniform vec3 earthPos;
-uniform float earthR;
-uniform mat3 earthRot;
-uniform float exposure;
-uniform float time;
-uniform float detail;
-uniform sampler2D earthDay;
-uniform sampler2D earthClouds;
-uniform sampler2D moonAlbedo;
-
-const float PI = 3.14159265;
-
-float hash12(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
-vec2 hash22(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973)); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.xx + p3.yz) * p3.zy); }
-
-float vnoise(vec2 p) {
-  vec2 i = floor(p); vec2 f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash12(i), hash12(i + vec2(1, 0)), u.x), mix(hash12(i + vec2(0, 1)), hash12(i + vec2(1, 1)), u.x), u.y);
-}
-float fbm(vec2 p) {
-  float v = 0.0, a = 0.5;
-  for (int i = 0; i < 4; i++) { v += a * vnoise(p); p = p * 2.03 + 7.1; a *= 0.5; }
-  return v;
-}
-
-// One octave of craters: sparse cells, each a bowl with a raised rim and a
-// soft ejecta skirt. Returns height in cell units.
-float craterLayer(vec2 q, float seed) {
-  vec2 c = floor(q); vec2 f = fract(q); float h = 0.0;
-  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
-    vec2 g = vec2(float(i), float(j));
-    vec2 id = c + g + seed;
-    if (hash12(id + 17.1) < 0.68) continue;
-    float rad = mix(0.16, 0.46, pow(hash12(id + 3.7), 1.6));
-    float r = length(g + hash22(id) - f) / rad;
-    float bowl = r < 1.0 ? (r * r - 1.0) * 0.16 : 0.0;
-    float rim = exp(-pow((r - 1.0) * 3.4, 2.0)) * 0.07;
-    float skirt = r > 1.0 ? 0.03 * exp(-(r - 1.0) * 2.2) : 0.0;
-    h += (bowl + rim + skirt) * rad;
+// Rasterise the glyph at the grid resolution (4x supersampled) and return the
+// per-cell coverage plus a blurred copy used for the red light spill.
+function glyphMask(cols, rows, glyph) {
+  const scale = 4;
+  const canvas = document.createElement('canvas');
+  canvas.width = cols * scale;
+  canvas.height = rows * scale;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const size = glyph.size * rows * scale;
+  context.fillStyle = '#fff';
+  context.textAlign = 'center';
+  context.textBaseline = 'alphabetic';
+  context.font = `900 ${size}px Satoshi, "Helvetica Neue", Arial, sans-serif`;
+  const metrics = context.measureText(glyph.text || '2');
+  const ascent = metrics.actualBoundingBoxAscent || size * 0.72;
+  const descent = metrics.actualBoundingBoxDescent || 0;
+  const x = (0.5 + glyph.cx) * canvas.width;
+  const y = (0.5 + glyph.cz) * canvas.height + (ascent - descent) / 2;
+  context.fillText(glyph.text || '2', x, y);
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  const mask = new Float32Array(cols * rows);
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      let sum = 0;
+      for (let sy = 0; sy < scale; sy++) {
+        for (let sx = 0; sx < scale; sx++) {
+          sum += pixels[((row * scale + sy) * canvas.width + col * scale + sx) * 4 + 3];
+        }
+      }
+      // Hard-ish threshold so the letterform reads as whole blocks.
+      const coverage = sum / (scale * scale * 255);
+      mask[row * cols + col] = coverage > 0.42 ? 1 : 0;
+    }
   }
-  return h;
-}
-
-// Terrain height on the tangent plane. Octaves smaller than the pixel
-// footprint fade out so the grazing ground near the horizon never shimmers.
-float terrain(vec2 q, float fp, int octaves) {
-  float h = (fbm(q * 0.11) - 0.5) * 0.9 + (fbm(q * 0.6 + 3.0) - 0.5) * 0.12;
-  float cell = 2.2;
-  for (int k = 0; k < 6; k++) {
-    if (k >= octaves) break;
-    float w = smoothstep(fp * 5.0, fp * 12.0, cell);
-    if (w > 0.0) h += craterLayer(q / cell, float(k) * 13.1) * cell * w;
-    cell *= 0.42;
+  const spill = new Float32Array(cols * rows);
+  const radius = 4;
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      let sum = 0;
+      let weight = 0;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const r = row + dy;
+          const c = col + dx;
+          if (r < 0 || c < 0 || r >= rows || c >= cols) continue;
+          const w = Math.exp(-(dx * dx + dy * dy) / (radius * radius * 0.5));
+          sum += mask[r * cols + c] * w;
+          weight += w;
+        }
+      }
+      spill[row * cols + col] = sum / weight;
+    }
   }
-  return h;
+  return { mask, spill };
 }
 
-vec2 sphere(vec3 ro, vec3 rd, vec3 c, float r) {
-  vec3 oc = ro - c; float b = dot(oc, rd); float h = b * b - dot(oc, oc) + r * r;
-  if (h < 0.0) return vec2(-1.0);
-  h = sqrt(h); return vec2(-b - h, -b + h);
-}
+const vertexShader = /* glsl */ `
+attribute vec2 aCell;
+attribute float aGlyph;
+attribute float aSpill;
+attribute float aRand;
+attribute float aDelay;
+uniform float uTime;
+uniform float uCell;
+uniform vec4 uVoiceA;
+uniform vec4 uVoiceB;
+uniform vec4 uWave;
+uniform float uResidual;
+uniform vec2 uForm;
+uniform float uGlyphHeight;
+varying vec3 vNormal;
+varying vec3 vLocal;
+varying vec3 vWorld;
+varying float vGlyph;
+varying float vSpill;
+varying float vWave;
+varying float vForm;
+varying float vHeight;
 
-vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
-vec3 toSrgb(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
-
-vec4 sampleEquirect(sampler2D tex, vec3 n) {
-  float lon = atan(n.y, n.x);
-  float lat = asin(clamp(n.z, -1.0, 1.0));
-  vec2 uv = vec2(lon / (2.0 * PI) + 0.5, lat / PI + 0.5);
-  // Seam-safe derivatives: take the smaller of the wrapped/unwrapped u slopes.
-  float u2 = fract(uv.x + 0.5);
-  vec2 dx = vec2(dFdx(uv.x), dFdx(uv.y)); vec2 dy = vec2(dFdy(uv.x), dFdy(uv.y));
-  vec2 dx2 = vec2(dFdx(u2), dx.y); vec2 dy2 = vec2(dFdy(u2), dy.y);
-  if (abs(dx2.x) < abs(dx.x)) dx = dx2;
-  if (abs(dy2.x) < abs(dy.x)) dy = dy2;
-  return textureGrad(tex, uv, dx, dy);
-}
-
-vec3 shadeEarth(vec3 ro, vec3 rd, float t) {
-  vec3 p = ro + rd * t;
-  vec3 n = normalize(p - earthPos);
-  vec3 l = earthRot * n;
-  float ndl = dot(n, sunDir);
-  float day = smoothstep(-0.06, 0.18, ndl);
-  vec3 albedo = sampleEquirect(earthDay, l).rgb; albedo = mix(vec3(dot(albedo, vec3(0.3, 0.59, 0.11))), albedo, 0.82);
-  vec4 cloudSample = sampleEquirect(earthClouds, l);
-  float cloud = smoothstep(0.5, 0.95, dot(cloudSample.rgb, vec3(0.333))) * cloudSample.a;
-  float ocean = smoothstep(0.06, 0.02, albedo.r) * smoothstep(0.02, 0.06, albedo.b);
-  vec3 h = normalize(sunDir - rd);
-  float glint = pow(max(dot(n, h), 0.0), 60.0) * ocean * (1.0 - cloud) * 0.5;
-  vec3 surface = mix(albedo, vec3(0.86), cloud);
-  vec3 lit = surface * max(ndl, 0.0) * day + glint * day;
-  // Rayleigh haze thickens toward the limb.
-  float mu = max(dot(n, -rd), 0.0);
-  float haze = pow(1.0 - mu, 2.2);
-  lit = mix(lit, vec3(0.32, 0.55, 1.0) * max(ndl + 0.1, 0.0), haze * 0.45);
-  return lit;
+float voice(vec4 v, vec2 p, float t) {
+  float dt = t - v.z;
+  if (dt <= 0.0) return 0.0;
+  float d = distance(p, v.xy);
+  float front = uWave.x * dt;
+  float envelope = smoothstep(front, front - 10.0, d);
+  float k = 6.2831853 / uWave.y;
+  float w = 6.2831853 / uWave.z;
+  float falloff = 1.0 / (1.0 + d * 0.035);
+  return sin(d * k - dt * w) * envelope * falloff * v.w;
 }
 
 void main() {
-  vec2 ndc = vUv * 2.0 - 1.0;
-  vec3 ro = camPos;
-  vec3 rd = normalize(camForward + ndc.x * tanHalf.x * camRight + ndc.y * tanHalf.y * camUp);
-  float pixelAngle = 2.0 * tanHalf.y / resolution.y;
+  float t = uTime;
+  float settle = smoothstep(uForm.x, uForm.x + uForm.y * 1.4, t);
+  float wave = (voice(uVoiceA, aCell, t) + voice(uVoiceB, aCell, t)) * uWave.w;
+  wave *= mix(1.0, uResidual, settle);
+  float form = clamp((t - uForm.x - aDelay) / uForm.y, 0.0, 1.0);
+  form = 1.0 - pow(1.0 - form, 3.0);
+  float h = max(0.06, 0.32 + aRand * 0.14 + wave);
+  h += aGlyph * uGlyphHeight * form;
 
-  vec3 moonC = vec3(0.0, 0.0, -moonR);
-  vec2 mh = sphere(ro, rd, moonC, moonR);
-  vec3 color = vec3(0.0);
+  vec3 p = position + vec3(0.0, 0.5, 0.0);
+  vec3 world = vec3(aCell.x + position.x * uCell, p.y * h, aCell.y + position.z * uCell);
+  vLocal = vec3(p.x, p.y * h, p.z);
+  vNormal = normal;
+  vWorld = world;
+  vGlyph = aGlyph;
+  vSpill = aSpill;
+  vWave = wave;
+  vForm = form;
+  vHeight = h;
+  gl_Position = projectionMatrix * viewMatrix * vec4(world, 1.0);
+}
+`;
 
-  // Horizon relief: a ray that grazes past the smooth sphere still hits if it
-  // passes under a mountain profile defined by its azimuth.
-  float az = atan(rd.x, rd.y);
-  float ridge = (0.1 + fbm(vec2(az * 120.0, 1.0)) * 0.75 + fbm(vec2(az * 700.0, 5.0)) * 0.15) * 0.022;
-  vec3 oc = ro - moonC;
-  float tc = -dot(oc, rd);
-  float miss = length(oc + rd * tc) - moonR;
-  bool silhouette = mh.x < 0.0 && tc > 0.0 && miss < ridge;
+const fragmentShader = /* glsl */ `
+precision highp float;
+uniform vec3 uCameraPos;
+uniform vec3 uLight;
+uniform float uExposure;
+uniform float uTime;
+uniform vec2 uFog;
+uniform vec3 uBg;
+uniform vec3 uRed;
+uniform vec2 uHalf;
+uniform vec2 uEdge;
+varying vec3 vNormal;
+varying vec3 vLocal;
+varying vec3 vWorld;
+varying float vGlyph;
+varying float vSpill;
+varying float vWave;
+varying float vForm;
+varying float vHeight;
 
-  if (mh.x > 0.0 || silhouette) {
-    float t = mh.x > 0.0 ? mh.x : tc;
-    vec3 p = ro + rd * t;
-    vec3 n0 = normalize(p - moonC);
-    vec2 q = p.xy;
-    float grazing = max(dot(n0, -rd), 0.015);
-    float fp = t * pixelAngle / grazing;
-    int oct = detail > 0.5 ? 6 : 4;
-    float e = max(fp * 0.5, 0.004);
-    float h0 = terrain(q, fp, oct);
-    float hx = terrain(q + vec2(e, 0.0), fp, oct);
-    float hy = terrain(q + vec2(0.0, e), fp, oct);
-    vec3 n = normalize(n0 - vec3((hx - h0) / e, (hy - h0) / e, 0.0));
-    if (silhouette) { n = n0; fp = 1.0; }
+float hash12(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 
-    // Cast shadows from crater rims under the low sun.
-    vec2 sd = normalize(sunDir.xy);
-    float tanSun = sunDir.z / length(sunDir.xy);
-    float shadow = 1.0;
-    float stp = 0.04;
-    float travel = 0.0;
-    for (int k = 0; k < 7; k++) {
-      travel += stp;
-      float hs = terrain(q + sd * travel, fp, oct - 2);
-      shadow = min(shadow, clamp(((h0 + travel * tanSun) - hs) * 2.5 / travel + 1.0, 0.0, 1.0));
-      stp *= 1.7;
-    }
+void main() {
+  vec3 n = normalize(vNormal);
+  bool top = n.y > 0.5;
+  vec3 graphite = vec3(0.034, 0.037, 0.043);
+  float diffuse = max(dot(n, uLight), 0.0);
+  vec3 color = graphite * (0.25 + 0.9 * diffuse);
 
-    float tone = texture(moonAlbedo, vec2(0.5, 0.5) + q * vec2(0.0045, 0.0035)).r;
-    float speckle = mix(0.86, 1.1, vnoise(q * 9.0));
-    vec3 albedo = vec3(0.155, 0.148, 0.14) * mix(0.75, 1.25, tone) * mix(1.0, speckle, smoothstep(0.08, 0.01, fp));
-    float mu0 = max(dot(n, sunDir) * 0.85 + 0.15, 0.0);
-    float mu = max(dot(n, -rd), 0.0);
-    // Lunar regolith: Lambert for relief, Lommel-Seeliger for the flat look.
-    float brdf = mix(mu0, 2.0 * mu0 / (mu0 + mu + 1e-4), 0.7);
-    color = albedo * brdf * mix(0.35, 1.0, shadow) * 0.78;
-    // Faint earthshine keeps shadows from going pure black.
-    color += albedo * 0.012;
+  if (top) {
+    // Machined top: a thin bright chamfer on each edge catches the key light.
+    vec2 uv = vLocal.xz;
+    float edge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
+    color = vec3(0.028, 0.03, 0.034);
+    color += vec3(0.022) * (1.0 - smoothstep(0.0, 0.05, edge));
+    // Wave crests read as a cool sheen, troughs fall into shadow.
+    color *= 0.55 + 0.75 * clamp(vWave * 0.7 + 0.35, 0.0, 1.5);
+    // Red light spilling from the glyph onto neighbouring tops.
+    color += uRed * 0.12 * vSpill * vForm * (1.0 - vGlyph);
   } else {
-    vec2 eh = sphere(ro, rd, earthPos, earthR);
-    if (eh.x > 0.0) {
-      color = shadeEarth(ro, rd, eh.x);
-    }
-    // Thin atmosphere ring, only on the sunlit limb.
-    vec3 oe = ro - earthPos;
-    float te = -dot(oe, rd);
-    float d = length(oe + rd * te);
-    if (te > 0.0 && d > earthR * 0.995) {
-      vec3 limbN = normalize(oe + rd * te);
-      float lit = smoothstep(-0.15, 0.35, dot(limbN, sunDir));
-      float glow = exp(-(d - earthR) / (earthR * 0.012)) * lit;
-      color += vec3(0.3, 0.55, 1.0) * glow * 0.55;
+    // Sides darken toward the floor (contact occlusion).
+    float ao = smoothstep(0.0, 0.9, vLocal.y);
+    color *= mix(0.35, 1.0, ao);
+    color += uRed * 0.05 * vSpill * vForm * ao * (1.0 - vGlyph);
+  }
+
+  if (vGlyph > 0.5) {
+    float lit = vForm;
+    if (top) {
+      vec2 uv = vLocal.xz;
+      float edge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
+      vec3 face = uRed * (0.62 + 0.28 * (1.0 - smoothstep(0.0, 0.06, edge))) * (0.75 + 0.35 * diffuse);
+      color = mix(color, face, lit);
+    } else {
+      float rise = clamp(vLocal.y / max(vHeight, 0.001), 0.0, 1.0);
+      vec3 side = uRed * mix(0.03, 0.34, rise * rise) * (0.45 + 0.6 * diffuse);
+      color = mix(color, side, lit);
     }
   }
 
-  color = aces(color * exposure);
-  color = toSrgb(color);
-  // Film grain, very light, so gradients never band.
-  float grain = hash12(gl_FragCoord.xy + fract(time * 0.001) * 917.0) - 0.5;
-  color += grain * 0.012;
+  float dist = distance(vWorld, uCameraPos);
+  color = mix(color, uBg, smoothstep(uFog.x, uFog.y, dist));
+  // Field dissolves into black around the focus, so it has no visible edge.
+  vec2 q = vWorld.xz / uHalf;
+  float r = pow(pow(abs(q.x), 4.0) + pow(abs(q.y), 4.0), 0.25);
+  color = mix(color, uBg, smoothstep(uEdge.x, uEdge.y, r));
+  color *= uExposure;
+  color = mix(color * 12.92, 1.055 * pow(max(color, vec3(0.0)), vec3(1.0 / 2.4)) - 0.055, step(0.0031308, color));
+  color += (hash12(gl_FragCoord.xy + fract(uTime * 0.001) * 917.0) - 0.5) * 0.01;
   gl_FragColor = vec4(color, 1.0);
 }
 `;
 
 async function createLumenSceneWithDependencies(
-  { mount, quality, assets, onContextLost = function () {}, signal, preserveDrawingBuffer = false },
+  { mount, quality, onContextLost = function () {}, signal, preserveDrawingBuffer = false },
   dependencies = defaultDependencies,
 ) {
-  if (!mount || !quality || !assets) throw new TypeError('Lumen scene requires mount, quality, and assets');
+  if (!mount || !quality) throw new TypeError('Aion 2 scene requires mount and quality');
   const tier = quality.textureTier === 'mobile' ? 'mobile' : 'desktop';
-  const renderer = dependencies.createRenderer({ alpha: false, antialias: false, preserveDrawingBuffer });
-  renderer.setPixelRatio(Math.min(quality.pixelRatio, 1.5));
+  const renderer = dependencies.createRenderer({ alpha: false, antialias: quality.antialias !== false, preserveDrawingBuffer });
+  renderer.setPixelRatio(Math.min(quality.pixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+  renderer.setClearColor(0x030406, 1);
   renderer.domElement.setAttribute('aria-hidden', 'true');
   mount.appendChild(renderer.domElement);
 
@@ -247,7 +245,6 @@ async function createLumenSceneWithDependencies(
   let initializing = true;
   let rejectInitialization;
   const initializationInterrupted = new Promise((resolve, reject) => { rejectInitialization = reject; });
-  const textures = [];
   const geometries = [];
   const materials = [];
 
@@ -259,7 +256,6 @@ async function createLumenSceneWithDependencies(
     signal?.removeEventListener('abort', handleAbort);
     geometries.forEach((geometry) => geometry.dispose());
     materials.forEach((material) => material.dispose());
-    textures.forEach((texture) => texture.dispose());
     renderer.dispose();
     renderer.domElement.remove();
   }
@@ -277,7 +273,7 @@ async function createLumenSceneWithDependencies(
     if (contextLost) return;
     contextLost = true;
     active = false;
-    interrupt(new Error('WebGL context lost during Lumen scene initialization'));
+    interrupt(new Error('WebGL context lost during Aion 2 scene initialization'));
     onContextLost();
   }
 
@@ -287,132 +283,115 @@ async function createLumenSceneWithDependencies(
 
   let timeline;
   try {
-    timeline = await Promise.race([dependencies.loadTimeline(signal), initializationInterrupted]);
+    [timeline] = await Promise.race([
+      Promise.all([dependencies.loadTimeline(signal), dependencies.loadFont?.()]),
+      initializationInterrupted,
+    ]);
   } catch (error) {
     interrupt(error);
     throw error;
   }
+  if (disposed || signal?.aborted) throw abortError();
 
-  const textureLoader = new THREE.TextureLoader();
-  async function loadTexture(name) {
-    const texture = await dependencies.loadTexture(textureLoader, assetPath(assets, name, tier), signal);
-    if (disposed || signal?.aborted) {
-      texture.dispose();
-      throw abortError();
+  const layout = timeline[tier];
+  const { cols, rows } = layout;
+  const cell = 1;
+  const count = cols * rows;
+  const { mask, spill } = glyphMask(cols, rows, { ...layout.glyph, text: timeline.glyphText || '2' });
+  const random = seededRandom(2026);
+
+  const glyphCenter = new THREE.Vector2(layout.glyph.cx * cols, layout.glyph.cz * rows);
+  const cells = new Float32Array(count * 2);
+  const glyphs = new Float32Array(count);
+  const spills = new Float32Array(count);
+  const rands = new Float32Array(count);
+  const delays = new Float32Array(count);
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const i = row * cols + col;
+      const x = (col - (cols - 1) / 2) * cell;
+      const z = (row - (rows - 1) / 2) * cell;
+      cells[i * 2] = x;
+      cells[i * 2 + 1] = z;
+      glyphs[i] = mask[i];
+      spills[i] = spill[i];
+      rands[i] = random();
+      // The glyph builds from its centre outward with a little jitter.
+      delays[i] = Math.hypot(x - glyphCenter.x, z - glyphCenter.y) * 14 + random() * 260;
     }
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    textures.push(texture);
-    return texture;
   }
 
-  let earthDay;
-  let earthClouds;
-  let moonAlbedo;
-  try {
-    [earthDay, earthClouds, moonAlbedo] = await Promise.race([Promise.all([
-      loadTexture('earthDay'),
-      loadTexture('earthClouds'),
-      loadTexture('moonAlbedo'),
-    ]), initializationInterrupted]);
-  } catch (error) {
-    interrupt(error);
-    throw error;
-  }
-  moonAlbedo.wrapS = moonAlbedo.wrapT = THREE.RepeatWrapping;
+  const box = new THREE.BoxGeometry(0.86, 1, 0.86);
+  const geometry = new THREE.InstancedBufferGeometry();
+  geometry.index = box.index;
+  geometry.setAttribute('position', box.getAttribute('position'));
+  geometry.setAttribute('normal', box.getAttribute('normal'));
+  geometry.setAttribute('aCell', new THREE.InstancedBufferAttribute(cells, 2));
+  geometry.setAttribute('aGlyph', new THREE.InstancedBufferAttribute(glyphs, 1));
+  geometry.setAttribute('aSpill', new THREE.InstancedBufferAttribute(spills, 1));
+  geometry.setAttribute('aRand', new THREE.InstancedBufferAttribute(rands, 1));
+  geometry.setAttribute('aDelay', new THREE.InstancedBufferAttribute(delays, 1));
+  geometry.instanceCount = count;
+  geometries.push(box, geometry);
 
-  if (dependencies.buildScene) {
-    const built = dependencies.buildScene({ renderer, resources: { geometries, materials, textures }, timeline });
-    initializing = false;
-    return {
-      render(state, deltaMs) { if (active && !disposed) built.render(state, deltaMs); },
-      resize(width, height) { if (!disposed && width > 0 && height > 0) built.resize(width, height); },
-      pause() { active = false; },
-      resume() { if (!disposed && !contextLost) active = true; },
-      dispose() { disposeResources(); },
-    };
-  }
+  const voice = (v) => new THREE.Vector4(v.x * cols, v.z * rows, v.startMs, 1);
+  const wave = timeline.wave;
+  const uniforms = {
+    uTime: { value: 0 },
+    uCell: { value: 1 },
+    uVoiceA: { value: voice(timeline.voices[0]) },
+    uVoiceB: { value: voice(timeline.voices[1]) },
+    uWave: { value: new THREE.Vector4(wave.speed, wave.wavelength, wave.periodMs, wave.amplitude) },
+    uResidual: { value: wave.residual },
+    uForm: { value: new THREE.Vector2(timeline.formStartMs, timeline.formMs) },
+    uGlyphHeight: { value: layout.glyph.height },
+    uCameraPos: { value: new THREE.Vector3() },
+    uLight: { value: new THREE.Vector3(-0.45, 0.78, 0.42).normalize() },
+    uExposure: { value: 0 },
+    uFog: { value: new THREE.Vector2(90, 190) },
+    uBg: { value: new THREE.Color(0x030406).convertSRGBToLinear() },
+    uRed: { value: new THREE.Color(0xc8302a).convertSRGBToLinear() },
+    uHalf: { value: new THREE.Vector2(cols / 2, rows / 2) },
+    uEdge: { value: new THREE.Vector2(0.55, 0.96) },
+  };
+  const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
+  materials.push(material);
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.frustumCulled = false;
+  const scene = new THREE.Scene();
+  scene.add(mesh);
+  const camera = new THREE.PerspectiveCamera(layout.camera.fovDeg, 1, 1, 600);
 
   const deg = Math.PI / 180;
-  const mobile = tier === 'mobile';
-  const moonR = timeline.moon.radius;
   const cam = timeline.camera;
-  const dip = (height) => Math.acos(moonR / (moonR + height));
-  const dipFrom = dip(cam.heightFrom);
-  const dipTo = dip(cam.heightTo);
+  const target = new THREE.Vector3(glyphCenter.x * 0.55, 1.5, glyphCenter.y * 0.4);
 
-  const azimuth = (mobile ? timeline.mobile.azimuthDeg : timeline.earth.azimuthDeg) * deg;
-  const elevation = timeline.earth.elevationDeg * deg;
-  const earthPos = new THREE.Vector3(
-    Math.cos(elevation) * Math.sin(azimuth),
-    Math.cos(elevation) * Math.cos(azimuth),
-    Math.sin(elevation),
-  ).multiplyScalar(timeline.earth.distance);
-  const sunDir = new THREE.Vector3(...timeline.sun.direction).normalize();
-
-  const pitch = cam.pitchDeg * deg;
-  const camForward = new THREE.Vector3(0, Math.cos(pitch), Math.sin(pitch));
-  const camRight = new THREE.Vector3(1, 0, 0);
-  const camUp = new THREE.Vector3().crossVectors(camRight, camForward);
-
-  const uniforms = {
-    resolution: { value: new THREE.Vector2(1, 1) },
-    camPos: { value: new THREE.Vector3(0, 0, cam.heightFrom) },
-    camRight: { value: camRight },
-    camUp: { value: camUp },
-    camForward: { value: camForward },
-    tanHalf: { value: new THREE.Vector2(1, 1) },
-    sunDir: { value: sunDir },
-    moonR: { value: moonR },
-    earthPos: { value: earthPos },
-    earthR: { value: timeline.earth.radius },
-    earthRot: { value: new THREE.Matrix3() },
-    exposure: { value: 0 },
-    time: { value: 0 },
-    detail: { value: mobile ? 0 : 1 },
-    earthDay: { value: earthDay },
-    earthClouds: { value: earthClouds },
-    moonAlbedo: { value: moonAlbedo },
-  };
-  const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader, depthTest: false, depthWrite: false });
-  materials.push(material);
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-1, -1, 0, 3, -1, 0, -1, 3, 0]), 3));
-  geometries.push(geometry);
-  const quad = new THREE.Mesh(geometry, material);
-  quad.frustumCulled = false;
-  const scene = new THREE.Scene();
-  scene.add(quad);
-  const camera = new THREE.Camera();
-
-  // World-to-Earth-local rotation: axial tilt toward the viewer, then spin.
-  const tilt = new THREE.Matrix4().makeRotationX(timeline.earth.tiltDeg * deg);
-  const spinMatrix = new THREE.Matrix4();
-  const earthMatrix = new THREE.Matrix4();
-
-  let latestState = { phase: 'rise', progress: 0, label: '', copyVisible: false, elapsedMs: 0 };
-  let viewportWidth = 1;
-  let viewportHeight = 1;
+  let latestState = { elapsedMs: 0 };
+  let aspect = 1;
 
   function draw(state) {
     const elapsed = Math.max(0, state.elapsedMs || 0);
-    const rise = easeInOut(Math.min(elapsed, cam.riseEndMs) / cam.riseEndMs);
-    const angle = dipFrom + (dipTo - dipFrom) * rise;
-    uniforms.camPos.value.set(0, 0, moonR * (1 / Math.cos(angle) - 1));
-
-    const spin = timeline.earth.spinDeg * deg + elapsed * timeline.earth.spinRadPerMs;
-    spinMatrix.makeRotationZ(-spin);
-    earthMatrix.multiplyMatrices(spinMatrix, tilt);
-    uniforms.earthRot.value.setFromMatrix4(earthMatrix);
-
+    const move = easeInOut(Math.min(elapsed, cam.moveEndMs) / cam.moveEndMs);
+    const elevation = (cam.elevationFromDeg + (cam.elevationToDeg - cam.elevationFromDeg) * move) * deg;
+    const azimuth = (cam.azimuthFromDeg + (cam.azimuthToDeg - cam.azimuthFromDeg) * move) * deg;
+    const radius = cam.radiusFrom + (cam.radiusTo - cam.radiusFrom) * move;
+    camera.position.set(
+      target.x + radius * Math.cos(elevation) * Math.sin(azimuth),
+      target.y + radius * Math.sin(elevation),
+      target.z + radius * Math.cos(elevation) * Math.cos(azimuth),
+    );
+    camera.lookAt(target);
+    camera.aspect = aspect;
+    // Portrait screens need a wider lens to keep the field across the frame.
+    camera.fov = aspect < 1 ? layout.camera.fovDeg / Math.min(1, aspect * 1.6) : layout.camera.fovDeg;
+    camera.updateProjectionMatrix();
+    camera.projectionMatrix.elements[8] = -layout.camera.shiftX;
+    camera.projectionMatrix.elements[9] = -layout.camera.shiftY;
+    camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+    uniforms.uCameraPos.value.copy(camera.position);
+    uniforms.uTime.value = elapsed;
     const fade = Math.min(1, elapsed / cam.fadeInMs);
-    uniforms.exposure.value = 1.1 * fade * fade * (3 - 2 * fade);
-    uniforms.time.value = elapsed;
-
-    const shortHalf = Math.tan(((mobile ? timeline.mobile.fovShortDeg : cam.fovShortDeg) * deg) / 2);
-    const aspect = viewportWidth / viewportHeight;
-    if (aspect >= 1) uniforms.tanHalf.value.set(shortHalf * aspect, shortHalf);
-    else uniforms.tanHalf.value.set(shortHalf, shortHalf / aspect);
+    uniforms.uExposure.value = fade * fade * (3 - 2 * fade);
     renderer.render(scene, camera);
   }
 
@@ -424,11 +403,8 @@ async function createLumenSceneWithDependencies(
 
   function resize(width, height) {
     if (disposed || width <= 0 || height <= 0) return;
-    viewportWidth = width;
-    viewportHeight = height;
+    aspect = width / height;
     renderer.setSize(width, height, false);
-    const size = renderer.getDrawingBufferSize(new THREE.Vector2());
-    uniforms.resolution.value.copy(size);
     if (active) draw(latestState);
   }
 

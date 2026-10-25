@@ -1,6 +1,6 @@
-// Renders the Earthrise fallback video and posters from the live WebGL scene.
-// Needs a static server on 127.0.0.1:8765 at the repo root and
-// tools/lumen-probe.html. Usage: node tools/lumen-render-earthrise.mjs
+// Renders the Aion 2 fallback video and posters from the live WebGL scene.
+// Needs a static server at the repo root (PORT, default 8080) and
+// tools/lumen-probe.html. Usage: node tools/lumen-render.mjs
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -19,7 +19,7 @@ const targets = [
 const browser = await chromium.launch({ args: ['--use-angle=d3d11', '--ignore-gpu-blocklist'] });
 for (const { tier, width, height } of targets) {
   const page = await browser.newPage({ viewport: { width, height } });
-  await page.goto(`http://127.0.0.1:8765/tools/lumen-probe.html?tier=${tier}`);
+  await page.goto(`http://127.0.0.1:${process.env.PORT || 8080}/tools/lumen-probe.html?tier=${tier}`);
   await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
   const dir = mkdtempSync(join(tmpdir(), 'lumen-'));
   for (let i = 0; i <= 240; i++) {

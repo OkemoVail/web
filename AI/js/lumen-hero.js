@@ -66,38 +66,10 @@
     };
   }
 
-  function assets() {
-    var base = 'assets/lumen/';
-    return {
-      earthDay: { mobile: base + 'earth-day-mobile.webp', desktop: base + 'earth-day-desktop.webp' },
-      earthClouds: { mobile: base + 'earth-clouds-mobile.webp', desktop: base + 'earth-clouds-desktop.webp' },
-      moonAlbedo: { mobile: base + 'moon-albedo-mobile.webp', desktop: base + 'moon-albedo-desktop.webp' },
-    };
-  }
+  function assets() { return {}; }
 
-  // Screen position of the held Earth (fractions of the stage), for tests.
-  function heldProjections() {
-    var mobile = window.innerWidth <= 640;
-    var aspect = stage.clientWidth / stage.clientHeight;
-    var deg = Math.PI / 180;
-    var az = (mobile ? 0.9 : 2.6) * deg;
-    var el = -3.95 * deg;
-    var pitch = -5.45 * deg;
-    var tanShort = Math.tan((mobile ? 10.5 : 9) * deg / 2);
-    var tx = aspect >= 1 ? tanShort * aspect : tanShort;
-    var ty = aspect >= 1 ? tanShort : tanShort / aspect;
-    var d = [Math.cos(el) * Math.sin(az), Math.cos(el) * Math.cos(az), Math.sin(el)];
-    var f = [0, Math.cos(pitch), Math.sin(pitch)];
-    var u = [0, -Math.sin(pitch), Math.cos(pitch)];
-    var depth = d[1] * f[1] + d[2] * f[2];
-    return {
-      earth: {
-        x: 0.5 + d[0] / depth / (2 * tx),
-        y: 0.5 - (d[1] * u[1] + d[2] * u[2]) / depth / (2 * ty),
-        radius: 7 / 400 / (2 * ty),
-      },
-    };
-  }
+  // The Aion 2 scene has no fixed bodies to project; kept for the test hook.
+  function heldProjections() { return {}; }
 
   function current(attempt) { return !destroyed && attempt === generation; }
 
@@ -123,7 +95,7 @@
   function announceReady() {
     if (destroyed || announced || !status) return;
     announced = true;
-    status.textContent = 'Lumen introduction ready';
+    status.textContent = 'Aion 2 introduction ready';
   }
 
   function updateLayers(frame) {
@@ -161,7 +133,14 @@
     updateLayers(policy.timelineAt(elapsedMs));
     setPresentation(mode, 'held');
     if (mode === 'video') {
-      try { if (video.readyState >= 1) video.currentTime = Math.min(video.duration || 8, 8); } catch (_) {}
+      // Hold on the last decoded frame. Seeking to exactly `duration` can land
+      // past the final frame and show black, so stay one frame short.
+      try {
+        if (video.readyState >= 1) {
+          var end = Math.max(0, (Number.isFinite(video.duration) ? video.duration : 8) - 1 / 30);
+          if (Math.abs(video.currentTime - end) > 0.02) video.currentTime = end;
+        }
+      } catch (_) {}
     }
     if (renderFinal) renderHeldSafely();
     announceReady();
@@ -200,7 +179,7 @@
         heldMotionMs += heldDelta;
         scene.render({ ...timeline, elapsedMs: elapsedMs + heldMotionMs }, delta);
       }
-      if (mode === 'video' && Math.abs(video.currentTime * 1000 - elapsedMs) > 180) video.currentTime = elapsedMs / 1000;
+      if (mode === 'video' && state === 'playing' && Math.abs(video.currentTime * 1000 - elapsedMs) > 180) video.currentTime = elapsedMs / 1000;
     } catch (_) {
       if (mode === 'webgl') showPoster('runtime', attempt);
       else showPoster('runtime', attempt);
@@ -273,7 +252,7 @@
     var attempt = ++generation;
     sceneAbort = new AbortController();
     try {
-      var module = await import('./lumen-scene.js?v=earthrise');
+      var module = await import('./lumen-scene.js?v=aion2');
       if (!current(attempt)) return;
       var candidate = await (window.createLumenScene || module.createLumenScene)({
         mount: stage,

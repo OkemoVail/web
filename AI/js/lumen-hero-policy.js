@@ -25,7 +25,8 @@
     var time = Math.max(0, ms);
     if (time >= DURATION) return { phase: 'held', progress: 1, label: '', copyVisible: true };
     if (time >= 6500) return { phase: 'reveal', progress: (time - 6500) / 1500, label: '', copyVisible: true };
-    return { phase: 'rise', progress: time / 6500, label: '', copyVisible: false };
+    if (time >= 4400) return { phase: 'form', progress: (time - 4400) / 2100, label: '', copyVisible: false };
+    return { phase: 'speak', progress: time / 4400, label: '', copyVisible: false };
   }
 
   window.LumenHeroPolicy = { DURATION: DURATION, chooseMode: chooseMode, chooseQuality: chooseQuality, timelineAt: timelineAt };

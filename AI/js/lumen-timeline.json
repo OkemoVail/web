@@ -2,27 +2,35 @@
   "fps": 30,
   "durationMs": 8000,
   "phases": [
-    { "name": "rise", "startMs": 0, "endMs": 6500 },
+    { "name": "speak", "startMs": 0, "endMs": 4400 },
+    { "name": "form", "startMs": 4400, "endMs": 6500 },
     { "name": "reveal", "startMs": 6500, "endMs": 8000 }
   ],
-  "sun": { "direction": [0.86, -0.3, 0.36] },
-  "moon": { "radius": 100, "orbitRadPerMs": 0.0000016 },
+  "voices": [
+    { "x": -0.3, "z": -0.22, "startMs": 200 },
+    { "x": 0.26, "z": 0.18, "startMs": 1700 }
+  ],
+  "wave": { "speed": 0.028, "wavelength": 15, "periodMs": 1150, "amplitude": 1.5, "residual": 0.12 },
+  "formStartMs": 4300,
+  "formMs": 1500,
+  "desktop": {
+    "cols": 128, "rows": 72,
+    "glyph": { "cx": 0.15, "cz": -0.04, "size": 0.5, "height": 6 },
+    "camera": { "fovDeg": 32, "shiftX": 0.16, "shiftY": 0.08 }
+  },
+  "mobile": {
+    "cols": 64, "rows": 92,
+    "glyph": { "cx": 0.0, "cz": -0.16, "size": 0.42, "height": 6 },
+    "camera": { "fovDeg": 42, "shiftX": 0.0, "shiftY": 0.3 }
+  },
   "camera": {
-    "heightFrom": 0.04,
-    "heightTo": 0.9,
-    "riseEndMs": 7600,
-    "pitchDeg": -5.45,
-    "fovShortDeg": 9,
+    "moveEndMs": 7600,
+    "elevationFromDeg": 6,
+    "elevationToDeg": 52,
+    "azimuthFromDeg": -6,
+    "azimuthToDeg": -22,
+    "radiusFrom": 112,
+    "radiusTo": 104,
     "fadeInMs": 900
-  },
-  "earth": {
-    "distance": 400,
-    "radius": 7,
-    "elevationDeg": -3.95,
-    "azimuthDeg": 2.6,
-    "tiltDeg": 24,
-    "spinDeg": 200,
-    "spinRadPerMs": 0.0000035
-  },
-  "mobile": { "fovShortDeg": 10.5, "azimuthDeg": 0.9 }
+  }
 }

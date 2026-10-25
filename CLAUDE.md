@@ -1801,10 +1801,17 @@ ids kept). Below: Models rows, Lab notes rows, Behind the model + spec grid,
 shared `.home-foot`. Satoshi only, no Playfair. Classes are `.lv-*` in the
 AI-HOME section of `src/site.css`; `.lx-*` removed. Cache tag `?v=earthrise`
 on lumen media/scripts, `site.css?v=20261025-earthrise`.
-Film: `AI/js/lumen-scene.js` is one full-screen ray-traced shader (lunar
-sphere with procedural craters + cast shadows, Blue Marble Earth + clouds,
-thin sunlit limb, no stars), 9deg telephoto, camera rises from 0.04 to 0.9
-units so Earth clears the horizon. Timeline phases are now `rise` (0-6.5s)
-and `reveal`; no location labels. Fallback video + posters are rendered from
-the scene with `node tools/lumen-render-earthrise.mjs` (needs a static server
-on 127.0.0.1:8765 serving the repo root; uses `tools/lumen-probe.html`).
+Aion 2 hero (2026-10-25, user: Earthrise "i dont like this animation",
+"keep this as pro as possible", no character): the hero is now Aion 2
+("An AI that talks back."), the Models row Lumen 1.9 -> Aion 2. The film in
+`AI/js/lumen-scene.js` is one InstancedMesh of graphite blocks (shader-driven
+heights): two voices ripple across the field (0-4.4s), the waves settle and
+the blocks under a Satoshi 900 "2" rise in AION red (#c8302a), camera moves
+from a low pass to a raised three-quarter view. Field edges fade to black
+(superellipse on grid bounds). Timeline phases `speak` / `form` / `reveal`;
+layout per tier in `lumen-timeline.json`. Held frame: the video seeks to
+duration - 1 frame and the frame loop no longer re-syncs a held video (seeking
+to exactly `duration` showed black). Fallback video + posters: run
+`node tools/lumen-render.mjs` with a static server on 127.0.0.1:8080 (PORT
+env overrides) serving the repo root; it renders `tools/lumen-probe.html`.
+Cache tag `?v=aion2`, `site.css?v=20261025-aion2`. Ids stay `lumen-*`.
