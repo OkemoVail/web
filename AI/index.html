@@ -4,16 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Labs21 | Stay Curious</title>
+    <title>Labs21 | Lumen 1.9</title>
     <meta name="description" content="Labs21 — small models, ongoing experiments, and a little curiosity. Meet Lumen 1.9, try Saga, and follow the research.">
-    <meta name="theme-color" content="#c96478">
+    <meta name="theme-color" content="#030406">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://okemovail.com/AI/">
     <meta property="og:title" content="Labs21 | Stay Curious">
     <meta property="og:description" content="Small models, ongoing experiments, and a little curiosity.">
-    <meta property="og:image" content="https://okemovail.com/AI/assets/lumen/poster-desktop.webp">
+    <meta property="og:image" content="https://okemovail.com/AI/assets/lumen/poster-desktop.webp?v=earthrise">
     <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
     <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/179893130?v=4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="../src/output.css">
     <script>
         (function () {
@@ -83,7 +85,7 @@
             }
         } };
     </script>
-    <link rel="stylesheet" href="../src/site.css?v=20261024-assistant">
+    <link rel="stylesheet" href="../src/site.css?v=20261025-earthrise">
     <link rel="stylesheet" href="../liquid-design/liquid-design.css?v=20261024-clear-visible">
     <script src="../src/glass-navigation.js"></script>
     <link rel="expect" href="#site-navigation-ready" blocking="render">
@@ -96,160 +98,126 @@
     <a href="#main-content" class="home-skip">Skip to content</a>
     <main id="main-content" class="home-main">
 
-    <!-- Hero: a greeting and a real prompt box (ChatGPT-style start screen) -->
-    <section class="ah-hero" aria-labelledby="ah-title">
-        <h1 id="ah-title" class="ah-title">Stay curious.</h1>
-        <p class="ah-sub">Small models from Labs21. Ask Saga anything.</p>
-
-        <form class="ah-composer" action="chat.html" method="get" role="search" aria-label="Ask Saga" data-lg-plain>
-            <label for="ah-q" class="sr-only">Ask Saga</label>
-            <textarea id="ah-q" name="q" rows="1" placeholder="What do you want to know?" autocomplete="off" required></textarea>
-            <div class="ah-composer-row">
-                <span class="ah-model"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v13M12 7c-2-1.6-5-2-8-1.5v13c3-.5 6-.1 8 1.5 2-1.6 5-2 8-1.5v-13c-3-.5-6-.1-8 1.5"/></svg>Saga</span>
-                <button type="submit" class="ah-send" aria-label="Send to Saga" disabled>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
+    <!-- Hero: the Lumen Earthrise film, full bleed, with the prompt on top -->
+    <section class="lv-hero" aria-labelledby="lv-title">
+        <div class="lumen-hero" id="lumen-hero" data-mode="poster" data-state="loading">
+            <picture id="lumen-poster" class="lumen-media lumen-poster" aria-hidden="true">
+                <source media="(max-width: 640px)" srcset="assets/lumen/poster-mobile.webp?v=earthrise">
+                <img src="assets/lumen/poster-desktop.webp?v=earthrise" alt="" width="1600" height="900">
+            </picture>
+            <video id="lumen-fallback" class="lumen-media lumen-fallback" poster="assets/lumen/poster-desktop.webp?v=earthrise" muted playsinline preload="none" aria-hidden="true">
+                <source media="(max-width: 640px)" data-src="assets/lumen/journey-mobile.mp4?v=earthrise" type="video/mp4">
+                <source data-src="assets/lumen/journey-desktop.mp4?v=earthrise" type="video/mp4">
+            </video>
+            <div id="lumen-stage" class="lumen-stage" aria-hidden="true"></div>
+            <p class="sr-only">Earth rising over the lunar horizon, seen from just above the surface.</p>
+            <p id="lumen-location" class="lumen-location" aria-hidden="true" hidden></p>
+            <div id="lumen-copy" class="lumen-copy" aria-hidden="true"></div>
+            <button id="lumen-playback" class="lumen-playback" type="button" hidden data-lg-plain>Skip intro</button>
+            <p id="lumen-status" class="sr-only" aria-live="polite"></p>
+        </div>
+        <div class="lv-hero-copy">
+            <p class="lv-kicker"><span translate="no">Labs21</span> · New model</p>
+            <h1 id="lv-title" class="lv-title" translate="no">Lumen 1.9</h1>
+            <p class="lv-lead">Built to keep going when the question gets difficult, instead of stopping at the first plausible answer.</p>
+            <form class="lv-composer" action="chat.html" method="get" role="search" aria-label="Ask Saga" data-lg-plain>
+                <label for="ah-q" class="sr-only">Ask Saga</label>
+                <textarea id="ah-q" name="q" rows="1" placeholder="Ask anything" autocomplete="off" required></textarea>
+                <button type="submit" class="lv-send" aria-label="Send to Saga" disabled>
+                    <svg class="lv-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
                 </button>
-            </div>
-        </form>
-
-        <ul class="ah-chips" aria-label="Example questions" data-lg-plain>
-            <li><button type="button" data-q="Explain how a transformer pays attention, like I'm new to it.">Explain attention</button></li>
-            <li><button type="button" data-q="Help me plan a week of study for a maths exam.">Plan a study week</button></li>
-            <li><button type="button" data-q="Write a short poem about Earth rising over the Moon.">Write a poem</button></li>
-            <li><button type="button" data-q="Review this idea and tell me what could go wrong: ">Pressure-test an idea</button></li>
-        </ul>
-    </section>
-
-    <!-- Announcement: Lumen 1.9 film -->
-    <section class="ah-section" aria-labelledby="lumen-title">
-        <div class="ah-feature">
-            <div class="lumen-hero" id="lumen-hero" data-mode="poster" data-state="loading">
-                <picture id="lumen-poster" class="lumen-media lumen-poster" aria-hidden="true">
-                    <source media="(max-width: 640px)" srcset="assets/lumen/poster-mobile.webp">
-                    <img src="assets/lumen/poster-desktop.webp" alt="" width="1600" height="900">
-                </picture>
-                <video id="lumen-fallback" class="lumen-media lumen-fallback" poster="assets/lumen/poster-desktop.webp" muted playsinline preload="none" aria-hidden="true">
-                    <source media="(max-width: 640px)" data-src="assets/lumen/journey-mobile.mp4" type="video/mp4">
-                    <source data-src="assets/lumen/journey-desktop.mp4" type="video/mp4">
-                </video>
-                <div id="lumen-stage" class="lumen-stage" aria-hidden="true"></div>
-                <p class="sr-only">A cinematic journey past the solar limb, Earth, and Moon, ending with Earth above Lumen 1.9.</p>
-                <p id="lumen-location" class="lumen-location" aria-hidden="true">SOLAR</p>
-                <div id="lumen-copy" class="lumen-copy" aria-hidden="true"></div>
-                <button id="lumen-playback" class="lumen-playback" type="button" hidden data-lg-plain>Skip intro</button>
-                <p id="lumen-status" class="sr-only" aria-live="polite"></p>
-            </div>
-            <div class="ah-feature-copy">
-                <p class="ah-meta">Model release</p>
-                <h2 id="lumen-title">Introducing Lumen 1.9</h2>
-                <p>A small model built to keep going when the question gets difficult. It's tuned to keep reasoning through long, awkward problems instead of stopping at the first plausible answer.</p>
-                <div class="ah-actions">
-                    <a href="chat.html" class="ah-btn ah-btn--solid" data-lg-plain>Try Lumen</a>
-                    <a href="research.html" class="ah-btn ah-btn--ghost" data-lg-plain>Read the notes</a>
-                </div>
-            </div>
+            </form>
         </div>
-    </section>
-
-    <!-- Latest: research posts (filled from data/blogs.json) -->
-    <section class="ah-section" aria-labelledby="latest-title" data-reveal>
-        <div class="ah-head">
-            <h2 id="latest-title">Latest from the lab</h2>
-            <a href="research.html" class="ah-more">All research<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
-        </div>
-        <ul class="ah-cards" id="ah-posts">
-            <li><a class="ah-card" href="research.html">
-                <img src="assets/space/earthrise.webp" width="1400" height="1400" alt="" loading="lazy" decoding="async">
-                <span class="ah-meta">Mar 2026 · Architecture</span>
-                <span class="ah-card-title">Scaling to 1B Parameters</span>
-                <span class="ah-card-text">Polaris has scaled to 1 billion parameters, up from 500M, for broader knowledge and stronger reasoning.</span>
-            </a></li>
-            <li><a class="ah-card" href="research.html">
-                <img src="assets/space/tycho.webp" width="1600" height="735" alt="" loading="lazy" decoding="async">
-                <span class="ah-meta">Feb 2026 · Architecture</span>
-                <span class="ah-card-title">Scaling Through Training</span>
-                <span class="ah-card-text">The model can grow as its knowledge grows: from 256M to 500M parameters during OLM's training.</span>
-            </a></li>
-            <li><a class="ah-card" href="#architecture">
-                <img src="assets/space/moon-quarter.webp" width="1200" height="1200" alt="" loading="lazy" decoding="async">
-                <span class="ah-meta">In progress · Saga</span>
-                <span class="ah-card-title">Bounded Dynamic Highway</span>
-                <span class="ah-card-text">A looped network that replaces attention, RoPE and large KV caches with bounded hidden dynamics.</span>
-            </a></li>
-        </ul>
     </section>
 
     <!-- Models -->
-    <section class="ah-section" aria-labelledby="models-title" data-reveal>
-        <div class="ah-head">
-            <h2 id="models-title">Models</h2>
+    <section class="lv-section" aria-labelledby="models-title">
+        <h2 id="models-title" class="lv-label">Models</h2>
+        <ul class="lv-rows">
+            <li><a href="chat.html" data-lg-plain>
+                <span class="lv-row-title" translate="no">Saga</span>
+                <span class="lv-row-text">The everyday model. Fast, conversational, and the one you're talking to in chat.</span>
+                <span class="lv-row-meta">Available now</span><svg class="lv-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>
+            </a></li>
+            <li><a href="research.html" data-lg-plain>
+                <span class="lv-row-title" translate="no">Lumen 1.9</span>
+                <span class="lv-row-text">A slower, more careful model for hard questions. Still in training.</span>
+                <span class="lv-row-meta">Preview</span><svg class="lv-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>
+            </a></li>
+        </ul>
+    </section>
+
+    <!-- Lab notes: research posts (filled from data/blogs.json) -->
+    <section class="lv-section" aria-labelledby="notes-title">
+        <div class="lv-section-head">
+            <h2 id="notes-title" class="lv-label">Lab notes</h2>
+            <a href="research.html" class="lv-link" data-lg-plain>All research<svg class="lv-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></a>
         </div>
-        <div class="ah-models">
-            <article class="ah-model-card">
-                <h3>Saga</h3>
-                <p>The everyday model. Fast, conversational, and the one you're talking to in chat.</p>
-                <dl>
-                    <div><dt>Best for</dt><dd>Chat, writing, quick answers</dd></div>
-                    <div><dt>Status</dt><dd>Available</dd></div>
-                </dl>
-                <a href="chat.html" class="ah-btn ah-btn--solid" data-lg-plain>Chat with Saga</a>
-            </article>
-            <article class="ah-model-card">
-                <h3>Lumen 1.9</h3>
-                <p>The persistent one. Slower, and built to stay with hard, multi-step problems.</p>
-                <dl>
-                    <div><dt>Best for</dt><dd>Reasoning, long problems</dd></div>
-                    <div><dt>Status</dt><dd>New</dd></div>
-                </dl>
-                <a href="chat.html" class="ah-btn ah-btn--ghost" data-lg-plain>Try Lumen</a>
-            </article>
-        </div>
+        <ol class="lv-rows" id="ah-posts">
+            <li><a href="research.html" data-lg-plain>
+                <span class="lv-row-title">Scaling to 1B Parameters</span>
+                <span class="lv-row-text">Polaris has scaled to 1 billion parameters, up from 500M, for broader knowledge and stronger reasoning.</span>
+                <span class="lv-row-meta">Mar 2026 · Architecture</span><svg class="lv-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>
+            </a></li>
+            <li><a href="research.html" data-lg-plain>
+                <span class="lv-row-title">Scaling Through Training</span>
+                <span class="lv-row-text">The model can grow as its knowledge grows: from 256M to 500M parameters during OLM's training.</span>
+                <span class="lv-row-meta">Feb 2026 · Architecture</span><svg class="lv-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>
+            </a></li>
+        </ol>
     </section>
 
     <!-- Behind the model -->
-    <section id="architecture" class="ah-section ah-bdh" aria-labelledby="bdh-title" data-reveal>
-        <div class="ah-bdh-copy">
-            <p class="ah-meta">Behind the model</p>
-            <h2 id="bdh-title">Bounded Dynamic Highway</h2>
-            <p>Saga is moving to a looped network that replaces attention, RoPE, and large KV caches with bounded hidden dynamics. Each block keeps four recent hidden states, mixes them across grouped temporal branches, then repeats the same physical depth.</p>
-            <p>It's all built and trained on one RTX&nbsp;5080. The aim is simple: keep making these models more useful, and make them affordable to run.</p>
+    <section id="architecture" class="lv-section lv-bdh" aria-labelledby="bdh-title">
+        <div>
+            <h2 class="lv-label">Behind the model</h2>
+            <p id="bdh-title" class="lv-bdh-title">Bounded Dynamic Highway</p>
+            <p class="lv-body">Saga is moving to a looped network that replaces attention, RoPE, and large KV caches with bounded hidden dynamics. Each block keeps four recent hidden states, mixes them across grouped temporal branches, then repeats the same physical depth.</p>
+            <p class="lv-body">It's all built and trained on one RTX&nbsp;5080, to make these models more useful and cheaper to run.</p>
         </div>
-        <dl class="ah-specs" aria-label="BDH model specifications">
+        <dl class="lv-specs" aria-label="BDH model specifications">
             <div><dt>Cached states</dt><dd>4</dd></div>
             <div><dt>Temporal branches</dt><dd>12</dd></div>
             <div><dt>Blocks × passes</dt><dd>28×2</dd></div>
-            <div><dt>Target GPU</dt><dd>RTX 5080</dd></div>
+            <div><dt>Target GPU</dt><dd>5080</dd></div>
         </dl>
     </section>
 
-    <!-- Closing prompt -->
-    <section class="ah-section ah-close" aria-labelledby="close-title" data-reveal>
-        <h2 id="close-title">Bring Saga a hard question.</h2>
-        <a href="chat.html" class="ah-btn ah-btn--solid" data-lg-plain>Start a chat</a>
-    </section>
-
-    <footer class="ah-foot">
-        <div class="ah-foot-grid">
-            <p class="ah-foot-brand" translate="no">Labs21</p>
-            <nav aria-label="Product">
-                <h2>Product</h2>
-                <a href="/AI/chat.html">Chat</a>
-                <a href="/AI/goals.html">Goals</a>
+    <!-- Footer: same as the homepage -->
+    <footer class="home-foot" aria-label="Site">
+        <p class="home-foot-mark" translate="no">o.</p>
+        <nav class="home-foot-cols" aria-label="Footer">
+            <ul>
+                <li><a href="/AI/chat.html">Chat</a></li>
+                <li><a href="/search/" translate="no">Astra</a></li>
+                <li><a href="/word/index.html" translate="no">Word</a></li>
+            </ul>
+            <ul>
+                <li><a href="/AI/research.html">Research</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="/AI/goals.html">Goals</a></li>
+            </ul>
+            <ul>
+                <li><a href="/index.html" translate="no">OkemoVail</a></li>
+                <li><a href="/AI/version.html">Versions</a></li>
+            </ul>
+            <ul>
+                <li><a href="https://github.com/okemovail" target="_blank" rel="noopener">GitHub</a></li>
+                <li><a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener">YouTube</a></li>
+            </ul>
+        </nav>
+        <div class="home-foot-base">
+            <nav class="home-foot-legal" aria-label="Legal">
+                <a href="/AI/privacy.html">Privacy Policy</a>
+                <a href="/AI/tos.html">Terms of Service</a>
+                <span>© 2026 <span translate="no">Labs21 by OkemoVail</span></span>
             </nav>
-            <nav aria-label="Research">
-                <h2>Research</h2>
-                <a href="/AI/research.html">Notes</a>
-                <a href="#architecture">Architecture</a>
-            </nav>
-            <nav aria-label="Company">
-                <h2>OkemoVail</h2>
-                <a href="/index.html">Home</a>
-                <a href="https://github.com/ar12c" target="_blank" rel="noopener">GitHub</a>
-                <a href="/AI/privacy.html">Privacy</a>
-                <a href="/AI/tos.html">Terms</a>
+            <nav class="home-foot-connect" aria-label="Connect">
+                <strong>Connect:</strong>
+                <a href="https://github.com/okemovail" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://www.youtube.com/@SochiVail" target="_blank" rel="noopener">YouTube</a>
             </nav>
         </div>
-        <p class="ah-credits">© 2026 Labs21 by OkemoVail. Photos: <a href="https://commons.wikimedia.org/w/index.php?curid=97231018">Earthrise</a> from Apollo 8 by Justin Cowart, CC BY 2.0; <a href="https://commons.wikimedia.org/w/index.php?curid=15545487">first-quarter Moon</a> by NASA Goddard, CC BY 2.0; <a href="https://commons.wikimedia.org/wiki/File:LRO_Tycho_Central_Peak.jpg">Tycho central peak</a> by NASA/GSFC/ASU, public domain.</p>
     </footer>
     </main>
 
@@ -267,11 +235,11 @@
     };
   </script>
   <script>
-    /* Composer: auto-grow, Enter sends, Shift+Enter adds a line; chips fill it. */
+    /* Composer: auto-grow, Enter sends, Shift+Enter adds a line. */
     (function () {
-      var form = document.querySelector('.ah-composer');
+      var form = document.querySelector('.lv-composer');
       var ta = document.getElementById('ah-q');
-      var send = form.querySelector('.ah-send');
+      var send = form.querySelector('.lv-send');
       function sync() {
         ta.style.height = 'auto';
         ta.style.height = Math.min(ta.scrollHeight, 220) + 'px';
@@ -284,40 +252,30 @@
           if (ta.value.trim()) form.requestSubmit();
         }
       });
-      document.querySelectorAll('.ah-chips button').forEach(function (b) {
-        b.addEventListener('click', function () {
-          ta.value = b.dataset.q;
-          sync();
-          ta.focus();
-          ta.setSelectionRange(ta.value.length, ta.value.length);
-        });
-      });
       sync();
     })();
 
-    /* Latest posts: newest three from data/blogs.json; the static cards stay if it fails. */
+    /* Lab notes: newest two from data/blogs.json; the static rows stay if it fails. */
     (function () {
       var list = document.getElementById('ah-posts');
-      var pics = ['assets/space/earthrise.webp', 'assets/space/tycho.webp', 'assets/space/moon-quarter.webp'];
       fetch('data/blogs.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (posts) {
         if (!Array.isArray(posts) || posts.length < 2) return;
         var latest = posts.slice().reverse().slice(0, 2);
-        var cards = list.querySelectorAll('.ah-card');
+        var rows = list.querySelectorAll('a');
         latest.forEach(function (p, i) {
-          var card = cards[i]; if (!card) return;
+          var row = rows[i]; if (!row) return;
           var tmp = new DOMParser().parseFromString(String(p.content || ''), 'text/html').body;
           var date = (p.date || '').toLowerCase().replace(/^\w/, function (c) { return c.toUpperCase(); });
           var tag = p.tags && p.tags[0] ? ' · ' + p.tags[0].name : '';
-          card.querySelector('.ah-meta').textContent = date + tag;
-          card.querySelector('.ah-card-title').textContent = String(p.title || '').replace(/\.$/, '');
-          card.querySelector('.ah-card-text').textContent = tmp.textContent.trim();
-          card.querySelector('img').src = pics[i];
+          row.querySelector('.lv-row-meta').textContent = date + tag;
+          row.querySelector('.lv-row-title').textContent = String(p.title || '').replace(/\.$/, '');
+          row.querySelector('.lv-row-text').textContent = tmp.textContent.trim();
         });
       }).catch(function () {});
     })();
   </script>
-  <script src="js/lumen-hero-policy.js"></script>
-  <script src="js/lumen-hero.js"></script>
+  <script src="js/lumen-hero-policy.js?v=earthrise"></script>
+  <script src="js/lumen-hero.js?v=earthrise"></script>
   <script src="../src/motion.js"></script>
   <script src="../src/nav.js"></script>
 </body>

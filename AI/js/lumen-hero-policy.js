@@ -25,9 +25,7 @@
     var time = Math.max(0, ms);
     if (time >= DURATION) return { phase: 'held', progress: 1, label: '', copyVisible: true };
     if (time >= 6500) return { phase: 'reveal', progress: (time - 6500) / 1500, label: '', copyVisible: true };
-    if (time >= 5000) return { phase: 'luna', progress: (time - 5000) / 1500, label: 'LUNA', copyVisible: false };
-    if (time >= 2000) return { phase: 'terra', progress: (time - 2000) / 3000, label: 'TERRA', copyVisible: false };
-    return { phase: 'solar', progress: time / 2000, label: 'SOLAR', copyVisible: false };
+    return { phase: 'rise', progress: time / 6500, label: '', copyVisible: false };
   }
 
   window.LumenHeroPolicy = { DURATION: DURATION, chooseMode: chooseMode, chooseQuality: chooseQuality, timelineAt: timelineAt };

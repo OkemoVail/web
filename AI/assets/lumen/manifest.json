@@ -101,57 +101,45 @@
       "source": "https://science.nasa.gov/resource/moon-mosaic/"
     },
     "poster-mobile.webp": {
-      "bytes": 46472,
-      "sha256": "6bee4460e68b02d5a12663dba1aee39f3af891de55cf31a2bb45a92d9958d498",
+      "bytes": 19918,
+      "sha256": "ce9d592b95e8b3e64fbad69f3ba63e572b5a5e50bc00d1587d55ff7e99011ade",
       "sources": [
         "earthDay",
-        "earthNight",
         "earthClouds",
-        "earthElevation",
-        "moonNear",
-        "moonFar"
+        "moonNear"
       ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
       "immutable": true
     },
     "poster-desktop.webp": {
-      "bytes": 70830,
-      "sha256": "fbddb74a881735cd818673a6ecb612735effe4aee20cc227ce3248a74fbb8a7c",
+      "bytes": 24466,
+      "sha256": "d207394fad2302298379dcb5e7142ed6c8c7d853cc28d350c2794479e021ebaf",
       "sources": [
         "earthDay",
-        "earthNight",
         "earthClouds",
-        "earthElevation",
-        "moonNear",
-        "moonFar"
+        "moonNear"
       ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
       "immutable": true
     },
     "journey-mobile.mp4": {
-      "bytes": 456483,
-      "sha256": "7ee8fc9ce082ae47fd215cd4526bdd16791b5b33cff5c71c02c1f324654bc15d",
+      "bytes": 621676,
+      "sha256": "8b388716e7256779c16338e2c6c6e133ea4d1b46bb21584e7b18a79529aa6d1b",
       "sources": [
         "earthDay",
-        "earthNight",
         "earthClouds",
-        "earthElevation",
-        "moonNear",
-        "moonFar"
+        "moonNear"
       ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
       "immutable": true
     },
     "journey-desktop.mp4": {
-      "bytes": 666751,
-      "sha256": "6f6780a3586a1e89eb3c879b3c71a08c5717328aeaa0b114835132649fe11457",
+      "bytes": 1329974,
+      "sha256": "7b0e8597de89f78e44b6c4b8c505898ef204c56355c505470c13b045b1356189",
       "sources": [
         "earthDay",
-        "earthNight",
         "earthClouds",
-        "earthElevation",
-        "moonNear",
-        "moonFar"
+        "moonNear"
       ],
       "source": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
       "immutable": true

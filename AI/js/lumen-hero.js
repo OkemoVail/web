@@ -70,41 +70,32 @@
     var base = 'assets/lumen/';
     return {
       earthDay: { mobile: base + 'earth-day-mobile.webp', desktop: base + 'earth-day-desktop.webp' },
-      earthNight: { mobile: base + 'earth-night-mobile.webp', desktop: base + 'earth-night-desktop.webp' },
       earthClouds: { mobile: base + 'earth-clouds-mobile.webp', desktop: base + 'earth-clouds-desktop.webp' },
-      earthNormal: { mobile: base + 'earth-normal-mobile.webp', desktop: base + 'earth-normal-desktop.webp' },
       moonAlbedo: { mobile: base + 'moon-albedo-mobile.webp', desktop: base + 'moon-albedo-desktop.webp' },
-      moonNormal: { mobile: base + 'moon-normal-mobile.webp', desktop: base + 'moon-normal-desktop.webp' },
     };
   }
 
+  // Screen position of the held Earth (fractions of the stage), for tests.
   function heldProjections() {
     var mobile = window.innerWidth <= 640;
     var aspect = stage.clientWidth / stage.clientHeight;
-    var camera = [0, -21, 0.4];
-    var target = [3.2, 0, 1.2];
-    var forward = normalize(target.map(function (value, index) { return value - camera[index]; }));
-    var right = normalize(cross(forward, [0, 0, 1]));
-    var up = cross(right, forward);
-    var tan = Math.tan(58 * Math.PI / 360);
-    function normalize(vector) {
-      var length = Math.hypot.apply(Math, vector);
-      return vector.map(function (value) { return value / length; });
-    }
-    function cross(a, b) {
-      return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-    }
-    function dot(a, b) { return a.reduce(function (sum, value, index) { return sum + value * b[index]; }, 0); }
-    function project(position, radius) {
-      var relative = position.map(function (value, index) { return value - camera[index]; });
-      var depth = dot(relative, forward);
-      var x = 0.5 + dot(relative, right) / (2 * depth * tan * aspect);
-      if (mobile) x -= -0.14;
-      return { x: x, y: 0.5 - dot(relative, up) / (2 * depth * tan), radius: radius / (2 * depth * tan) };
-    }
+    var deg = Math.PI / 180;
+    var az = (mobile ? 0.9 : 2.6) * deg;
+    var el = -3.95 * deg;
+    var pitch = -5.45 * deg;
+    var tanShort = Math.tan((mobile ? 10.5 : 9) * deg / 2);
+    var tx = aspect >= 1 ? tanShort * aspect : tanShort;
+    var ty = aspect >= 1 ? tanShort : tanShort / aspect;
+    var d = [Math.cos(el) * Math.sin(az), Math.cos(el) * Math.cos(az), Math.sin(el)];
+    var f = [0, Math.cos(pitch), Math.sin(pitch)];
+    var u = [0, -Math.sin(pitch), Math.cos(pitch)];
+    var depth = d[1] * f[1] + d[2] * f[2];
     return {
-      earth: project([mobile ? 2.5 : 4.2, 0, 1.2], 2.35),
-      moon: project([mobile ? 0.25 : 0.7, -1.1, -0.45], 0.72),
+      earth: {
+        x: 0.5 + d[0] / depth / (2 * tx),
+        y: 0.5 - (d[1] * u[1] + d[2] * u[2]) / depth / (2 * ty),
+        radius: 7 / 400 / (2 * ty),
+      },
     };
   }
 
@@ -282,7 +273,7 @@
     var attempt = ++generation;
     sceneAbort = new AbortController();
     try {
-      var module = await import('./lumen-scene.js');
+      var module = await import('./lumen-scene.js?v=earthrise');
       if (!current(attempt)) return;
       var candidate = await (window.createLumenScene || module.createLumenScene)({
         mount: stage,

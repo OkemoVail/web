@@ -1790,3 +1790,21 @@ Saga/Lumen model cards, BDH specs, closing prompt, column footer. `main.js`
 sends `?q=` once after `initChatUI()` and strips it with `replaceState`.
 Controls carry `data-lg-plain`, which `src/liquid-design-site.js` skips (no
 glass). CSS: `.ah-*` in the AI-HOME section of `src/site.css`.
+
+AI landing, Earthrise (2026-10-25, user: poster design and the old Lumen
+solar/terra/luna film "looked very AI"; chose "Earthrise shot" + "Dark,
+film-led"): supersedes the assistant and poster layouts above. The page is
+dark in both themes (it redefines --bg/--text-* on the page root). Hero is the
+Lumen film full bleed with kicker, "Lumen 1.9" title, lead and the composer
+bottom-left (still GET `chat.html?q=`, ids `ah-q`/`ah-posts` and all lumen
+ids kept). Below: Models rows, Lab notes rows, Behind the model + spec grid,
+shared `.home-foot`. Satoshi only, no Playfair. Classes are `.lv-*` in the
+AI-HOME section of `src/site.css`; `.lx-*` removed. Cache tag `?v=earthrise`
+on lumen media/scripts, `site.css?v=20261025-earthrise`.
+Film: `AI/js/lumen-scene.js` is one full-screen ray-traced shader (lunar
+sphere with procedural craters + cast shadows, Blue Marble Earth + clouds,
+thin sunlit limb, no stars), 9deg telephoto, camera rises from 0.04 to 0.9
+units so Earth clears the horizon. Timeline phases are now `rise` (0-6.5s)
+and `reveal`; no location labels. Fallback video + posters are rendered from
+the scene with `node tools/lumen-render-earthrise.mjs` (needs a static server
+on 127.0.0.1:8765 serving the repo root; uses `tools/lumen-probe.html`).
