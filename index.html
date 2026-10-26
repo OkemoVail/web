@@ -73,7 +73,7 @@
       }
     } };
   </script>
-  <link rel="stylesheet" href="src/site.css?v=20261024-poster-rebuild">
+  <link rel="stylesheet" href="src/site.css?v=20261026-no-labs-nav">
   <script src="src/glass-navigation.js"></script>
   <link rel="expect" href="#site-navigation-ready" blocking="render">
   <link rel="stylesheet" href="liquid-design/liquid-design.css?v=20261024-clear-visible">
@@ -176,8 +176,9 @@
         { label: 'Liquid Design', href: '/liquid-design/index.html' },
         { label: 'GitHub', href: 'https://github.com/okemovail' },
         { label: 'YouTube', href: 'https://www.youtube.com/@SochiVail' }
-      ]
-      // primary + theme toggle use defaults (Labs21 pill + theme button)
+      ],
+      // No Labs21 pill in the top nav; the theme toggle keeps its default.
+      primary: null
     };
   </script>
   <script src="src/nav.js?v=20261025-liquid-docs"></script>

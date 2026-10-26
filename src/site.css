@@ -8318,8 +8318,12 @@ html:has([data-page="liquid-docs"]) { scroll-padding-top: calc(var(--ld-top) + 1
 [data-page="liquid-docs"] .ld-side {
   position: sticky; top: var(--ld-top); height: calc(100vh - var(--ld-top)); overflow-y: auto;
   padding: 32px 20px 40px var(--ld-slot-l);
-  scrollbar-width: thin;
+  /* No visible scrollbar: the list still scrolls by wheel, touch and keyboard.
+     (scrollbar-width: thin rendered Chrome's grey arrowed bar and overrode the
+     site's slim ::-webkit-scrollbar style.) */
+  scrollbar-width: none;
 }
+[data-page="liquid-docs"] .ld-side::-webkit-scrollbar { display: none; }
 [data-page="liquid-docs"] .ld-side nav { display: flex; flex-direction: column; }
 [data-page="liquid-docs"] .ld-side-head { margin: 26px 0 6px; color: var(--text-tertiary); font-size: 13px; font-weight: 500; }
 [data-page="liquid-docs"] .ld-side-head:first-child { margin-top: 0; }

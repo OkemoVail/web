@@ -106,6 +106,11 @@
     button.addEventListener('pointerdown', function () { record.held = true; });
     function release() { record.held = false; if (record.next) { var next = record.next; record.next = null; updateFace(record, next); } }
     button.addEventListener('pointerup', release); button.addEventListener('pointercancel', release);
+    // The release can land over the page iframe (or the window loses focus),
+    // so the button never sees pointerup. Never leave a control stuck "held".
+    button.addEventListener('lostpointercapture', function () { if (record.held) release(); });
+    window.addEventListener('pointerup', function () { if (record.held) release(); }, true);
+    window.addEventListener('blur', function () { if (record.held) release(); });
     button.addEventListener('click', function () {
       var descriptor = record.d;
       if (d.role === 'theme') { GlassShell.toggleTheme(); return; }
@@ -215,6 +220,17 @@
   }
   function update(ds) {
     pending = ds;
+    // A new page owns the chrome. Drop any press or open menu left over from
+    // the previous page first: a held or expanded control defers its face
+    // swap and never finishes retiring, so it would stay on screen (e.g. the
+    // homepage Socials / More / Labs21 floating over the Liquid Design docs).
+    roles.forEach(function (r) {
+      r.held = false;
+      if (r.panel && r.button.getAttribute('aria-expanded') === 'true') r.button.click();
+      if (r.panel && r.button.getAttribute('aria-expanded') === 'true') r.button.setAttribute('aria-expanded', 'false');
+      r.next = null;
+    });
+    closeMenu();
     var matched = new Set();
     ds.forEach(function (d) {
       var key = d.key || d.role, record = roles.get(key);
