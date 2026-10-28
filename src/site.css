@@ -4940,7 +4940,14 @@ body[data-glass-shell] .glass-shell-search input:focus, body[data-glass-shell] .
         [data-page="chat"] #input-inner.is-multiline .input-textarea-wrap { flex: 1 1 0; order: 0; animation: none; }
         [data-page="chat"] .main-response-content { font-size: 17px; font-weight: 400; line-height: 1.7; }
         [data-page="chat"] #user-input { font-weight: 400; }
-        [data-page="chat"] #welcome-greeting { font-weight: 500; }
+        /* Greeting colour follows the site theme token, not Tailwind's
+           `dark:` variant (which tracks the OS and left it white in light mode). */
+        [data-page="chat"] #welcome-greeting {
+            color: var(--text-primary);
+            font-family: 'Newsreader', Georgia, serif;
+            font-weight: 400;
+            letter-spacing: -.015em;
+        }
         [data-page="chat"] .user-msg-bubble { border: 0; background: var(--chat-library); }
         @media (min-width: 768px) {
             [data-page="chat"].sidebar-collapsed #sidebar { width: 0 !important; border-radius: 0; }

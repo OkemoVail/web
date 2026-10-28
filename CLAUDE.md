@@ -1845,6 +1845,26 @@ frame and sharp after 90ms still; Options menus pass `staticActionSurface`,
 `deformationScale: 1`, `areaScaleLimit: 1.2` and `pullFromPress: true` so open
 sheets stretch while still clicks still choose a row.
 
+Chat welcome greeting (2026-10-28, user): `#welcome-greeting` was white in
+light mode because its Tailwind `dark:text-[#f0f0f0]` follows the OS scheme,
+not the site's `.dark` class. The rule in the chat section of `src/site.css`
+now sets `color: var(--text-primary)` and a serif font: Newsreader 400
+(user's pick as the closest free match to Claude's proprietary serif; loaded
+with its optical-size axis in `chat.html`'s Google Fonts link, Georgia
+fallback). Cache version `site.css?v=20261028-greeting-newsreader`.
+
+Model-written thinking label (2026-10-28, user): the pending
+`.thinking-text-gradient` label ("Saga is thinking") is replaced by three
+short status labels Saga writes per message (Claude-style "Pondering…").
+`AI/js/thinking-words.js` (loaded after `streaming.js`) fires a small
+parallel non-stream request from `sendMessage` (`startThinkingWords`), cleans
+each label to letters only (max 3 words / 24 chars), and on each
+`chat-thinking-shimmer` `animationiteration` swaps to the next label (rise +
+blur fade) for 3 passes, then holds the last. `render()` reads
+`window.thinkingLabel()` so re-renders keep the current label. Fallback stays
+"Saga is thinking" when the request fails or is late; stale answers are
+dropped by `currentJobId`.
+
 Liquid Design click flash (2026-10-25): clicking Liquid Design flashed because
 browsers kept cached copies of `glass-shell.js`/`glass-shell-controls.js`
 (`?v=20261014-word-stretch-6`) and the homepage `nav.js`

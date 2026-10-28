@@ -125,6 +125,8 @@ window.sendMessage = async (txt = null, forceSearch = false) => {
     window.currentGenerationIsSearch = window.isWebSearch || forceSearch;
     window.isGenerating = true;
     window.currentJobId = Math.random().toString(36).substring(7);
+    // Reset the label before render() so the fallback shows, then fetch words.
+    window.startThinkingWords?.(displayMsg);
     window.render();
     const _morphed = _morphFrom && window.motionMorphLastUserBubble
         && window.motionMorphLastUserBubble(_morphFrom);

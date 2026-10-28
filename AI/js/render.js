@@ -95,7 +95,8 @@ window.render = () => {
             // "Saga is thinking". Shown before any tokens arrive (replaces
             // the old "Thinking…" placeholder + duplicate generating header).
             if (responseText === null && isLast && window.isGenerating) {
-                contentHtml = `<div class="thinking-container"><span class="thinking-text-gradient">Saga is thinking</span></div>`;
+                const label = window.thinkingLabel ? window.thinkingLabel() : 'Saga is thinking';
+                contentHtml = `<div class="thinking-container"><span class="thinking-text-gradient">${label}</span></div>`;
             } else if (responseText) {
                 const { thought, content } = window.parseThought(responseText);
                 if (thought) {
